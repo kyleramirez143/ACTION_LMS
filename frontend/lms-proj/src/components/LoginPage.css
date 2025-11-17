@@ -1,0 +1,91 @@
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Left side */
+.login-left {
+  flex: 1;
+  background-color: #0047AB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+}
+
+.brand-text {
+  font-size: 48px;
+  font-weight: bold;
+}
+
+/* Right side */
+.login-right {
+  flex: 1;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 80px;
+  margin-bottom: 20px;
+}
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.welcome-subtext {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-input {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.forgot-link {
+  color: #0047AB;
+  text-decoration: none;
+}
+
+.login-button {
+  background-color: #0047AB;
+  color: #FFFFFF;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background-color: #003a8d;
+}
