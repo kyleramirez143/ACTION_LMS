@@ -1,42 +1,53 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Global font and background */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #D9D9D9;
+  margin: 0;
+  padding: 0;
+}
+
+/* Reset box sizing */
+* {
+  box-sizing: border-box;
+}
+
+/* Utility classes (optional) */
+.text-center {
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Global reset and layout */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #D9D9D9;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Ensure all elements respect box sizing */
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Ensure all components fill the screen */
+.full-screen {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  overflow: hidden;
 }
 
-.card {
-  padding: 2em;
-}
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
 
-.read-the-docs {
-  color: #888;
-}
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 1rem; }
