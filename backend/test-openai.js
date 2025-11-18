@@ -21,3 +21,5 @@ async function generateText(prompt) {
 generateText("Write a short sentence about a talking cat.")
     .then(text => console.log(text))
     .catch(err => console.error(err));
+
+    
