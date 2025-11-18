@@ -16,6 +16,30 @@ body {
   text-align: center;
 }
 
+/* Global reset and layout */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #D9D9D9;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Ensure all elements respect box sizing */
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Ensure all components fill the screen */
+.full-screen {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  overflow: hidden;
+}
+
 .mt-1 { margin-top: 0.25rem; }
 .mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }

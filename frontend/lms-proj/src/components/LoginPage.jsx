@@ -1,26 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
 
 function LoginPage() {
-  return (
-    <div className="login-wrapper">
-      {/* Left side: solid blue */}
-      <div className="login-left">
-        <h1 className="brand-text">ACTION</h1>
-      </div>
+  const [showPassword, setShowPassword] = useState(false);
 
-      {/* Right side: white with centered logo and form */}
+  return (
+    <div className="full-screen">
+      <div className="login-left"></div>
+
       <div className="login-right">
         <div className="login-content">
-          <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />
+          <img src="/action-logo.png" alt="ACTION Logo" className="login-logo"/>
           <h2 className="welcome-title">Welcome to ACTION LMS</h2>
           <p className="welcome-subtext">
             Access your courses, complete assignments, and track your academic progress anytime, anywhere.
           </p>
 
           <form className="login-form">
-            <input type="text" placeholder="Enter your Username" className="form-input" />
-            <input type="password" placeholder="Enter your Password" className="form-input" />
+
+            {/* Username */}
+            <input type="text" placeholder="Username" className="form-input" name="username"/>
+
+            {/* Password container */}
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="form-input"
+                name="password"
+              />
+
+              {/* Toggle eye icon */}
+              <span
+                className="eye-icon"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
+            </div>
 
             <div className="form-options">
               <label>
