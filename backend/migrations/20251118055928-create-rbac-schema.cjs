@@ -20,8 +20,19 @@ module.exports = {
     const foreignKey = (references, key) => ({
       type: Sequelize.UUID, // <--- Uses the argument
       allowNull: false,
-      // ... rest of FK definition
+      references: {
+        model: references, // Table name
+        key: key,          // Primary key of the referenced table
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
     });
+
+    const standardTimestamp = { 
+      type: Sequelize.DATE, 
+      defaultValue: Sequelize.literal('NOW()'),
+      allowNull: false,
+    };
 
     // --- Start of your actual migration code ---
     
@@ -32,12 +43,78 @@ module.exports = {
     await queryInterface.createTable('users', {
       id: uuidColumn,
       first_name: { type: Sequelize.STRING(100) }, // <--- Uses the argument
-      // ... rest of table definitions
-      created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()') },
-      updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()') },
+      last_name:  { type: Sequelize.STRING(100) },
+      email:      { 
+        type: Sequelize.STRING(150),
+        allowNull: false,
+        unique: true,
+      },
+      is_active:  { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
+
+    // 2. Passwords Table
+    await queryInterface.createTable('passwords', {
+      id: uuidColumn,
+      password: { 
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      user_id: foreignKey('users', 'id'),
+      created_at: standardTimestamp,
+      is_current: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
+      },
+    });
+
+    // 3. Roles Table
+    await queryInterface.createTable('roles', {
+      id: uuidColumn,
+      name: { 
+        type: Sequelize.STRING(50),
+        allowNull: false,
+        unique: true,
+      },
+      description: {
+        type: Sequelize.STRING(255),
+      },
+      created_at: standardTimestamp,
     });
     
-    // ... continue with other table creations (passwords, roles, etc.)
+    // 4. Permissions Table
+    await queryInterface.createTable('permissions', {
+      id: uuidColumn,
+      type_name: {
+        type: Sequelize.STRING(100),
+        allowNull: false,
+        unique: true,
+      },
+      created_at: standardTimestamp,
+    });
+
+    // 5. User_Roles Table (Join Table)
+    await queryInterface.createTable('user_roles', {
+      user_id: {
+        ...foreignKey('users', 'id'),
+        primaryKey: true,
+      },
+      role_id: {
+        ...foreignKey('roles', 'id'),
+        primaryKey: true,
+      },
+      created_at: standardTimestamp,
+    });
+
+    // 6. Role_Permissions Table (Join Table)
+    await queryInterface.createTable('role_permissions', {
+      id: uuidColumn, // Using UUID as a primary key for this join table
+      role_id: foreignKey('roles', 'id'),
+      permission_id: foreignKey('permissions', 'id'),
+      created_at: standardTimestamp,
+    });
 
   }, // End of up function
 
@@ -47,7 +124,10 @@ module.exports = {
     // ----------------------------------------------------
     // Drop tables in reverse order of dependency
     await queryInterface.dropTable('role_permissions');
-    // ... rest of drop statements
+    await queryInterface.dropTable('user_roles');
+    await queryInterface.dropTable('permissions');
+    await queryInterface.dropTable('roles');
+    await queryInterface.dropTable('passwords');
     await queryInterface.dropTable('users');
   }
 };
