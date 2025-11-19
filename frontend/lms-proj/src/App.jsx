@@ -1,9 +1,9 @@
 import React from 'react';
 import './App.css';
-import LoginPage from './components/LoginPage';
+import ModuleScreen from './components/ModuleScreen';
 
 function App() {
-  return <LoginPage />;
+  return <ModuleScreen />;
 }
 
 export default App;
