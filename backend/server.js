@@ -86,6 +86,7 @@ dotenv.config();
 import uploadRoute from "./routes/uploadRoute.js";
 import quizRoutes from "./routes/quizRoute.js";
 import resultRoutes from "./routes/resultRoute.js";
+import authRoutes from "./routes/authRoute.js";
 
 const app = express();
 app.use(cors());
@@ -96,6 +97,7 @@ app.get("/", (req, res) => res.send("LMS Backend ✅"));
 app.use("/api/upload", uploadRoute);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Backend running on http://localhost:${PORT}`));
