@@ -4,12 +4,9 @@ import "./Assessment.css";
 export default function Assessment() {
     return (
         <div className="assessment-wrapper">
-
             <div className="page-content px-4">
-                {/* Assessments Header */}
                 <h2 className="fw-bold mt-4 mb-3">Assessments</h2>
 
-                {/* Two Column Section */}
                 <div className="row g-4">
                     <div className="col-md-6">
                         <div className="card-gray equal-card text-center border">
@@ -36,7 +33,6 @@ export default function Assessment() {
                     </div>
                 </div>
 
-                {/* Question Text Section */}
                 <div className="card-gray mt-4 border">
                     <p className="fw-semibold mb-3">Question Text</p>
                     <div className="d-flex flex-column gap-2">
@@ -49,7 +45,6 @@ export default function Assessment() {
                     </div>
                 </div>
 
-                {/* Create Button */}
                 <div className="d-flex justify-content-end mt-4 mb-5">
                     <button className="bg-blue-700 text-white px-5 py-3 rounded-pill shadow">
                         Create

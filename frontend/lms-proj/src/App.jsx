@@ -20,7 +20,7 @@ function AppContent() {
       <div className="full-screen">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Assessment />} />
+          <Route path="/assessment" element={<Assessment />} />
           <Route path="/course" element={<Course />} />
         </Routes>
       </div>
