@@ -9,6 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Navbar from "./Components/Navbar";
 import LoginPage from "./Components/LoginPage";
 import AssessmentConfirmation from "./components/AssessmentConfirmation";
+import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -16,7 +17,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 function AppContent() {
   const location = useLocation();
-  // ✅ Hide Navbar only on login page ("/")
   const hideNavbar = location.pathname === "/";
 
   return (
@@ -26,8 +26,9 @@ function AppContent() {
       <div className="full-screen">
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/course" element={<Course />} />
+          <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/assessment" element={<Assessment />} />
+          <Route path="/course" element={<Course />} />
           <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
         </Routes>
       </div>
