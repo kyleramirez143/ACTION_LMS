@@ -1,8 +1,12 @@
+// ./frontend/lms-proj/src/components/LoginPage.jsx
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '', // Correctly named 'email'
@@ -30,7 +34,7 @@ function LoginPage() {
 
     try {
       // 1. Target the correct API endpoint using the environment variable
-      const apiEndpoint = `${import.meta.env.VITE_API_URL}/api/auth/login`;
+      const apiEndpoint = `/api/auth/login`;
 
       console.log('Attempting login with:', formData);
       console.log('Sending request to:', apiEndpoint); // Debug: Check the URL
@@ -48,19 +52,37 @@ function LoginPage() {
       // This prevents the 'Unexpected end of JSON input' error on 404/500
       let data;
       try {
-          data = await response.json();
+        data = await response.json();
       } catch (err) {
-          // If response is not JSON (e.g., HTML 404 page), use a generic message
-          console.error("Failed to parse API response as JSON:", err);
-          data = { message: `Server error or bad response (Status: ${response.status}).` };
+        // If response is not JSON (e.g., HTML 404 page), use a generic message
+        console.error("Failed to parse API response as JSON:", err);
+        data = { message: `Server error or bad response (Status: ${response.status}).` };
       }
-      
+
       if (response.ok) {
         // Successful login (HTTP 200)
         console.log("Login Successful! Token: ", data.token);
+        // 1. Store the token
         localStorage.setItem('authToken', data.token);
         alert('Login Successful!');
+
+        // 2. Decode the token to get the user's role for redirection
+        const decodedUser = jwtDecode(data.token);
+        const roles = decodedUser?.roles || []; // Get the roles array
+
+        if (roles.includes('Admin')) {
+          // 3. Redirect to the admin dashboard
+          navigate('/admin/dashboard');
+        } else if (roles.includes('Student')) {
+          // Example for another role
+          navigate('/student/dashboard');
+        } else {
+          // Default redirect for unrecognized roles
+          navigate('/dashboard');
+        }
+
         setFormData({ email: '', password: '' });
+
       } else {
         // Failed login (e.g., HTTP 401 Unauthorized, HTTP 400 Bad Request)
         // The error message comes from the 'data' object (backend response)
