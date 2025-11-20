@@ -6,23 +6,31 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="full-screen">
-      <div className="login-left"></div>
+    <div className="login-wrapper">
+      {/* Left side: Blue panel */}
+      <div className="login-left">
+        {/* Optional: add logo, image, or tagline here */}
+      </div>
 
+      {/* Right side: Login form */}
       <div className="login-right">
         <div className="login-content">
-          <img src="/action-logo.png" alt="ACTION Logo" className="login-logo"/>
+          <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />
           <h2 className="welcome-title">Welcome to ACTION LMS</h2>
           <p className="welcome-subtext">
             Access your courses, complete assignments, and track your academic progress anytime, anywhere.
           </p>
 
           <form className="login-form">
-
             {/* Username */}
-            <input type="text" placeholder="Username" className="form-input" name="username"/>
+            <input
+              type="text"
+              placeholder="Username"
+              className="form-input"
+              name="username"
+            />
 
-            {/* Password container */}
+            {/* Password */}
             <div className="password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
@@ -30,8 +38,6 @@ function LoginPage() {
                 className="form-input"
                 name="password"
               />
-
-              {/* Toggle eye icon */}
               <span
                 className="eye-icon"
                 onClick={() => setShowPassword(!showPassword)}
@@ -40,6 +46,7 @@ function LoginPage() {
               </span>
             </div>
 
+            {/* Options */}
             <div className="form-options">
               <label>
                 <input type="checkbox" /> Remember me
@@ -47,6 +54,7 @@ function LoginPage() {
               <a href="#" className="forgot-link">Forgot Password</a>
             </div>
 
+            {/* Login Button */}
             <button type="submit" className="login-button">Login</button>
           </form>
         </div>
