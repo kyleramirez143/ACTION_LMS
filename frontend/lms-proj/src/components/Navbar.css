@@ -1,0 +1,115 @@
+  :root {
+    --primary-blue: #0047AB;
+    --white: #FFFFFF;
+    --light-gray: #D9D9D9;
+    --dark-gray: #333333;
+  }
+
+  /* Navbar Container */
+  .navbar {
+    background-color: var(--white);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    padding: 0 1.25rem;
+    z-index: 2000;
+    border-bottom: 1px solid var(--light-gray);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Logo */
+  .logo-small {
+    width: 80px;
+    height: 50px;
+    object-fit: contain;
+  }
+
+  /* Brand Text */
+  .brand-text {
+    color: var(--dark-gray);
+  }
+
+  /* Navigation Links */
+  .navbar a {
+    color: var(--dark-gray);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .navbar a:hover {
+    color: var(--primary-blue);
+  }
+
+  /* Bell Icon */
+  .bell-icon {
+    font-size: 28px;
+    color: var(--dark-gray);
+    cursor: pointer;
+  }
+
+  /* Trainee Circle */
+  .trainee-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--white);
+    border: 1px solid var(--dark-gray);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Search Bar Section */
+  .search-bar-section {
+    background-color: var(--primary-blue);
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  /* White Search Input */
+  .search-input {
+    flex: 1;
+    height: 50px;
+    background-color: var(--white);
+    border: none;
+    border-radius: 40px;
+    padding: 0 20px;
+    font-size: 1rem;
+  }
+
+  /* White Rounded Buttons */
+  .btn-primary-custom {
+    height: 50px;
+    min-width: 150px;
+    border-radius: 40px;
+    background-color: var(--white);
+    color: var(--primary-blue);
+    font-weight: 600;
+    border: none;
+    padding: 0 20px;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-primary-custom:hover {
+    background-color: var(--light-gray);
+  }
+
+  .search-button {
+    height: 50px;
+    min-width: 150px;
+    background-color: var(--white);
+    border: none;
+    border-radius: 40px;
+    padding: 0 20px;
+    font-size: 1rem;
+    color: var(--primary-blue);
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+  }
+
+  .search-button:hover {
+    background-color: var(--light-gray);
+  }
