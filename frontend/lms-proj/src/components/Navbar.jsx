@@ -46,15 +46,16 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Search Section Below Navbar */}
             <div className="search-bar-section py-3 px-4 d-flex gap-3">
                 <input
                     type="text"
                     className="form-control search-input"
                     placeholder="Search your Available Courses"
                 />
-                <button className="btn btn-primary-custom">Search</button>
-                <button className="btn btn-primary-custom">Assessment</button>
+                <div className="d-flex gap-2">
+                    <button className="search-button">Export</button>
+                    <button className="search-button">Export</button>
+                </div>
             </div>
         </nav>
     );

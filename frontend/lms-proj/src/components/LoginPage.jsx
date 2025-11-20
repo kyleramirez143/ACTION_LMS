@@ -97,9 +97,13 @@ function LoginPage() {
 
 
   return (
-    <div className="full-screen">
-      <div className="login-left"></div>
+    <div className="login-wrapper">
+      {/* Left side: Blue panel */}
+      <div className="login-left">
+        {/* Optional: add logo, image, or tagline here */}
+      </div>
 
+      {/* Right side: Login form */}
       <div className="login-right">
         <div className="login-content">
           <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />
@@ -124,7 +128,7 @@ function LoginPage() {
               onChange={handleChange}
             />
 
-            {/* Password container */}
+            {/* Password */}
             <div className="password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
@@ -134,8 +138,6 @@ function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
               />
-
-              {/* Toggle eye icon */}
               <span
                 className="eye-icon"
                 onClick={() => setShowPassword(!showPassword)}
@@ -144,6 +146,7 @@ function LoginPage() {
               </span>
             </div>
 
+            {/* Options */}
             <div className="form-options">
               <label>
                 <input type="checkbox" /> Remember me
