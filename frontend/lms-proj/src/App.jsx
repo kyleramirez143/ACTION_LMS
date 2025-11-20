@@ -2,6 +2,10 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Assessment from "./components/Assessment";
 import Course from "./Components/Course";
+import Navbar from "./components/Navbar";
+import LoginPage from "./components/LoginPage";
+import AdminDashboard from './pages/AdminDashboard';
+// import StudentDashboard from './pages/TraineeDashboard';
 import Navbar from "./Components/Navbar";
 import LoginPage from "./Components/LoginPage";
 import AssessmentConfirmation from "./components/AssessmentConfirmation";
@@ -34,7 +38,14 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        {/* The target redirect route */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
+        {/* Other dashboard routes */}
+        {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
+        {/* ... */}
+      </Routes>
     </Router>
   );
 }
