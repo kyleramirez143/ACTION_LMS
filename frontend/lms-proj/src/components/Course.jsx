@@ -19,7 +19,7 @@ export default function Course() {
 
     return (
         <div className="course-wrapper">
-            {/* ✅ Navbar removed here, handled globally in App.jsx */}
+            {/*  Navbar removed here, handled globally in App.jsx */}
 
             {/* Scrollable Page Content */}
             <div className="page-content px-4">
