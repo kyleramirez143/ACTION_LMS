@@ -18,14 +18,15 @@ body {
 
 /* Global reset and layout */
 html, body, #root {
+  font-family: 'Poppins', sans-serif;
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #D9D9D9;
-  /* overflow: hidden; */
-  box-sizing: border-box;
+  background-color: #f8f9fa;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
+
 
 /* Ensure all elements respect box sizing */
 *, *::before, *::after {

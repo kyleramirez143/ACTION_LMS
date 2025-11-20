@@ -1,20 +1,21 @@
+import React from "react";
 import ModuleAccordion from "./ModuleAccordion";
 import UpcomingPanel from "./UpcomingPanel";
 import "./modules.css";
 
 export default function ModuleScreen() {
   return (
-    <div className="screen-wrapper">
-      <TopNav />
+    <div className="module-container">
+      {/* LEFT: Accordion */}
+      <div className="module-left">
+        <div className="module-title">Module 1: Computer Science</div>
+        <ModuleAccordion />
+      </div>
 
-      <div className="module-container">
-        <div className="module-left">
-          <h1 className="module-title">Module 1: Computer Science</h1>
-          <ModuleAccordion />
-        </div>
-
-        <div className="module-right">
-          <h2 className="upcoming-title">Upcoming</h2>
+      {/* RIGHT: Upcoming Panel */}
+      <div className="module-right">
+        <div className="upcoming-title">Upcoming</div>
+        <div className="upcoming-wrapper">
           <UpcomingPanel />
         </div>
       </div>

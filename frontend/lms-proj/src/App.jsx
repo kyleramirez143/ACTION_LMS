@@ -4,6 +4,7 @@ import Assessment from "./Components/Assessment";
 import Course from "./Components/Course";
 import Navbar from "./Components/Navbar";
 import LoginPage from "./Components/LoginPage";
+import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -11,7 +12,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 function AppContent() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/login";
+  const hideNavbar = location.pathname === "/";
 
   return (
     <>
@@ -19,8 +20,9 @@ function AppContent() {
 
       <div className="full-screen">
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Assessment />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/modules" element={<ModuleScreen />} />
+          <Route path="/assessment" element={<Assessment />} />
           <Route path="/course" element={<Course />} />
         </Routes>
       </div>

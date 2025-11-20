@@ -7,11 +7,18 @@ export default function UpcomingPanel() {
 
   return (
     <div className="upcoming-wrapper">
-        {events.map((e, i) => (
-            <div key={i} className={`upcoming-card ${e.color}`}>
-                <strong>{e.title}</strong>
-                <p>{e.date}</p>
-            </div>
-        ))}
+      {events.map((e, i) => (
+        <a 
+          key={i} 
+          href="#" 
+          className={`upcoming-card ${e.color}`} 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          <strong>{e.title}</strong>
+          <p>{e.date}</p>
+        </a>
+      ))}
     </div>
-      );}
+  );
+}

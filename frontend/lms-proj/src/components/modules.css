@@ -27,7 +27,7 @@
 
 .module-title {
   font-size: 26px;
-  font-weight: 600;
+  font-weight: bold;
   color: var(--text-dark);
   margin-bottom: 22px;
 }
@@ -36,58 +36,104 @@
 .accordion-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 1rem;
 }
 
 .accordion-card {
-  background: var(--white);
-  border-radius: var(--card-radius);
-  padding: 20px 22px;
-  box-shadow: var(--card-shadow);
-  width: 100%;
-  box-sizing: border-box;
+  border: 1px solid #dee2e6;
+  border-radius: 12px; /* smoother edges */
+  background-color: #fff;
+  /* stronger shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-.accordion-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 17px;
-  color: var(--blue);
-  font-weight: 600;
-  cursor: pointer;
+.accordion-card.active {
+  /* subtle lift when opened */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .accordion-content {
-  margin-top: 16px;
-  padding-left: 4px;
+  padding: 1rem 1.5rem;
+  background-color: #fff;
+  /* smooth opening */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
 }
 
-.resource-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.accordion-card.active .accordion-content {
+  max-height: 500px; /* enough to fit content */
+  padding: 1rem 1.5rem;
+}
+
+
+.accordion-header {
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  font-size: 1.1rem;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-medium);
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
-.resource-list li {
+.accordion-title {
+  font-weight: 700;
+}
+
+.accordion-content {
+  padding: 1rem 1.5rem;
+  background-color: #fff;
+}
+
+.accordion-description {
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.resource-heading {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Resource container */
+.resources-container {
+  margin-bottom: 0.5rem;
+}
+
+.resource-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.5rem;
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #212529;
+  transition: background-color 0.2s ease;
 }
 
-.no-res {
-  font-size: 14px;
-  color: var(--text-light);
+.resource-item:hover {
+  background-color: #e2e6ea;
 }
+
+.quiz-link {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+
 
 /* ================= UPCOMING PANEL ================= */
 .module-right {
-  border:#ffffff
+  border: #ffffff;
 }
 
 .upcoming-title {
@@ -103,12 +149,24 @@
   gap: 18px;
 }
 
+/* Base card style */
 .upcoming-card {
+  display: block; /* makes it behave like a link */
   background: var(--white);
   padding: 18px;
-  border-radius: var(--card-radius);
+  border-radius: 12px; /* smoother edges */
   position: relative;
   box-shadow: var(--card-shadow);
+  text-decoration: none;
+  color: var(--text-dark);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+/* Hover effect */
+.upcoming-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  background-color: #ffffff;
 }
 
 /* Colored tags */
@@ -131,6 +189,7 @@
 .upcoming-card strong {
   font-size: 15px;
   color: var(--text-dark);
+  display: block;
 }
 
 .upcoming-card p {
@@ -138,6 +197,7 @@
   font-size: 13px;
   color: var(--text-light);
 }
+
 
 /* ================= RESPONSIVE ================= */
 /* @media (max-width: 1250px) {
