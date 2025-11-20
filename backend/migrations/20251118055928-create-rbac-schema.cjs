@@ -2,15 +2,9 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  // ----------------------------------------------------
-  // IMPORTANT: 'Sequelize' MUST be the second argument
-  // ----------------------------------------------------
-  async up(queryInterface, Sequelize) { 
-
-    // Helper function for PostgreSQL UUID column
-    // This function MUST use the 'Sequelize' argument from the function signature.
+  async up(queryInterface, Sequelize) {
     const uuidColumn = {
-      type: Sequelize.UUID, 
+      type: Sequelize.UUID,
       defaultValue: Sequelize.literal('gen_random_uuid()'),
       primaryKey: true,
       allowNull: false,
@@ -39,7 +33,12 @@ module.exports = {
     // PostgreSQL Specific: Enable UUID Generation Extension
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
-    // 1. users table
+    // Enable pgcrypto
+    await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
+    // --------------------------
+    // USERS
+    // --------------------------
     await queryInterface.createTable('users', {
       id: uuidColumn,
       first_name: { type: Sequelize.STRING(100) }, // <--- Uses the argument
@@ -116,18 +115,175 @@ module.exports = {
       created_at: standardTimestamp,
     });
 
-  }, // End of up function
+    // --------------------------
+    // ROLES & PERMISSIONS
+    // --------------------------
+    await queryInterface.createTable('roles', {
+      id: uuidColumn,
+      name: { type: Sequelize.STRING(50), allowNull: false, unique: true },
+      description: { type: Sequelize.STRING(255) },
+      created_at: timestamp,
+    });
+
+    await queryInterface.createTable('permissions', {
+      id: uuidColumn,
+      type_name: { type: Sequelize.STRING(100), allowNull: false, unique: true },
+      created_at: timestamp,
+    });
+
+    await queryInterface.createTable('user_roles', {
+      user_id: { ...foreignKey('users', 'id'), primaryKey: true },
+      role_id: { ...foreignKey('roles', 'id'), primaryKey: true },
+      created_at: timestamp,
+    });
+
+    await queryInterface.createTable('role_permissions', {
+      id: uuidColumn,
+      role_id: foreignKey('roles', 'id'),
+      permission_id: foreignKey('permissions', 'id'),
+      created_at: timestamp,
+    });
+
+    // --------------------------
+    // COURSES, MODULES, LECTURES
+    // --------------------------
+    await queryInterface.createTable('courses', {
+      course_id: uuidColumn,
+      title: { type: Sequelize.STRING(255), allowNull: false },
+      description: { type: Sequelize.TEXT },
+      instructor_id: foreignKey('users', 'id'),
+      is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('courses', ['instructor_id']);
+
+    await queryInterface.createTable('modules', {
+      module_id: uuidColumn,
+      course_id: foreignKey('courses', 'course_id'),
+      title: { type: Sequelize.STRING(255), allowNull: false },
+      description: { type: Sequelize.TEXT },
+      created_by: foreignKey('users', 'id'),
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('modules', ['course_id']);
+    await queryInterface.addIndex('modules', ['created_by']);
+
+    await queryInterface.createTable('lectures', {
+      lecture_id: uuidColumn,
+      module_id: foreignKey('modules', 'module_id'),
+      title: { type: Sequelize.STRING(255), allowNull: false },
+      content_type: { type: Sequelize.STRING(50) },
+      content_url: { type: Sequelize.TEXT },
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('lectures', ['module_id']);
+
+    // --------------------------
+    // ASSESSMENTS
+    // --------------------------
+    await queryInterface.createTable('assessments', {
+      assessment_id: uuidColumn,
+      title: { type: Sequelize.STRING(255), allowNull: false },
+      description: { type: Sequelize.TEXT },
+      pdf_source_url: { type: Sequelize.TEXT },
+      lecture_id: foreignKey('lectures', 'lecture_id', true, 'SET NULL'),
+      module_id: foreignKey('modules', 'module_id', true, 'SET NULL'),
+      course_id: foreignKey('courses', 'course_id', true, 'SET NULL'),
+      is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
+      created_by: foreignKey('users', 'id'),
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('assessments', ['course_id', 'module_id', 'lecture_id', 'created_by']);
+
+    // --------------------------
+    // ASSESSMENT QUESTIONS
+    // --------------------------
+    await queryInterface.createTable('assessment_questions', {
+      question_id: uuidColumn,
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      question_text: { type: Sequelize.TEXT, allowNull: false },
+      options: { type: Sequelize.JSON },
+      correct_answer: { type: Sequelize.JSON },
+      points: { type: Sequelize.INTEGER, defaultValue: 1 },
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('assessment_questions', ['assessment_id']);
+
+    // --------------------------
+    // ASSESSMENT RESPONSES
+    // --------------------------
+    await queryInterface.createTable('assessment_responses', {
+      response_id: uuidColumn,
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      user_id: foreignKey('users', 'id'),
+      question_id: foreignKey('assessment_questions', 'question_id'),
+      answer: { type: Sequelize.JSON },
+      score: { type: Sequelize.DECIMAL(5, 2) },
+      feedback: { type: Sequelize.TEXT },
+      submitted_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()'), allowNull: false },
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('assessment_responses', ['assessment_id', 'user_id', 'question_id']);
+
+    // --------------------------
+    // GRADES
+    // --------------------------
+    await queryInterface.createTable('grades', {
+      grade_id: uuidColumn,
+      user_id: foreignKey('users', 'id'),
+      course_id: foreignKey('courses', 'course_id'),
+      module_id: foreignKey('modules', 'module_id'),
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      grade_type: { type: Sequelize.STRING(50) },
+      score: { type: Sequelize.DECIMAL(5, 2) },
+      weight: { type: Sequelize.DECIMAL(5, 2) },
+      calculated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()'), allowNull: false },
+      remarks: { type: Sequelize.TEXT },
+      overridden_by: foreignKey('users', 'id', true, 'SET NULL'),
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('grades', ['user_id', 'course_id', 'module_id', 'assessment_id']);
+
+    // --------------------------
+    // AI INSIGHTS
+    // --------------------------
+    await queryInterface.createTable('ai_insights', {
+      insight_id: uuidColumn,
+      user_id: foreignKey('users', 'id'),
+      generated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()'), allowNull: false },
+      weakness_summary: { type: Sequelize.TEXT },
+      improvement_areas_json: { type: Sequelize.JSON },
+      recommended_courses_json: { type: Sequelize.JSON },
+      confidence_score: { type: Sequelize.DECIMAL(5, 2) },
+      reviewed_by: foreignKey('users', 'id', true, 'SET NULL'),
+      created_at: timestamp,
+      updated_at: timestamp,
+    });
+    await queryInterface.addIndex('ai_insights', ['user_id']);
+  },
 
   async down(queryInterface, Sequelize) {
-    // ----------------------------------------------------
-    // IMPORTANT: 'Sequelize' MUST be the second argument here too
-    // ----------------------------------------------------
-    // Drop tables in reverse order of dependency
+    // Drop in reverse dependency order
+    await queryInterface.dropTable('ai_insights');
+    await queryInterface.dropTable('grades');
+    await queryInterface.dropTable('assessment_responses');
+    await queryInterface.dropTable('assessment_questions');
+    await queryInterface.dropTable('assessments');
+    await queryInterface.dropTable('lectures');
+    await queryInterface.dropTable('modules');
+    await queryInterface.dropTable('courses');
     await queryInterface.dropTable('role_permissions');
     await queryInterface.dropTable('user_roles');
     await queryInterface.dropTable('permissions');
     await queryInterface.dropTable('roles');
     await queryInterface.dropTable('passwords');
     await queryInterface.dropTable('users');
-  }
+  },
 };
