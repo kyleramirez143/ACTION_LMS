@@ -5,16 +5,16 @@ import nihongoLogo from "../image/jlptlogo.png";
 
 export default function Course() {
     const courses = [
+        { title: "PhilNITS", image: philnitsLogo },
         { title: "Nihongo", image: nihongoLogo },
-        { title: "Philnits", image: philnitsLogo },
-        { title: "Nihongo", image: nihongoLogo },
-        { title: "Philnits", image: philnitsLogo },
-        { title: "Nihongo", image: nihongoLogo },
-        { title: "Philnits", image: philnitsLogo },
-        { title: "Nihongo", image: nihongoLogo },
-        { title: "Philnits", image: philnitsLogo },
-        { title: "Nihongo", image: nihongoLogo },
-        { title: "Philnits", image: philnitsLogo },
+        // { title: "Nihongo", image: nihongoLogo },
+        // { title: "Philnits", image: philnitsLogo },
+        // { title: "Nihongo", image: nihongoLogo },
+        // { title: "Philnits", image: philnitsLogo },
+        // { title: "Nihongo", image: nihongoLogo },
+        // { title: "Philnits", image: philnitsLogo },
+        // { title: "Nihongo", image: nihongoLogo },
+        // { title: "Philnits", image: philnitsLogo },
     ];
 
     return (
@@ -24,7 +24,7 @@ export default function Course() {
             {/* Scrollable Page Content */}
             <div className="page-content px-4">
                 {/* Courses Header */}
-                <h2 className="fw-bold mt-4 mb-3">Courses</h2>
+                <h2 className="fw-bold mt-0.5 mb-3">Courses</h2>
 
                 {/* Courses Grid */}
                 <div className="row g-4">
@@ -43,7 +43,7 @@ export default function Course() {
                     ))}
                 </div>
 
-                {/* Pagination */}
+                {/* Pagination
                 <div className="pagination-container mt-4 mb-5 d-flex justify-content-center align-items-center gap-2">
                     <button className="btn btn-outline-dark">&laquo;</button>
                     {[1, 2, 3, 4, 5].map((page) => (
@@ -55,7 +55,7 @@ export default function Course() {
                         </button>
                     ))}
                     <button className="btn btn-outline-dark">&raquo;</button>
-                </div>
+                </div> */}
             </div>
         </div>
     );

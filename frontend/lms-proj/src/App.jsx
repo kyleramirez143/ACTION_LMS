@@ -1,23 +1,25 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Assessment from "./components/Assessment";
-import Course from "./components/Course";
-import Navbar from "./components/Navbar";
-import LoginPage from "./components/LoginPage";
-import AdminDashboard from './pages/AdminDashboard';
-// import StudentDashboard from './pages/TraineeDashboard';
-// import Navbar from "./components/Navbar";
-// import LoginPage from "./components/LoginPage";
-import AssessmentConfirmation from "./components/AssessmentConfirmation";
-import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
+import Navbar from "./all/Navbar";
+import LoginPage from "./all/LoginPage";
+import Assessment from "./trainer/Assessment";
+import AssessmentConfirmation from "./trainer/AssessmentConfirmation";
+import ReviewPublish from "./trainer/ReviewPublish";
+import Course from "./trainee/Course";
+import ModuleScreen from "./trainee/ModuleScreen"; 
+//import AdminDashboard from './pages/AdminDashboard';
+//import StudentDashboard from './pages/TraineeDashboard';
+
+
+
 function AppContent() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/";
+  const hideNavbar = location.pathname === "/"; // hide navbar only on login page
 
   return (
     <>
@@ -27,9 +29,12 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/modules" element={<ModuleScreen />} />
-          <Route path="/assessment" element={<Assessment />} />
           <Route path="/course" element={<Course />} />
+          <Route path="/assessment" element={<Assessment />} />
           <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
+          <Route path="/reviewpublish" element={<ReviewPublish />} />
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
     </>
@@ -39,14 +44,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        {/* The target redirect route */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
-        {/* Other dashboard routes */}
-        {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
-        {/* ... */}
-      </Routes>
+      <AppContent />
     </Router>
   );
 }

@@ -54,7 +54,7 @@ export default function Navbar() {
                     placeholder="Search your Available Courses"
                 />
                 <div className="d-flex gap-2">
-                    <button className="search-button">Export</button>
+                    <button className="search-button">Search</button>
                     <button className="search-button">Export</button>
                 </div>
             </div>
