@@ -1,13 +1,13 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Assessment from "./components/Assessment";
-import Course from "./Components/Course";
+import Course from "./components/Course";
 import Navbar from "./components/Navbar";
 import LoginPage from "./components/LoginPage";
 import AdminDashboard from './pages/AdminDashboard';
 // import StudentDashboard from './pages/TraineeDashboard';
-import Navbar from "./Components/Navbar";
-import LoginPage from "./Components/LoginPage";
+// import Navbar from "./components/Navbar";
+// import LoginPage from "./components/LoginPage";
 import AssessmentConfirmation from "./components/AssessmentConfirmation";
 import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
