@@ -1,9 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Assessment from "./Components/Assessment";
+import Assessment from "./components/Assessment";
 import Course from "./Components/Course";
+import Navbar from "./components/Navbar";
+import LoginPage from "./components/LoginPage";
+import AdminDashboard from './pages/AdminDashboard';
+// import StudentDashboard from './pages/TraineeDashboard';
 import Navbar from "./Components/Navbar";
 import LoginPage from "./Components/LoginPage";
+import AssessmentConfirmation from "./components/AssessmentConfirmation";
 import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -16,7 +21,7 @@ function AppContent() {
 
   return (
     <>
-      {!hideNavbar && <Navbar />}  {/* Hide Navbar on login page */}
+      {!hideNavbar && <Navbar />}
 
       <div className="full-screen">
         <Routes>
@@ -24,6 +29,7 @@ function AppContent() {
           <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/course" element={<Course />} />
+          <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
         </Routes>
       </div>
     </>
@@ -33,7 +39,14 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        {/* The target redirect route */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} /> 
+        {/* Other dashboard routes */}
+        {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
+        {/* ... */}
+      </Routes>
     </Router>
   );
 }
