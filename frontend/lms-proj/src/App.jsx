@@ -11,6 +11,7 @@ import ActivityResult from "./trainer/ActivityResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
+import TraineeAssessment from "./trainee/TraineeAssessment"; 
 // import PdfViewerPage from "./trainee/PdfViewer";
 //import AdminDashboard from './pages/AdminDashboard';
 //import StudentDashboard from './pages/TraineeDashboard';
@@ -33,6 +34,7 @@ function AppContent() {
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/quizresult" element={<QuizResult/>} />
           <Route path="/activityresult" element={<ActivityResult/>} />
+          <Route path="/traineeassessment" element={<TraineeAssessment />} />
           {/* <Route path="/reviewpublish" element={<ReviewPublish />} />
           <Route path="/pdfviewer" element={<PdfViewerPage/>} /> */}
           {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
