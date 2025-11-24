@@ -7,13 +7,13 @@ import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
+import ActivityResult from "./trainer/ActivityResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
 // import PdfViewerPage from "./trainee/PdfViewer";
 //import AdminDashboard from './pages/AdminDashboard';
 //import StudentDashboard from './pages/TraineeDashboard';
-import ActivityResult from "./trainer/ActivityResult"; 
 
 
 
@@ -32,11 +32,11 @@ function AppContent() {
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/quizresult" element={<QuizResult/>} />
-          <Route path="/reviewpublish" element={<ReviewPublish />} />
-          {/* <Route path="/pdfviewer" element={<PdfViewerPage/>} /> */}
+          <Route path="/activityresult" element={<ActivityResult/>} />
+          {/* <Route path="/reviewpublish" element={<ReviewPublish />} />
+          <Route path="/pdfviewer" element={<PdfViewerPage/>} /> */}
           {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
-          <Route path="/activityresult" element={<ActivityResult/>} />
         </Routes>
       </div>
     </>
