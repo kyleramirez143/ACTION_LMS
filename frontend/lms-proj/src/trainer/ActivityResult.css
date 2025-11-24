@@ -19,9 +19,10 @@
 /* MAIN LAYOUT */
 .main-content {
   display: flex;
-  flex: 1;         
+  flex: 1;
   gap: 25px;
-  min-height: 0;    
+  min-height: 0;
+  flex-wrap: wrap; /* allows stacking on small screens */
 }
 
 /* TABLE SECTION */
@@ -38,20 +39,12 @@
   flex: 3;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
-  overflow: hidden;
-}
-
-.results-table-scroll {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;    
+  min-width: 0; /* important for flex */
 }
 
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
 }
 
 .results-table thead {
@@ -65,6 +58,19 @@
 .results-table td {
   padding: 14px 10px;
   border-bottom: 1px solid #eee;
+  word-break: break-word; /* prevent overflow */
+}
+
+.results-table-scroll {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.results-table-scroll tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .status-pill {
@@ -89,6 +95,7 @@
   display: flex;
   gap: 10px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .pagination button {
@@ -114,12 +121,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;           /* ensures proper flex layout */
+  height: 100%;
 }
 
+/* scrollable content inside summary */
 .activity-summary-content {
-  flex: 1;                /* scroll area takes all remaining space */
-  overflow-y: auto;       /* scroll only inside content */
+  flex: 1;
+  overflow-y: auto;
   min-height: 0;
   padding-right: 4px;
 }
@@ -177,26 +185,77 @@
 .green { background: #00C49F; }
 .red { background: #FF4D4F; }
 
-/* BUTTONS (used for table actions only) */
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background: #0047AB;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 1024px) {
+  .main-content {
+    gap: 15px;
+  }
+  
+  .results-table-scroll {
+    max-height: 250px;
+  }
+  
+  .donut-circle {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .donut-circle .donut-value {
+    font-size: 28px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
 }
 
-.btn-primary:hover { background: #003380; }
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
 
-.btn-light {
-  width: 100%;
-  padding: 12px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  cursor: pointer;
+  .results-table-container {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .activity-summary {
+    flex: 1;
+    width: 100%;
+  }
+
+  .results-table-scroll {
+    max-height: 200px;
+  }
 }
 
-.btn-light:hover { background: #f2f2f2; }
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 20px;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .status-pill {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .donut-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .donut-circle .donut-value {
+    font-size: 22px;
+  }
+
+  .legend li {
+    font-size: 12px;
+  }
+}
