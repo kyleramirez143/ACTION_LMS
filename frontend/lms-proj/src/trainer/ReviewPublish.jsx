@@ -9,7 +9,7 @@ export default function ReviewPublish() {
     return (
         <div className="assessment-wrapper">
             <div className="page-content px-4">
-                <h2 className="fw-bold mt-4 mb-3">Review and Publish</h2>
+                <h2 className="fw-bold mt-0.5 mb-3">Review and Publish</h2>
 
                 {/* Instructions Section */}
                 <div className="card-gray border shadow-sm mb-4">
