@@ -2,6 +2,7 @@ import React from "react";
 import { Dropdown } from "react-bootstrap";
 import logo from "../image/logo.jpg";
 import "./Navbar.css";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
     return (
@@ -16,7 +17,7 @@ export default function Navbar() {
                 {/* Right Section */}
                 <div className="d-flex align-items-center gap-3">
                     <a href="#" className="nav-link text-dark fw-semibold">Home</a>
-                    <a href="#" className="nav-link text-dark fw-semibold">Assessment</a>
+                    <Link to="/assessment" className="nav-link text-dark fw-semibold">Assessment</Link>
                     <a href="#" className="nav-link text-dark fw-semibold">Courses</a>
 
                     <i className="bi bi-bell bell-icon"></i>
@@ -39,7 +40,7 @@ export default function Navbar() {
                                 <Dropdown.Item href="#">Settings & Privacy</Dropdown.Item>
                                 <Dropdown.Item href="#">Help & Support</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item href="#" className="text-danger">Sign Out</Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/" className="text-danger">Sign Out</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     </div>
@@ -53,7 +54,7 @@ export default function Navbar() {
                     placeholder="Search your Available Courses"
                 />
                 <div className="d-flex gap-2">
-                    <button className="search-button">Export</button>
+                    <button className="search-button">Search</button>
                     <button className="search-button">Export</button>
                 </div>
             </div>

@@ -9,17 +9,13 @@ module.exports = {
       primaryKey: true,
       allowNull: false,
     };
-    
-    // Helper function for FK column
-    const foreignKey = (references, key) => ({
-      type: Sequelize.UUID, // <--- Uses the argument
-      allowNull: false,
-      references: {
-        model: references, // Table name
-        key: key,          // Primary key of the referenced table
-      },
+
+    const foreignKey = (references, key, allowNull = false, onDelete = 'CASCADE') => ({
+      type: Sequelize.UUID,
+      allowNull,
+      references: { model: references, key },
       onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
+      onDelete,
     });
 
     const standardTimestamp = { 
@@ -28,12 +24,8 @@ module.exports = {
       allowNull: false,
     };
 
-    // --- Start of your actual migration code ---
-    
-    // PostgreSQL Specific: Enable UUID Generation Extension
+    // Enable UUID generation extensions
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
-
-    // Enable pgcrypto
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
 
     // --------------------------
@@ -41,83 +33,24 @@ module.exports = {
     // --------------------------
     await queryInterface.createTable('users', {
       id: uuidColumn,
-      first_name: { type: Sequelize.STRING(100) }, // <--- Uses the argument
-      last_name:  { type: Sequelize.STRING(100) },
-      email:      { 
-        type: Sequelize.STRING(150),
-        allowNull: false,
-        unique: true,
-      },
-      is_active:  { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
+      first_name: { type: Sequelize.STRING(100) },
+      last_name: { type: Sequelize.STRING(100) },
+      email: { type: Sequelize.STRING(150), allowNull: false, unique: true },
+      is_active: { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
 
-    // 2. Passwords Table
+    // PASSWORDS
     await queryInterface.createTable('passwords', {
       id: uuidColumn,
-      password: { 
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
+      password: { type: Sequelize.STRING, allowNull: false },
       user_id: foreignKey('users', 'id'),
       created_at: standardTimestamp,
-      is_current: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
-        allowNull: false,
-      },
+      is_current: { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
     });
 
-    // 3. Roles Table
-    await queryInterface.createTable('roles', {
-      id: uuidColumn,
-      name: { 
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        unique: true,
-      },
-      description: {
-        type: Sequelize.STRING(255),
-      },
-      created_at: standardTimestamp,
-    });
-    
-    // 4. Permissions Table
-    await queryInterface.createTable('permissions', {
-      id: uuidColumn,
-      type_name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      created_at: standardTimestamp,
-    });
-
-    // 5. User_Roles Table (Join Table)
-    await queryInterface.createTable('user_roles', {
-      user_id: {
-        ...foreignKey('users', 'id'),
-        primaryKey: true,
-      },
-      role_id: {
-        ...foreignKey('roles', 'id'),
-        primaryKey: true,
-      },
-      created_at: standardTimestamp,
-    });
-
-    // 6. Role_Permissions Table (Join Table)
-    await queryInterface.createTable('role_permissions', {
-      id: uuidColumn, // Using UUID as a primary key for this join table
-      role_id: foreignKey('roles', 'id'),
-      permission_id: foreignKey('permissions', 'id'),
-      created_at: standardTimestamp,
-    });
-
-    // --------------------------
-    // ROLES & PERMISSIONS
-    // --------------------------
+    // ROLES
     await queryInterface.createTable('roles', {
       id: uuidColumn,
       name: { type: Sequelize.STRING(50), allowNull: false, unique: true },
@@ -125,18 +58,21 @@ module.exports = {
       created_at: standardTimestamp,
     });
 
+    // PERMISSIONS
     await queryInterface.createTable('permissions', {
       id: uuidColumn,
       type_name: { type: Sequelize.STRING(100), allowNull: false, unique: true },
       created_at: standardTimestamp,
     });
 
+    // USER_ROLES
     await queryInterface.createTable('user_roles', {
       user_id: { ...foreignKey('users', 'id'), primaryKey: true },
       role_id: { ...foreignKey('roles', 'id'), primaryKey: true },
       created_at: standardTimestamp,
     });
 
+    // ROLE_PERMISSIONS
     await queryInterface.createTable('role_permissions', {
       id: uuidColumn,
       role_id: foreignKey('roles', 'id'),
@@ -173,6 +109,7 @@ module.exports = {
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,
       module_id: foreignKey('modules', 'module_id'),
+      course_id: foreignKey('courses', 'course_id'),
       title: { type: Sequelize.STRING(255), allowNull: false },
       content_type: { type: Sequelize.STRING(50) },
       content_url: { type: Sequelize.TEXT },
@@ -182,6 +119,17 @@ module.exports = {
     await queryInterface.addIndex('lectures', ['module_id']);
 
     // --------------------------
+    // ASSESSMENT TYPES
+    // --------------------------
+    await queryInterface.createTable('assessment_types', {
+      assessment_type_id: uuidColumn,
+      name: { type: Sequelize.STRING(100), allowNull: false },
+      description: { type: Sequelize.TEXT },
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
+
+    // --------------------------
     // ASSESSMENTS
     // --------------------------
     await queryInterface.createTable('assessments', {
@@ -189,19 +137,15 @@ module.exports = {
       title: { type: Sequelize.STRING(255), allowNull: false },
       description: { type: Sequelize.TEXT },
       pdf_source_url: { type: Sequelize.TEXT },
-      lecture_id: foreignKey('lectures', 'lecture_id', true, 'SET NULL'),
-      module_id: foreignKey('modules', 'module_id', true, 'SET NULL'),
-      course_id: foreignKey('courses', 'course_id', true, 'SET NULL'),
+      assessment_type_id: foreignKey('assessment_types', 'assessment_type_id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
       created_by: foreignKey('users', 'id'),
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
-    await queryInterface.addIndex('assessments', ['course_id', 'module_id', 'lecture_id', 'created_by']);
+    await queryInterface.addIndex('assessments', ['assessment_type_id', 'created_by']);
 
-    // --------------------------
     // ASSESSMENT QUESTIONS
-    // --------------------------
     await queryInterface.createTable('assessment_questions', {
       question_id: uuidColumn,
       assessment_id: foreignKey('assessments', 'assessment_id'),
@@ -214,9 +158,7 @@ module.exports = {
     });
     await queryInterface.addIndex('assessment_questions', ['assessment_id']);
 
-    // --------------------------
     // ASSESSMENT RESPONSES
-    // --------------------------
     await queryInterface.createTable('assessment_responses', {
       response_id: uuidColumn,
       assessment_id: foreignKey('assessments', 'assessment_id'),
@@ -231,14 +173,10 @@ module.exports = {
     });
     await queryInterface.addIndex('assessment_responses', ['assessment_id', 'user_id', 'question_id']);
 
-    // --------------------------
     // GRADES
-    // --------------------------
     await queryInterface.createTable('grades', {
       grade_id: uuidColumn,
       user_id: foreignKey('users', 'id'),
-      course_id: foreignKey('courses', 'course_id'),
-      module_id: foreignKey('modules', 'module_id'),
       assessment_id: foreignKey('assessments', 'assessment_id'),
       grade_type: { type: Sequelize.STRING(50) },
       score: { type: Sequelize.DECIMAL(5, 2) },
@@ -249,11 +187,9 @@ module.exports = {
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
-    await queryInterface.addIndex('grades', ['user_id', 'course_id', 'module_id', 'assessment_id']);
+    await queryInterface.addIndex('grades', ['user_id', 'assessment_id']);
 
-    // --------------------------
-    // AI INSIGHTS
-    // --------------------------
+    // AI_INSIGHTS
     await queryInterface.createTable('ai_insights', {
       insight_id: uuidColumn,
       user_id: foreignKey('users', 'id'),
@@ -270,12 +206,12 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    // Drop in reverse dependency order
     await queryInterface.dropTable('ai_insights');
     await queryInterface.dropTable('grades');
     await queryInterface.dropTable('assessment_responses');
     await queryInterface.dropTable('assessment_questions');
     await queryInterface.dropTable('assessments');
+    await queryInterface.dropTable('assessment_types');
     await queryInterface.dropTable('lectures');
     await queryInterface.dropTable('modules');
     await queryInterface.dropTable('courses');
