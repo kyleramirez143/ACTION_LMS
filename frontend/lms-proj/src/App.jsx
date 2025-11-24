@@ -4,7 +4,6 @@ import Assessment from "./components/Assessment";
 import Course from "./components/Course";
 import Navbar from "./components/Navbar";
 import LoginPage from "./components/LoginPage";
-import AssessmentConfirmation from "./components/AssessmentConfirmation";
 import QuizResult from "./components/QuizResult";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -26,7 +25,6 @@ function AppContent() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
-          <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
           <Route path="/quizresult" element={<QuizResult/>} />
           <Route path="/reviewpublish" element={<ReviewPublish/>} />
         </Routes>
