@@ -122,26 +122,26 @@ module.exports = {
       id: uuidColumn,
       name: { type: Sequelize.STRING(50), allowNull: false, unique: true },
       description: { type: Sequelize.STRING(255) },
-      created_at: timestamp,
+      created_at: standardTimestamp,
     });
 
     await queryInterface.createTable('permissions', {
       id: uuidColumn,
       type_name: { type: Sequelize.STRING(100), allowNull: false, unique: true },
-      created_at: timestamp,
+      created_at: standardTimestamp,
     });
 
     await queryInterface.createTable('user_roles', {
       user_id: { ...foreignKey('users', 'id'), primaryKey: true },
       role_id: { ...foreignKey('roles', 'id'), primaryKey: true },
-      created_at: timestamp,
+      created_at: standardTimestamp,
     });
 
     await queryInterface.createTable('role_permissions', {
       id: uuidColumn,
       role_id: foreignKey('roles', 'id'),
       permission_id: foreignKey('permissions', 'id'),
-      created_at: timestamp,
+      created_at: standardTimestamp,
     });
 
     // --------------------------
@@ -153,8 +153,8 @@ module.exports = {
       description: { type: Sequelize.TEXT },
       instructor_id: foreignKey('users', 'id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('courses', ['instructor_id']);
 
@@ -164,8 +164,8 @@ module.exports = {
       title: { type: Sequelize.STRING(255), allowNull: false },
       description: { type: Sequelize.TEXT },
       created_by: foreignKey('users', 'id'),
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('modules', ['course_id']);
     await queryInterface.addIndex('modules', ['created_by']);
@@ -176,8 +176,8 @@ module.exports = {
       title: { type: Sequelize.STRING(255), allowNull: false },
       content_type: { type: Sequelize.STRING(50) },
       content_url: { type: Sequelize.TEXT },
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('lectures', ['module_id']);
 
@@ -194,8 +194,8 @@ module.exports = {
       course_id: foreignKey('courses', 'course_id', true, 'SET NULL'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
       created_by: foreignKey('users', 'id'),
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('assessments', ['course_id', 'module_id', 'lecture_id', 'created_by']);
 
@@ -209,8 +209,8 @@ module.exports = {
       options: { type: Sequelize.JSON },
       correct_answer: { type: Sequelize.JSON },
       points: { type: Sequelize.INTEGER, defaultValue: 1 },
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('assessment_questions', ['assessment_id']);
 
@@ -226,8 +226,8 @@ module.exports = {
       score: { type: Sequelize.DECIMAL(5, 2) },
       feedback: { type: Sequelize.TEXT },
       submitted_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()'), allowNull: false },
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('assessment_responses', ['assessment_id', 'user_id', 'question_id']);
 
@@ -246,8 +246,8 @@ module.exports = {
       calculated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('NOW()'), allowNull: false },
       remarks: { type: Sequelize.TEXT },
       overridden_by: foreignKey('users', 'id', true, 'SET NULL'),
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('grades', ['user_id', 'course_id', 'module_id', 'assessment_id']);
 
@@ -263,8 +263,8 @@ module.exports = {
       recommended_courses_json: { type: Sequelize.JSON },
       confidence_score: { type: Sequelize.DECIMAL(5, 2) },
       reviewed_by: foreignKey('users', 'id', true, 'SET NULL'),
-      created_at: timestamp,
-      updated_at: timestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('ai_insights', ['user_id']);
   },

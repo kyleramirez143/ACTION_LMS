@@ -6,8 +6,6 @@ import Navbar from "./components/Navbar";
 import LoginPage from "./components/LoginPage";
 import AdminDashboard from './pages/AdminDashboard';
 // import StudentDashboard from './pages/TraineeDashboard';
-import Navbar from "./Components/Navbar";
-import LoginPage from "./Components/LoginPage";
 import AssessmentConfirmation from "./components/AssessmentConfirmation";
 import ModuleScreen from "./components/ModuleScreen"; 
 import "./App.css";
