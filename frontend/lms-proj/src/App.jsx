@@ -49,8 +49,8 @@ function AppContent() {
 
           Ang roles={[]} ay palitan nang na aayon sa mga makaka access ng page na yon.
 
-          Pagkatapos maglagay ng mga routes, I check ang file na navConfig upang maayos
-          na tuluyang maayos na talaga ang navbar natin.
+          Pagkatapos maglagay ng mga routes, I check ang file na navConfig upang
+          tuluyang maayos na talaga ang navbar natin.
 
         */}
         <Routes>
