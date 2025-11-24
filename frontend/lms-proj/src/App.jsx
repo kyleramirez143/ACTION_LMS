@@ -9,6 +9,7 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { AuthProvider } from './context/AuthContext.jsx'
 import ReviewPublish from "./components/ReviewPublish";
 
 import Navbar from "./all/Navbar";
@@ -18,7 +19,7 @@ import AssessmentConfirmation from "./trainer/AssessmentConfirmation";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
-//import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './admin/AdminDashboard';
 //import StudentDashboard from './pages/TraineeDashboard';
 
 
@@ -37,6 +38,10 @@ function AppContent() {
           <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
+          <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
+          <Route path="/reviewpublish" element={<ReviewPublish />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
           <Route path="/quizresult" element={<QuizResult/>} />
           <Route path="/reviewpublish" element={<ReviewPublish/>} />
         </Routes>
@@ -48,7 +53,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }

@@ -2,13 +2,26 @@ import React from "react";
 import { Dropdown } from "react-bootstrap";
 import logo from "../image/logo.jpg";
 import "./Navbar.css";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { navLinks } from "../config/navConfig";
 
-export default function Navbar() {
+const Navbar = () => {
+    const { hasRole } = useAuth();
+
+    const visibleLinks = navLinks.filter(link => {
+        if (!link.requiredRoles || link.requiredRoles.length == 0) {
+            return true;
+        }
+
+        return hasRole(link.requiredRoles);
+    });
+
     return (
         <nav className="navbar-wrapper">
             {/* Top Navbar Row */}
             <div className="navbar px-4 d-flex justify-content-between align-items-center">
+                
                 {/* Left - Logo and Brand */}
                 <div className="d-flex align-items-center gap-2">
                     <img src={logo} alt="logo" className="logo-small" />
@@ -16,16 +29,25 @@ export default function Navbar() {
 
                 {/* Right Section */}
                 <div className="d-flex align-items-center gap-3">
-                    <a href="#" className="nav-link text-dark fw-semibold">Home</a>
-                    <Link to="/assessment" className="nav-link text-dark fw-semibold">Assessment</Link>
-                    <a href="#" className="nav-link text-dark fw-semibold">Courses</a>
+
+                    {visibleLinks.map((link) => (
+                        <NavLink
+                        key={link.path}
+                        to={link.path} 
+                        className={({ isActive }) => 
+                                `nav-link fw-semibold ${isActive ? 'text-primary' : 'text-dark'}`
+                            }
+                        >
+                            {link.name}
+                        </NavLink>
+                    ))}
 
                     <i className="bi bi-bell bell-icon"></i>
 
                     <div className="d-flex align-items-center gap-2">
                         <div className="trainee-circle"></div>
                         <div className="text-end">
-                            <p className="mb-0 fw-semibold text-dark">Action Trainee Name</p>
+                            <p className="mb-0 fw-semibold text-dark"></p>
                         </div>
 
                         <Dropdown align="end">
@@ -61,3 +83,4 @@ export default function Navbar() {
         </nav>
     );
 }
+export default Navbar;
