@@ -1,10 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import Assessment from "./components/Assessment";
+import Course from "./components/Course";
+import Navbar from "./components/Navbar";
+import LoginPage from "./components/LoginPage";
+import QuizResult from "./components/QuizResult";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { AuthProvider } from './context/AuthContext.jsx'
+import ReviewPublish from "./components/ReviewPublish";
 
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
@@ -36,6 +42,8 @@ function AppContent() {
           <Route path="/reviewpublish" element={<ReviewPublish />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
+          <Route path="/quizresult" element={<QuizResult/>} />
+          <Route path="/reviewpublish" element={<ReviewPublish/>} />
         </Routes>
       </div>
     </>
