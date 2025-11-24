@@ -11,10 +11,21 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import ReviewPublish from "./components/ReviewPublish";
 
+import Navbar from "./all/Navbar";
+import LoginPage from "./all/LoginPage";
+import Assessment from "./trainer/Assessment";
+import AssessmentConfirmation from "./trainer/AssessmentConfirmation";
+import ReviewPublish from "./trainer/ReviewPublish";
+import Course from "./trainee/Course";
+import ModuleScreen from "./trainee/ModuleScreen"; 
+//import AdminDashboard from './pages/AdminDashboard';
+//import StudentDashboard from './pages/TraineeDashboard';
+
+
+
 function AppContent() {
   const location = useLocation();
-  // Hide Navbar only on login page ("/")
-  const hideNavbar = location.pathname === "/";
+  const hideNavbar = location.pathname === "/"; // hide navbar only on login page
 
   return (
     <>
@@ -23,6 +34,7 @@ function AppContent() {
       <div className="full-screen">
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/quizresult" element={<QuizResult/>} />

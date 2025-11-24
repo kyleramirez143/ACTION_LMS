@@ -8,7 +8,6 @@
   /* Navbar Container */
   .navbar {
     background-color: var(--white);
-    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -17,6 +16,15 @@
     z-index: 2000;
     border-bottom: 1px solid var(--light-gray);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .navbar-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative; /* allows stacking */
+    top: 0;
+    z-index: 1000;
   }
 
   /* Logo */
