@@ -1,18 +1,20 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Assessment from "./components/Assessment";
-import Course from "./Components/Course";
-import Navbar from "./Components/Navbar";
-import LoginPage from "./Components/LoginPage";
+import Course from "./components/Course";
+import Navbar from "./components/Navbar";
+import LoginPage from "./components/LoginPage";
 import AssessmentConfirmation from "./components/AssessmentConfirmation";
+import QuizResult from "./components/QuizResult";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import ReviewPublish from "./components/ReviewPublish";
 
 function AppContent() {
   const location = useLocation();
-  // ✅ Hide Navbar only on login page ("/")
+  // Hide Navbar only on login page ("/")
   const hideNavbar = location.pathname === "/";
 
   return (
@@ -25,6 +27,8 @@ function AppContent() {
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
+          <Route path="/quizresult" element={<QuizResult/>} />
+          <Route path="/reviewpublish" element={<ReviewPublish/>} />
         </Routes>
       </div>
     </>
