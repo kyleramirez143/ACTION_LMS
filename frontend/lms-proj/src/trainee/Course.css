@@ -1,0 +1,33 @@
+/* Course Cards */
+.card-img-top {
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.card-text {
+  color: var(--dark-gray);
+}
+
+/* Add shadow to cards */
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /*  subtle shadow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Optional hover effect */
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Pagination */
+.pagination-container .btn.active {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  border-color: var(--primary-blue);
+}
