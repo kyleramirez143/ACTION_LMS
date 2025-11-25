@@ -1,23 +1,17 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Assessment from "./components/Assessment";
-import Course from "./components/Course";
-import Navbar from "./components/Navbar";
-import LoginPage from "./components/LoginPage";
-import QuizResult from "./components/QuizResult";
 import "./App.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import ReviewPublish from "./components/ReviewPublish";
+
 
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 import Assessment from "./trainer/Assessment";
-import AssessmentConfirmation from "./trainer/AssessmentConfirmation";
+import QuizResult from "./trainer/QuizResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
+import PdfViewerPage from "./trainee/PdfViewerPage";
+import TrainerPdf from "./trainer/TrainerPdf";
 //import AdminDashboard from './pages/AdminDashboard';
 //import StudentDashboard from './pages/TraineeDashboard';
 
@@ -34,11 +28,15 @@ function AppContent() {
       <div className="full-screen">
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/modules" element={<ModuleScreen />} />
-          <Route path="/course" element={<Course />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/quizresult" element={<QuizResult/>} />
-          <Route path="/reviewpublish" element={<ReviewPublish/>} />
+          <Route path="/trainee/modules" element={<ModuleScreen />} />
+          <Route path="/trainee/course" element={<Course />} />
+          <Route path="/trainer/assessment" element={<Assessment />} />
+          <Route path="/trainer/quizresult" element={<QuizResult/>} />
+          <Route path="/trainer/reviewpublish" element={<ReviewPublish />} />
+          <Route path="/trainee/pdfviewer" element={<PdfViewerPage/>} />
+          <Route path="/trainer/pdfviewer" element={<TrainerPdf/>} />
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
     </>
