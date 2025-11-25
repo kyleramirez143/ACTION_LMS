@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./ActivityResult.css";
 
+
 export default function ActivityResult() {
   const summary = {
     totalTrainees: 12,
@@ -9,6 +10,7 @@ export default function ActivityResult() {
     late: 2,
     overdue: 1,
   };
+
 
   const results = [
     { name: "Trainee 1", score: "15 / 20", time: "18:00", date: "July 12, 2025", status: "Passed" },
@@ -25,6 +27,7 @@ export default function ActivityResult() {
     { name: "Trainee 12", score: "12 / 20", time: "18:45", date: "July 12, 2025", status: "Failed" },
   ];
 
+
   const statusClass = {
     Passed: "pass",
     Failed: "fail",
@@ -32,25 +35,31 @@ export default function ActivityResult() {
     Overdue: "overdue",
   };
 
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(results.length / itemsPerPage);
+
 
   const displayedResults = results.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
+
   return (
     <div className="activity-wrapper">
       <h2 className="page-title">Activity Result</h2>
 
+
       <div className="main-content">
+
 
         {/* LEFT: Activity Result Table */}
         <div className="results-table-container white-card">
@@ -83,6 +92,7 @@ export default function ActivityResult() {
             </table>
           </div>
 
+
           {/* Pagination */}
           <div className="pagination">
             <button onClick={() => goToPage(currentPage - 1)}>&lt;</button>
@@ -99,6 +109,7 @@ export default function ActivityResult() {
           </div>
         </div>
 
+
         {/* RIGHT: Activity Summary */}
         <div className="activity-summary white-card">
           <h3>Activity Status</h3>
@@ -110,6 +121,7 @@ export default function ActivityResult() {
               </div>
             </div>
 
+
             <ul className="legend">
               <li><span className="dot blue"></span> Processing ({summary.processing})</li>
               <li><span className="dot yellow"></span> Work finished late ({summary.late})</li>
@@ -119,7 +131,10 @@ export default function ActivityResult() {
           </div>
         </div>
 
+
       </div>
     </div>
   );
 }
+
+
