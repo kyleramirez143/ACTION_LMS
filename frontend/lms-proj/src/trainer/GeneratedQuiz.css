@@ -1,0 +1,93 @@
+/* Root full-screen wrapper */
+.full-screen {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: #f8f9fd;
+}
+
+/* Scrollable content */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Card styling */
+.container-box {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Option list */
+.option-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f2f2f2;
+  padding: 0.4rem 0.6rem;
+  border-radius: 20px;
+}
+
+.option-label {
+  width: 24px;
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 50%;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-text {
+  font-size: 14px;
+  color: #444;
+}
+
+/* RIGHT COLUMN: scrollable PDF preview */
+.right-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.right-card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.questions-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.preview-line {
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+}
+
+/* Buttons styling */
+.btn {
+  padding: 0.5rem 1rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .row {
+    flex-direction: column;
+  }
+  .questions-scroll {
+    max-height: 40vh;
+  }
+}

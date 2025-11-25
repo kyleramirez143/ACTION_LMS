@@ -6,6 +6,7 @@ export default function Assessment() {
   const [questionQuantity, setQuestionQuantity] = useState("");
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   const questions = [
     {
@@ -56,9 +57,7 @@ export default function Assessment() {
 
   const handleQuestionToggle = (index) => {
     setSelectedQuestions((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -67,23 +66,58 @@ export default function Assessment() {
   };
 
   return (
-    <div className="assessment-wrapper">
-      <div className="page-content">
-        <div className="container-lg">
-          <h2 className="fw-bold mb-4">Create Quiz</h2>
+    <div className="review-publish full-screen">
+      {/* Full-width title */}
+      <h2 className="review-publish-title fw-bold mb-4">Create Quiz</h2>
 
-          <div className="row g-4">
-            {/* LEFT COLUMN */}
-            <div className="col-md-6 d-flex flex-column gap-4">
-              <div className="card-gray border shadow-sm">
-                <label className="fw-semibold mb-2 d-block">Upload File (PDF only)</label>
-                <input type="file" accept=".pdf" className="form-control" />
+      <div className="page-scroll">
+        <div className="row g-4">
+          {/* LEFT COLUMN */}
+          <div className="col-md-6 d-flex flex-column gap-3">
+            {/* Drag & Drop Upload */}
+            <div className="container-box">
+              <label className="fw-semibold mb-2 d-block text-center">Upload File (PDF only)</label>
+              <div
+                className="drop-zone"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.type === "application/pdf") {
+                    setUploadedFile(file);
+                  }
+                }}
+                onClick={() => document.getElementById("pdfInput").click()}
+              >
+                {uploadedFile ? (
+                  <p className="uploaded-file">📄 {uploadedFile.name}</p>
+                ) : (
+                  <>
+                    <p>Drag and drop your PDF here</p>
+                    <p>or click to choose</p>
+                  </>
+                )}
               </div>
+              <input
+                type="file"
+                id="pdfInput"
+                accept=".pdf"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.type === "application/pdf") {
+                    setUploadedFile(file);
+                  }
+                }}
+              />
+            </div>
 
-              <div className="card-gray border shadow-sm">
-                <label className="fw-semibold mb-3 d-block">Choose Quiz Type</label>
-                <div className="d-flex flex-column gap-2">
-                  {["Multiple Choice", "Check Boxes", "Dropdown", "Enumeration", "Identification"].map((type) => (
+            {/* Quiz Type */}
+            <div className="container-box">
+              <label className="fw-semibold mb-3 d-block">Choose Quiz Type</label>
+              <div className="d-flex flex-column gap-1">
+                {["Multiple Choice", "Check Boxes", "Dropdown", "Enumeration", "Identification"].map(
+                  (type) => (
                     <label key={type} className="d-flex align-items-center gap-2">
                       <input
                         type="radio"
@@ -94,28 +128,31 @@ export default function Assessment() {
                       />
                       {type}
                     </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card-gray border shadow-sm">
-                <label className="fw-semibold mb-2 d-block">Enter Quantity</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={questionQuantity}
-                  onChange={(e) => setQuestionQuantity(e.target.value)}
-                  placeholder="Enter quantity"
-                />
+                  )
+                )}
               </div>
             </div>
 
-            {/* RIGHT COLUMN */}
-            <div className="col-md-6 d-flex flex-column gap-4">
-              <div className="card-gray border shadow-sm flex-grow-1 d-flex flex-column justify-content-between">
-                <div>
-                  <label className="fw-semibold mb-3 d-block">Select Questions</label>
-                  <div className="d-flex flex-column gap-3">
+            {/* Quantity */}
+            <div className="container-box">
+              <label className="fw-semibold mb-2 d-block">Enter Quantity</label>
+              <input
+                type="number"
+                className="form-control"
+                value={questionQuantity}
+                onChange={(e) => setQuestionQuantity(e.target.value)}
+                placeholder="Enter quantity"
+              />
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="col-md-6 d-flex flex-column gap-3">
+            <div className="container-box right-card">
+              <div className="right-card-content">
+                <label className="fw-semibold mb-3 d-block">Select Questions</label>
+                <div className="questions-scroll">
+                  <div className="d-flex flex-column gap-2">
                     {questions.map((q, index) => (
                       <div key={index} className="question-block">
                         <label className="d-flex align-items-start gap-2 fw-semibold">
@@ -124,9 +161,11 @@ export default function Assessment() {
                             checked={selectedQuestions.includes(index)}
                             onChange={() => handleQuestionToggle(index)}
                           />
-                          <span>{index + 1}. {q.text}</span>
+                          <span>
+                            {index + 1}. {q.text}
+                          </span>
                         </label>
-                        <ul className="ms-4 mt-2 text-gray-700">
+                        <ul className="ms-4 mt-1 text-gray-700">
                           {q.options.map((opt, optIndex) => (
                             <li key={optIndex}>{opt}</li>
                           ))}
@@ -135,37 +174,40 @@ export default function Assessment() {
                     ))}
                   </div>
                 </div>
+              </div>
 
-                <div className="d-flex justify-content-end mt-4">
-                  <button
-                    className="btn-white px-5 py-3 rounded-pill shadow"
-                    onClick={handleGenerateQuiz}
-                  >
-                    Generate Quiz
-                  </button>
-                </div>
+              <div className="right-card-footer">
+                <button
+                  className="btn btn-primary w-100 rounded-pill text-white"
+                  onClick={handleGenerateQuiz}
+                >
+                  Generate Quiz
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* MODAL */}
-        {showModal && (
-          <div className="modal-overlay">
-            <div className="modal-box">
-              <div className="modal-icon">✅</div>
-              <h4 className="modal-title">Successfully Generated Quiz</h4>
-              <p className="modal-text">
-                The quiz is generated. You can now proceed to the next part where you finalize the details of the quiz.
-              </p>
-              <div className="modal-actions">
-                <button className="btn btn-primary">Review and Publish</button>
-                <button className="btn btn-light" onClick={() => setShowModal(false)}>Cancel</button>
-              </div>
+      {/* MODAL */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <div className="modal-icon">✅</div>
+            <h4 className="modal-title">Successfully Generated Quiz</h4>
+            <p className="modal-text">
+              The quiz is generated. You can now proceed to the next part where you finalize the
+              details of the quiz.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-primary w-100 rounded-pill text-white">Review and Publish</button>
+              <button className="btn btn-light" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

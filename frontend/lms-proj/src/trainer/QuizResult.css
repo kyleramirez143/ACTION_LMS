@@ -9,14 +9,14 @@ html, body, #root {
 
 /* WRAPPER TAKES FULL SCREEN WIDTH + HEIGHT */
 .quiz-wrapper {
-  width: 100vw;     /* FIX: Fill full left & right */
+  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f8f9fd;
   padding: 20px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-y: auto; /* allow full-page scroll */
 }
 
 /* Title */
@@ -27,12 +27,27 @@ html, body, #root {
   color: #10143b;
 }
 
+/* Pagination */
 .pagination {
   margin-top: 15px;
   display: flex;
   gap: 10px;
-  justify-content: center;  /* CENTER the buttons */
+  justify-content: center;
   flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background: #0047AB;
+  color: #fff;
+  border-color: #0047AB;
 }
 
 /* White card */
@@ -45,11 +60,11 @@ html, body, #root {
 
 /* SUMMARY */
 .top-summary-container {
-  width: 100%;         /* FIX: stretch horizontally */
+  width: 100%;
   display: flex;
   gap: 20px;
   margin-bottom: 25px;
-  flex-shrink: 0;      /* prevent shrinking */
+  flex-shrink: 0;
 }
 
 .summary-left,
@@ -64,6 +79,7 @@ html, body, #root {
   flex: 1;
   position: relative;
   min-width: 150px;
+  padding: 15px;
 }
 
 .summary-card .value {
@@ -98,13 +114,12 @@ html, body, #root {
   gap: 15px;
 }
 
-/* MAIN CONTENT (fills remaining screen) */
+/* MAIN CONTENT */
 .main-content {
-  width: 100%;        /* FIX: fill left & right */
-  flex: 1;
+  width: 100%;
   display: flex;
   gap: 25px;
-  overflow: hidden;   /* prevent global scroll */
+  flex-wrap: wrap;
 }
 
 /* TABLE SECTION */
@@ -115,19 +130,44 @@ html, body, #root {
   overflow: hidden;
 }
 
+/* Make table scrollable */
+.table-responsive {
+  overflow-x: auto;
+  max-height: 500px; /* optional max-height */
+}
+
+/* Table styling */
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  flex: 1;
-  overflow-y: auto;
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .results-table thead {
   position: sticky;
   top: 0;
   background: #fafafa;
+  font-weight: 600;
   z-index: 10;
 }
+
+/* Status pills */
+.status-pill {
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-pill.pass { background-color: #00C49F; }
+.status-pill.fail { background-color: #FF4D4F; }
 
 /* RIGHT SUMMARY BOX */
 .test-summary {
@@ -135,6 +175,20 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.test-summary h3 {
+  margin-bottom: 15px;
+}
+
+.test-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+}
+
+.test-summary li {
+  margin-bottom: 10px;
 }
 
 /* BUTTONS */
@@ -156,4 +210,17 @@ html, body, #root {
   border: 1px solid #ccc;
   border-radius: 10px;
   cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .top-summary-container,
+  .summary-left,
+  .summary-right {
+    flex-direction: column;
+  }
 }

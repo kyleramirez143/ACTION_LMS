@@ -1,17 +1,132 @@
+/* Root */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden; /* prevent double scrollbars */
+}
+
+/* Full-screen wrapper (no scroll here) */
+.full-screen {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fd;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+/* The area that scrolls the entire page content */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Row fix for flex */
+.row {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Container/card styles */
+.container-box {
+  background: #ffffff;
+  padding: 1rem;                 /* compact spacing */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 250px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.container-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* Right card layout: header+scroll+sticky footer */
+.right-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* header/content/footer */
+  gap: 0.5rem;                        /* tighter gap */
+}
+
+/* Content wrapper above the scroll area */
+.right-card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Only the questions list scrolls */
+.questions-scroll {
+  min-height: 0;
+  max-height: 50vh;           /* cap height so footer is visible */
+  overflow-y: auto;           /* scroll here */
+  padding-right: 0.25rem;     /* breathing room for scrollbar */
+}
+
+/* Sticky footer inside the right card */
+.right-card-footer {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;        /* match card background */
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  padding-bottom: 0.25rem;
+  box-shadow: 0 -6px 12px rgba(0,0,0,0.04); /* subtle divider effect */
+  border-radius: 0 0 12px 12px;             /* respect card radius */
+}
+
+/* Question block styling */
+.question-block {
+  margin-bottom: 0.5rem;      /* compact spacing */
+}
+
+.question-block ul {
+  margin: 0.25rem 0 0 1.25rem;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.text-gray-700 {
+  color: #555;
+}
+
+/* Form control */
+.form-control {
+  padding: 0.5rem;            /* compact */
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* Button styles */
 .btn-white {
   background-color: #0047AB;
   color: #ffffff;
   border: 1px solid #ccc;
-  font-weight: 600;
+  font-weight: 100;
+  padding: 0.5rem 1rem;        /* compact */
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* MODAL STYLES */
+.btn-white:hover {
+  background-color: #003a8c;
+  transform: translateY(-1px);
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0; /* shorthand for top/right/bottom/left:0 */
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
@@ -21,42 +136,44 @@
 
 .modal-box {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;            /* compact */
   border-radius: 16px;
   max-width: 500px;
+  width: 90%;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .modal-icon {
-  font-size: 48px;
+  font-size: 40px;            /* compact */
   color: #00C49F;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .modal-title {
-  font-size: 22px;
+  font-size: 20px;            /* compact */
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: #10143b;
 }
 
 .modal-text {
-  font-size: 16px;
+  font-size: 14px;            /* compact */
   color: #555;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .modal-actions {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 12px;                   /* compact */
 }
 
 .modal-actions .btn {
-  padding: 10px 20px;
+  padding: 8px 16px;           /* compact */
   border-radius: 10px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -69,4 +186,14 @@
 .modal-actions .btn-light {
   background: #fff;
   border: 1px solid #ccc;
+}
+
+/* Optional: small-screen tweaks (keeps column order) */
+@media (max-width: 992px) {
+  .row {
+    gap: 0.75rem;
+  }
+  .questions-scroll {
+    max-height: 40vh; /* tighter on smaller screens */
+  }
 }
