@@ -22,7 +22,7 @@
 }
 
 .module-left {
-  border:#ffffff
+  border: #ffffff;
 }
 
 .module-title {
@@ -41,15 +41,13 @@
 
 .accordion-card {
   border: 1px solid #dee2e6;
-  border-radius: 12px; /* smoother edges */
+  border-radius: 12px;
   background-color: #fff;
-  /* stronger shadow */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .accordion-card.active {
-  /* subtle lift when opened */
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
@@ -57,17 +55,16 @@
 .accordion-content {
   padding: 1rem 1.5rem;
   background-color: #fff;
-  /* smooth opening */
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.4s ease, padding 0.3s ease;
 }
 
 .accordion-card.active .accordion-content {
-  max-height: 500px; /* enough to fit content */
+  max-height: 500px;
   padding: 1rem 1.5rem;
+  overflow: visible; /* critical for dropdown visibility */
 }
-
 
 .accordion-header {
   padding: 1rem 1.25rem;
@@ -85,22 +82,23 @@
   font-weight: 700;
 }
 
-.accordion-content {
-  padding: 1rem 1.5rem;
-  background-color: #fff;
-}
-
 .accordion-description {
   margin-bottom: 1rem;
   color: #495057;
 }
 
-.resource-heading {
-  font-weight: 600;
+/* ================= RESOURCE SECTION ================= */
+.resource-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
 }
 
-/* Resource container */
+.resource-heading {
+  font-weight: 600;
+}
+
 .resources-container {
   margin-bottom: 0.5rem;
 }
@@ -124,12 +122,109 @@
   background-color: #e2e6ea;
 }
 
-.quiz-link {
+.resource-item.quiz-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
   color: #dc3545;
   font-weight: 500;
+  text-decoration: none;
 }
 
+/* ================= ADD RESOURCES DROPDOWN ================= */
+.dropdown-wrapper {
+  position: relative;
+}
 
+.dropdown-toggle {
+  background-color: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  box-shadow: none;
+}
+
+.dropdown-toggle::after {
+  content: "▾";
+  margin-left: 6px;
+  font-size: 0.8rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: var(--card-shadow);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1000;
+  width: 160px;
+}
+
+.dropdown-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f1f1f1;
+}
+
+/* ================= QUIZ MENU ================= */
+/* Three-dot icon floats right */
+.quiz-menu-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #1E1E1E;
+}
+
+.quiz-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 3000;
+  width: 140px;
+}
+
+.quiz-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.quiz-menu li:hover {
+  background-color: #444;
+  color: #fff;
+}
 
 /* ================= UPCOMING PANEL ================= */
 .module-right {
@@ -149,12 +244,11 @@
   gap: 18px;
 }
 
-/* Base card style */
 .upcoming-card {
-  display: block; /* makes it behave like a link */
+  display: block;
   background: var(--white);
   padding: 18px;
-  border-radius: 12px; /* smoother edges */
+  border-radius: 12px;
   position: relative;
   box-shadow: var(--card-shadow);
   text-decoration: none;
@@ -162,14 +256,12 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
-/* Hover effect */
 .upcoming-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   background-color: #ffffff;
 }
 
-/* Colored tags */
 .upcoming-card.green::before,
 .upcoming-card.yellow::before,
 .upcoming-card.red::before {
@@ -197,7 +289,6 @@
   font-size: 13px;
   color: var(--text-light);
 }
-
 
 /* ================= RESPONSIVE ================= */
 /* @media (max-width: 1250px) {

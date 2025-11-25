@@ -12,6 +12,8 @@ import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
 import PdfViewerPage from "./trainee/PdfViewerPage";
 import TrainerPdf from "./trainer/TrainerPdf";
+import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
+
 //import AdminDashboard from './pages/AdminDashboard';
 //import StudentDashboard from './pages/TraineeDashboard';
 
@@ -28,7 +30,8 @@ function AppContent() {
       <div className="full-screen">
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/trainee/modules" element={<ModuleScreen />} />
+          <Route path="/trainee/modulescreen" element={<ModuleScreen />} />
+          <Route path="/trainer/modulescreen" element={<TrainerModuleScreen/>} />
           <Route path="/trainee/course" element={<Course />} />
           <Route path="/trainer/assessment" element={<Assessment />} />
           <Route path="/trainer/quizresult" element={<QuizResult/>} />
