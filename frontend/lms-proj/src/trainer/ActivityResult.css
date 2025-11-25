@@ -1,12 +1,15 @@
 /* FULL SCREEN WRAPPER */
 .activity-wrapper {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;          /* full page minimum height - allow the page to grow */
   display: flex;
   flex-direction: column;
   background: #f8f9fd;
   padding: 20px;
   box-sizing: border-box;
+  /* rely on the document/body scrollbar for page scrolling */
+  overflow-y: visible;
+  overscroll-behavior: auto;
 }
 
 .page-title {
@@ -22,24 +25,23 @@
   flex: 1;
   gap: 25px;
   min-height: 0;
-  flex-wrap: wrap; /* allows stacking on small screens */
+  flex-wrap: wrap;
 }
 
-/* TABLE SECTION */
-.white-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-}
-
+/* LEFT CARD: Activity Result */
 .results-table-container {
-  flex: 3;
+  flex: 0 0 70%;               /* left card wider */
   display: flex;
   flex-direction: column;
-  min-width: 0; /* important for flex */
+  min-width: 0;                /* important for flex overflow */
+  /* allow the card to grow to its content and rely on page scroll */
+  max-height: none;
+}
+
+.results-table-scroll {
+  flex: 1 1 auto;              /* scrollable area grows/shrinks */
+  /* no internal vertical scroll - rely on page-level scrolling */
+  min-height: 0;               /* needed for flex children */
 }
 
 .results-table {
@@ -58,21 +60,27 @@
 .results-table td {
   padding: 14px 10px;
   border-bottom: 1px solid #eee;
-  word-break: break-word; /* prevent overflow */
+  word-break: break-word;
 }
 
-.results-table-scroll {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
+/* RIGHT CARD: Activity Summary */
+.activity-summary {
+  flex: 0 0 28%;               /* right card smaller */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* allow the card to grow to its content and rely on page scroll */
+  max-height: none;
 }
 
-.results-table-scroll tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+.activity-summary-content {
+  flex: 1 1 auto;
+  /* no internal vertical scroll - rely on page-level scrolling */
+  min-height: 0;
+  padding-right: 4px;
 }
 
+/* STATUS BADGES */
 .status-pill {
   padding: 6px 14px;
   border-radius: 20px;
@@ -106,30 +114,11 @@
   cursor: pointer;
 }
 
-.pagination button:hover {
-  background: #c0c0c0;
-}
+.pagination button:hover { background: #c0c0c0; }
 
 .pagination .active {
   background: #0047AB;
   color: white;
-}
-
-/* RIGHT SUMMARY BOX */
-.activity-summary {
-  flex: 1.2;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-}
-
-/* scrollable content inside summary */
-.activity-summary-content {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-right: 4px;
 }
 
 /* DONUT CHART */
@@ -156,9 +145,7 @@
   color: #10143b;
 }
 
-.donut-circle .donut-value {
-  font-size: 38px;
-}
+.donut-circle .donut-value { font-size: 38px; }
 
 .legend {
   list-style: none;
@@ -185,77 +172,30 @@
 .green { background: #00C49F; }
 .red { background: #FF4D4F; }
 
-/* RESPONSIVE MEDIA QUERIES */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
-  .main-content {
-    gap: 15px;
-  }
-  
-  .results-table-scroll {
-    max-height: 250px;
-  }
-  
-  .donut-circle {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .donut-circle .donut-value {
-    font-size: 28px;
-  }
-  
-  .page-title {
-    font-size: 24px;
-  }
+  .results-table-container { flex: 0 0 65%; }
+  .activity-summary { flex: 0 0 33%; }
+  .results-table-scroll { max-height: 300px; }
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    flex-direction: column;
-  }
-
-  .results-table-container {
-    flex: 1;
-    width: 100%;
-    min-width: 0;
-  }
-
+  .main-content { flex-direction: column; }
+  .results-table-container,
   .activity-summary {
-    flex: 1;
     width: 100%;
+    flex: none;
+    max-height: none;           /* remove fixed height on small screens */
   }
-
-  .results-table-scroll {
-    max-height: 200px;
-  }
+  .results-table-scroll { max-height: 250px; }
 }
 
 @media (max-width: 480px) {
-  .page-title {
-    font-size: 20px;
-  }
-
-  .results-table th,
-  .results-table td {
-    padding: 10px 6px;
-    font-size: 12px;
-  }
-
-  .status-pill {
-    padding: 4px 8px;
-    font-size: 12px;
-  }
-
-  .donut-circle {
-    width: 100px;
-    height: 100px;
-  }
-
-  .donut-circle .donut-value {
-    font-size: 22px;
-  }
-
-  .legend li {
-    font-size: 12px;
-  }
+  .page-title { font-size: 20px; }
+  .results-table th, .results-table td { padding: 10px 6px; font-size: 12px; }
+  .status-pill { padding: 4px 8px; font-size: 12px; }
+  .donut-circle { width: 100px; height: 100px; }
+  .donut-circle .donut-value { font-size: 22px; }
+  .legend li { font-size: 12px; }
+  .results-table-scroll { max-height: 200px; }
 }

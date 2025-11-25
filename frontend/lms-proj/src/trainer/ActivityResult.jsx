@@ -49,9 +49,10 @@ export default function ActivityResult() {
   return (
     <div className="activity-wrapper">
       <h2 className="page-title">Activity Result</h2>
+
       <div className="main-content">
 
-        {/* TABLE SECTION */}
+        {/* LEFT: Activity Result Table */}
         <div className="results-table-container white-card">
           <div className="results-table-scroll">
             <table className="results-table">
@@ -98,10 +99,9 @@ export default function ActivityResult() {
           </div>
         </div>
 
-        {/* RIGHT SUMMARY */}
+        {/* RIGHT: Activity Summary */}
         <div className="activity-summary white-card">
           <h3>Activity Status</h3>
-
           <div className="activity-summary-content">
             <div className="donut-wrapper">
               <div className="donut-circle">
@@ -118,6 +118,7 @@ export default function ActivityResult() {
             </ul>
           </div>
         </div>
+
       </div>
     </div>
   );
