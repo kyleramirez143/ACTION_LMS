@@ -7,7 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
 
 const Navbar = () => {
-  const { hasRole, logout } = useAuth();
+  const { hasRole, logout, loading } = useAuth();
   const navigate = useNavigate();
 
   const logoutUser = () => {
@@ -15,11 +15,10 @@ const Navbar = () => {
     navigate("/"); // send user to login page
   };
 
-  const visibleLinks = navLinks.filter((link) => {
-    if (!link.requiredRoles || link.requiredRoles.length == 0) {
-      return true;
-    }
+  if (loading) return null;
 
+  const visibleLinks = navLinks.filter(link => {
+    if (!link.requiredRoles || link.requiredRoles.length === 0) return true;
     return hasRole(link.requiredRoles);
   });
 
@@ -39,8 +38,7 @@ const Navbar = () => {
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `nav-link fw-semibold ${
-                  isActive ? "text-primary" : "text-dark"
+                `nav-link fw-semibold ${isActive ? "text-primary" : "text-dark"
                 }`
               }
             >
