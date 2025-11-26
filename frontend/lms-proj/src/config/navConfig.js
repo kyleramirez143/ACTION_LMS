@@ -5,21 +5,35 @@
 export const navLinks = [
   {
     name: 'Home',
-    path: '/',
-    icon: 'HomeIcon', // Placeholder for a component or string
+    // path: '/',
+    // icon: 'HomeIcon', // Placeholder for a component or string
     requiredRoles: ['Admin', 'Trainer', 'Trainee'], // All users
   },
   {
-    name: 'Admin Dashboard',
+    name: 'Dashboard',
     path: '/admin/dashboard',
     // icon: 'SettingsIcon',
     requiredRoles: ['Admin'], // Only Admin can see this
   },
   {
     name: 'Course Management',
-    path: '/manager/courses',
-    // icon: 'BookIcon',
-    requiredRoles: ['Admin', 'Trainer'], // Admin and Manager
+    path: '/admin/course-management',
+    requiredRoles: ['Admin'],
+  },
+  {
+    name: 'Module Management',
+    path: '/admin/module-management',
+    requiredRoles: ['Admin'],
+  },
+  {
+    name: 'Dashboard',
+    path: '/trainer/module-management',
+    requiredRoles: ['Trainer'],
+  },
+  {
+    name: 'Lecture Management',
+    path: '/trainer/lecture-management',
+    requiredRoles: ['Trainer'],
   },
   {
     name: 'My Courses',
@@ -27,10 +41,10 @@ export const navLinks = [
     // icon: 'SchoolIcon',
     requiredRoles: ['Trainee'], // Only Students
   },
-  {
-    name: 'Profile',
-    path: '/profile',
-    // icon: 'UserIcon',
-    requiredRoles: ['Admin', 'Trainer', 'Trainee'],
-  },
+  // {
+  //   name: 'Profile',
+  //   path: '/profile',
+  //   // icon: 'UserIcon',
+  //   requiredRoles: ['Admin', 'Trainer', 'Trainee'],
+  // },
 ];

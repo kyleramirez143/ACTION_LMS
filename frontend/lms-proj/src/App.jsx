@@ -9,7 +9,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 // All imports Configuration, Security, etc. 
 import { AuthProvider } from './context/AuthContext.jsx'
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 // All imports of each pages
 import Navbar from "./all/Navbar";
@@ -19,7 +19,8 @@ import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
 import AdminDashboard from './admin/AdminDashboard';
-//import StudentDashboard from './pages/TraineeDashboard';
+import AdminCreateCourse from './admin/AdminCoursePage';
+import AdminCourseManagement from './admin/CourseManagementPage';
 
 function AppContent() {
   const location = useLocation();
@@ -62,7 +63,11 @@ function AppContent() {
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/reviewpublish" element={<ReviewPublish />} />
+
+          {/* Admin Side Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/course-management" element={<AdminCourseManagement />} />
+          <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
