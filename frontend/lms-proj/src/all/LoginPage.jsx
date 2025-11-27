@@ -4,8 +4,10 @@ import { Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../hooks/useAuth';
 
 function LoginPage() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -65,6 +67,8 @@ function LoginPage() {
         // 1. Store the token
         localStorage.setItem('authToken', data.token);
         alert('Login Successful!');
+
+        login(data.token);
 
         // 2. Decode the token to get the user's role for redirection
         const decodedUser = jwtDecode(data.token);
