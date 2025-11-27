@@ -1,0 +1,159 @@
+/* RESET + FULL SCREEN */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+}
+
+/* WRAPPER TAKES FULL SCREEN WIDTH + HEIGHT */
+.quiz-wrapper {
+  width: 100vw;     /* FIX: Fill full left & right */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fd;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Title */
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #10143b;
+}
+
+.pagination {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;  /* CENTER the buttons */
+  flex-wrap: wrap;
+}
+
+/* White card */
+.white-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+/* SUMMARY */
+.top-summary-container {
+  width: 100%;         /* FIX: stretch horizontally */
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+  flex-shrink: 0;      /* prevent shrinking */
+}
+
+.summary-left,
+.summary-right {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  position: relative;
+  min-width: 150px;
+}
+
+.summary-card .value {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.summary-icon {
+  position: absolute;
+  right: 20px;
+  bottom: 15px;
+  font-size: 32px;
+  padding: 6px 10px;
+  border-radius: 50%;
+  color: white;
+}
+
+.green-bg { background: #00C49F; }
+.yellow-bg { background: #F2C94C; }
+.red-bg { background: #FF4D4F; }
+
+.green-text { color: #00C49F; }
+.yellow-text { color: #F2C94C; }
+.red-text { color: #FF4D4F; }
+
+/* GRAPH CARDS */
+.graph-card {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* MAIN CONTENT (fills remaining screen) */
+.main-content {
+  width: 100%;        /* FIX: fill left & right */
+  flex: 1;
+  display: flex;
+  gap: 25px;
+  overflow: hidden;   /* prevent global scroll */
+}
+
+/* TABLE SECTION */
+.results-table-container {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.results-table thead {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 10;
+}
+
+/* RIGHT SUMMARY BOX */
+.test-summary {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* BUTTONS */
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #0047AB;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.btn-light {
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  cursor: pointer;
+}
