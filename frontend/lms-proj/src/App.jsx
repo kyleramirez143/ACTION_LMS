@@ -22,7 +22,7 @@ import TrainerPdf from "./trainer/TrainerPdf";
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCreateCourse from './admin/AdminCoursePage';
-import AdminCourseManagement from './admin/CourseManagementPage
+import AdminCourseManagement from './admin/CourseManagementPage';
 
 function AppContent() {
   const location = useLocation();
