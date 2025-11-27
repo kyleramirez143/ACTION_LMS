@@ -1,17 +1,18 @@
-/* FULL SCREEN WRAPPER */
+/* ================= FULL SCREEN WRAPPER ================= */
 .activity-wrapper {
   width: 100vw;
-  min-height: 100vh;          /* full page minimum height - allow the page to grow */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f8f9fd;
-  padding: 20px;
+  padding: 30px;
   box-sizing: border-box;
-  /* rely on the document/body scrollbar for page scrolling */
-  overflow-y: visible;
+  overflow-y: auto;
   overscroll-behavior: auto;
+  margin-top: 5px;
 }
 
+/* ================= PAGE TITLE ================= */
 .page-title {
   font-size: 28px;
   font-weight: 700;
@@ -19,68 +20,73 @@
   color: #10143b;
 }
 
-/* MAIN LAYOUT */
-.main-content {
+.page-title-wrapper {
   display: flex;
-  flex: 1;
-  gap: 25px;
-  min-height: 0;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  margin-bottom: 25px;
 }
 
-/* LEFT CARD: Activity Result */
+/* Back arrow button */
+.back-button {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* ================= MAIN CONTENT LAYOUT ================= */
+.main-content {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  min-height: 0; /* allow flex children to shrink properly */
+}
+
+/* ================= LEFT CARD / TABLE ================= */
 .results-table-container {
-  flex: 0 0 70%;               /* left card wider */
+  flex: 2 1 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;                /* important for flex overflow */
-  /* allow the card to grow to its content and rely on page scroll */
-  max-height: none;
+  min-width: 0;
+  max-height: 450px;
+  overflow: hidden;
 }
 
 .results-table-scroll {
-  flex: 1 1 auto;              /* scrollable area grows/shrinks */
-  /* no internal vertical scroll - rely on page-level scrolling */
-  min-height: 0;               /* needed for flex children */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding-top: 20px;
 }
 
-.results-table {
+.table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
-.results-table thead {
+.table thead {
   position: sticky;
   top: 0;
   background: #fafafa;
   z-index: 1;
 }
 
-.results-table th,
-.results-table td {
-  padding: 14px 10px;
+.table th,
+.table td {
+  padding: 12px 10px;
   border-bottom: 1px solid #eee;
-  word-break: break-word;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-/* RIGHT CARD: Activity Summary */
-.activity-summary {
-  flex: 0 0 28%;               /* right card smaller */
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  /* allow the card to grow to its content and rely on page scroll */
-  max-height: none;
-}
-
-.activity-summary-content {
-  flex: 1 1 auto;
-  /* no internal vertical scroll - rely on page-level scrolling */
-  min-height: 0;
-  padding-right: 4px;
-}
-
-/* STATUS BADGES */
+/* ================= STATUS BADGES ================= */
 .status-pill {
   padding: 6px 14px;
   border-radius: 20px;
@@ -94,34 +100,54 @@
 
 .pass { background: #00C49F; }
 .fail { background: #FF4D4F; }
-.late { background: #F2C94C; }
+.late { background: #F2C94C; color: #10143b; }
 .overdue { background: #0047AB; }
 
-/* PAGINATION */
-.pagination {
-  margin-top: 15px;
+/* ================= PAGINATION ================= */
+.pagination-wrapper {
   display: flex;
-  gap: 10px;
   justify-content: center;
-  flex-wrap: wrap;
+  margin-top: 30px;
 }
 
-.pagination button {
-  padding: 6px 12px;
-  border-radius: 8px;
+.custom-pagination .page-link {
+  background-color: #fff;
+  color: black;
   border: none;
-  background: #e6e6e6;
-  cursor: pointer;
+  margin: 0 6px;
+  font-size: 1rem;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.pagination button:hover { background: #c0c0c0; }
-
-.pagination .active {
-  background: #0047AB;
+.custom-pagination .page-item.active .page-link {
   color: white;
+  border: 2px solid #0047AB;
+  background-color: #0047AB;
 }
 
-/* DONUT CHART */
+/* ================= RIGHT SUMMARY ================= */
+.activity-summary {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  max-height: 450px;
+}
+
+.activity-summary-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 10px; /* avoid scrollbar overlapping content */
+}
+
+/* ================= DONUT CHART ================= */
 .donut-wrapper {
   display: flex;
   justify-content: center;
@@ -132,11 +158,6 @@
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  border: 12px solid #e9ecef;
-  border-top-color: #00C49F;
-  border-right-color: #F2C94C;
-  border-bottom-color: #FF4D4F;
-  border-left-color: #0047AB;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -145,7 +166,9 @@
   color: #10143b;
 }
 
-.donut-circle .donut-value { font-size: 38px; }
+.donut-circle .donut-value {
+  font-size: 38px;
+}
 
 .legend {
   list-style: none;
@@ -172,30 +195,48 @@
 .green { background: #00C49F; }
 .red { background: #FF4D4F; }
 
-/* RESPONSIVE */
+/* ================= RESPONSIVE FIXES ================= */
 @media (max-width: 1024px) {
-  .results-table-container { flex: 0 0 65%; }
-  .activity-summary { flex: 0 0 33%; }
   .results-table-scroll { max-height: 300px; }
 }
 
 @media (max-width: 768px) {
-  .main-content { flex-direction: column; }
+  .main-content {
+    flex-direction: column;
+  }
+
   .results-table-container,
   .activity-summary {
     width: 100%;
     flex: none;
-    max-height: none;           /* remove fixed height on small screens */
+    max-height: none;
+    height: auto;
   }
-  .results-table-scroll { max-height: 250px; }
+
+  .activity-summary-content {
+    max-height: none;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .results-table-scroll {
+    max-height: 250px;
+  }
 }
 
-@media (max-width: 480px) {
-  .page-title { font-size: 20px; }
-  .results-table th, .results-table td { padding: 10px 6px; font-size: 12px; }
-  .status-pill { padding: 4px 8px; font-size: 12px; }
+@media (max-width: 576px) {
+  .page-title { font-size: 22px; }
+  .table th, .table td { padding: 6px 4px; font-size: 12px; }
+  .status-pill { padding: 4px 6px; font-size: 12px; }
   .donut-circle { width: 100px; height: 100px; }
   .donut-circle .donut-value { font-size: 22px; }
   .legend li { font-size: 12px; }
   .results-table-scroll { max-height: 200px; }
+}
+
+@media (max-width: 400px) {
+  .page-title { font-size: 20px; }
+  .table th, .table td { padding: 4px 2px; font-size: 10px; }
+  .back-button { font-size: 18px; }
+  .pagination button { padding: 4px 8px; font-size: 10px; }
 }
