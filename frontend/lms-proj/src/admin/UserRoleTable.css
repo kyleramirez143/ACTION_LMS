@@ -1,0 +1,75 @@
+.user-role-card {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+    max-width: 1400px;
+    margin: 40px auto;
+}
+
+.section-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.icon-btn {
+    background-color: #fff;
+    color: #333;
+    padding: 4px;
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.icon-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.custom-pagination .page-link {
+    background-color: #fff;
+    color: black;
+    /* 2F327D at 10% opacity */
+    border: none;
+    margin: 0 6px;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+    color: white;
+    font-weight: 600;
+    border: 2px solid #0047AB;
+    background-color: #0047AB;
+}

@@ -35,8 +35,8 @@ export default function Navbar() {
                                 style={{ width: "40px", height: "40px", cursor: "pointer" }}
                             ></Dropdown.Toggle>
 
-                            <Dropdown.Menu className="mt-2 shadow">
-                                <Dropdown.Item href="#">Profile</Dropdown.Item>
+                            <Dropdown.Menu className="mt-2 shadow">``
+                                <Dropdown.Item as={Link} to="/">Profile</Dropdown.Item>
                                 <Dropdown.Item href="#">Settings & Privacy</Dropdown.Item>
                                 <Dropdown.Item href="#">Help & Support</Dropdown.Item>
                                 <Dropdown.Divider />
