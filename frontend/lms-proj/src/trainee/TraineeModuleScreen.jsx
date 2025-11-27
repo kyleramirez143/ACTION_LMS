@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import ModuleAccordion from "../trainee/ModuleAccordion";
-import UpcomingPanel from "../trainee/UpcomingPanel";
-import "../trainee/modules.css";
+import ModuleAccordion from "./ModuleAccordion";
+import UpcomingPanel from "./UpcomingPanel";
+import "./modules.css";
 
-export default function TrainerModuleScreen({ courseId }) {
+export default function TraineeModuleScreen({ courseId }) {
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function TrainerModuleScreen({ courseId }) {
       {/* LEFT: Accordion */}
       <div className="module-left">
         <div className="module-title">Modules for this Course</div>
-        <ModuleAccordion isTrainerView={true} modules={modules} />
+        <ModuleAccordion isTrainerView={false} modules={modules} />
       </div>
 
       {/* RIGHT: Upcoming Panel */}

@@ -16,7 +16,7 @@ import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
-import ModuleScreen from "./trainee/ModuleScreen"; 
+import TraineeModuleScreen from "./trainee/TraineeModuleScreen.jsx"; 
 import PdfViewerPage from "./trainee/PdfViewerPage";
 import TrainerPdf from "./trainer/TrainerPdf";
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
@@ -58,7 +58,7 @@ function AppContent() {
         */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/trainee/modulescreen" element={<ModuleScreen />} />
+          <Route path="/trainee/modulescreen" element={<TraineeModuleScreen />} />
           <Route path="/trainer/modulescreen" element={<TrainerModuleScreen/>} />
           <Route path="/trainee/course" element={<Course />} />
           <Route path="/trainer/assessment" element={<Assessment />} />
