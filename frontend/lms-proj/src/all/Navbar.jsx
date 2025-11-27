@@ -1,6 +1,6 @@
 import React from "react";
 import { Dropdown } from "react-bootstrap";
-import logo from "../image/logo.jpg";
+import logo from "../image/logo.png";
 import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
