@@ -1,7 +1,7 @@
 export default function UpcomingPanel() {
   const events = [
-    { title: "Deploy with Firebase", date: "Tuesday, 29 June 2021", color: "green" },
-    { title: "Deploy with Firebase", date: "Tuesday, 29 June 2021", color: "yellow" },
+    { title: "L49 Vocabulary Quiz", date: "Tuesday, 29 June 2021", color: "green" },
+    { title: "[Java] Mock Exam", date: "Tuesday, 29 June 2021", color: "yellow" },
     { title: "Quiz on Basic Theory", date: "Tuesday, 29 June 2021", color: "red" }
   ];
 
