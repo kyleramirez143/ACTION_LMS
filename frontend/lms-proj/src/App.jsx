@@ -16,7 +16,7 @@ import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
-import ModuleScreen from "./trainee/ModuleScreen"; 
+import TraineeModuleScreen from "./trainee/TraineeModuleScreen"; 
 //import AdminDashboard from './pages/AdminDashboard';
 import TraineeDashboard from './trainee/TraineeDashboard';
 import AddPowerpoint from "./trainer/AddPowerpoint";
@@ -81,10 +81,9 @@ function AppContent() {
           <Route path="/admin/addmodule" element={<AddModule />} />
           <Route path="/admin/adduser" element={<AddUsers />} />
           <Route path="/admin/userroletable" element={<UserRoleTable />} />
-          <Route path="/admin/course" element={<CourseManagement />} />
           <Route path="/admin/course/module" element={<ModuleManagement />} />
           <Route path="/trainer/dashboard" element={<Dashboard />} />
-          <Route path="/trainee/modulescreen" element={<ModuleScreen />} />
+          <Route path="/trainee/modulescreen" element={<TraineeModuleScreen />} />
           <Route path="/trainer/modulescreen" element={<TrainerModuleScreen/>} />
           <Route path="/trainee/course" element={<Course />} />
           <Route path="/trainer/assessment" element={<Assessment />} />
@@ -97,6 +96,7 @@ function AppContent() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/course-management" element={<AdminCourseManagement />} />
           <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
+          <Route path="/admin/module-management/create" element={<ModuleManagement />} />
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
