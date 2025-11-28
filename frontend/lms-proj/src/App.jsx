@@ -17,10 +17,11 @@ import LoginPage from "./all/LoginPage";
 import Assessment from "./trainer/Assessment";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
-import ModuleScreen from "./trainee/ModuleScreen"; 
+import ModuleScreen from "./trainee/ModuleScreen";
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
+import QuizGenerator from './trainer/QuizGenerator';
 
 function AppContent() {
   const location = useLocation();
@@ -57,12 +58,14 @@ function AppContent() {
         <Routes>
           <Route
             path="/"
-            element={<LoginPage />} 
+            element={<LoginPage />}
           />
           <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/course" element={<Course />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/reviewpublish" element={<ReviewPublish />} />
+
+          <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
 
           {/* Admin Side Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

@@ -77,9 +77,9 @@ function LoginPage() {
         if (roles.includes('Admin')) {
           // 3. Redirect to the admin dashboard
           navigate('/admin/dashboard');
-        } else if (roles.includes('Student')) {
+        } else if (roles.includes('Trainer')) {
           // Example for another role
-          navigate('/student/dashboard');
+          navigate('/trainer/dashboard');
         } else {
           // Default redirect for unrecognized roles
           navigate('/dashboard');

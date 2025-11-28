@@ -21,7 +21,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // If you plan to send cookies/session info
 }));
-app.use(express.json());
+// app.use(express.json());
+
+app.use(express.json({ limit: '50mb' }));
+
+// It's also good practice to increase the limit for URL-encoded bodies
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get("/", (req, res) => res.send("LMS Backend ✅"));
 
@@ -33,6 +38,8 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/modules", moduleRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/users", userRoutes);
+
+app.use("/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Backend running on http://localhost:${PORT}`));
