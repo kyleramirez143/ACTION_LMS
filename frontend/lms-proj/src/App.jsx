@@ -5,7 +5,7 @@ import "./App.css";
 
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
-import Assessment from "./trainer/Assessment";
+import CreateQuiz from "./trainer/CreateQuiz";
 import QuizResult from "./trainer/QuizResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
@@ -30,7 +30,7 @@ function AppContent() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/modules" element={<ModuleScreen />} />
           <Route path="/course" element={<Course />} />
-          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/createquiz" element={<CreateQuiz />} />
           <Route path="/quizresult" element={<QuizResult/>} />
           <Route path="/reviewpublish" element={<ReviewPublish />} />
           <Route path="/generatedquiz" element={<GeneratedQuiz />} />
