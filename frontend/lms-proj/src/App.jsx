@@ -37,6 +37,7 @@ import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
+import QuizGenerator from './trainer/QuizGenerator';
 
 function AppContent() {
   const location = useLocation();
