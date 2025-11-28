@@ -88,7 +88,6 @@ module.exports = {
       title: { type: Sequelize.STRING(255), allowNull: false },
       image: { type: Sequelize.STRING(255), allowNull: true},
       description: { type: Sequelize.TEXT },
-      instructor_id: foreignKey('users', 'id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
