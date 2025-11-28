@@ -4,12 +4,6 @@
 // Check what each role can access. Add something if it's not yet included.
 export const navLinks = [
   {
-    name: 'Home',
-    // path: '/',
-    // icon: 'HomeIcon', // Placeholder for a component or string
-    requiredRoles: ['Admin', 'Trainer', 'Trainee'], // All users
-  },
-  {
     name: 'Dashboard',
     path: '/admin/dashboard',
     // icon: 'SettingsIcon',
@@ -21,18 +15,23 @@ export const navLinks = [
     requiredRoles: ['Admin'],
   },
   {
-    name: 'Module Management',
-    path: '/admin/module-management',
+    name: 'User Management',
+    path: '/admin/user-management',
     requiredRoles: ['Admin'],
   },
   {
     name: 'Dashboard',
-    path: '/trainer/module-management',
+    path: '/trainer/dashboard',
     requiredRoles: ['Trainer'],
   },
   {
     name: 'Lecture Management',
     path: '/trainer/lecture-management',
+    requiredRoles: ['Trainer'],
+  },
+  {
+    name: 'Quiz Generator',
+    path: '/trainer/quiz-generator',
     requiredRoles: ['Trainer'],
   },
   {
