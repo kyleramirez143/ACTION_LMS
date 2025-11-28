@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   background: #f8f9fd;
-  padding: 30px;
+  padding: 10px 5px;
   box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: auto;
@@ -48,7 +48,7 @@
 
 /* ================= LEFT CARD / TABLE ================= */
 .results-table-container {
-  flex: 2 1 0;
+  flex: 3 1 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -84,6 +84,19 @@
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.table {
+  border-collapse: separate;  /* ensures borders display consistently */
+  border-spacing: 0 0;        /* prevent gaps between rows */
+}
+
+.table tbody tr td {
+  border-bottom: 1px solid #ddd !important; /* stronger line */
+}
+
+.table thead th {
+  border-bottom: 2px solid #ccc !important; /* stronger header line */
 }
 
 /* ================= STATUS BADGES ================= */
@@ -133,7 +146,7 @@
 
 /* ================= RIGHT SUMMARY ================= */
 .activity-summary {
-  flex: 1 1 0;
+  flex: 0.8 1 0;
   display: flex;
   flex-direction: column;
   min-width: 250px;
