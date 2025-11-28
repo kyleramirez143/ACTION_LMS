@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./CourseManagementPage.css";
-import defaultImage from "../image/logo.jpg";
+import defaultImage from "../image/logo.png";
 
 function Course() {
     const navigate = useNavigate();
@@ -47,19 +47,23 @@ function Course() {
                     <button
                         className="btn btn-primary"
                         onClick={() => navigate("/admin/course-management/create")}
-                    > 
-                    {/* /COURSE/{COURSE_ID}/MODULE/{MODULE_id} */}
+                    >
                         Add Course</button>
                 </div>
 
                 {/* Courses Grid */}
                 <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
                     {courses.map((course) => (
-                        <div className="col" key={course.course_id}>
+                        <div
+                            key={course.course_id}
+                            onClick={() => navigate(`/admin/course-management/edit/${course.course_id}`)}
+                            style={{ cursor: "pointer" }}
+                        >
                             <div
                                 className="card h-100 shadow-sm"
                             >
                                 <div className="p-3">
+                                    <div>{course.is_published ? 'Visible' : 'Hidden'}</div>
                                     <div
                                         className="bg-light rounded overflow-hidden"
                                         style={{
@@ -108,7 +112,7 @@ function Course() {
                         </ul>
                     </nav>
                 </div>
-            </div>
+            </div >
         </>
     );
 }
