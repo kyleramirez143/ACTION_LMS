@@ -35,11 +35,11 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
   });
 
-  User.associate = function(models) {
+  User.associate = function (models) {
     // 1. One-to-One/Many relationship with Password
     // Used by login logic to find the hashed password
-    User.hasOne(models.Password, { 
-      foreignKey: 'user_id', 
+    User.hasOne(models.Password, {
+      foreignKey: 'user_id',
       as: 'currentPassword' // Alias used in the authController query
     });
 
@@ -50,6 +50,8 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'role_id',
       as: 'roles'
     });
+
+    User.hasMany(models.UserRole, { foreignKey: "user_id", as: "user_roles" });
   };
 
   return User;

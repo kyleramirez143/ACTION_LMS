@@ -16,15 +16,20 @@
     z-index: 2000;
     border-bottom: 1px solid var(--light-gray);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
   }
 
   .navbar-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
-    position: relative; /* allows stacking */
+    position: fixed; /* allows stacking */
     top: 0;
-    z-index: 1000;
+    z-index: 2000;
+  }
+
+  .navbar-wrapper + * {
+  padding-top: 140px;
   }
 
   /* Logo */

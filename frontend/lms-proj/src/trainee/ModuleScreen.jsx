@@ -1,15 +1,16 @@
 import React from "react";
 import ModuleAccordion from "./ModuleAccordion";
 import UpcomingPanel from "./UpcomingPanel";
-import "./modules.css";
+import "./modules.css"; // shared styles, trainee overrides can be added separately
 
-export default function ModuleScreen() {
+export default function TraineeModuleScreen() {
   return (
     <div className="module-container">
       {/* LEFT: Accordion */}
       <div className="module-left">
         <div className="module-title">Module 1: Computer Science</div>
-        <ModuleAccordion />
+        {/* Trainee view disables dropdown + quiz menu */}
+        <ModuleAccordion isTrainerView={false} />
       </div>
 
       {/* RIGHT: Upcoming Panel */}
