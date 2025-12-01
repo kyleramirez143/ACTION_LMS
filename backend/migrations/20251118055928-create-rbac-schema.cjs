@@ -18,8 +18,8 @@ module.exports = {
       onDelete,
     });
 
-    const standardTimestamp = { 
-      type: Sequelize.DATE, 
+    const standardTimestamp = {
+      type: Sequelize.DATE,
       defaultValue: Sequelize.literal('NOW()'),
       allowNull: false,
     };
@@ -86,13 +86,32 @@ module.exports = {
     await queryInterface.createTable('courses', {
       course_id: uuidColumn,
       title: { type: Sequelize.STRING(255), allowNull: false },
+      image: { type: Sequelize.STRING(255), allowNull: true},
       description: { type: Sequelize.TEXT },
-      instructor_id: foreignKey('users', 'id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('courses', ['instructor_id']);
+
+    await queryInterface.createTable('course_instructors', {
+      course_id: {
+        type: uuidColumn,
+        allowNull: false,
+        ...foreignKey('courses', 'course_id'),
+        onDelete: 'CASCADE',
+        primaryKey: true,
+      },
+      managed_by: {
+        type: uuidColumn,
+        allowNull: false,
+        ...foreignKey('users', 'id'),
+        onDelete: 'CASCADE',
+        primaryKey: true,
+      },
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
 
     await queryInterface.createTable('modules', {
       module_id: uuidColumn,
@@ -109,7 +128,7 @@ module.exports = {
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,
       module_id: foreignKey('modules', 'module_id'),
-      course_id: foreignKey('courses', 'course_id'),
+      created_by: foreignKey('users', 'id'),
       title: { type: Sequelize.STRING(255), allowNull: false },
       content_type: { type: Sequelize.STRING(50) },
       content_url: { type: Sequelize.TEXT },
@@ -117,7 +136,8 @@ module.exports = {
       updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('lectures', ['module_id']);
-
+    await queryInterface.addIndex('lectures', ['created_by']);
+    
     // --------------------------
     // ASSESSMENT TYPES
     // --------------------------
@@ -203,6 +223,53 @@ module.exports = {
       updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('ai_insights', ['user_id']);
+
+    // Assessment_Screen_Recording_Sessions
+    await queryInterface.createTable('assessment_screen_sessions', {
+      session_id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        primaryKey: true,
+        allowNull: false,
+      },
+      assessment_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: { model: 'assessments', key: 'assessment_id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      user_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: { model: 'users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
+      start_time: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('NOW()'),
+        allowNull: false,
+      },
+      end_time: {
+        type: Sequelize.DATE,
+      },
+      recording_url: {
+        type: Sequelize.TEXT,
+      },
+      status: {
+        type: Sequelize.STRING(20),
+        defaultValue: 'active',
+        allowNull: false,
+      },
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
+
+    // Indexes for assessment_screen_sessions
+    await queryInterface.addIndex('assessment_screen_sessions', ['user_id']);
+    await queryInterface.addIndex('assessment_screen_sessions', ['assessment_id']);
+    await queryInterface.addIndex('assessment_screen_sessions', ['user_id', 'assessment_id']);
   },
 
   async down(queryInterface, Sequelize) {
@@ -221,5 +288,7 @@ module.exports = {
     await queryInterface.dropTable('roles');
     await queryInterface.dropTable('passwords');
     await queryInterface.dropTable('users');
+    await queryInterface.dropTable('assessment_screen_sessions');
+    await queryInterface.dropTable('course_instructors');
   },
 };
