@@ -11,7 +11,8 @@ const { Course, User, CourseInstructor } = db;
 
 export const createCourse = async (req, res) => {
     try {
-        const { title, description, trainer_email } = req.body;
+        const { title, description, trainer_email, image } = req.body;
+        // const image = req.file ? req.file.filename : null;
 
         if (!title) return res.status(400).json({ error: "Title is required" });
         if (!trainer_email || !Array.isArray(trainer_email) || trainer_email.length === 0) {
@@ -33,6 +34,7 @@ export const createCourse = async (req, res) => {
         // Create the course
         const course = await Course.create({
             title,
+            image: image || null,
             description,
             is_published: true,
         });

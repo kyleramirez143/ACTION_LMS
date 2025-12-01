@@ -76,10 +76,33 @@ function AdminCoursePage() {
         if (!courseTitle.trim()) return alert("Course Title is required");
         if (selectedTrainers.length === 0) return alert("Select at least one trainer");
 
+        let uploadedFilename = null;
+
         const trainerEmails = selectedTrainers.map(t => t.email);
+
+        if (courseImage) {
+            const formData = new FormData();
+            formData.append("image", courseImage);
+            formData.append("title", courseTitle);
+            
+            const uploadRes = await fetch("/api/courses/upload-image", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!uploadRes.ok) {
+                const err = await uploadRes.json();
+                return alert("Image upload failed: " + err.error);
+            }
+
+            const data = await uploadRes.json();
+            uploadedFilename = data.filename;
+            console.log('Extracted filename: ', uploadedFilename)
+        }
 
         const body = {
             title: courseTitle,
+            image: uploadedFilename,
             description: courseDescription,
             trainer_email: trainerEmails, // array sent to backend
         };
@@ -88,7 +111,6 @@ function AdminCoursePage() {
         formData.append("title", courseTitle);
         formData.append("description", courseDescription);
         formData.append("instructor_ids", JSON.stringify(selectedTrainers.map(t => t.id)));
-        if (courseImage) formData.append("cover_photo", courseImage);
 
         try {
             const res = await fetch(apiEndpoint, {
@@ -129,7 +151,11 @@ function AdminCoursePage() {
                                     style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "4px" }}
                                 />
                             ) : (
-                                <div style={styles.imagePlaceholder}>👤</div>
+                                <img
+                                    src="/images/default-course.jpg"   // fallback local image
+                                    alt="Default Course"
+                                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "4px" }}
+                                />
                             )}
                         </div>
                         <input
@@ -139,7 +165,7 @@ function AdminCoursePage() {
                             accept="image/*"
                             onChange={handleImageChange}
                         />
-                        <label htmlFor="profileUpload" style={styles.uploadLink}>Upload Cover Photo</label>
+                        <label htmlFor="profileUpload" style={styles.uploadLink}>Upload</label>
                     </div>
                     <div style={styles.profileText}>
                         <h4 style={styles.profileName}>Course Cover Photo</h4>
