@@ -85,7 +85,7 @@ function AppContent() {
           <Route path="/admin/userroletable" element={<UserRoleTable />} /> */}
           {/* <Route path="/admin/course" element={<CourseManagement />} /> */}
           <Route path="/admin/course/module" element={<ModuleManagement />} />
-          <Route path="/trainer/dashboard" element={<Dashboard />} />
+          {/* <Route path="/trainer/dashboard" element={<Dashboard />} /> */}
           <Route path="/trainee/modulescreen" element={<ModuleScreen />} />
           <Route path="/trainer/modulescreen" element={<TrainerModuleScreen />} />
           <Route path="/trainee/course" element={<Course />} />
@@ -100,6 +100,7 @@ function AppContent() {
           <Route path="/admin/course-management" element={<AdminCourseManagement />} />
           <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
           <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
+          <Route path="/trainer/dashboard/revision" element={<Dashboard />} />
 
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>

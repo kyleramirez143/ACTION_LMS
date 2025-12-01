@@ -179,7 +179,7 @@ function AdminCourseEditPage() {
                             style={{ cursor: "pointer" }}
                             onClick={() => setSelectedTrainers(prev => prev.filter(x => x.id !== t.id))}
                         >
-                            {t.first_name} {t.last_name} ×
+                            {t.first_name} {t.last_name}
                         </span>
                     ))}
                 </div>

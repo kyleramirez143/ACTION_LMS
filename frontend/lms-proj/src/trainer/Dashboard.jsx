@@ -3,12 +3,14 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { FaExclamationTriangle } from 'react-icons/fa'
-
+import { CloudOff } from 'lucide-react';
+import './Dashboard.css';
 
 const CircularProgress = ({ percent }) => (
     <div style={{ width: '100px', margin: 'auto' }}>
-        <svg viewBox="0 0 36 36" className="circular-chart" style={{ width: '100%' }}>
+        <svg viewBox="0 0 36 36" className="circular-chart" style={{ height: "150px" }}>
             <path
                 d="M18 2.0845
            a 15.9155 15.9155 0 0 1 0 31.831
@@ -27,7 +29,7 @@ const CircularProgress = ({ percent }) => (
                 strokeDasharray={`${percent}, 100`}
                 strokeLinecap="round"
             />
-            <text x="18" y="20.35" textAnchor="middle" fontSize="8" fill="#4caf50">
+            <text x="18" y="20.35" textAnchor="middle" fontSize="8" fill="#21B148">
                 {percent}%
             </text>
         </svg>
@@ -35,19 +37,90 @@ const CircularProgress = ({ percent }) => (
 );
 
 const StatCard = ({ title, stats, showProgress }) => (
-    <div className="card shadow-sm mb-4">
-        <div className="card-header bg-primary text-white fw-bold">{title}</div>
-        <div className="card-body d-flex justify-content-around align-items-center text-center">
-            {stats.map(({ label, value }) => (
-                <div key={label}>
-                    <h6 className="fw-semibold">{label}</h6>
-                    <p className="mb-0">{value}</p>
+    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
+        <h4 className="fw-semibold mb-3">{title}</h4>
+        <div className="row align-items-center">
+            <div className="col-md-7">
+                {stats.map(({ label, value, iconColor, extra }) => (
+                    <div key={label} className="d-flex align-items-center gap-2 mb-3">
+                        <div className="rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                                width: '60px',
+                                height: '60px',
+                                backgroundColor: iconColor,
+                            }}
+                        >
+                            <i className="bi bi-check-lg text-white" style={{ fontSize: '30px' }}></i>
+                        </div>
+                        <div>
+                            <h5 className="fw-semibold">{label}</h5>
+                            <h6 className="text-muted">{value}</h6>
+                            {extra && <div className="mt-1">{extra}</div>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {showProgress && (
+                <div className="col-md-5 d-flex justify-content-center">
+                    <CircularProgress percent={75} />
                 </div>
-            ))}
-            {showProgress && <CircularProgress percent={75} />}
+            )}
         </div>
     </div>
 );
+
+
+const AttendanceCard = () => {
+    const items = [
+        {
+            label: "Present",
+            count: 360,
+            icon: "bi-clock",
+            bgColor: "#21B148",
+        },
+        {
+            label: "Late Arrival",
+            count: 360,
+            icon: "bi-clock-history",
+            bgColor: "#FF8383", 
+        },
+        {
+            label: "On Leave",
+            count: 360,
+            icon: "bi-people-fill",
+            bgColor: "#ffc107", 
+        },
+    ];
+
+    return (
+        <div className="row mb-4">
+            {items.map((it, idx) => (
+                <div key={idx} className="col-md-4">
+                    <div
+                        className="d-flex justify-content-between align-items-center p-3 bg-white rounded shadow-sm"
+                        style={{ height: "100px" }}
+                    >
+                        <div>
+                            <div className="fs-3 fw-bold">{it.count}</div>
+                            <div className="text-muted">{it.label}</div>
+                        </div>
+                        <div
+                            className="rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                                width: "60px",
+                                height: "60px",
+                                backgroundColor: it.bgColor,
+                            }}
+                        >
+                            <i className={`${it.icon} text-white`} style={{ fontSize: "20px" }}></i>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 
 const TraineeChartCard = () => {
     const data = [
@@ -62,28 +135,31 @@ const TraineeChartCard = () => {
     ];
 
     return (
-        <div className="card shadow-sm mb-4">
-            <div className="card-header bg-info text-white fw-bold">Trainee Performance Charter</div>
-            <div className="card-body">
-                <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis domain={[0, 100]} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="performance" stroke="#007bff" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
+        <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
+            <h4 className="fw-semibold">Trainee Chart Performance</h4>
+            <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Line
+                        type="monotone"
+                        dataKey="performance"
+                        stroke="#007bff"
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                    />
+                </LineChart>
+            </ResponsiveContainer>
         </div>
     );
 };
 
 const AICoachCard = () => (
-    <div className="card shadow-sm mb-4 ai-coach-card">
-        <div className="card-header bg-success text-white fw-bold">AI Powered-Coach</div>
+    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
         <div className="card-body">
-            <h5 className="fw-semibold">Hello Trainee Name!</h5>
+            <h4 className="fw-semibold">Hello Trainee Name!</h4>
 
             <div className="mb-3">
                 <label className="fw-semibold">Overall Progress</label>
@@ -101,7 +177,7 @@ const AICoachCard = () => (
                 </div>
 
                 <div className="row">
-                    <div className="card col-md-6">
+                    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4 col-md-6">
                         <label className="fw-semibold">Weak Areas</label>
                         <ul className="mt-2 ps-3">
                             <li><span className="dot red"></span> Data Structure</li>
@@ -110,7 +186,7 @@ const AICoachCard = () => (
                         </ul>
                     </div>
 
-                    <div className="card col-md-6">
+                    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4 col-md-6">
                         <label className="fw-semibold">Recommendation</label>
                         <ul className="mt-2 ps-3">
                             <li>Review Resources</li>
@@ -129,7 +205,7 @@ const DashboardHeader = () => (
             <h2 className="fw-bold">Welcome, Trainer!</h2>
         </div>
         <div className="col-md-4">
-            <select class="form-select" aria-label="Default select example">
+            <select className="form-select" aria-label="Default select example">
                 <option selected>Trainee Name</option>
                 <option value="1">One</option>
                 <option value="2">Two</option>
@@ -144,14 +220,7 @@ const Dashboard = () => (
         <DashboardHeader />
 
         <div className="col-md-12">
-            <StatCard
-                title="Attendance (July - December 2025)"
-                stats={[
-                    { label: 'Present', value: 360 },
-                    { label: 'Late Arrival', value: 360 },
-                    { label: 'On Leave', value: 360 },
-                ]}
-            />
+            <AttendanceCard />
         </div>
 
         <div className="row">
@@ -159,8 +228,8 @@ const Dashboard = () => (
                 <StatCard
                     title="Daily Performance"
                     stats={[
-                        { label: 'Skill Checks', value: '70%' },
-                        { label: 'Course-End Exams', value: '70%' },
+                        { label: 'Skill Checks', value: '70%', iconColor: '#4caf50' }, // green
+                        { label: 'Course-End Exams', value: '75%', iconColor: '#f44336' }, // red
                     ]}
                     showProgress
                 />
@@ -169,8 +238,8 @@ const Dashboard = () => (
                 <StatCard
                     title="Exams"
                     stats={[
-                        { label: 'Practice Exam', value: '70%' },
-                        { label: 'Mock Exam', value: '70%' },
+                        { label: 'Practice Exam', value: '70%', iconColor: '#4caf50' },
+                        { label: 'Mock Exam', value: '75%', iconColor: '#f44336' },
                     ]}
                     showProgress
                 />
