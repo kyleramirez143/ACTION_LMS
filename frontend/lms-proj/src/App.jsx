@@ -12,6 +12,8 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 // All imports of each pages
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
+import CreateQuiz from "./trainer/CreateQuiz";
+import GeneratedQuiz from "./trainer/GeneratedQuiz";
 import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
 import ActivityResult from "./trainer/ActivityResult";
@@ -32,6 +34,7 @@ import AddUsers from "./admin/AddUsers";
 import UserRoleTable from "./admin/UserRoleTable";
 import ModuleManagement from "./admin/ModuleManagement";
 import Dashboard from "./trainer/Dashboard";
+
 
 
 import PdfViewerPage from "./trainee/PdfViewerPage";
@@ -77,7 +80,9 @@ function AppContent() {
         */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/createquiz" element={<CreateQuiz />} />
+          <Route path="/generatedquiz" element={<GeneratedQuiz />} />
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/activityresult" element={<ActivityResult />} />
           <Route path="/traineeassessment" element={<TraineeAssessment />} />
           
