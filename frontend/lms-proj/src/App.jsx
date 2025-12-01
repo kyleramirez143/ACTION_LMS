@@ -1,7 +1,7 @@
 
 // All imports of packages that are needed 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 
 
@@ -14,10 +14,13 @@ import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
+import ActivityResult from "./trainer/ActivityResult";
+import TraineeAssessment from "./trainee/TraineeAssessment"; 
+import QuizPage from "./trainee/QuizPage";
+import ReviewPage from "./trainee/ReviewPage";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
 import ModuleScreen from "./trainee/ModuleScreen"; 
-//import AdminDashboard from './pages/AdminDashboard';
 import TraineeDashboard from './trainee/TraineeDashboard';
 import AddPowerpoint from "./trainer/AddPowerpoint";
 import AddVideo from "./trainer/AddVideo";
@@ -42,6 +45,7 @@ import QuizGenerator from './trainer/QuizGenerator';
 function AppContent() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/"; // hide navbar only on login page
+  const navigate = useNavigate();
 
   return (
     <>
@@ -73,6 +77,31 @@ function AppContent() {
         */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/activityresult" element={<ActivityResult />} />
+          <Route path="/traineeassessment" element={<TraineeAssessment />} />
+          
+          {/* Updated quiz route */}
+          <Route 
+            path="/quizpage" 
+            element={
+              <QuizPage 
+                totalQuestions={20} 
+                onQuizEnd={() => navigate("/modules")} // return to modules after quiz
+              />
+            } 
+          />
+
+           {/* Correct Answers / Review Page */}
+          <Route 
+            path="/review" 
+            element={<ReviewPage />} 
+          />
+
+          {/* <Route path="/reviewpublish" element={<ReviewPublish />} />
+          <Route path="/pdfviewer" element={<PdfViewerPage />} /> */}
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+
           <Route path="/trainee" element={<TraineeDashboard />} /> 
           <Route path="/trainer/addpowerpoint" element={<AddPowerpoint />} />
           <Route path="/trainer/addvideo" element={<AddVideo />} />
@@ -98,6 +127,7 @@ function AppContent() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/course-management" element={<AdminCourseManagement />} />
           <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
+
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
