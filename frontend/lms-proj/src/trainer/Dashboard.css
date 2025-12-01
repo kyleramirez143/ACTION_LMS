@@ -45,3 +45,82 @@
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
     /* adds shadow */
 }
+
+.present-circle {
+    background-color: #d1fae5;
+    /* green-100 */
+    color: #10b981;
+    /* green-500 */
+}
+
+.late-circle {
+    background-color: #fee2e2;
+    /* red-100 */
+    color: #ef4444;
+    /* red-500 */
+}
+
+.leave-circle {
+    background-color: #fef3c7;
+    /* yellow-100 */
+    color: #f59e0b;
+    /* yellow-500 */
+}
+
+/* StatCard container */
+.card {
+    background-color: white;
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Title styling */
+.card h6 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Stat rows */
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Colored circular icons */
+.stat-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon.green {
+    background-color: #4caf50;
+}
+
+.stat-icon.red {
+    background-color: #f44336;
+}
+
+.stat-icon i {
+    color: white;
+    font-size: 12px;
+}
+
+/* Circular progress container */
+.circular-chart {
+    max-width: 100px;
+    margin-left: auto;
+}
+
+/* Optional: spacing between stats and progress */
+.stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -9,7 +9,7 @@ import { CloudOff } from 'lucide-react';
 
 const CircularProgress = ({ percent }) => (
     <div style={{ width: '100px', margin: 'auto' }}>
-        <svg viewBox="0 0 36 36" className="circular-chart" style={{ width: '100%' }}>
+        <svg viewBox="0 0 36 36" className="circular-chart" style={{ height: "150px" }}>
             <path
                 d="M18 2.0845
            a 15.9155 15.9155 0 0 1 0 31.831
@@ -37,46 +37,85 @@ const CircularProgress = ({ percent }) => (
 
 const StatCard = ({ title, stats, showProgress }) => (
     <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
-        <div className="card-body d-flex justify-content-around align-items-center text-center">
-            {stats.map(({ label, value }) => (
-                <div key={label}>
-                    <h6 className="fw-semibold">{label}</h6>
-                    <p className="mb-0">{value}</p>
+        <h4 className="fw-semibold mb-3">{title}</h4>
+        <div className="row align-items-center">
+            <div className="col-md-7">
+                {stats.map(({ label, value, iconColor, extra }) => (
+                    <div key={label} className="d-flex align-items-center gap-2 mb-3">
+                        <div className="rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                                width: '60px',
+                                height: '60px',
+                                backgroundColor: iconColor,
+                            }}
+                        >
+                            <i className="bi bi-check-lg text-white" style={{ fontSize: '30px' }}></i>
+                        </div>
+                        <div>
+                            <h5 className="fw-semibold">{label}</h5>
+                            <h6 className="text-muted">{value}</h6>
+                            {extra && <div className="mt-1">{extra}</div>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {showProgress && (
+                <div className="col-md-5 d-flex justify-content-center">
+                    <CircularProgress percent={75} />
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+
+const AttendanceCard = () => {
+    const items = [
+        {
+            label: "Present",
+            count: 360,
+            icon: "bi-clock",
+            colorClass: "present-circle",
+        },
+        {
+            label: "Late Arrival",
+            count: 360,
+            icon: "bi-clock-history",
+            colorClass: "late-circle",
+        },
+        {
+            label: "On Leave",
+            count: 360,
+            icon: "bi-people-fill",
+            colorClass: "leave-circle",
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {items.map((it, idx) => (
+                <div
+                    key={idx}
+                    className="flex items-center justify-between px-4 py-3 bg-white rounded shadow-sm"
+                    style={{ width: "300px", height: "89px" }}
+                >
+                    <div>
+                        <div className="text-xl font-bold leading-tight">{it.count}</div>
+                        <div className="text-sm font-medium text-gray-700">{it.label}</div>
+                    </div>
+
+                    <div
+                        className={`flex items-center justify-center rounded-full ${it.colorClass}`}
+                        style={{ width: "40px", height: "40px" }}
+                    >
+                        <i className={`${it.icon} text-lg`}></i>
+                    </div>
                 </div>
             ))}
-            {showProgress && <CircularProgress percent={75} />}
         </div>
-    </div>
-);
+    );
+};
 
-const AttendanceCard = () => (
-    <div className="row g-3 mb-4">
-        <div className="col-md-4">
-            <div className="bg-white rounded shadow-sm p-3 d-flex flex-column">
-                <i className="bi bi-clock text-success fs-3 mb-2"></i>
-                <h6 className="fw-semibold text-success">Present</h6>
-                <p className="mb-0 fw-bold">360</p>
-            </div>
-        </div>
-        <div className="col-md-4">
-            <div className="bg-white rounded shadow-sm p-3 d-flex flex-column">
-                <div className="d-flex align-items-center mb-2">
-                    <i className="bi bi-clock-fill text-danger fs-3 me-2"></i>
-                    <h6 className="fw-semibold text-danger mb-0">Late Arrival</h6>
-                </div>
-                <p className="mb-0 fw-bold">360</p>
-            </div>
-        </div>
-
-        <div className="col-md-4">
-            <div className="bg-white rounded shadow-sm p-3 d-flex flex-column">
-                <i className="bi bi-person-fill text-warning fs-3 mb-2"></i>
-                <h6 className="fw-semibold text-warning">On Leave</h6>
-                <p className="mb-0 fw-bold">360</p>
-            </div>
-        </div>
-    </div>
-);
 
 const TraineeChartCard = () => {
     const data = [
@@ -92,7 +131,7 @@ const TraineeChartCard = () => {
 
     return (
         <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
-            <h5 className="fw-semibold">Trainee Chart Performance</h5>
+            <h4 className="fw-semibold">Trainee Chart Performance</h4>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -115,7 +154,7 @@ const TraineeChartCard = () => {
 const AICoachCard = () => (
     <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
         <div className="card-body">
-            <h5 className="fw-semibold">Hello Trainee Name!</h5>
+            <h4 className="fw-semibold">Hello Trainee Name!</h4>
 
             <div className="mb-3">
                 <label className="fw-semibold">Overall Progress</label>
@@ -184,8 +223,8 @@ const Dashboard = () => (
                 <StatCard
                     title="Daily Performance"
                     stats={[
-                        { label: 'Skill Checks', value: '70%' },
-                        { label: 'Course-End Exams', value: '70%' },
+                        { label: 'Skill Checks', value: '70%', iconColor: '#4caf50' }, // green
+                        { label: 'Course-End Exams', value: '75%', iconColor: '#f44336' }, // red
                     ]}
                     showProgress
                 />
@@ -194,8 +233,8 @@ const Dashboard = () => (
                 <StatCard
                     title="Exams"
                     stats={[
-                        { label: 'Practice Exam', value: '70%' },
-                        { label: 'Mock Exam', value: '70%' },
+                        { label: 'Practice Exam', value: '70%', iconColor: '#4caf50' },
+                        { label: 'Mock Exam', value: '75%', iconColor: '#f44336' },
                     ]}
                     showProgress
                 />
