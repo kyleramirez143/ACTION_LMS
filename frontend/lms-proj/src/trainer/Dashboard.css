@@ -28,4 +28,20 @@
     fill: #4caf50;
     font-size: 0.5em;
     text-anchor: middle;
+}
+
+.card {
+    background-color: #fff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: none;
+    outline-style: none;
 } */
+
+.card.bg-white {
+    background-color: white !important;
+    border: none !important;
+    /* removes border */
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    /* adds shadow */
+}
