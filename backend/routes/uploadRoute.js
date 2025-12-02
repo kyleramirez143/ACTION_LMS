@@ -31,26 +31,31 @@ const upload = multer({ storage });
 
 // POST /api/upload
 // Form-data: file (pdf), title (optional)
-router.post("/", protect, checkRole(["Trainer"]), upload.single("file"), async (req, res) => {
-  console.log("Upload route hit!");
-  console.log("Request body:", req.body);
-  console.log("Uploaded file:", req.file);
-  const file = req.file;
-  const user = req.user; // Comes from 'protect' middleware
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
-  if (!file) return res.status(400).json({ error: "PDF file is required" });
+router.post(
+  "/",
+  protect,
+  checkRole(["Trainer"]),
+  upload.single("file"),
+  async (req, res) => {
+    console.log("Upload route hit!");
+    console.log("Request body:", req.body);
+    console.log("Uploaded file:", req.file);
+    const file = req.file;
+    const user = req.user; // Comes from 'protect' middleware
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!file) return res.status(400).json({ error: "PDF file is required" });
 
-  const title = req.body.title || "AI Generated Quiz";
-  console.log(`[UPLOAD] User ${user.id} uploading file: ${file.filename}`);
+    const title = req.body.title || "AI Generated Quiz";
+    console.log(`[UPLOAD] User ${user.id} uploading file: ${file.filename}`);
 
-  try {
-    // 1️⃣ Extract text from PDF
-    const text = await extractTextFromPdf(file.path);
-    console.log(`[UPLOAD] PDF text extracted (${text.length} chars)`);
+    try {
+      // 1️⃣ Extract text from PDF
+      const text = await extractTextFromPdf(file.path);
+      console.log(`[UPLOAD] PDF text extracted (${text.length} chars)`);
 
-    // 2️⃣ Call OpenAI to generate quiz JSON
-    const prompt = `
-You are an LMS quiz generator. Based on the content below, create a JSON object named "questions"
+      // 2️⃣ Call OpenAI to generate quiz JSON
+      const prompt = `
+You are an LMS quiz generator. Based on the content below, create a 20 JSON object named "questions"
 with an array "questions" where each question has:
 - question (string)
 - options (object with keys a,b,c,d)
@@ -61,77 +66,79 @@ Content:
 ${text.slice(0, 16000)}
     `.trim();
 
-    const aiResp = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You generate quizzes in JSON for a corporate LMS." },
-        { role: "user", content: prompt },
-      ],
-      max_tokens: 1500,
-    });
+      const aiResp = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You generate quizzes in JSON for a corporate LMS." },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 1500,
+      });
 
-    let aiText = aiResp.choices?.[0]?.message?.content ?? aiResp.choices?.[0]?.text;
-    aiText = aiText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
+      let aiText = aiResp.choices?.[0]?.message?.content ?? aiResp.choices?.[0]?.text;
+      aiText = aiText.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
 
-    let parsed;
-    try {
-      parsed = JSON.parse(aiText);
-    } catch (err) {
-      console.error("[UPLOAD] AI returned invalid JSON:", aiText);
-      return res.status(500).json({ error: "AI returned invalid JSON", raw: aiText });
-    }
+      let parsed;
+      try {
+        parsed = JSON.parse(aiText);
+      } catch (err) {
+        console.error("[UPLOAD] AI returned invalid JSON:", aiText);
+        return res.status(500).json({ error: "AI returned invalid JSON", raw: aiText });
+      }
 
-    const questions = Array.isArray(parsed.questions ? parsed.questions : parsed)
-      ? parsed.questions || parsed
-      : [];
+      const questions = Array.isArray(parsed.questions ? parsed.questions : parsed)
+        ? parsed.questions || parsed
+        : [];
 
-    // Save quiz to database
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
+      // Save quiz to database
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
 
-      const quizInsert = await client.query(
-        `INSERT INTO assessments 
+        const quizInsert = await client.query(
+          `INSERT INTO assessments 
           (title, pdf_source_url, assessment_type_id, is_published, created_by, created_at) 
          VALUES ($1, $2, $3, $4, $5, NOW())
          RETURNING assessment_id`,
-        [title, file.filename, "9e36d4a6-2330-4b8d-bc3d-65551a7cdd55", true, user.id] // Use actual assessment_type_id
-      );
+          [title, file.filename, "9e36d4a6-2330-4b8d-bc3d-65551a7cdd55", true, user.id] // Use actual assessment_type_id
+        );
 
-      const assessmentId = quizInsert.rows[0].assessment_id;
+        const assessmentId = quizInsert.rows[0].assessment_id;
 
-      for (const q of questions) {
-        await client.query(
-          `INSERT INTO assessment_questions 
+        for (const q of questions) {
+          await client.query(
+            `INSERT INTO assessment_questions 
              (assessment_id, question_text, options, correct_answer, created_at)
            VALUES ($1, $2, $3, $4, NOW())`,
-          [assessmentId, q.question, JSON.stringify(q.options), JSON.stringify(q.correct_answer)]
-        );
+            [assessmentId, q.question, JSON.stringify(q.options), JSON.stringify(q.correct_answer)]
+          );
+        }
+
+        await client.query("COMMIT");
+
+        console.log(`[UPLOAD] Assessment ${assessmentId} created with ${questions.length} questions by user ${user.id}`);
+        console.log("[UPLOAD] AI JSON output:", JSON.stringify(parsed, null, 2));
+
+        res.json({
+          success: true,
+          assessmentId,
+          pdf_filename: file.filename,
+          questions_count: questions.length,
+          ai_json: parsed,
+        });
+      } catch (dbErr) {
+        await client.query("ROLLBACK");
+        console.error("[UPLOAD] DB error:", dbErr);
+        res.status(500).json({ error: dbErr.message });
+      } finally {
+        client.release();
       }
-
-      await client.query("COMMIT");
-
-      console.log(`[UPLOAD] Assessment ${assessmentId} created with ${questions.length} questions by user ${user.id}`);
-
-      res.json({
-        success: true,
-        assessmentId,
-        pdf_filename: file.filename,
-        questions_count: questions.length,
-      });
-    } catch (dbErr) {
-      await client.query("ROLLBACK");
-      console.error("[UPLOAD] DB error:", dbErr);
-      res.status(500).json({ error: dbErr.message });
-    } finally {
-      client.release();
+    } catch (err) {
+      console.error("[UPLOAD] Error during processing:", err);
+      // Cleanup PDF if something failed
+      if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      res.status(500).json({ error: err.message });
     }
-  } catch (err) {
-    console.error("[UPLOAD] Error during processing:", err);
-    // Cleanup PDF if something failed
-    if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
-    res.status(500).json({ error: err.message });
-  }
-});
+  });
 
 export default router;

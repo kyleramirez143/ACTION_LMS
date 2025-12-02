@@ -171,6 +171,7 @@ module.exports = {
       question_id: uuidColumn,
       assessment_id: foreignKey('assessments', 'assessment_id'),
       question_text: { type: Sequelize.TEXT, allowNull: false },
+      exlanation: { type: Sequelize.TEXT, allowNull: true },
       options: { type: Sequelize.JSON },
       correct_answer: { type: Sequelize.JSON },
       points: { type: Sequelize.INTEGER, defaultValue: 1 },
