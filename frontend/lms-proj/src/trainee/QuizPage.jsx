@@ -175,7 +175,7 @@ export default function QuizPage({ totalQuestions = 20 }) {
           onReview={() => setShowResultModal(false)}
           onCancel={() => {
             setShowResultModal(false);
-            window.location.href = '/modules';
+            window.location.href = '/trainee/modulescreen';
           }}
         />
       )}
