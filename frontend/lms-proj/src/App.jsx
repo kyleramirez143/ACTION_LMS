@@ -9,8 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 // Navbar & Pages
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
-
-// Trainer Pages
+import CreateQuiz from "./trainer/CreateQuiz";
+import GeneratedQuiz from "./trainer/GeneratedQuiz";
 import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
 import ActivityResult from "./trainer/ActivityResult";
@@ -39,6 +39,13 @@ import AddModule from "./admin/AddModule";
 import AddUsers from "./admin/AddUsers";
 import UserRoleTable from "./admin/UserRoleTable";
 import ModuleManagement from "./admin/ModuleManagement";
+import Dashboard from "./trainer/Dashboard";
+
+
+
+import PdfViewerPage from "./trainee/PdfViewerPage";
+import TrainerPdf from "./trainer/TrainerPdf";
+import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
@@ -56,6 +63,22 @@ function AppContent() {
         <Routes>
           {/* Public / Login */}
           <Route path="/" element={<LoginPage />} />
+          <Route path="/createquiz" element={<CreateQuiz />} />
+          <Route path="/generatedquiz" element={<GeneratedQuiz />} />
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/activityresult" element={<ActivityResult />} />
+          <Route path="/traineeassessment" element={<TraineeAssessment />} />
+          
+          {/* Updated quiz route */}
+          <Route 
+            path="/quizpage" 
+            element={
+              <QuizPage 
+                totalQuestions={20} 
+                onQuizEnd={() => navigate("/modules")} // return to modules after quiz
+              />
+            } 
+          />
 
           {/* Trainee Routes */}
           <Route path="/trainee/modulescreen" element={<ModuleScreen />} />
