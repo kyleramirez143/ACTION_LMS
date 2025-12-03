@@ -1,111 +1,92 @@
-// controllers/moduleController.js
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const { Module, Course, User, Lecture } = require("../models/index.cjs");
+const { Module, CourseInstructor, User, Lecture } = require("../models/index.cjs");
 
-// =========================
-// CREATE MODULE
-// =========================
 export const createModule = async (req, res) => {
     try {
-        const { title, description, course_id, created_by, cover } = req.body;
+        const { title, description, is_active, has_deadline, course_id } = req.body;
+        const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
 
-        if (!title || !course_id || !created_by) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+        if (!title) return res.status(400).json({ error: "Module title is required" });
+        if (!course_id) return res.status(400).json({ error: "Course ID is required" });
+
+        // Optionally: verify course exists here if needed
+        // const courseExists = await Course.findByPk(course_id);
+        // if (!courseExists) return res.status(404).json({ error: "Course not found" });
 
         const module = await Module.create({
+            course_id,
             title,
             description,
-            course_id,
-            created_by,
-            cover
+            is_active: is_active ?? true,
+            has_deadline: has_deadline ?? false,
+            created_by: trainerId
         });
 
-        res.status(201).json(module);
+        res.status(201).json({ message: "Module created successfully", module, course_id });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 };
 
-// =========================
-// GET ALL MODULES
-// =========================
 export const getModules = async (req, res) => {
     try {
+        const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
+
+        // Find all modules for courses this trainer manages
+        const courseInstructor = await CourseInstructor.findAll({ where: { managed_by: trainerId } });
+        const courseIds = courseInstructor.map(ci => ci.course_id);
+
         const modules = await Module.findAll({
-            include: [
-                { model: Course, as: "course" },
-                { model: User, as: "creator" },
-               // { model: Lecture, as: "lectures" }
-            ],
-            order: [["created_at", "DESC"]]
+            where: { course_id: courseIds },
+            include: [{ model: User, as: "creator", attributes: ["first_name", "last_name", "email"] }]
         });
 
         res.json(modules);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 };
 
-// =========================
-// GET MODULE BY ID
-// =========================
-export const getModuleById = async (req, res) => {
+export const getModulesByCourse = async (req, res) => {
     try {
-        const { id } = req.params;
-
-        const module = await Module.findByPk(id, {
+        const modules = await Module.findAll({
+            where: { course_id: req.params.course_id },
             include: [
-                { model: Course, as: "course" },
-                { model: User, as: "creator" },
-              //  { model: Lecture, as: "lectures" }
-            ]
+                { model: Lecture, as: "lectures" }
+            ],
+            order: [["created_at", "ASC"]]
         });
 
-        if (!module) return res.status(404).json({ error: "Module not found" });
-
-        res.json(module);
+        return res.json(modules);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Get Modules Error:", error);
+        res.status(500).json({ error: "Failed to fetch modules" });
     }
 };
 
-// =========================
-// UPDATE MODULE
-// =========================
+
 export const updateModule = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { module_id } = req.params;
+        const updated = await Module.update(req.body, { where: { module_id } });
 
-        const module = await Module.findByPk(id);
-        if (!module) return res.status(404).json({ error: "Module not found" });
+        if (!updated[0]) return res.status(404).json({ error: "Module not found" });
 
-        await module.update({
-            title: req.body.title,
-            description: req.body.description,
-            course_id: req.body.course_id,
-            created_by: req.body.created_by
-        });
-
-
-        res.json({ message: "Module updated successfully", module });
+        res.json({ message: "Module updated successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// =========================
-// DELETE MODULE
-// =========================
 export const deleteModule = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { module_id } = req.params;
+        const deleted = await Module.destroy({ where: { module_id } });
 
-        const module = await Module.findByPk(id);
-        if (!module) return res.status(404).json({ error: "Module not found" });
-
-        await module.destroy();
+        if (!deleted) return res.status(404).json({ error: "Module not found" });
 
         res.json({ message: "Module deleted successfully" });
     } catch (error) {

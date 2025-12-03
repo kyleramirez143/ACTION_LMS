@@ -86,7 +86,7 @@ module.exports = {
     await queryInterface.createTable('courses', {
       course_id: uuidColumn,
       title: { type: Sequelize.STRING(255), allowNull: false },
-      image: { type: Sequelize.STRING(255), allowNull: true},
+      image: { type: Sequelize.STRING(255), allowNull: true },
       description: { type: Sequelize.TEXT },
       instructor_id: foreignKey('users', 'id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
@@ -116,10 +116,20 @@ module.exports = {
 
     await queryInterface.createTable('modules', {
       module_id: uuidColumn,
-      course_id: foreignKey('courses', 'course_id'),
+      course_id: {
+        ...foreignKey('courses', 'course_id'),
+        allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       title: { type: Sequelize.STRING(255), allowNull: false },
       description: { type: Sequelize.TEXT },
-      created_by: foreignKey('users', 'id'),
+      created_by: {
+        ...foreignKey('users', 'id'),
+        allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
@@ -128,8 +138,24 @@ module.exports = {
 
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,
-      module_id: foreignKey('modules', 'module_id'),
-      created_by: foreignKey('users', 'id'),
+      course_id: {
+        ...foreignKey('courses', 'course_id'),
+        allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      module_id: {
+        ...foreignKey('modules', 'module_id'),
+        allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      created_by: {
+        ...foreignKey('users', 'id'),
+        allowNull: false,
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
       title: { type: Sequelize.STRING(255), allowNull: false },
       content_type: { type: Sequelize.STRING(50) },
       content_url: { type: Sequelize.TEXT },
@@ -138,7 +164,7 @@ module.exports = {
     });
     await queryInterface.addIndex('lectures', ['module_id']);
     await queryInterface.addIndex('lectures', ['created_by']);
-    
+
     // --------------------------
     // ASSESSMENT TYPES
     // --------------------------
@@ -278,8 +304,10 @@ module.exports = {
     await queryInterface.dropTable('grades');
     await queryInterface.dropTable('assessment_responses');
     await queryInterface.dropTable('assessment_questions');
+    await queryInterface.dropTable('assessment_screen_sessions');
     await queryInterface.dropTable('assessments');
     await queryInterface.dropTable('assessment_types');
+    await queryInterface.dropTable('course_instructors');
     await queryInterface.dropTable('lectures');
     await queryInterface.dropTable('modules');
     await queryInterface.dropTable('courses');
@@ -289,7 +317,5 @@ module.exports = {
     await queryInterface.dropTable('roles');
     await queryInterface.dropTable('passwords');
     await queryInterface.dropTable('users');
-    await queryInterface.dropTable('assessment_screen_sessions');
-    await queryInterface.dropTable('course_instructors');
   },
 };
