@@ -1,9 +1,10 @@
+//../routes/uploadRoute.js
 import express from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { protect, checkRole } from "../middleware/authMiddleware.js";
-import { generateQuizFromPdf } from "../controllers/uploadController.js";
+import { generateQuizFromPdf, saveQuiz, discardQuiz } from "../controllers/uploadController.js";
 
 const router = express.Router();
 
@@ -24,5 +25,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/", protect, checkRole(["Trainer"]), upload.single("file"), generateQuizFromPdf);
+router.post("/:assessmentId/publish", protect, checkRole(["Trainer"]), saveQuiz);
+router.delete("/:assessmentId", protect, checkRole(["Trainer"]), discardQuiz);
 
 export default router;

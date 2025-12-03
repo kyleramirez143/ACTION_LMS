@@ -8,7 +8,7 @@ function QuizGenerator() {
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
-    const [questionQty, setQuestionQty] = useState(10);
+    const [questionQty, setQuestionQty] = useState(0);
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -30,6 +30,11 @@ function QuizGenerator() {
     const handleUpload = async () => {
         if (!file) {
             alert("Please select a PDF file first!");
+            return;
+        }
+
+        if (questionQty == 0) {
+            alert("Questions cannot be 0!");
             return;
         }
 
@@ -57,12 +62,64 @@ function QuizGenerator() {
 
             const data = await res.json();
             console.log("Quiz generated:", data);
-            setQuiz(data);
+            // <-- FIX HERE
+            setQuiz({
+                assessmentId: data.assessmentId,
+                pdf_filename: data.pdf_filename,
+                questions: data.ai_json.questions,
+            });
         } catch (err) {
             console.error("Fetch error:", err);
             alert("An error occurred. Check console.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveQuiz = async (assessmentId) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/assessments/${assessmentId}/publish`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            if (res.ok) {
+                alert("Quiz saved successfully!");
+                setQuiz(null); // clear form
+            } else {
+                const text = await res.text();
+                console.error(text);
+                alert("Failed to save quiz.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error saving quiz.");
+        }
+    };
+
+    const handleDiscardQuiz = async (assessmentId) => {
+        if (!window.confirm("Are you sure you want to discard this quiz? This cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/assessments/${assessmentId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (res.ok) {
+                alert("Quiz discarded.");
+                setQuiz(null); // clear the frontend
+            } else {
+                const text = await res.text();
+                console.error(text);
+                alert("Failed to discard quiz.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error discarding quiz.");
         }
     };
 
@@ -205,10 +262,31 @@ function QuizGenerator() {
                                                 <strong>Answer:</strong> {q.correct_answer.toUpperCase()} —{" "}
                                                 {q.options[q.correct_answer]}
                                             </p>
+                                            <p className="text-muted mb-0">
+                                                <strong>Explanation:</strong> {q.explanation}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             ))}
+
+                            {quiz && quiz.questions && (
+                                <div className="d-flex justify-content-between mt-3">
+                                    <button
+                                        className="btn btn-success"
+                                        onClick={() => handleSaveQuiz(quiz.assessmentId)}
+                                    >
+                                        Save Quiz
+                                    </button>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => handleDiscardQuiz(quiz.assessmentId)}
+                                    >
+                                        Discard Quiz
+                                    </button>
+                                </div>
+                            )}
+
                         </div>
                     )}
                 </div>

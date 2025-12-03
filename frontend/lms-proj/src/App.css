@@ -17,7 +17,9 @@ body {
 }
 
 /* Global reset and layout */
-html, body, #root {
+html,
+body,
+#root {
   font-family: 'Poppins', sans-serif !important;
   height: 100%;
   margin: 0;
