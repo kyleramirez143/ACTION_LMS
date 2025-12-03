@@ -78,7 +78,6 @@ ${text.slice(0, 16000)}
             ? parsed.questions || parsed
             : [];
 
-        // 3️⃣ Save quiz to DB
         const client = await pool.connect();
         try {
             await client.query("BEGIN");

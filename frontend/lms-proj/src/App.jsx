@@ -21,6 +21,7 @@ import AdminUserRole from './admin/UserRoleTable';
 
 // Trainer Imports
 import QuizGenerator from './trainer/QuizGenerator';
+import CoursePage from './trainer/CourseManagement';
 
 function AppContent() {
   const location = useLocation();
@@ -67,7 +68,6 @@ function AppContent() {
           <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
           <Route path="/admin/user-management" element={<AdminUserRole />} />
 
-          {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>
     </>

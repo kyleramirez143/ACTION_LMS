@@ -25,8 +25,8 @@ export const navLinks = [
     requiredRoles: ['Trainer'],
   },
   {
-    name: 'Lecture Management',
-    path: '/trainer/lecture-management',
+    name: 'Courses',
+    path: '/trainer/my-course',
     requiredRoles: ['Trainer'],
   },
   {
