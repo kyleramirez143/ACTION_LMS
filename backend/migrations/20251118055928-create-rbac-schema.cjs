@@ -88,12 +88,10 @@ module.exports = {
       title: { type: Sequelize.STRING(255), allowNull: false },
       image: { type: Sequelize.STRING(255), allowNull: true },
       description: { type: Sequelize.TEXT },
-      instructor_id: foreignKey('users', 'id'),
       is_published: { type: Sequelize.BOOLEAN, defaultValue: false, allowNull: false },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
-    await queryInterface.addIndex('courses', ['instructor_id']);
 
     await queryInterface.createTable('course_instructors', {
       course_id: {
@@ -133,8 +131,13 @@ module.exports = {
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
-    await queryInterface.addIndex('modules', ['course_id']);
-    await queryInterface.addIndex('modules', ['created_by']);
+    await queryInterface.sequelize.query(`
+      CREATE INDEX IF NOT EXISTS modules_course_id ON modules (course_id);
+    `);
+    await queryInterface.sequelize.query(`
+      CREATE INDEX IF NOT EXISTS modules_created_by ON modules (created_by);
+    `);
+
 
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,

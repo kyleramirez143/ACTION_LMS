@@ -1,0 +1,255 @@
+/* ================= FULL SCREEN WRAPPER ================= */
+.activity-wrapper {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fd;
+  padding: 10px 5px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: auto;
+  margin-top: 5px;
+}
+
+/* ================= PAGE TITLE ================= */
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #10143b;
+}
+
+.page-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  margin-bottom: 25px;
+}
+
+/* Back arrow button */
+.back-button {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* ================= MAIN CONTENT LAYOUT ================= */
+.main-content {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  min-height: 0; /* allow flex children to shrink properly */
+}
+
+/* ================= LEFT CARD / TABLE ================= */
+.results-table-container {
+  flex: 3 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-height: 450px;
+  overflow: hidden;
+}
+
+.results-table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding-top: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
+}
+
+.table th,
+.table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table {
+  border-collapse: separate;  /* ensures borders display consistently */
+  border-spacing: 0 0;        /* prevent gaps between rows */
+}
+
+.table tbody tr td {
+  border-bottom: 1px solid #ddd !important; /* stronger line */
+}
+
+.table thead th {
+  border-bottom: 2px solid #ccc !important; /* stronger header line */
+}
+
+/* ================= STATUS BADGES ================= */
+.status-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pass { background: #00C49F; }
+.fail { background: #FF4D4F; }
+.late { background: #F2C94C; color: #10143b; }
+.overdue { background: #0047AB; }
+
+/* ================= PAGINATION ================= */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.custom-pagination .page-link {
+  background-color: #fff;
+  color: black;
+  border: none;
+  margin: 0 6px;
+  font-size: 1rem;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+  color: white;
+  border: 2px solid #0047AB;
+  background-color: #0047AB;
+}
+
+/* ================= RIGHT SUMMARY ================= */
+.activity-summary {
+  flex: 0.8 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  max-height: 450px;
+}
+
+.activity-summary-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 10px; /* avoid scrollbar overlapping content */
+}
+
+/* ================= DONUT CHART ================= */
+.donut-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.donut-circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  color: #10143b;
+}
+
+.donut-circle .donut-value {
+  font-size: 38px;
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.blue { background: #0047AB; }
+.yellow { background: #F2C94C; }
+.green { background: #00C49F; }
+.red { background: #FF4D4F; }
+
+/* ================= RESPONSIVE FIXES ================= */
+@media (max-width: 1024px) {
+  .results-table-scroll { max-height: 300px; }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .results-table-container,
+  .activity-summary {
+    width: 100%;
+    flex: none;
+    max-height: none;
+    height: auto;
+  }
+
+  .activity-summary-content {
+    max-height: none;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .results-table-scroll {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title { font-size: 22px; }
+  .table th, .table td { padding: 6px 4px; font-size: 12px; }
+  .status-pill { padding: 4px 6px; font-size: 12px; }
+  .donut-circle { width: 100px; height: 100px; }
+  .donut-circle .donut-value { font-size: 22px; }
+  .legend li { font-size: 12px; }
+  .results-table-scroll { max-height: 200px; }
+}
+
+@media (max-width: 400px) {
+  .page-title { font-size: 20px; }
+  .table th, .table td { padding: 4px 2px; font-size: 10px; }
+  .back-button { font-size: 18px; }
+  .pagination button { padding: 4px 8px; font-size: 10px; }
+}
