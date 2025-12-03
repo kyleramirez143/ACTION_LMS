@@ -37,7 +37,7 @@ export default function ReviewPage() {
           <button
             type="button"
             className="back-btn"
-            onClick={() => navigate('/modules')}
+            onClick={() => navigate('/trainee/modulescreen')}
             aria-label="Go back"
           >
             <ArrowLeft size={20} strokeWidth={2.2} />
