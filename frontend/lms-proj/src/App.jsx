@@ -1,14 +1,13 @@
 // All imports of packages that are needed 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 
-
-// All imports Configuration, Security, etc. 
-import { AuthProvider } from './context/AuthContext.jsx'
+// Context & Security
+import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoutes";
 
-// All imports of each pages
+// Navbar & Shared
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 
@@ -22,9 +21,45 @@ import AdminUserRole from './admin/UserRoleTable';
 // Trainer Imports
 import QuizGenerator from './trainer/QuizGenerator';
 import CoursePage from './trainer/CourseManagement';
+// Trainer Pages
+import CreateQuiz from "./trainer/CreateQuiz";
+import GeneratedQuiz from "./trainer/GeneratedQuiz";
+import Assessment from "./trainer/Assessment";
+import QuizResult from "./trainer/QuizResult";
+import ActivityResult from "./trainer/ActivityResult";
+import ReviewPublish from "./trainer/ReviewPublish";
+import AddLecture from "./trainer/AddLecture";
+import AddResource from "./trainer/AddResource.jsx";
+import AddActivity from "./trainer/AddActivity";
+import ProfileManagement from "./trainer/ProfileManagement";
+import Dashboard from "./trainer/Dashboard";
+import QuizGenerator from "./trainer/QuizGenerator";
+import TrainerPdf from "./trainer/TrainerPdf";
+import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
+
+// Trainee Pages
+import Course from "./trainee/Course";
+import ModuleScreen from "./trainee/ModuleScreen";
+import TraineeModuleScreen from "./trainee/TraineeModuleScreen";
+import TraineeAssessment from "./trainee/TraineeAssessment";
+import QuizPage from "./trainee/QuizPage";
+import ReviewPage from "./trainee/ReviewPage";
+import PdfViewerPage from "./trainee/PdfViewerPage";
+import TraineeDashboard from "./trainee/TraineeDashboard";
+
+// Admin Pages
+import AddCourse from "./admin/AddCourse";
+import AddModule from "./admin/AddModule";
+import AddUsers from "./admin/AddUsers";
+import UserRoleTable from "./admin/UserRoleTable";
+import ModuleManagement from "./admin/ModuleManagement";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminCreateCourse from "./admin/AdminCoursePage";
+import AdminCourseManagement from "./admin/CourseManagementPage";
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const hideNavbar = location.pathname === "/"; // hide navbar only on login page
 
   return (
@@ -32,30 +67,8 @@ function AppContent() {
       {!hideNavbar && <Navbar />}
 
       <div className="full-screen">
-        {/* 
-          How to use ProtectedRoutes:
-
-          <Route 
-            path="path-of-the-web-page"
-            element={
-              <ProtectedRoute roles={["Admin", "Trainer", "Trainee"]}>
-                <ObjectOfWebPage ex.ModuleScreen/>
-              </ProtectedRoute>
-            }
-          />
-
-          Goodluck mga frontend!!!
-          
-          Wag lagyan ng protected ang login page sapagkat ito ay kaylangan ma access
-          kahit walang naka login. Salamat nawa.
-
-          Ang roles={[]} ay palitan nang na aayon sa mga makaka access ng page na yon.
-
-          Pagkatapos maglagay ng mga routes, I check ang file na navConfig upang
-          tuluyang maayos na talaga ang navbar natin.
-
-        */}
         <Routes>
+          {/* Public / Login */}
           <Route path="/" element={<LoginPage />} />
 
           {/* Trainer Side Routes */}

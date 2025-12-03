@@ -1,9 +1,12 @@
-import { Router } from "express";
-import { createModule, getModules } from "../controllers/moduleController.js";
+import express from "express";
+import { createModule, getModulesByCourse, updateModule, deleteModule } from "../controllers/moduleController.js";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/", createModule);
-router.get("/", getModules);
+// All routes require authentication (trainer)
+router.post("/" , createModule);          // Add module
+router.get("/:course_id", getModulesByCourse);
+router.put("/:module_id", updateModule); // Update module
+router.delete("/:module_id", deleteModule); // Delete module
 
 export default router;
