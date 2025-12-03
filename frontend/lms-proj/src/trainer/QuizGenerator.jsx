@@ -7,6 +7,8 @@ function QuizGenerator() {
     const [file, setFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [quizType, setQuizType] = useState("Multiple Choice");
+    const [questionQty, setQuestionQty] = useState(10);
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -33,6 +35,8 @@ function QuizGenerator() {
 
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("quizType", quizType);
+        formData.append("questionQty", questionQty);
 
         setLoading(true);
         try {
@@ -40,9 +44,8 @@ function QuizGenerator() {
                 method: "POST",
                 body: formData,
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }, // use if JWT/cookies are needed
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
             if (!res.ok) {
@@ -54,7 +57,7 @@ function QuizGenerator() {
 
             const data = await res.json();
             console.log("Quiz generated:", data);
-            setQuiz(data); // store backend response (assessments + questions)
+            setQuiz(data);
         } catch (err) {
             console.error("Fetch error:", err);
             alert("An error occurred. Check console.");
@@ -64,49 +67,108 @@ function QuizGenerator() {
     };
 
     return (
-        <div className="container-fluid" style={{ height: "100vh" }}>
-            <div className="row h-100">
-                {/* LEFT: Upload Panel */}
+        <div className="container-fluid bg-white" style={{ minHeight: "100vh" }}>
+            <div className="row">
+                {/* LEFT: Upload & Settings Panel */}
                 <div
                     className="col-md-6 p-4"
                     style={{
-                        backgroundColor: "#181818",
-                        position: "sticky",
-                        top: 0,
                         height: "100vh",
-                        color: "#fff",
+                        overflowY: "auto",
                     }}
                 >
-                    <h1 className="mb-4">📘 LMS AI Quiz Generator</h1>
+                    <div className="p-3 mb-4 shadow-sm rounded bg-light">
+                        <h1 className="mb-4">📘 ACTION LMS AI Quiz Generator</h1>
 
-                    <div className="mb-3">
-                        <input
-                            type="file"
-                            accept="application/pdf"
-                            className="form-control"
-                            onChange={(e) => setFile(e.target.files[0])}
-                        />
-                    </div>
+                        {/* Upload File */}
+                        <div className="mb-3">
+                            <label className="form-label">Upload PDF</label>
+                            <input
+                                type="file"
+                                accept="application/pdf"
+                                className="form-control shadow-sm"
+                                onChange={(e) => setFile(e.target.files[0])}
+                            />
+                        </div>
 
-                    <button
-                        className="btn btn-primary w-100"
-                        onClick={handleUpload}
-                        disabled={loading}
-                    >
-                        {loading ? "Generating..." : "Generate Quiz"}
-                    </button>
+                        {/* Quiz Type Selection */}
+                        <div className="mb-3 p-3 shadow-sm rounded bg-white">
+                            <label className="form-label fw-bold">Choose Quiz Type</label>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="quizType"
+                                    value="Multiple Choice"
+                                    checked={quizType === "Multiple Choice"}
+                                    onChange={(e) => setQuizType(e.target.value)}
+                                />
+                                <label className="form-check-label">Multiple Choice</label>
+                            </div>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="quizType"
+                                    value="Matching Type"
+                                    checked={quizType === "Matching Type"}
+                                    onChange={(e) => setQuizType(e.target.value)}
+                                />
+                                <label className="form-check-label">Matching Type</label>
+                            </div>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="quizType"
+                                    value="Identification"
+                                    checked={quizType === "Identification"}
+                                    onChange={(e) => setQuizType(e.target.value)}
+                                />
+                                <label className="form-check-label">Identification</label>
+                            </div>
+                            <div className="form-check">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    name="quizType"
+                                    value="Enumeration"
+                                    checked={quizType === "Enumeration"}
+                                    onChange={(e) => setQuizType(e.target.value)}
+                                />
+                                <label className="form-check-label">Enumeration</label>
+                            </div>
+                        </div>
 
-                    <hr />
+                        {/* Question Quantity */}
+                        <div className="mb-3 p-3 shadow-sm rounded bg-white">
+                            <label className="form-label fw-bold">Set Question Quantity</label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                value={questionQty}
+                                min={1}
+                                max={50}
+                                onChange={(e) => setQuestionQty(e.target.value)}
+                            />
+                        </div>
 
-                    <p className="mt-4 text-light">
-                        Upload a PDF file to automatically generate quiz questions using AI.
-                    </p>
+                        {/* Generate Button */}
+                        <button
+                            className="btn btn-primary w-100 shadow-sm"
+                            onClick={handleUpload}
+                            disabled={loading}
+                        >
+                            {loading ? "Generating..." : "Generate Quiz"}
+                        </button>
 
-                    <div className="p-3 bg-primary rounded-3">
-                        <p className="mt-4 text-justify">
-                            The content is generated by an OpenAI model. Verify answers independently
-                            before relying on them.
-                        </p>
+                        <hr />
+
+                        <div className="p-3 shadow-sm rounded bg-light mt-3">
+                            <p className="text-muted mb-0">
+                                Upload a PDF file to automatically generate quiz questions using AI. Verify answers independently.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -114,21 +176,20 @@ function QuizGenerator() {
                 <div
                     className="col-md-6 p-4"
                     style={{
-                        backgroundColor: "#212121",
                         height: "100vh",
                         overflowY: "auto",
-                        color: "#fff",
+                        backgroundColor: "#f8f9fa",
                     }}
                 >
                     <h2 className="mb-4">Generated Quiz</h2>
 
                     {!quiz || !quiz.questions ? (
-                        <p className="text-light">No quiz generated yet.</p>
+                        <p className="text-muted">No quiz generated yet.</p>
                     ) : (
                         <div className="row">
                             {quiz.questions.map((q, i) => (
                                 <div className="col-12 mb-3" key={i}>
-                                    <div className="card shadow-sm border-0">
+                                    <div className="card shadow-sm">
                                         <div className="card-body">
                                             <h5 className="card-title">
                                                 Q{i + 1}: {q.question}
