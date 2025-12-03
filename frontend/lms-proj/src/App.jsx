@@ -16,14 +16,13 @@ import Assessment from "./trainer/Assessment";
 import QuizResult from "./trainer/QuizResult";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
-import TraineeModuleScreen from "./trainee/TraineeModuleScreen"; 
+import TraineeModuleScreen from "./trainee/TraineeModuleScreen";
+import AddLecture from "./trainer/AddLecture";
 //import AdminDashboard from './pages/AdminDashboard';
 import TraineeDashboard from './trainee/TraineeDashboard';
-import AddPowerpoint from "./trainer/AddPowerpoint";
-import AddVideo from "./trainer/AddVideo";
+import AddResource from "./trainer/AddResource.jsx";
 import AddActivity from "./trainer/AddActivity";
 import ProfileManagement from "./trainer/ProfileManagement";
-import AddCourse from "./admin/AddCourse";
 import AddModule from "./admin/AddModule";
 import AddUsers from "./admin/AddUsers";
 import UserRoleTable from "./admin/UserRoleTable";
@@ -73,31 +72,33 @@ function AppContent() {
         */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/trainee" element={<TraineeDashboard />} /> 
-          <Route path="/trainer/addpowerpoint" element={<AddPowerpoint />} />
-          <Route path="/trainer/addvideo" element={<AddVideo />} />
+          <Route path="/trainee" element={<TraineeDashboard />} />
+          <Route path="/trainer/addresource" element={<AddResource />} />
           <Route path="/trainer/addactivity" element={<AddActivity />} />
           <Route path="/trainer/profile" element={<ProfileManagement />} />
-          <Route path="/admin/addcourse" element={<AddCourse />} />
-          <Route path="/admin/addmodule" element={<AddModule />} />
+          <Route path="/admin/module-management/:course_id/create" element={<AddModule />} />
           <Route path="/admin/adduser" element={<AddUsers />} />
           <Route path="/admin/userroletable" element={<UserRoleTable />} />
-          <Route path="/admin/course/module" element={<ModuleManagement />} />
           <Route path="/trainer/dashboard" element={<Dashboard />} />
           <Route path="/trainee/modulescreen" element={<TraineeModuleScreen />} />
-          <Route path="/trainer/modulescreen" element={<TrainerModuleScreen/>} />
+          <Route path="/trainer/modulescreen/:course_id/:module_id" element={<TrainerModuleScreen />} />
           <Route path="/trainee/course" element={<Course />} />
           <Route path="/trainer/assessment" element={<Assessment />} />
-          <Route path="/trainer/quizresult" element={<QuizResult/>} />
+          <Route path="/trainer/quizresult" element={<QuizResult />} />
           <Route path="/trainer/reviewpublish" element={<ReviewPublish />} />
-          <Route path="/trainee/pdfviewer" element={<PdfViewerPage/>} />
-          <Route path="/trainer/pdfviewer" element={<TrainerPdf/>} />
-          
+          <Route path="/trainee/pdfviewer" element={<PdfViewerPage />} />
+          <Route path="/trainer/pdfviewer" element={<TrainerPdf />} />
+          <Route
+            path="/trainer/addlecture/:course_id/:module_id"
+            element={<AddLecture />}
+          />
+
+
           {/* Admin Side Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/course-management" element={<AdminCourseManagement />} />
           <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
-          <Route path="/admin/module-management/create" element={<ModuleManagement />} />
+          <Route path="/admin/module-management/:course_id" element={<ModuleManagement />} />
           {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
         </Routes>
       </div>

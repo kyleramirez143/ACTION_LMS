@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom"; // ✅ correct import
 import "./ModuleManagement.css";
 
 export default function ModuleManagement() {
     const navigate = useNavigate();
+    const location = useLocation(); // detect navigation state
+    const { course_id } = useParams(); // ✅ correct object destructuring
+
     const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -11,12 +14,13 @@ export default function ModuleManagement() {
     const [page, setPage] = useState(1);
 
     // ================================
-    // FETCH MODULES FROM API
+    // FETCH MODULES FROM API FOR THIS COURSE
     // ================================
     useEffect(() => {
         const fetchModules = async () => {
+            setLoading(true);
             try {
-                const res = await fetch("/api/modules");
+                const res = await fetch(`/api/modules/${course_id}`);
                 const data = await res.json();
 
                 if (!Array.isArray(data)) {
@@ -26,15 +30,15 @@ export default function ModuleManagement() {
                     setModules(data);
                 }
             } catch (error) {
-                console.error("Fetch error:", error);
+                console.error("Failed to fetch modules:", error);
                 setModules([]);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchModules();
-    }, []);
+        if (course_id) fetchModules();
+    }, [course_id]);
 
     const totalPages = Math.ceil(modules.length / ITEMS_PER_PAGE);
 
@@ -48,8 +52,9 @@ export default function ModuleManagement() {
     };
 
     const handleCardClick = (module) => {
-        navigate(`/admin/module/${module.module_id}`);
+        navigate(`/trainer/modulescreen/${module.course_id}/${module.module_id}`);
     };
+
 
     // ================================
     // RENDER
@@ -63,7 +68,10 @@ export default function ModuleManagement() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">Modules</h3>
-                <button className="btn btn-primary" onClick={() => navigate("/admin/addmodule")}>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate(`/admin/module-management/${course_id}/create`)}
+                >
                     Add New Module
                 </button>
             </div>
@@ -131,14 +139,8 @@ export default function ModuleManagement() {
                                 </li>
 
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                                    <li
-                                        key={p}
-                                        className={`page-item ${p === page ? "active" : ""}`}
-                                    >
-                                        <button
-                                            className="page-link"
-                                            onClick={() => goToPage(p)}
-                                        >
+                                    <li key={p} className={`page-item ${p === page ? "active" : ""}`}>
+                                        <button className="page-link" onClick={() => goToPage(p)}>
                                             {p}
                                         </button>
                                     </li>

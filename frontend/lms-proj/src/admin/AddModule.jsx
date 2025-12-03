@@ -1,7 +1,52 @@
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./Add.css";
 
 function AddModule() {
+    const navigate = useNavigate();
+    const { course_id } = useParams(); // <-- get course_id from URL
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const body = {
+                title: document.getElementById("fileTitle").value,
+                description: document.getElementById("fileDescription").value,
+                is_active: document.getElementById("trainerToggle").checked,
+                has_deadline: document.getElementById("canDownload").checked,
+                course_id // <-- send course_id to backend
+            };
+
+
+            const token = localStorage.getItem("token");
+
+            const res = await fetch("http://localhost:5000/api/modules", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { "Authorization": `Bearer ${token}` })
+                },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+            // After successful POST
+            if (res.ok) {
+                alert("Module created successfully!");
+                console.log(data.module);
+
+                // Navigate back to ModuleManagement for this course
+                navigate(`/admin/module-management/${course_id}`);
+            } else {
+                alert(data.error || data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong");
+        }
+    };
+
     return (
         <div style={styles.page}>
             <div style={styles.card}>
@@ -19,35 +64,35 @@ function AddModule() {
 
                     <div style={styles.profileText}>
                         <h4 style={styles.profileName}>Upload Module Cover Photo</h4>
-                        <p style={styles.profileRole}><i class="bi bi-exclamation-circle"> 250mb only</i></p>
+                        <p style={styles.profileRole}><i className="bi bi-exclamation-circle"> 250mb only</i></p>
                     </div>
                 </div>
 
                 {/* Form Section */}
                 <div style={styles.formSection}>
-                    <form style={{ marginTop: "20px", }}>
+                    <form style={{ marginTop: "20px" }} onSubmit={handleSubmit}>
 
-                        {/* Course Title */}
+                        {/* Module Title */}
                         <div className="mb-3 row">
                             <label htmlFor="fileTitle" className="col-12 col-sm-2 col-form-label">Module Title</label>
                             <div className="col-12 col-sm-8">
-                                <input type="text" className="form-control" id="fileTitle" placeholder="Enter Course Title" />
+                                <input type="text" className="form-control" id="fileTitle" placeholder="Enter Module Title" required />
                             </div>
                         </div>
 
-                        {/* Course Description */}
+                        {/* Module Description */}
                         <div className="mb-3 row">
                             <label htmlFor="fileDescription" className="col-12 col-sm-2 col-form-label">Module Description</label>
                             <div className="col-12 col-sm-8">
-                                <textarea class="text" className="form-control" id="fileDescription" placeholder="Enter Course Description" />
+                                <textarea className="form-control" id="fileDescription" placeholder="Enter Module Description" />
                             </div>
                         </div>
 
-                        {/* Email */}
+                        {/* Trainer Name */}
                         <div className="mb-3 row">
-                            <label htmlFor="fileDescription" className="col-12 col-sm-2 col-form-label">Trainer Name</label>
+                            <label htmlFor="trainerName" className="col-12 col-sm-2 col-form-label">Trainer Name</label>
                             <div className="col-12 col-sm-8">
-                                <input type="name" className="form-control" id="fileDescription" placeholder="Enter Trainer Name" />
+                                <input type="text" className="form-control" id="trainerName" placeholder="Enter Trainer Name" />
                             </div>
                         </div>
 
@@ -69,19 +114,20 @@ function AddModule() {
                                 </div>
                             </div>
                         </fieldset>
-                    </form>
 
-                    {/* Action Buttons */}
-                    <div className="mb-3 row">
-                        <div className="col-12 col-sm-9">
-                            <button type="submit" className="btn btn-primary rounded-pill me-2" style={styles.btn}>
-                                Add Module
-                            </button>
-                            <button type="button" className="btn btn-outline-primary rounded-pill me-2" style={styles.btn}>
-                                Cancel
-                            </button>
+                        {/* Action Buttons */}
+                        <div className="mb-3 row">
+                            <div className="col-12 col-sm-9">
+                                <button type="submit" className="btn btn-primary rounded-pill me-2" style={styles.btn}>
+                                    Add Module
+                                </button>
+                                <button type="button" className="btn btn-outline-primary rounded-pill me-2" style={styles.btn}>
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
-                    </div>
+
+                    </form>
                 </div>
             </div>
         </div>
@@ -91,7 +137,6 @@ function AddModule() {
 const styles = {
     page: {
         backgroundColor: "#FFFFFF",
-        // minHeight: "100vh",
         width: "100vw",
         padding: "30px 30px",
     },
@@ -117,64 +162,25 @@ const styles = {
         borderRadius: "6px",
         fontFamily: "Poppins, sans-serif",
     },
-
     profileLayout: {
         display: "flex",
         alignItems: "center",
         gap: "24px",
         marginBottom: "30px",
     },
-
-    imageCard: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        backgroundColor: "#fff",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        padding: "16px",
-        width: "120px",
-        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-    },
-
-    imageSquare: {
-        width: "80px",
-        height: "80px",
-        backgroundColor: "#e0e0e0",
-        borderRadius: "4px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    imagePlaceholder: {
-        fontSize: "32px",
-    },
-
-    uploadLink: {
-        marginTop: "8px",
-        fontSize: "0.9rem",
-        color: "#0047AB",
-        cursor: "pointer",
-        textDecoration: "underline",
-    },
-
     profileText: {
         fontFamily: "Poppins, sans-serif",
     },
-
     profileName: {
         fontWeight: 600,
         marginBottom: "4px",
         color: "#333",
     },
-
     profileRole: {
         fontWeight: 500,
         color: "#777",
         marginBottom: 0,
     },
-
 };
 
 export default AddModule;
