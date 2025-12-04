@@ -22,12 +22,18 @@ module.exports = {
     await queryInterface.createTable('lectures_assessments', {
       lecture_id: foreignKey('lectures', 'lecture_id'),
       assessment_id: foreignKey('assessments', 'assessment_id'),
-      order: { type: Sequelize.INTEGER, allowNull: true }, // optional for ordering
+      order: { type: Sequelize.INTEGER, allowNull: true, defaultValue: 1 }, // optional ordering
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
 
-    // Add indexes
+    // Add composite primary key
+    await queryInterface.sequelize.query(`
+      ALTER TABLE lectures_assessments
+      ADD PRIMARY KEY (lecture_id, assessment_id);
+    `);
+
+    // Add indexes for faster lookups
     await queryInterface.addIndex('lectures_assessments', ['lecture_id']);
     await queryInterface.addIndex('lectures_assessments', ['assessment_id']);
   },

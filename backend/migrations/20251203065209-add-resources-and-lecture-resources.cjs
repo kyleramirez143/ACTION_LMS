@@ -3,6 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // Helpers
     const uuidColumn = {
       type: Sequelize.UUID,
       defaultValue: Sequelize.literal('gen_random_uuid()'),
@@ -39,17 +40,15 @@ module.exports = {
 
     // Create lecture_resources table (many-to-many)
     await queryInterface.createTable('lecture_resources', {
-      lecture_id: foreignKey('lectures', 'lecture_id'),
-      resource_id: foreignKey('resources', 'resource_id'),
+      lecture_id: { ...foreignKey('lectures', 'lecture_id'), primaryKey: true },
+      resource_id: { ...foreignKey('resources', 'resource_id'), primaryKey: true },
       created_at: standardTimestamp,
-      primaryKey: false, // We’ll set composite PK below
+      updated_at: standardTimestamp,
     });
 
-    // Add composite primary key
-    await queryInterface.sequelize.query(`
-      ALTER TABLE lecture_resources
-      ADD PRIMARY KEY (lecture_id, resource_id);
-    `);
+    // Add indexes for faster queries
+    await queryInterface.addIndex('lecture_resources', ['lecture_id']);
+    await queryInterface.addIndex('lecture_resources', ['resource_id']);
   },
 
   async down(queryInterface, Sequelize) {
