@@ -12,7 +12,7 @@ export const navLinks = [
   {
     name: 'Course Management',
     path: '/admin/course-management',
-    requiredRoles: ['Admin', 'Trainer'],
+    requiredRoles: ['Admin'],
   },
   {
     name: 'User Management',
@@ -26,7 +26,7 @@ export const navLinks = [
   },
   {
     name: 'Courses',
-    path: '/trainer/my-course',
+    path: '/trainer/my-courses',
     requiredRoles: ['Trainer'],
   },
   {
