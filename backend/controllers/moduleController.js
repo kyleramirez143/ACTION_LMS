@@ -4,28 +4,31 @@ const { Module, CourseInstructor, User, Lecture } = require("../models/index.cjs
 
 export const createModule = async (req, res) => {
     try {
-        const { title, description, is_active, has_deadline, course_id } = req.body;
-        const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
+        const { title, description, course_id } = req.body;
+        const trainerId = req.user?.user_id;
 
         if (!title) return res.status(400).json({ error: "Module title is required" });
         if (!course_id) return res.status(400).json({ error: "Course ID is required" });
+        if (!trainerId) return res.status(401).json({ error: "Unauthorized trainer" });
 
-        // Optionally: verify course exists here if needed
-        // const courseExists = await Course.findByPk(course_id);
-        // if (!courseExists) return res.status(404).json({ error: "Course not found" });
+        const imageFilename = req.file ? req.file.filename : null;
 
         const module = await Module.create({
             course_id,
             title,
             description,
-            is_active: is_active ?? true,
-            has_deadline: has_deadline ?? false,
-            created_by: trainerId
+            image: imageFilename,
+            created_by: trainerId,
+            created_at: new Date(),
+            updated_at: new Date()
         });
 
-        res.status(201).json({ message: "Module created successfully", module, course_id });
+        res.status(201).json({
+            message: "Module created successfully",
+            module
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Create Module Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -52,44 +55,59 @@ export const getModules = async (req, res) => {
 
 export const getModulesByCourse = async (req, res) => {
     try {
+        const { course_id } = req.params;
+
         const modules = await Module.findAll({
-            where: { course_id: req.params.course_id },
+            where: { course_id },
             include: [
                 { model: Lecture, as: "lectures" }
             ],
             order: [["created_at", "ASC"]]
         });
 
-        return res.json(modules);
+        res.json(modules);
     } catch (error) {
         console.error("Get Modules Error:", error);
         res.status(500).json({ error: "Failed to fetch modules" });
     }
 };
 
-
 export const updateModule = async (req, res) => {
     try {
         const { module_id } = req.params;
-        const updated = await Module.update(req.body, { where: { module_id } });
 
-        if (!updated[0]) return res.status(404).json({ error: "Module not found" });
+        const updates = {
+            title: req.body.title,
+            description: req.body.description,
+            updated_at: new Date()
+        };
+
+        if (req.file) updates.image = req.file.filename;
+
+        const [updated] = await Module.update(updates, { where: { module_id } });
+
+        if (!updated) return res.status(404).json({ error: "Module not found" });
 
         res.json({ message: "Module updated successfully" });
     } catch (error) {
+        console.error("Update Module Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
 
+
 export const deleteModule = async (req, res) => {
     try {
         const { module_id } = req.params;
+
         const deleted = await Module.destroy({ where: { module_id } });
 
         if (!deleted) return res.status(404).json({ error: "Module not found" });
 
         res.json({ message: "Module deleted successfully" });
     } catch (error) {
+        console.error("Delete Module Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
+

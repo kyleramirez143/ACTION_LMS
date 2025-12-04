@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
+import "./QuizGenerator.css";
 
 function QuizGenerator() {
     const [file, setFile] = useState(null);
+    const [uploadedFile, setUploadedFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
@@ -123,6 +125,21 @@ function QuizGenerator() {
         }
     };
 
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === "application/pdf") {
+            setUploadedFile(file);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === "application/pdf") {
+            setUploadedFile(file);
+        }
+    };
+
     return (
         <div className="container-fluid bg-white" style={{ minHeight: "100vh" }}>
             <div className="row">
@@ -136,9 +153,46 @@ function QuizGenerator() {
                 >
                     <div className="p-3 mb-4 shadow-sm rounded bg-light">
                         <h1 className="mb-4">📘 ACTION LMS AI Quiz Generator</h1>
+                        {/* New upload files */}
+                        <div className="assessment-page">
+                            <div
+                                style={{
+                                    flex: "0 0 50%",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "1rem",
+                                    overflowY: "auto",
+                                    maxHeight: "80vh",
+                                }}
+                            >
+                                <div
+                                    className="file-upload-wrapper enhanced-upload"
+                                    onClick={() => document.getElementById("pdfInput").click()}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={handleDrop}
+                                >
+                                    <i className="bi bi-upload upload-icon"></i>
+                                    <span className="fw-semibold text-primary mb-1">Upload PDF</span>
+                                    <span className="text-muted" style={{ fontSize: "0.85rem" }}>
+                                        Drag & Drop or Click to Upload
+                                    </span>
+                                    {uploadedFile && (
+                                        <span className="uploaded-file mt-2">{uploadedFile.name}</span>
+                                    )}
+                                    <input
+                                        type="file"
+                                        id="pdfInput"
+                                        accept="application/pdf"
+                                        style={{ display: "none" }}
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
 
                         {/* Upload File */}
-                        <div className="mb-3">
+                        {/* <div className="mb-3">
                             <label className="form-label">Upload PDF</label>
                             <input
                                 type="file"
@@ -146,7 +200,7 @@ function QuizGenerator() {
                                 className="form-control shadow-sm"
                                 onChange={(e) => setFile(e.target.files[0])}
                             />
-                        </div>
+                        </div> */}
 
                         {/* Quiz Type Selection */}
                         <div className="mb-3 p-3 shadow-sm rounded bg-white">

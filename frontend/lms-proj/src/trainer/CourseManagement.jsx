@@ -1,7 +1,8 @@
+// frontend/lms-proj/src/trainer/CourseManagement.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-// import "./CourseManagementPage.css";
 import defaultImage from "../image/logo.png";
 
 function Course() {
@@ -16,9 +17,7 @@ function Course() {
         try {
             const decoded = jwtDecode(token);
             const userRoles = decoded.roles || [];
-            setRoles(userRoles); // <-- store roles
-
-            if (userRoles.includes("Trainee")) navigate("/access-denied");
+            if (!userRoles.includes("Trainer")) navigate("/access-denied");
         } catch (err) {
             localStorage.removeItem("authToken");
             navigate("/login");
@@ -28,7 +27,12 @@ function Course() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await fetch("/api/courses");
+                const res = await fetch("/api/courses/trainer", {
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 const data = await res.json();
                 setCourses(data);
             } catch (err) {
@@ -42,19 +46,14 @@ function Course() {
         <>
             <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">Courses</h3>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate("/admin/course-management/create")}
-                    >
-                        Add Course</button>
+                    <h3 className="mb-0">My Courses</h3>
                 </div>
 
                 <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
                     {courses.map((course) => (
                         <div
                             key={course.course_id}
-                            onClick={() => navigate(`/admin/course-management/edit/${course.course_id}`)}
+                            onClick={() => navigate(`/trainer/${course.course_id}/modules`)}
                             style={{ cursor: "pointer" }}
                         >
                             <div
@@ -95,26 +94,6 @@ function Course() {
                     ))}
                 </div>
 
-                {/* Pagination */}
-                {/* <div className="pagination-wrapper">
-                    <nav>
-                        <ul className="pagination custom-pagination">
-                            <li className="page-item"><button className="page-link" style={{ backgroundColor: "#f0f0f0" }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" /></svg>
-                            </button></li>
-
-                            <li className="page-item"><button className="page-link">1</button></li>
-                            <li className="page-item"><button className="page-link">2</button></li>
-                            <li className="page-item active"><button className="page-link">3</button></li>
-                            <li className="page-item"><button className="page-link">4</button></li>
-                            <li className="page-item"><button className="page-link">5</button></li>
-
-                            <li className="page-item"><button className="page-link" style={{ backgroundColor: "#f0f0f0" }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black"><path d="m321-80-71-71 329-329-329-329 71-71 400 400L321-80Z" /></svg>
-                            </button></li>
-                        </ul>
-                    </nav>
-                </div> */}
             </div >
         </>
     );

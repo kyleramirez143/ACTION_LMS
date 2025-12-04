@@ -223,3 +223,33 @@ export const deleteCourse = async (req, res) => {
     await Course.destroy({ where: { course_id } });
     res.json({ message: "Deleted!" });
 };
+
+
+// Trainer functions
+export const getTrainerCourses = async (req, res) => {
+    try {
+        const trainerId = req.user.id;
+
+        const data = await Course.findAll({
+            include: [
+                {
+                    model: CourseInstructor,
+                    as: "course_instructors",
+                    where: { managed_by: trainerId },
+                    include: [
+                        {
+                            model: User,
+                            as: "instructor",
+                            attributes: ["first_name", "last_name", "email"]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        res.json(data);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: e.message });
+    }
+};

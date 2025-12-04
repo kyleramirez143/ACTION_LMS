@@ -1,3 +1,5 @@
+// frontend/lms-proj/src/admin/CourseManagementPage.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -26,7 +28,12 @@ function Course() {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await fetch("/api/courses");
+                const res = await fetch("/api/courses", {
+                    headers: {
+                        "Content-type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 const data = await res.json();
                 setCourses(data);
             } catch (err) {

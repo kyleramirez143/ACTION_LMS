@@ -21,6 +21,10 @@ import AdminUserRole from './admin/UserRoleTable';
 // Trainer Imports
 import QuizGenerator from './trainer/QuizGenerator';
 import CoursePage from './trainer/CourseManagement';
+import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
+import AddLecture from "./trainer/AddLecture";
+import ModuleManagement from "./trainer/ModuleManagement.jsx";
+import AddModule from "./trainer/AddModule.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -61,8 +65,14 @@ function AppContent() {
           {/* Trainer Side Routes */}
           <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
 
+          <Route path="/trainer/course-management" element={<CoursePage />} />
+          <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
+          <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
+          <Route path="/trainer/modules/add-lecture/:module_id" element={<AddLecture />} />
+
           {/* Admin Side Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
           <Route path="/admin/course-management" element={<AdminCourseManagement />} />
           <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
           <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />

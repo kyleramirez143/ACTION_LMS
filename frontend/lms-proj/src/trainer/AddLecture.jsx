@@ -73,7 +73,7 @@ export default function AddLecture() {
         if (file) await handleFileUpload(lecture.lecture_id);
 
         // Navigate back to the module screen
-        navigate(`/trainer/modulescreen/${course_id}/${module_id}`, { replace: true });
+        navigate(`/trainer/modules/${module_id}`, { replace: true });
     };
 
     return (

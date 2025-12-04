@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom"; // ✅ correct import
-import "./ModuleManagement.css";
+// import "./ModuleManagement.css";
 
 export default function ModuleManagement() {
     const navigate = useNavigate();
@@ -70,7 +70,7 @@ export default function ModuleManagement() {
                 <h3 className="mb-0">Modules</h3>
                 <button
                     className="btn btn-primary"
-                    onClick={() => navigate(`/admin/module-management/${course_id}/create`)}
+                    onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
                 >
                     Add New Module
                 </button>

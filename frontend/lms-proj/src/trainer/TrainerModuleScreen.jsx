@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ModuleAccordion from "../trainee/ModuleAccordion";
-import UpcomingPanel from "../trainee/UpcomingPanel";
-import "../trainee/modules.css";
+import ModuleAccordion from "../trainer/ModuleAccordion";
+import UpcomingPanel from "../trainer/UpcomingPanel";
+import "../trainer/Module.css";
 
 export default function TrainerModuleScreen() {
-  // ✅ Grab both course_id and module_id from the route
+  // Grab both course_id and module_id from the route
   const { course_id, module_id } = useParams();
   const navigate = useNavigate();
 
@@ -17,12 +17,12 @@ export default function TrainerModuleScreen() {
     const fetchLectures = async () => {
       setLoading(true);
       try {
-        // ✅ Fetch lectures for this specific module
+        // Fetch lectures for this specific module
         const res = await fetch(`/api/lectures/module/${module_id}`);
         if (!res.ok) throw new Error("Failed to fetch lectures");
         const data = await res.json();
 
-        // ✅ If backend returns { lectures: [...] }, unwrap it
+        // If backend returns { lectures: [...] }, unwrap it
         setLectures(data.lectures || data);
       } catch (err) {
         console.error(err);
@@ -37,9 +37,9 @@ export default function TrainerModuleScreen() {
     }
   }, [module_id]);
 
-  // ✅ Navigate to AddLecture page with proper params
+  // Navigate to AddLecture page with proper params
   const handleAddLectureClick = () => {
-    navigate(`/trainer/addlecture/${course_id}/${module_id}`);
+    navigate(`/trainer/modules/${module_id}/add-lecture`);
   };
 
   return (
@@ -50,7 +50,7 @@ export default function TrainerModuleScreen() {
           <button
             className="btn btn-primary btn-sm"
             onClick={handleAddLectureClick}
-            disabled={!module_id}
+            disabled={module_id}
           >
             Add Lecture
           </button>
@@ -69,7 +69,7 @@ export default function TrainerModuleScreen() {
 
       <div className="module-right">
         <div className="upcoming-title">Upcoming</div>
-        <UpcomingPanel />
+        <UpcomingPanel /> 
       </div>
     </div>
   );
