@@ -274,45 +274,35 @@ const AICoachCard = () => (
     <div className="card border-0 shadow-sm bg-white rounded p-3 w-100 h-100">
         <div className="card-body">
             <h4 className="fw-semibold">AI Powered-Coach</h4>
-            <h5 className="text-muted">Hello Trainee Name!</h5>
+            <h6 className="text-muted">Hello Trainee Name!</h6>
+
+            <div className="mb-3">
+                <h5 className="fw-semibold">Overall Progress</h5>
+            </div>
 
             <div className="mb-3">
                 <div className="d-flex align-items-center gap-2 text-danger fw-semibold">
                     <FaExclamationTriangle />
-                    3 Students Struggle with Module 1
+                    Weak Areas: 3 points
                 </div>
 
-                <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4 col-md-12">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col" className="text-center">#</th>
-                                <th scope="col" className="text-center">Name</th>
-                                <th scope="col" className="text-center">Weakness</th>
-                                <th scope="col" className="text-center">Suggestion</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row text-center">1</th>
-                                <td className="text-center">Trainee Name</td>
-                                <td className="text-center">Nihongo Module 1</td>
-                                <td className="text-center">Need to Passed MOCK Exam</td>
-                            </tr>
-                            <tr>
-                                <th scope="row text-center">2</th>
-                                <td className="text-center">Trainee Name</td>
-                                <td className="text-center">Nihongo Module 1</td>
-                                <td className="text-center">Need to Passed MOCK Exam</td>
-                            </tr>
-                            <tr>
-                                <th scope="row text-center">3</th>
-                                <td className="text-center">Trainee Name</td>
-                                <td className="text-center">Nihongo Module 1</td>
-                                <td className="text-center">Need to Passed MOCK Exam</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div className="row">
+                    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4 col-md-6">
+                        <label className="fw-semibold">Weak Areas</label>
+                        <ul className="mt-2 ps-3">
+                            <li><span className="dot red"></span> Data Structure</li>
+                            <li><span className="dot pink"></span> Basic Theory</li>
+                            <li><span className="dot pink"></span> Discrete Math</li>
+                        </ul>
+                    </div>
+
+                    <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4 col-md-6">
+                        <label className="fw-semibold">Recommendation</label>
+                        <ul className="mt-2 ps-3">
+                            <li>Review Resources</li>
+                            <li>Watch Video related to the topics of your weak points.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -322,7 +312,7 @@ const AICoachCard = () => (
 const DashboardHeader = () => (
     <div className="row">
         <div className="col-md-8">
-            <h2 className="fw-bold">Welcome, Trainer!</h2>
+            <h2 className="fw-bold">Admin LMS Dashboard</h2>
         </div>
         <div className="col-md-4">
             <select className="form-select" aria-label="Default select example">

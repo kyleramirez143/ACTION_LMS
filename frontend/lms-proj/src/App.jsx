@@ -11,7 +11,7 @@ import Assessment from "./trainer/Assessment";
 import AssessmentConfirmation from "./trainer/AssessmentConfirmation";
 import ReviewPublish from "./trainer/ReviewPublish";
 import Course from "./trainee/Course";
-import ModuleScreen from "./trainee/ModuleScreen"; 
+import ModuleScreen from "./trainee/ModuleScreen";
 //import AdminDashboard from './pages/AdminDashboard';
 import TraineeDashboard from './trainee/TraineeDashboard';
 import AddPowerpoint from "./trainer/AddPowerpoint";
@@ -25,6 +25,9 @@ import UserRoleTable from "./admin/UserRoleTable";
 import CourseManagement from "./admin/CourseManagement";
 import ModuleManagement from "./admin/ModuleManagement";
 import Dashboard from "./trainer/Dashboard";
+import QuizResult from "./trainee/QuizResult";
+import CreateQuiz from "./trainer/CreateQuiz";
+import AdminDashboard from "./admin/AdminDashboard";
 
 
 
@@ -36,27 +39,31 @@ function AppContent() {
     <>
       {!hideNavbar && <Navbar />}
 
-      <div className="full-screen">
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/modules" element={<ModuleScreen />} />
-          <Route path="/course" element={<Course />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
-          <Route path="/reviewpublish" element={<ReviewPublish />} />
-          <Route path="/trainee" element={<TraineeDashboard />} /> 
-          <Route path="/trainer/addpowerpoint" element={<AddPowerpoint />} />
-          <Route path="/trainer/addvideo" element={<AddVideo />} />
-          <Route path="/trainer/addactivity" element={<AddActivity />} />
-          <Route path="/trainer/profile" element={<ProfileManagement />} />
-          <Route path="/admin/addcourse" element={<AddCourse />} />
-          <Route path="/admin/addmodule" element={<AddModule />} />
-          <Route path="/admin/adduser" element={<AddUsers />} />
-          <Route path="/admin/userroletable" element={<UserRoleTable />} />
-          <Route path="/admin/course" element={<CourseManagement />} />
-          <Route path="/admin/course/module" element={<ModuleManagement />} />
-          <Route path="/trainer/dashboard" element={<Dashboard />} />
-        </Routes>
+      <div className="container-fluid w-100 h-100">
+        <div className="row h-100">
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/modules" element={<ModuleScreen />} />
+            <Route path="/course" element={<Course />} />
+            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/assessmentconfirmation" element={<AssessmentConfirmation />} />
+            <Route path="/reviewpublish" element={<ReviewPublish />} />
+            <Route path="/trainer/addpowerpoint" element={<AddPowerpoint />} />
+            <Route path="/trainer/addvideo" element={<AddVideo />} />
+            <Route path="/trainer/addactivity" element={<AddActivity />} />
+            <Route path="/trainer/profile" element={<ProfileManagement />} />
+            <Route path="/admin/addcourse" element={<AddCourse />} />
+            <Route path="/admin/addmodule" element={<AddModule />} />
+            <Route path="/admin/adduser" element={<AddUsers />} />
+            <Route path="/admin/userroletable" element={<UserRoleTable />} />
+            <Route path="/admin/course" element={<CourseManagement />} />
+            <Route path="/admin/course/module" element={<ModuleManagement />} />
+            <Route path="/trainer/dashboard" element={<Dashboard />} />
+            <Route path="/trainer/quizresult" element={<QuizResult />} />
+            <Route path="/trainer/createquiz" element={<CreateQuiz />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          </Routes>
+        </div>
       </div>
     </>
   );
