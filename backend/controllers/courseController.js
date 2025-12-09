@@ -3,10 +3,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const db = require("../models/index.cjs");
-// console.log(db);
-
 const { Course, User, CourseInstructor, sequelize, Sequelize } = db;
-// console.log(Course);
 const { Op } = Sequelize;
 
 export const createCourse = async (req, res) => {

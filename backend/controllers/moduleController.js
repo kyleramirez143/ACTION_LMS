@@ -1,11 +1,13 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const { Module, CourseInstructor, User, Lecture } = require("../models/index.cjs");
+
+const db = require("../models/index.cjs");
+const { Module, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
     try {
         const { title, description, course_id } = req.body;
-        const trainerId = req.user?.user_id;
+        const trainerId = req.user?.id;
 
         if (!title) return res.status(400).json({ error: "Module title is required" });
         if (!course_id) return res.status(400).json({ error: "Course ID is required" });
@@ -33,30 +35,29 @@ export const createModule = async (req, res) => {
     }
 };
 
-export const getModules = async (req, res) => {
-    try {
-        const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
+// export const getModules = async (req, res) => {
+//     try {
+//         const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
 
-        // Find all modules for courses this trainer manages
-        const courseInstructor = await CourseInstructor.findAll({ where: { managed_by: trainerId } });
-        const courseIds = courseInstructor.map(ci => ci.course_id);
+//         // Find all modules for courses this trainer manages
+//         const courseInstructor = await CourseInstructor.findAll({ where: { managed_by: trainerId } });
+//         const courseIds = courseInstructor.map(ci => ci.course_id);
 
-        const modules = await Module.findAll({
-            where: { course_id: courseIds },
-            include: [{ model: User, as: "creator", attributes: ["first_name", "last_name", "email"] }]
-        });
+//         const modules = await Module.findAll({
+//             where: { course_id: courseIds },
+//             include: [{ model: User, as: "creator", attributes: ["first_name", "last_name", "email"] }]
+//         });
 
-        res.json(modules);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
-    }
-};
+//         res.json(modules);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 
 export const getModulesByCourse = async (req, res) => {
     try {
         const { course_id } = req.params;
-
         const modules = await Module.findAll({
             where: { course_id },
             include: [
@@ -65,10 +66,10 @@ export const getModulesByCourse = async (req, res) => {
             order: [["created_at", "ASC"]]
         });
 
-        res.json(modules);
+        res.json(modules || []);
     } catch (error) {
         console.error("Get Modules Error:", error);
-        res.status(500).json({ error: "Failed to fetch modules" });
+        res.json([]);
     }
 };
 

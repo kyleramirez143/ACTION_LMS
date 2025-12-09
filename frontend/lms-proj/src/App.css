@@ -1,41 +1,27 @@
-.review-publish .card {
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  background-color: #fff;
-  border: 1px solid #dee2e6;
-}
-
-/* Global font and background */
 body {
-  font-family: 'Poppins', sans-serif !important;
+  font-family: 'Poppins', sans-serif;
   background-color: #D9D9D9;
-  margin: 0;
-  padding: 0;
+  /* margin: 0;
+  padding: 0; */
 }
 
-.review-publish .card-header {
-  font-weight: 600;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  font-size: 1rem;
+/* Reset box sizing */
+* {
+  box-sizing: border-box;
 }
 
-.review-publish .card-body {
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.review-publish ol {
-  padding-left: 1.2rem;
-  margin-bottom: 1rem;
-}
+/* Utility classes (optional) */
+/* .text-center {
+  text-align: center;
+} */
 
 /* Global reset and layout */
 html,
 body,
 #root {
-  font-family: 'Poppins', sans-serif !important;
+  font-family: 'Poppins', sans-serif;
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
   background-color: #f8f9fa;
@@ -43,57 +29,24 @@ body,
   overflow-y: auto;
 }
 
-.review-publish .form-check {
-  margin-bottom: 0.75rem;
-}
-
-.review-publish .form-check-label {
-  margin-left: 0.25rem;
-}
-
-.review-publish .list-group-item {
-  border: none;
-  padding-left: 1.2rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.review-publish .btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-  font-weight: 500;
-}
-
-.review-publish .btn-outline-secondary {
-  border-color: #007bff;
-  color: #007bff;
-  font-weight: 500;
-}
-
-.review-publish .btn-outline-secondary:hover {
-  background-color: #007bff;
-  color: #fff;
-}
 
 /* Ensure all elements respect box sizing */
-*,
+/* *,
 *::before,
 *::after {
   box-sizing: inherit;
-  font-family: inherit;
-}
+} */
 
 /* Ensure all components fill the screen */
-.full-screen {
+/* .full-screen {
   min-height: 100vh;
   width: 100vw;
   display: flex;
   flex-direction: row;
   overflow-y: auto;
-}
+} */
 
-.mt-1 {
+/* .mt-1 {
   margin-top: 0.25rem;
 }
 
@@ -127,4 +80,4 @@ body,
 
 .p-3 {
   padding: 1rem;
-}
+} */

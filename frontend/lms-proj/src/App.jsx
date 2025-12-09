@@ -34,8 +34,9 @@ function AppContent() {
     <>
       {!hideNavbar && <Navbar />}
 
-      <div className="full-screen">
-        {/* 
+      <div className="container-fluid w-100 h-100">
+        <div className="row h-100">
+          {/* 
           How to use ProtectedRoutes:
 
           <Route 
@@ -58,27 +59,29 @@ function AppContent() {
           tuluyang maayos na talaga ang navbar natin.
 
         */}
-        <Routes>
-          {/* Public / Login */}
-          <Route path="/" element={<LoginPage />} />
+          <Routes>
+            {/* Public / Login */}
+            <Route path="/" element={<LoginPage />} />
 
-          {/* Trainer Side Routes */}
-          <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            {/* Trainer Side Routes */}
+            <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
 
-          <Route path="/trainer/course-management" element={<CoursePage />} />
-          <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
-          <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
-          <Route path="/trainer/modules/add-lecture/:module_id" element={<AddLecture />} />
+            <Route path="/trainer/course-management" element={<CoursePage />} />
+            <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
+            <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
+            <Route path="/trainer/modules/add-lecture/:module_id" element={<AddLecture />} />
 
-          {/* Admin Side Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Admin Side Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-          <Route path="/admin/course-management" element={<AdminCourseManagement />} />
-          <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
-          <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
-          <Route path="/admin/user-management" element={<AdminUserRole />} />
+            <Route path="/admin/course-management" element={<AdminCourseManagement />} />
+            <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
+            <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
+            <Route path="/admin/user-management" element={<AdminUserRole />} />
 
-        </Routes>
+          </Routes>
+        </div>
+
       </div>
     </>
   );

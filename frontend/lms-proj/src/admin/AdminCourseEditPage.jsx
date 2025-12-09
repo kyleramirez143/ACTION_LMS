@@ -1,9 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 function AdminCourseEditPage() {
     const navigate = useNavigate();
     const { course_id } = useParams();
+    const token = localStorage.getItem("authToken");
+
+    // AUTH CHECK
+    useEffect(() => {
+        if (!token) return navigate("/");
+
+        try {
+            const decoded = jwtDecode(token);
+            const roles = decoded.roles || [];
+            if (!roles.includes("Admin")) navigate("/access-denied");
+        } catch (err) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+        }
+    }, [token, navigate]);
 
     const [course, setCourse] = useState(null);
     const [title, setTitle] = useState("");
@@ -19,7 +35,11 @@ function AdminCourseEditPage() {
     // Load trainers
     useEffect(() => {
         const loadTrainers = async () => {
-            const res = await fetch("/api/users/trainers");
+            const res = await fetch("/api/users/trainers", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const data = await res.json();
             setTrainers(data);
         };
@@ -29,7 +49,13 @@ function AdminCourseEditPage() {
     // Load course data
     useEffect(() => {
         const loadCourse = async () => {
-            const res = await fetch(`/api/courses`);
+            const res = await fetch(`/api/courses`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
             const data = await res.json();
             const found = data.find(c => c.course_id == course_id);
 
@@ -66,7 +92,10 @@ function AdminCourseEditPage() {
 
             const res = await fetch("/api/courses/upload-image", {
                 method: "POST",
-                body: formData
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             const data = await res.json();
@@ -83,7 +112,10 @@ function AdminCourseEditPage() {
 
         const res = await fetch(`/api/courses/${course_id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify(body)
         });
 
@@ -97,7 +129,10 @@ function AdminCourseEditPage() {
         if (!confirm("Are you sure? This cannot be undone.")) return;
 
         const res = await fetch(`/api/courses/${course_id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         });
 
         if (!res.ok) return alert("Delete failed");
@@ -172,9 +207,9 @@ function AdminCourseEditPage() {
                 </select>
 
                 <div className="mt-2">
-                    {selectedTrainers.map(t => (
+                    {selectedTrainers.map((t, index) => (
                         <span
-                            key={t.id}
+                            key={`${t.id}-${index}`}
                             className="badge bg-primary p-2 me-2"
                             style={{ cursor: "pointer" }}
                             onClick={() => setSelectedTrainers(prev => prev.filter(x => x.id !== t.id))}
