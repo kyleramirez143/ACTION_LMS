@@ -5,18 +5,18 @@ import { v4 as uuidv4 } from "uuid";
 // Create a new lecture
 export const createLecture = async (req, res) => {
     try {
-        const { title, description, module_id, course_id } = req.body;
-        const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
+        const { title, description, module_id } = req.body;
+        const trainerId = req.user?.id;
 
-        if (!title || !module_id || !course_id) {
+        if (!title || !module_id ) {
             return res.status(400).json({ error: "Title, module_id, and course_id are required" });
         }
 
         const lecture = await Lecture.create({
             lecture_id: uuidv4(),
             title,
+            description,
             module_id,
-            course_id,
             created_by: trainerId,
             content_url: null // initially empty
         });

@@ -120,6 +120,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      image: {type: Sequelize.STRING(255), allowNull: true},
       title: { type: Sequelize.STRING(255), allowNull: false },
       description: { type: Sequelize.TEXT },
       created_by: {
@@ -141,12 +142,6 @@ module.exports = {
 
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,
-      course_id: {
-        ...foreignKey('courses', 'course_id'),
-        allowNull: false,
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
       module_id: {
         ...foreignKey('modules', 'module_id'),
         allowNull: false,
@@ -160,63 +155,12 @@ module.exports = {
         onDelete: 'SET NULL'
       },
       title: { type: Sequelize.STRING(255), allowNull: false },
-      content_type: { type: Sequelize.STRING(50) },
-      content_url: { type: Sequelize.TEXT },
+      description: { type: Sequelize.TEXT, allowNull: true},
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
     await queryInterface.addIndex('lectures', ['module_id']);
     await queryInterface.addIndex('lectures', ['created_by']);
-
-    // Lecture_Resources table
-    await queryInterface.createTable('lecture_resources', {
-      lecture_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        primaryKey: true,
-        references: {
-          model: 'lectures',
-          key: 'lecture_id'
-        },
-        onDelete: 'CASCADE'
-      },
-      resources_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        primaryKey: true,
-        references: {
-          model: 'resources',
-          key: 'resource_id'
-        },
-        onDelete: 'CASCADE'
-      },
-      created_at: standardTimestamp,
-    });
-
-    // Lecture_Assessments table
-    await queryInterface.createTable('lecture_assessments', {
-      lecture_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        primaryKey: true,
-        references: {
-          model: 'lectures',
-          key: 'lecture_id'
-        },
-        onDelete: 'CASCADE'
-      },
-      assessment_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        primaryKey: true,
-        references: {
-          model: 'assessments',
-          key: 'assessment_id'
-        },
-        onDelete: 'CASCADE'
-      },
-      created_at: standardTimestamp,
-    });
 
     // Resources
     await queryInterface.createTable('resources', {
@@ -370,6 +314,44 @@ module.exports = {
     await queryInterface.addIndex('assessment_screen_sessions', ['user_id']);
     await queryInterface.addIndex('assessment_screen_sessions', ['assessment_id']);
     await queryInterface.addIndex('assessment_screen_sessions', ['user_id', 'assessment_id']);
+
+    // Lecture_Resources table
+    await queryInterface.createTable('lecture_resources', {
+      lecture_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        ...foreignKey('lectures', 'lecture_id'),
+        onDelete: 'CASCADE'
+      },
+      resources_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        ...foreignKey('resources', 'resource_id'),
+        onDelete: 'CASCADE'
+      },
+      created_at: standardTimestamp,
+    });
+
+    // Lecture_Assessments table
+    await queryInterface.createTable('lecture_assessments', {
+      lecture_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        ...foreignKey('lectures', 'lecture_id'),
+        onDelete: 'CASCADE'
+      },
+      assessment_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        ...foreignKey('assessments', 'assessment_id'),
+        onDelete: 'CASCADE'
+      },
+      created_at: standardTimestamp,
+    });
   },
 
   async down(queryInterface, Sequelize) {

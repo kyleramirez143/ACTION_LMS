@@ -70,7 +70,7 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
 
-            <Route path="/trainer/modules/add-lecture/:module_id" element={<AddLecture />} />
+            <Route path="/trainer/modules/:module_id/create" element={<AddLecture />} />
             <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />}/>
 
             {/* Admin Side Routes */}
