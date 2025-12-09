@@ -1,11 +1,28 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom"; // ✅ correct import
+import { useNavigate, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 // import "./ModuleManagement.css";
+import defaultImage from "../image/logo.png";
 
 export default function ModuleManagement() {
     const navigate = useNavigate();
-    const location = useLocation(); // detect navigation state
-    const { course_id } = useParams(); // ✅ correct object destructuring
+    const { course_id } = useParams();
+
+    const token = localStorage.getItem("authToken");
+
+    // AUTH CHECK
+    useEffect(() => {
+        if (!token) return navigate("/");
+
+        try {
+            const decoded = jwtDecode(token);
+            const roles = decoded.roles || [];
+            if (!roles.includes("Trainer")) navigate("/access-denied");
+        } catch (err) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+        }
+    }, [token, navigate]);
 
     const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,15 +37,24 @@ export default function ModuleManagement() {
         const fetchModules = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/modules/${course_id}`);
+                const res = await fetch(`/api/modules/${course_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-type": "application/json",
+                    }
+                });
                 const data = await res.json();
 
-                if (!Array.isArray(data)) {
-                    console.error("API returned non-array:", data);
-                    setModules([]);
-                } else {
+                if (Array.isArray(data)) {
                     setModules(data);
+                } else if (data.modules) {
+                    setModules(data.modules);
+                    if (data.error) console.warn("Backend error:", data.error);
+                } else {
+                    setModules([]);
                 }
+
+                console.log("Fetched modules:", data);
             } catch (error) {
                 console.error("Failed to fetch modules:", error);
                 setModules([]);
@@ -101,10 +127,7 @@ export default function ModuleManagement() {
                                             }}
                                         >
                                             <img
-                                                src={
-                                                    module.cover ||
-                                                    "https://source.unsplash.com/800x450/?education,learning"
-                                                }
+                                                src={ module.image ? `/uploads/images/${module.image}` : defaultImage}
                                                 alt={`${module.title} cover`}
                                                 className="w-100 h-100 rounded"
                                                 style={{ objectFit: "cover" }}

@@ -34,7 +34,11 @@ function AdminCoursePage() {
     useEffect(() => {
         const fetchTrainers = async () => {
             try {
-                const res = await fetch("/api/users/trainers");
+                const res = await fetch("/api/users/trainers", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 const data = await res.json();
                 setTrainers(data);
             } catch (err) {
@@ -84,10 +88,13 @@ function AdminCoursePage() {
             const formData = new FormData();
             formData.append("image", courseImage);
             formData.append("title", courseTitle);
-            
+
             const uploadRes = await fetch("/api/courses/upload-image", {
                 method: "POST",
                 body: formData,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             if (!uploadRes.ok) {
@@ -115,7 +122,10 @@ function AdminCoursePage() {
         try {
             const res = await fetch(apiEndpoint, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify(body),
             });
 

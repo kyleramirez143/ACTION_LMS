@@ -5,7 +5,7 @@ import { jwtDecode } from "jwt-decode";
 function AddModule() {
     const navigate = useNavigate();
     const { course_id } = useParams();
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
 
     // AUTH CHECK
     useEffect(() => {
@@ -36,10 +36,13 @@ function AddModule() {
             formData.append("course_id", course_id);
             if (image) formData.append("image", image);
 
-            const res = await fetch(`/api/modules`, {
+            const apiEndpoint = `/api/modules`;
+            const res = await fetch(apiEndpoint, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
             });
 
             const data = await res.json();

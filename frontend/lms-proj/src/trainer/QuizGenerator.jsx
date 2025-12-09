@@ -154,7 +154,7 @@ function QuizGenerator() {
                     <div className="p-3 mb-4 shadow-sm rounded bg-light">
                         <h1 className="mb-4">📘 ACTION LMS AI Quiz Generator</h1>
                         {/* New upload files */}
-                        <div className="assessment-page">
+                        {/* <div className="assessment-page">
                             <div
                                 style={{
                                     flex: "0 0 50%",
@@ -188,11 +188,10 @@ function QuizGenerator() {
                                     />
                                 </div>
                             </div>
-                        </div>
-
+                        </div> */}
 
                         {/* Upload File */}
-                        {/* <div className="mb-3">
+                        <div className="mb-3">
                             <label className="form-label">Upload PDF</label>
                             <input
                                 type="file"
@@ -200,7 +199,7 @@ function QuizGenerator() {
                                 className="form-control shadow-sm"
                                 onChange={(e) => setFile(e.target.files[0])}
                             />
-                        </div> */}
+                        </div>
 
                         {/* Quiz Type Selection */}
                         <div className="mb-3 p-3 shadow-sm rounded bg-white">
