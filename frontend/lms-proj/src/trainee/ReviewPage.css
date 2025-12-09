@@ -1,0 +1,164 @@
+/* MAIN CONTAINER */
+.reviewpage-container {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f8f9fc;
+}
+
+/* HEADER */
+.reviewpage-header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: -55px; /* move more to the left */
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* SCORE DISPLAY */
+.reviewpage-score {
+  margin-left: auto;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #28a745;
+}
+
+/* MAIN WRAPPER (same as quiz-main) */
+.reviewpage-main {
+  display: flex;
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* QUESTION CARD (same as quiz-page) */
+.reviewpage-question-card {
+  flex: 3;
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.question-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+/* OPTIONS (same structure as quizpage, but disabled + color-coded) */
+.reviewpage-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reviewpage-option {
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  background: #f7f7f7;
+}
+
+/* correct option */
+.reviewpage-option.correct {
+  background: #d9fadd;
+  border-color: #2ecc71;
+  font-weight: 600;
+}
+
+/* wrong option (user selected) */
+.reviewpage-option.wrong {
+  background: #ffe1e1;
+  border-color: #e74c3c;
+  font-weight: 600;
+}
+
+/* SIDEBAR (copy of quiz-sidebar) */
+.reviewpage-sidebar {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Navigator box (same as quizpage) */
+.question-navigator {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.nav-item {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9ecef;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Correct = green */
+.nav-item.correct {
+  background: #28a745;
+  color: white;
+}
+
+/* Incorrect = red */
+.nav-item.incorrect {
+  background: #dc3545;
+  color: white;
+}
+
+/* Active question (outline only, don’t override correct/wrong colors) */
+.nav-item.active {
+  outline: 3px solid #0055ff;
+}
+
+.explanation-card {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #fff3cd; /* light yellow */
+  border-left: 5px solid #ffc107; /* yellow border */
+  border-radius: 6px;
+}
+
+.explanation-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.explanation-card p {
+  margin: 0;
+  font-size: 0.95rem;
+}

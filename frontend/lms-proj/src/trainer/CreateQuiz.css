@@ -1,5 +1,6 @@
 /* ===================== ROOT ===================== */
 .assessment-page {
+<<<<<<< HEAD
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -337,3 +338,279 @@
     font-weight: 500;
     word-break: break-word;
 }
+=======
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  padding: 1rem 2rem;
+  font-family: 'Arial', sans-serif;
+  background: #f8f9fd;
+  box-sizing: border-box;
+}
+
+/* ===================== PAGE TITLE ===================== */
+.assessment-page .page-title {
+  font-size: 26px;
+  color: #10143b;
+  margin-bottom: 1rem;
+  padding-top: 0;
+}
+
+/* ===================== SCROLLABLE CONTENT ===================== */
+.assessment-page .page-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* ===================== ROW FIX ===================== */
+.assessment-page .row {
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 1rem;
+}
+
+/* ===================== CONTAINER / CARD ===================== */
+.assessment-page .container-box {
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.assessment-page .container-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* ===================== QUESTIONS ===================== */
+.assessment-page .questions-wrapper {
+  padding: 1.5rem;
+}
+
+.assessment-page .questions-scroll,
+.assessment-page .questions-scroll-left {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+.assessment-page .question-block {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.assessment-page .option-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.assessment-page .option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f2f2f2;
+  padding: 0.5rem 0.75rem;
+  border-radius: 25px;
+  margin-bottom: 8px;
+}
+
+.assessment-page .option-label {
+  width: 26px;
+  height: 26px;
+  background: #dedede;
+  border-radius: 50%;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.assessment-page .preview-line {
+  margin-bottom: 8px;
+}
+
+/* ===================== RIGHT CARD LAYOUT ===================== */
+.assessment-page .right-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.assessment-page .right-card-footer {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 -6px 12px rgba(0,0,0,0.04);
+  border-radius: 0 0 12px 12px;
+}
+
+/* ===================== FORM CONTROLS ===================== */
+.assessment-page .form-control {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* ===================== BUTTONS ===================== */
+.assessment-page .btn-primary {
+  background: #0047AB !important;
+  padding: 10px 25px;
+  border-radius: 0px;
+  color: white;
+}
+
+.assessment-page .btn-outline-secondary {
+  padding: 10px 25px;
+  border-radius: 30px;
+}
+
+.assessment-page .btn-white {
+  background-color: #0047AB;
+  color: #ffffff;
+  border: 1px solid #ccc;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.assessment-page .btn-white:hover {
+  background-color: #003a8c;
+  transform: translateY(-1px);
+}
+
+/* ===================== MODAL ===================== */
+.assessment-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.assessment-page .modal-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.assessment-page .bi.bi-check2-square {
+  font-size: 80px;
+  color: #00C49F !important;
+  margin-bottom: 0.75rem;
+}
+
+.assessment-page .modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #10143b;
+}
+
+.assessment-page .modal-text {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.assessment-page .modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.assessment-page .modal-actions .btn {
+  flex: 1;                  /* Equal width */
+  padding: 12px 20px;       /* Same height */
+  border-radius: 8px;       /* Unified shape */
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Review and Publish button */
+.assessment-page .modal-actions .btn-primary {
+  background: #0047AB;
+  color: white;
+  border: 1px solid #0047AB; /* border added for consistency */
+}
+
+/* Cancel button */
+.assessment-page .modal-actions .btn-light {
+  background: #fff;
+  color: #0047AB;
+  border: 1px solid #0047AB; /* same border thickness */
+}
+
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 992px) {
+  .assessment-page .row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+/* ===================== ENHANCED PDF UPLOAD ===================== */
+.assessment-page .enhanced-upload {
+  cursor: pointer;
+  background: #ffffff;               /* same as container-box */
+  min-height: 300px;
+  width: 100%;
+  border-radius: 12px;               /* match card radius */
+  padding: 1rem;
+
+  /* match container-box shadow */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+  border: 1px solid #e5e5e5;         /* subtle border like cards */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* match hover behavior of container-box */
+.assessment-page .enhanced-upload:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2); 
+}
+
+.assessment-page .enhanced-upload .upload-icon {
+  font-size: 2.5rem;
+  color: #0047AB;
+  margin-bottom: 0.5rem;
+}
+
+.assessment-page .enhanced-upload .uploaded-file {
+  font-size: 0.85rem;
+  color: #333;
+  margin-top: 5px;
+  font-weight: 500;
+  word-break: break-word;
+}
+>>>>>>> e04b104a9210cc186fc966415cd794a316074cea
