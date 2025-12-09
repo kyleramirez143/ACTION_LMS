@@ -116,7 +116,7 @@ export const QuizResultModal = ({ score, total, onReview }) => {
         <button
           type="button"
           className="btn-review"
-          onClick={() => navigate("/review")} // navigate to review page
+          onClick={() => navigate("/trainee/review")} // navigate to review page
         >
           Review Answers
         </button>
