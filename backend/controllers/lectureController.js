@@ -1,14 +1,15 @@
 import pkg from "../models/index.cjs";
-const { Lecture } = pkg;
+const { Lecture, LectureResource, Resource } = pkg;
 import { v4 as uuidv4 } from "uuid";
 
+// Create a new lecture
 export const createLecture = async (req, res) => {
     try {
         const { title, description, module_id, course_id } = req.body;
         const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
 
         if (!title || !module_id || !course_id) {
-            return res.status(400).json({ error: "Title, module_id, and course_id required" });
+            return res.status(400).json({ error: "Title, module_id, and course_id are required" });
         }
 
         const lecture = await Lecture.create({
@@ -23,22 +24,26 @@ export const createLecture = async (req, res) => {
         res.status(201).json(lecture);
     } catch (err) {
         console.error("Create Lecture Error:", err);
-        res.status(500).json({ error: "Failed to create lecture" });
+        res.status(500).json({ error: "Failed to create lecture", details: err.message });
     }
 };
+
+// Upload a file to a lecture
 export const uploadLectureFile = async (req, res) => {
     try {
         const { lecture_id } = req.body;
-
         if (!lecture_id || !req.file) {
             return res.status(400).json({ error: "lecture_id and file are required" });
         }
 
-        // Update lecture with file path
-        await Lecture.update(
+        const updated = await Lecture.update(
             { content_url: req.file.path },
             { where: { lecture_id } }
         );
+
+        if (!updated[0]) {
+            return res.status(404).json({ error: "Lecture not found" });
+        }
 
         res.status(200).json({
             message: "File uploaded successfully",
@@ -47,20 +52,29 @@ export const uploadLectureFile = async (req, res) => {
 
     } catch (err) {
         console.error("Upload Lecture File Error:", err);
-        res.status(500).json({ error: "Failed to upload lecture file" });
+        res.status(500).json({ error: "Failed to upload lecture file", details: err.message });
     }
 };
+
+// Get all lectures for a specific module
 export const getLecturesByModule = async (req, res) => {
     try {
+        const { module_id } = req.params;
+        if (!module_id) {
+            return res.status(400).json({ error: "module_id is required" });
+        }
+
+        // Quick fix: remove include for now
         const lectures = await Lecture.findAll({
-            where: { module_id: req.params.module_id },
+            where: { module_id },
             order: [["created_at", "ASC"]],
-            attributes: ["lecture_id", "title", "content_url", "module_id", "course_id"],
+            attributes: ["lecture_id", "title", "content_url", "module_id", "course_id"]
         });
 
-        res.json(lectures);
+        res.json(lectures || []);
+
     } catch (err) {
         console.error("Get Lectures Error:", err);
-        res.status(500).json({ error: "Failed to fetch lectures" });
+        res.status(500).json({ error: "Failed to fetch lectures", details: err.message });
     }
 };

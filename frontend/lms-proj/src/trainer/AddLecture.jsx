@@ -1,9 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function AddLecture() {
     const { course_id, module_id } = useParams();
     const navigate = useNavigate();
+
+    const token = localStorage.getItem("authToken");
+
+    // AUTH CHECK
+    useEffect(() => {
+        if (!token) return navigate("/");
+
+        try {
+            const decoded = jwtDecode(token);
+            const roles = decoded.roles || [];
+            if (!roles.includes("Trainer")) navigate("/access-denied");
+        } catch (err) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+        }
+    }, [token, navigate]);
 
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState(null);

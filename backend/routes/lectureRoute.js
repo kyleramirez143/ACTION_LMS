@@ -17,6 +17,6 @@ router.post("/", createLecture);
 router.post("/resource", upload.single("file"), uploadLectureFile);
 
 // get lectures by module
-router.get("/module/:module_id", getLecturesByModule);
+router.get("/modules/:module_id", getLecturesByModule);
 
 export default router;

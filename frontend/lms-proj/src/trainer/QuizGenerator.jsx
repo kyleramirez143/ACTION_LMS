@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { usePrompt } from "../hooks/usePrompt"
 // import "bootstrap/dist/css/bootstrap.min.css";
 import "./QuizGenerator.css";
 
@@ -11,6 +12,9 @@ function QuizGenerator() {
     const [loading, setLoading] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
     const [questionQty, setQuestionQty] = useState(0);
+    const [hasSaved, setHasSaved] = useState(false);
+    const [hasDiscarded, setHasDiscarded] = useState(false);
+
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -79,8 +83,9 @@ function QuizGenerator() {
     };
 
     const handleSaveQuiz = async (assessmentId) => {
+        setHasSaved(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/assessments/${assessmentId}/publish`, {
+            const res = await fetch(`http://localhost:5000/api/upload/${assessmentId}/publish`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -102,10 +107,11 @@ function QuizGenerator() {
     };
 
     const handleDiscardQuiz = async (assessmentId) => {
+        setHasDiscarded(true);
         if (!window.confirm("Are you sure you want to discard this quiz? This cannot be undone.")) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/api/assessments/${assessmentId}`, {
+            const res = await fetch(`http://localhost:5000/api/upload/${assessmentId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -140,6 +146,35 @@ function QuizGenerator() {
         }
     };
 
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!quiz) return;
+            e.preventDefault();
+            e.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [quiz]);
+
+    usePrompt("You have an unsaved quiz. Are you sure you want to leave?", quiz);
+
+    useEffect(() => {
+        return () => {
+            if (quiz && !hasSaved && !hasDiscarded) {
+                // Auto discard quiz when user leaves page without saving
+                fetch(`http://localhost:5000/api/upload/${quiz.assessmentId}`, {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                    .then(() => console.log("Auto-discarded unsaved quiz"))
+                    .catch(err => console.error("Auto-discard failed:", err));
+            }
+        };
+    }, [quiz, hasSaved, hasDiscarded, token]);
+
     return (
         <div className="container-fluid bg-white" style={{ minHeight: "100vh" }}>
             <div className="row">
@@ -154,7 +189,7 @@ function QuizGenerator() {
                     <div className="p-3 mb-4 shadow-sm rounded bg-light">
                         <h1 className="mb-4">📘 ACTION LMS AI Quiz Generator</h1>
                         {/* New upload files */}
-                        {/* <div className="assessment-page">
+                        <div className="assessment-page">
                             <div
                                 style={{
                                     flex: "0 0 50%",
@@ -188,7 +223,7 @@ function QuizGenerator() {
                                     />
                                 </div>
                             </div>
-                        </div> */}
+                        </div>
 
                         {/* Upload File */}
                         <div className="mb-3">

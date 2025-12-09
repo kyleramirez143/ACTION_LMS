@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const db = require("../models/index.cjs");
-const { Module, CourseInstructor, User, Lecture } = db;
+const { Module, Course, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
     try {
@@ -35,29 +35,10 @@ export const createModule = async (req, res) => {
     }
 };
 
-// export const getModules = async (req, res) => {
-//     try {
-//         const trainerId = req.user?.user_id || "c0000000-0000-0000-0000-000000000002";
-
-//         // Find all modules for courses this trainer manages
-//         const courseInstructor = await CourseInstructor.findAll({ where: { managed_by: trainerId } });
-//         const courseIds = courseInstructor.map(ci => ci.course_id);
-
-//         const modules = await Module.findAll({
-//             where: { course_id: courseIds },
-//             include: [{ model: User, as: "creator", attributes: ["first_name", "last_name", "email"] }]
-//         });
-
-//         res.json(modules);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: error.message });
-//     }
-// };
-
 export const getModulesByCourse = async (req, res) => {
     try {
         const { course_id } = req.params;
+        
         const modules = await Module.findAll({
             where: { course_id },
             include: [

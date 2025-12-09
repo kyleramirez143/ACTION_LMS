@@ -168,6 +168,75 @@ module.exports = {
     await queryInterface.addIndex('lectures', ['module_id']);
     await queryInterface.addIndex('lectures', ['created_by']);
 
+    // Lecture_Resources table
+    await queryInterface.createTable('lecture_resources', {
+      lecture_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: 'lectures',
+          key: 'lecture_id'
+        },
+        onDelete: 'CASCADE'
+      },
+      resources_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: 'resources',
+          key: 'resource_id'
+        },
+        onDelete: 'CASCADE'
+      },
+      created_at: standardTimestamp,
+    });
+
+    // Lecture_Assessments table
+    await queryInterface.createTable('lecture_assessments', {
+      lecture_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: 'lectures',
+          key: 'lecture_id'
+        },
+        onDelete: 'CASCADE'
+      },
+      assessment_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: 'assessments',
+          key: 'assessment_id'
+        },
+        onDelete: 'CASCADE'
+      },
+      created_at: standardTimestamp,
+    });
+
+    // Resources
+    await queryInterface.createTable('resources', {
+      resource_id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+        defaultValue: Sequelize.UUIDV4,
+        allowNull: false
+      },
+      file_url: {
+        type: Sequelize.STRING(500),
+        allowNull: false
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW
+      }
+    });
+
     // --------------------------
     // ASSESSMENT TYPES
     // --------------------------
@@ -321,5 +390,8 @@ module.exports = {
     await queryInterface.dropTable('roles');
     await queryInterface.dropTable('passwords');
     await queryInterface.dropTable('users');
+    await queryInterface.dropTable('lecture_assessments');
+    await queryInterface.dropTable('lecture_resources');
+    await queryInterface.dropTable('resources');
   },
 };
