@@ -35,7 +35,13 @@ export default function TrainerModuleScreen() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/lectures/modules/${module_id}`);
+      const res = await fetch(`/api/lectures/modules/${module_id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
 
       const data = await res.json();
       // Ensure we always have an array
@@ -49,16 +55,16 @@ export default function TrainerModuleScreen() {
     }
   };
 
-  // useEffect(() => {
-  //   if (module_id) {
-  //     fetchLectures();
-  //   }
-  // }, [module_id]);
+  useEffect(() => {
+    if (module_id) {
+      fetchLectures();
+    }
+  }, [module_id]);
 
   // Navigate to AddLecture page
   const handleAddLectureClick = () => {
     // Pass fetchLectures so AddLecture can call it after creating a lecture
-    navigate(`/trainer/modules/${module_id}/create`);
+    navigate(`/trainer/${course_id}/modules/${module_id}/create`);
   };
 
   return (

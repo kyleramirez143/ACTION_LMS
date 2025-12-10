@@ -75,7 +75,6 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                 {/* RESOURCES HEADER */}
                                 <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <h6 className="resource-heading">Resources</h6>
-
                                     {isTrainerView && (
                                         <div ref={resourcesRef} style={{ position: "relative" }}>
                                             <button
@@ -108,59 +107,40 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                 </div>
 
                                 {/* RESOURCES LIST */}
-                                {lec.content_url && lec.content_url.length > 0 ? (
+                                {lec.resources && lec.resources.length > 0 ? (
                                     <div className="resources-container">
-                                        {lec.content_url.map((url, idx) => (
+                                        {lec.resources.map((res, idx) => (
                                             <a
-                                                key={idx}
-                                                href={`${window.location.origin}/${url.replace(/\\/g, "/")}`}
+                                                key={res.resource_id}
+                                                href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
                                                 className="resource-item"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                <FileText size={18} /> {lec.title} Resource {idx + 1}
+                                                <FileText size={18} /> Resource {idx + 1}
                                             </a>
                                         ))}
-
-                                        {/* QUIZ LINK (TRAINEE VIEW) */}
-                                        {!isTrainerView && (
-                                            <button type="button" className="resource-item quiz-link" onClick={handleQuizClick}>
-                                                <FileArchive size={18} /> Quiz for {lec.title}
-                                            </button>
-                                        )}
-
-                                        {/* QUIZ LINK + MENU (TRAINER VIEW) */}
-                                        {isTrainerView && (
-                                            <div className="resource-item quiz-link" ref={quizRef} style={{ position: "relative" }}>
-                                                <FileArchive size={18} /> Quiz for {lec.title}
-                                                <button
-                                                    className="quiz-menu-button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCoords(getCoords(quizRef));
-                                                        setShowQuizMenuIndex(showQuizMenuIndex === i ? -1 : i);
-                                                    }}
-                                                >
-                                                    <MoreVertical size={18} />
-                                                </button>
-
-                                                {showQuizMenuIndex === i &&
-                                                    createPortal(
-                                                        <ul
-                                                            className="quiz-menu"
-                                                            style={{ position: "absolute", top: coords.top, left: coords.left, zIndex: 9999 }}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <li>Quiz Configuration</li>
-                                                            <li>Delete</li>
-                                                        </ul>,
-                                                        document.body
-                                                    )}
-                                            </div>
-                                        )}
                                     </div>
                                 ) : (
                                     <p className="no-res">No resources available yet.</p>
+                                )}
+
+                                {/* QUIZZES LIST */}
+                                {lec.assessments && lec.assessments.length > 0 && (
+                                    <div className="quizzes-container">
+                                        {lec.assessments.map((quiz) => (
+                                            <button
+                                                key={quiz.assessment_id}
+                                                className="resource-item quiz-link"
+                                                onClick={() => {
+                                                    // navigate to quiz page
+                                                    navigate(`/trainer/quiz/${quiz.assessment_id}`);
+                                                }}
+                                            >
+                                                <FileArchive size={18} /> {quiz.title} ({quiz.type})
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
                         )}

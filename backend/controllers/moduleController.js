@@ -1,7 +1,6 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+// /backend/controllers/moduleController.js
 
-const db = require("../models/index.cjs");
+import db from "../models/index.cjs";
 const { Module, Course, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
@@ -38,7 +37,7 @@ export const createModule = async (req, res) => {
 export const getModulesByCourse = async (req, res) => {
     try {
         const { course_id } = req.params;
-        
+
         const modules = await Module.findAll({
             where: { course_id },
             include: [
