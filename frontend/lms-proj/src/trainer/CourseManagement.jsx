@@ -46,7 +46,7 @@ function Course() {
         <>
             <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">My Courses</h3>
+                    <h3 className="mb-0">Assigned Courses</h3>
                 </div>
 
                 <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
@@ -60,7 +60,6 @@ function Course() {
                                 className="card h-100 shadow-sm"
                             >
                                 <div className="p-3">
-                                    <div>{course.is_published ? 'Visible' : 'Hidden'}</div>
                                     <div
                                         className="bg-light rounded overflow-hidden"
                                         style={{
@@ -79,14 +78,14 @@ function Course() {
 
                                 <div className="card-body pt-2">
                                     <h5 className="card-title mb-2">{course.title}</h5>
-                                    <p>
+                                    {/* <p>
                                         <strong>Trainers:</strong>{" "}
                                         {course.course_instructors?.length
                                             ? course.course_instructors
                                                 .map(ci => `${ci.instructor.first_name} ${ci.instructor.last_name}`)
                                                 .join(", ")
                                             : "No trainers assigned"}
-                                    </p>
+                                    </p> */}
                                     <p className="card-text text-muted mb-0">{course.description}</p>
                                 </div>
                             </div>

@@ -30,7 +30,7 @@ function AdminCourseEditPage() {
     const [trainers, setTrainers] = useState([]);
     const [selectedTrainers, setSelectedTrainers] = useState([]);
 
-    const [isPublished, setIsPublished] = useState(true);
+    const [isPublished, setIsPublished] = useState();
 
     // Load trainers
     useEffect(() => {
@@ -77,6 +77,8 @@ function AdminCourseEditPage() {
                     email: ci.instructor.email
                 })) || []
             );
+
+            setIsPublished(found.is_published);
         };
 
         loadCourse();
@@ -227,8 +229,8 @@ function AdminCourseEditPage() {
                     value={isPublished.toString()}
                     onChange={(e) => setIsPublished(e.target.value === "true")}
                 >
-                    <option value="true">Published</option>
-                    <option value="false">Unpublished</option>
+                    <option value="true">Visible</option>
+                    <option value="false">Hidden</option>
                 </select>
             </div>
 

@@ -16,7 +16,6 @@ import AdminDashboard from './admin/AdminDashboard';
 import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
 import AdminCourseEditPage from './admin/AdminCourseEditPage';
-import AdminUserRole from './admin/UserRoleTable';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
@@ -84,8 +83,7 @@ function AppContent() {
             <Route path="/admin/course-management" element={<AdminCourseManagement />} />
             <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
             <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
-            <Route path="/admin/user-management" element={<AdminUserRole />} />
-            <Route path="/admin/userroles" element={<UserRoleTable />} />
+            <Route path="/admin/user-management" element={<UserRoleTable />} />
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profilemanagement" element={<AdminProfileManagement />} />

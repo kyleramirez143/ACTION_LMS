@@ -40,7 +40,7 @@ export default function TrainerModuleScreen() {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       });
 
       const data = await res.json();
@@ -56,15 +56,17 @@ export default function TrainerModuleScreen() {
   };
 
   const [moduleTitle, setModuleTitle] = useState("");
+  const [moduleDescription, setModuleDescription] = useState("");
 
   const fetchModule = async () => {
     try {
       const res = await fetch(`/api/modules/id/${module_id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (res.ok) {
         setModuleTitle(data.title);
+        setModuleDescription(data.description);
       } else {
         console.error(data.error);
       }
@@ -101,6 +103,7 @@ export default function TrainerModuleScreen() {
             Add Lecture
           </button>
         </div>
+        <p className="text-secondary">{moduleDescription}</p>
 
         {loading ? (
           <p>Loading lectures...</p>

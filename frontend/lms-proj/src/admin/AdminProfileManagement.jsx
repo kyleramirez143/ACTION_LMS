@@ -38,7 +38,7 @@ function AdminProfileManagement() {
     // Fetch profile info (read-only)
     const fetchProfile = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/users/profile", {
+            const res = await fetch("/api/users/profile", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-type": "application/json",
@@ -70,7 +70,7 @@ function AdminProfileManagement() {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/api/users/change-password", {
+            const res = await fetch("/api/users/change-password", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

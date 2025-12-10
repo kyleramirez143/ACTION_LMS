@@ -266,7 +266,7 @@ function AddUser() { // Keeping the original function name
                             type="button"
                             className="btn btn-outline-primary rounded-pill"
                             style={styles.btn}
-                            onClick={() => navigate("/admin/userroles")}
+                            onClick={() => navigate(-1)}
                         >
                             Cancel
                         </button>
