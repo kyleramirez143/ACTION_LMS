@@ -1,12 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function AddLecture() {
     const { course_id, module_id } = useParams();
     const navigate = useNavigate();
 
+    const token = localStorage.getItem("authToken");
+
+    useEffect(() => {
+        if (!token) return navigate("/");
+
+        try {
+            const decoded = jwtDecode(token);
+            const roles = decoded.roles || [];
+            if (!roles.includes("Trainer")) navigate("/access-denied");
+        } catch (err) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+        }
+    }, [token, navigate]);
+
     const [loading, setLoading] = useState(false);
-    const [file, setFile] = useState(null);
+
+    // State fields
+    const [description, setDescription] = useState("");
+    const [resources, setResources] = useState([]); // multiple resource files
+
+    // Add a new resource field (max 5)
+    const handleAddResource = () => {
+        if (resources.length >= 5) {
+            alert("Maximum of 5 resources allowed");
+            return;
+        }
+        setResources([...resources, null]);
+    };
+
+    // Update a file in a resource slot
+    const handleResourceChange = (index, file) => {
+        const updated = [...resources];
+        updated[index] = file;
+        setResources(updated);
+    };
 
     // Step 1: Create lecture metadata
     const handleLectureSubmit = async () => {
@@ -18,17 +53,26 @@ export default function AddLecture() {
         try {
             const res = await fetch("/api/lectures", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, module_id, course_id }),
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    module_id,
+                    course_id
+                }),
             });
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || `Failed to create lecture: ${res.status}`);
+                throw new Error(errorData.error || `Failed to create lecture`);
             }
 
-            const lecture = await res.json(); // lecture object with lecture_id
-            return lecture;
+            const data = await res.json();
+            alert(data.message);
+            return data;
         } catch (err) {
             console.error("Add Lecture Error:", err);
             alert(err.message);
@@ -38,60 +82,107 @@ export default function AddLecture() {
         }
     };
 
-    // Step 2: Upload file (optional)
-    const handleFileUpload = async (lecture_id) => {
-        if (!file) return;
-
+    // Step 2: Upload resources (if any)
+    const uploadResources = async (lecture_id) => {
         const formData = new FormData();
-        formData.append("file", file);
+        resources.forEach((file) => {
+            if (file) formData.append("files", file);
+        });
         formData.append("lecture_id", lecture_id);
 
-        try {
-            const res = await fetch("/api/lectures/resource", {
-                method: "POST",
-                body: formData,
-            });
+        const res = await fetch("/api/lectures/resource", {
+            method: "POST",
+            body: formData,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || "Failed to upload file");
-            }
-
-            alert("File uploaded successfully!");
-        } catch (err) {
-            console.error("File Upload Error:", err);
-            alert(err.message);
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to upload resources");
         }
     };
 
-    // Combined submit handler
+    // Combined handler
     const handleSubmitAll = async (e) => {
         e.preventDefault();
-        const lecture = await handleLectureSubmit();
-        if (!lecture) return;
 
-        if (file) await handleFileUpload(lecture.lecture_id);
+        setLoading(true); // start loading
+        try {
+            // Step 1: create lecture metadata
+            const lectureData = await handleLectureSubmit();
+            if (!lectureData) throw new Error("Lecture creation failed");
 
-        // Navigate back to the module screen
-        navigate(`/trainer/modules/${module_id}`, { replace: true });
+            // Step 2: upload resources if any
+            if (resources.length > 0) {
+                try {
+                    await uploadResources(lectureData.lecture.lecture_id);
+                } catch (err) {
+                    console.error("Resource Upload Error:", err);
+                    alert(err.message || "Failed to upload resources");
+                    return; // stop further execution if upload fails
+                }
+            }
+
+            // Step 3: navigate back to lecture list
+            navigate(`/trainer/${course_id}/modules/${module_id}/lectures`, { replace: true });
+
+        } catch (err) {
+            console.error("Add Lecture Error:", err);
+            alert(err.message || "Something went wrong");
+        } finally {
+            setLoading(false); // stop loading
+        }
     };
 
     return (
         <div className="container py-4" style={{ maxWidth: "800px" }}>
             <h3>Add Lecture</h3>
             <form onSubmit={handleSubmitAll}>
+
+                {/* Title */}
                 <div className="mb-3">
                     <label className="form-label">Title</label>
                     <input id="lecture-title" type="text" className="form-control" />
                 </div>
 
+                {/* Description */}
                 <div className="mb-3">
-                    <label className="form-label">Upload File</label>
-                    <input
-                        type="file"
+                    <label className="form-label">Description</label>
+                    <textarea
                         className="form-control"
-                        onChange={(e) => setFile(e.target.files[0])}
+                        rows="3"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
                     />
+                </div>
+
+                {/* Resources Section */}
+                <div className="mb-3">
+                    <label className="form-label">Resources (PDF, video, images)</label>
+
+                    {resources.map((res, index) => (
+                        <div key={index} className="mb-2">
+                            <input
+                                type="file"
+                                className="form-control"
+                                onChange={(e) =>
+                                    handleResourceChange(index, e.target.files[0])
+                                }
+                            />
+                        </div>
+                    ))}
+
+                    {resources.length < 5 && (
+                        <button
+                            type="button"
+                            className="btn btn-secondary mt-2"
+                            onClick={handleAddResource}
+                        >
+                            + Add Resource
+                        </button>
+                    )}
                 </div>
 
                 <button type="submit" className="btn btn-primary" disabled={loading}>

@@ -1,45 +1,70 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
+import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
-import "../trainer/Module.css";
 
 export default function TrainerModuleScreen() {
-  // Grab both course_id and module_id from the route
   const { course_id, module_id } = useParams();
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("authToken");
+
+  // AUTH CHECK
+  useEffect(() => {
+    if (!token) return navigate("/");
+
+    try {
+      const decoded = jwtDecode(token);
+      const roles = decoded.roles || [];
+      if (!roles.includes("Trainer")) navigate("/access-denied");
+    } catch (err) {
+      localStorage.removeItem("authToken");
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
   const [loading, setLoading] = useState(true);
   const [lectures, setLectures] = useState([]);
   const [error, setError] = useState(null);
 
+  // Fetch lectures
+  const fetchLectures = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/lectures/modules/${module_id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+
+      const data = await res.json();
+      // Ensure we always have an array
+      setLectures(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      setLectures([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchLectures = async () => {
-      setLoading(true);
-      try {
-        // Fetch lectures for this specific module
-        const res = await fetch(`/api/lectures/module/${module_id}`);
-        if (!res.ok) throw new Error("Failed to fetch lectures");
-        const data = await res.json();
-
-        // If backend returns { lectures: [...] }, unwrap it
-        setLectures(data.lectures || data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (module_id) {
       fetchLectures();
     }
   }, [module_id]);
 
-  // Navigate to AddLecture page with proper params
+  // Navigate to AddLecture page
   const handleAddLectureClick = () => {
-    navigate(`/trainer/modules/${module_id}/add-lecture`);
+    // Pass fetchLectures so AddLecture can call it after creating a lecture
+    navigate(`/trainer/${course_id}/modules/${module_id}/create`);
   };
 
   return (
@@ -50,7 +75,6 @@ export default function TrainerModuleScreen() {
           <button
             className="btn btn-primary btn-sm"
             onClick={handleAddLectureClick}
-            disabled={module_id}
           >
             Add Lecture
           </button>
@@ -69,7 +93,7 @@ export default function TrainerModuleScreen() {
 
       <div className="module-right">
         <div className="upcoming-title">Upcoming</div>
-        <UpcomingPanel /> 
+        <UpcomingPanel />
       </div>
     </div>
   );

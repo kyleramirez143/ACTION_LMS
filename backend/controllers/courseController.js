@@ -228,6 +228,7 @@ export const getTrainerCourses = async (req, res) => {
         const trainerId = req.user.id;
 
         const data = await Course.findAll({
+            where: { is_published: true},
             include: [
                 {
                     model: CourseInstructor,
@@ -238,7 +239,7 @@ export const getTrainerCourses = async (req, res) => {
                             model: User,
                             as: "instructor",
                             attributes: ["first_name", "last_name", "email"]
-                        }
+                        },
                     ]
                 }
             ]

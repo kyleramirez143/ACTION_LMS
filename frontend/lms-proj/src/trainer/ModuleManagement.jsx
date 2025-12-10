@@ -77,11 +77,6 @@ export default function ModuleManagement() {
         if (p >= 1 && p <= totalPages && p !== page) setPage(p);
     };
 
-    const handleCardClick = (module) => {
-        navigate(`/trainer/modulescreen/${module.course_id}/${module.module_id}`);
-    };
-
-
     // ================================
     // RENDER
     // ================================
@@ -114,7 +109,7 @@ export default function ModuleManagement() {
                                 <div
                                     className="card h-100 shadow-sm"
                                     style={{ cursor: "pointer" }}
-                                    onClick={() => handleCardClick(module)}
+                                    onClick={() => navigate(`/trainer/${course_id}/modules/${module.module_id}/lectures`)}
                                 >
                                     {/* Image */}
                                     <div className="p-3">

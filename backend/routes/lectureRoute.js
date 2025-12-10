@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
-const upload = multer({ dest: "uploads/lectures" });
+import path from "path";
+import { protect, checkRole } from "../middleware/authMiddleware.js";
 
 import {
     createLecture,
@@ -10,13 +11,31 @@ import {
 
 const router = express.Router();
 
+const lectureStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/lectures/"); // folder for lecture files
+    },
+    filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        const name = path.basename(file.originalname, ext);
+        cb(null, `lecture-${timestamp}-${name}${ext}`);
+    }
+});
+
+const uploadLecture = multer({ storage: lectureStorage });
+
 // create lecture
-router.post("/", createLecture);
+router.post("/", protect, checkRole(["Trainer"]), createLecture);
 
 // upload file to lecture
-router.post("/resource", upload.single("file"), uploadLectureFile);
+router.post("/resource",
+    protect,
+    checkRole(["Trainer"]),
+    uploadLecture.array("files", 5),
+    uploadLectureFile);
 
 // get lectures by module
-router.get("/module/:module_id", getLecturesByModule);
+router.get("/modules/:module_id", protect, checkRole(["Trainer"]), getLecturesByModule);
 
 export default router;
