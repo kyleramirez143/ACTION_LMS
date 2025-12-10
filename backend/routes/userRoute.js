@@ -15,7 +15,7 @@ router.get('/users', getUsers);
 
 { /* Profile Routes */ }
 router.get("/profile", protect, getProfile);
-router.put("/change-password", protect, changePassword);
+router.put("/change-password", protect, checkRole(["Admin"]), changePassword);
 
 router.get("/counts", getUserCounts);
 router.get("/growth", getUserGrowth);

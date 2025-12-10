@@ -66,6 +66,29 @@ export default function ModuleManagement() {
         if (course_id) fetchModules();
     }, [course_id]);
 
+    const [courseTitle, setCourseTitle] = useState("");
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await fetch(`/api/courses/id/${course_id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setCourseTitle(data.title);
+                } else {
+                    console.error(data.error);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchCourses();
+    }, [course_id]);
+
+
     const totalPages = Math.ceil(modules.length / ITEMS_PER_PAGE);
 
     const pagedModules = useMemo(() => {
@@ -88,7 +111,7 @@ export default function ModuleManagement() {
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">Modules</h3>
+                <h3 className="mb-0">Modules for "{courseTitle}"</h3>
                 <button
                     className="btn btn-primary"
                     onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
@@ -122,7 +145,7 @@ export default function ModuleManagement() {
                                             }}
                                         >
                                             <img
-                                                src={ module.image ? `/uploads/images/${module.image}` : defaultImage}
+                                                src={module.image ? `/uploads/images/${module.image}` : defaultImage}
                                                 alt={`${module.title} cover`}
                                                 className="w-100 h-100 rounded"
                                                 style={{ objectFit: "cover" }}

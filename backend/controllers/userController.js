@@ -364,7 +364,7 @@ export const changePassword = async (req, res) => {
                 {
                     model: db.Password,
                     as: "currentPassword",
-                    attributes: ["password"]
+                    attributes: ["id", "password"]
                 }
             ]
         });

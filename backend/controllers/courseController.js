@@ -61,6 +61,7 @@ export const createCourse = async (req, res) => {
 export const getCourses = async (req, res) => {
     try {
         const data = await Course.findAll({
+            attributes: ["course_id", "title"],
             include: [
                 {
                     model: CourseInstructor,
@@ -80,6 +81,20 @@ export const getCourses = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+export const getCourseById = async (req, res) => {
+    try {
+        const { course_id } = req.params;
+        const course = await Course.findOne({
+            where: { course_id }
+        });
+
+        res.status(200).json(course);
+    } catch (err) {
+        console.error("Get Course Error: ", err);
+        res.status(500).json({ error: "Failed to fetch course", details: err.message});
+    }
+}
 
 export const updateCourse = async (req, res) => {
     const { course_id } = req.params;

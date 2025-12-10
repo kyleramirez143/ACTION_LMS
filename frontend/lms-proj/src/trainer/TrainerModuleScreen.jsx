@@ -55,6 +55,28 @@ export default function TrainerModuleScreen() {
     }
   };
 
+  const [moduleTitle, setModuleTitle] = useState("");
+
+  const fetchModule = async () => {
+    try {
+      const res = await fetch(`/api/modules/id/${module_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setModuleTitle(data.title);
+      } else {
+        console.error(data.error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (module_id) fetchModule();
+  }, [module_id]);
+
   useEffect(() => {
     if (module_id) {
       fetchLectures();
@@ -71,7 +93,7 @@ export default function TrainerModuleScreen() {
     <div className="module-container">
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="module-title">Lectures for this Module</div>
+          <div className="module-title">Lectures for "{moduleTitle}"</div>
           <button
             className="btn btn-primary btn-sm"
             onClick={handleAddLectureClick}

@@ -7,7 +7,8 @@ import {
     createModule,
     getModulesByCourse,
     updateModule,
-    deleteModule
+    deleteModule,
+    getModuleById
 } from "../controllers/moduleController.js";
 
 const router = express.Router();
@@ -32,6 +33,7 @@ const upload = multer({ storage });
 router.post("/", protect, checkRole(["Trainer"]), upload.single("image"), createModule);
 router.get("/:course_id", protect, checkRole(["Trainer"]), getModulesByCourse);
 router.put("/:module_id", protect, checkRole(["Trainer"]), upload.single("image"), updateModule);
+router.get("/id/:module_id", protect, checkRole(["Trainer"]), getModuleById);
 router.delete("/:module_id", protect, checkRole(["Trainer"]), deleteModule);
 
 export default router;
