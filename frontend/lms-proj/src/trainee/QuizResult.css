@@ -1,0 +1,78 @@
+/* General card styling */
+.card {
+    background-color: #fff;
+    border: none !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-radius: 0.5rem;
+}
+
+/* Section title */
+.section-title {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Summary icons */
+.card .bi {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+/* Ensure consistent icon circle size */
+.bg-success,
+.bg-warning,
+.bg-danger {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+
+/* Text inside summary cards */
+.fw-bold.fs-5 {
+    font-size: 1.25rem;
+    line-height: 1.2;
+}
+
+/* Table styling */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    color: #555;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: #007bff;
+    border: none;
+    box-shadow: none;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 0.25rem;
+}
+
+/* Test summary list */
+.list-unstyled li {
+    margin-bottom: 0.4rem;
+    color: #444;
+}
+
+.list-unstyled strong {
+    color: #222;
+}
+
+/* Circle chart container */
+.card .d-flex.flex-row.justify-content-around {
+    align-items: center;
+}

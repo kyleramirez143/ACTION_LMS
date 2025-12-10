@@ -1,0 +1,130 @@
+/* .progress-circle {
+    width: 100px;
+    height: 100px;
+    margin: auto;
+}
+
+.circular-chart {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3.8;
+}
+
+.circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke: #4caf50;
+    animation: progress 1s ease-out forwards;
+}
+
+.percentage {
+    fill: #4caf50;
+    font-size: 0.5em;
+    text-anchor: middle;
+}
+
+.card {
+    background-color: #fff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: none;
+    outline-style: none;
+} */
+
+.card.bg-white {
+    background-color: white !important;
+    border: none !important;
+    /* removes border */
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    /* adds shadow */
+}
+
+.present-circle {
+    background-color: #d1fae5;
+    /* green-100 */
+    color: #10b981;
+    /* green-500 */
+}
+
+.late-circle {
+    background-color: #fee2e2;
+    /* red-100 */
+    color: #ef4444;
+    /* red-500 */
+}
+
+.leave-circle {
+    background-color: #fef3c7;
+    /* yellow-100 */
+    color: #f59e0b;
+    /* yellow-500 */
+}
+
+/* StatCard container */
+.card {
+    background-color: white;
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Title styling */
+.card h6 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Stat rows */
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Colored circular icons */
+.stat-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon.green {
+    background-color: #4caf50;
+}
+
+.stat-icon.red {
+    background-color: #f44336;
+}
+
+.stat-icon i {
+    color: white;
+    font-size: 12px;
+}
+
+/* Circular progress container */
+.circular-chart {
+    max-width: 100px;
+    margin-left: auto;
+}
+
+/* Optional: spacing between stats and progress */
+.stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-group .btn {
+    min-width: 80px;
+}

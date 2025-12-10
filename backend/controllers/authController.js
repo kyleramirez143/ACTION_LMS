@@ -25,7 +25,7 @@ export const login = async (req, res) => {
   try {
     // 1. Find User, their current Password, and all associated Roles
     const user = await User.findOne({
-      where: { email: email, is_active: true },
+      where: { email: email},
       include: [
         {
           model: Password,
@@ -40,6 +40,16 @@ export const login = async (req, res) => {
         }
       ]
     });
+
+    // 2. Check if user exists
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    // 3. Check if user is active (deactivated users cannot login)
+    if (!user.is_active) {
+      return res.status(401).json({ message: 'Account Deactivated. Please contact your Manager.' });
+    }
 
     if (!user || !user.currentPassword || !user.currentPassword.password) {
       return res.status(401).json({ message: 'Invalid credentials.' });

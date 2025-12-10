@@ -17,8 +17,12 @@ import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
 import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AdminUserRole from './admin/UserRoleTable';
+import AddUser from "./admin/AddUser.jsx";
+import UserRoleTable from "./admin/UserRoleTable";
+import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
 
 // Trainer Imports
+import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
 import CoursePage from './trainer/CourseManagement';
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
@@ -64,6 +68,7 @@ function AppContent() {
             <Route path="/" element={<LoginPage />} />
 
             {/* Trainer Side Routes */}
+            <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
@@ -80,6 +85,10 @@ function AppContent() {
             <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
             <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
             <Route path="/admin/user-management" element={<AdminUserRole />} />
+            <Route path="/admin/userroles" element={<UserRoleTable />} />
+            <Route path="/admin/adduser" element={<AddUser />} />
+            <Route path="/admin/edituser/:id" element={<AddUser />} />
+            <Route path="/admin/profilemanagement" element={<AdminProfileManagement />} />
 
           </Routes>
         </div>
