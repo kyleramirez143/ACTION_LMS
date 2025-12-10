@@ -444,7 +444,6 @@ export const getUserCounts = async (req, res) => {
     }
 };
 
-// user.controller.js 
 
 // Helper function to get the start/end dates for the specified period
 const getDateRange = (filterType, todayDate) => {
