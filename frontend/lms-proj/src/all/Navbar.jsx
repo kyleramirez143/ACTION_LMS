@@ -62,7 +62,9 @@ const Navbar = () => {
               ></Dropdown.Toggle>
 
               <Dropdown.Menu className="mt-2 shadow">
-                <Dropdown.Item href="#">Profile</Dropdown.Item>
+                <Dropdown.Item as={Link} to="/admin/profilemanagement">
+                  Profile
+                </Dropdown.Item>
                 <Dropdown.Item href="#">Settings & Privacy</Dropdown.Item>
                 <Dropdown.Item href="#">Help & Support</Dropdown.Item>
                 <Dropdown.Divider />
