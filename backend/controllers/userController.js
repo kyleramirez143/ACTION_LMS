@@ -111,8 +111,8 @@ export const addUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     const userId = req.params.id;
     // Ensure 'email' is destructured from the request body
-    const { first_name, last_name, email, role, is_active } = req.body; 
-    
+    const { first_name, last_name, email, role, is_active } = req.body;
+
     // ... (Authorization and Self-Edit Checks remain the same) ...
 
     // ⚠️ DATA VALIDATION (ensure email is present)
@@ -122,9 +122,9 @@ export const updateUser = async (req, res) => {
 
     try {
         const { User, sequelize } = db;
-        
+
         await sequelize.transaction(async (t) => {
-            
+
             const existingUser = await User.findByPk(userId, { transaction: t });
             if (!existingUser) {
                 throw new Error("User not found.");
@@ -136,7 +136,7 @@ export const updateUser = async (req, res) => {
                     first_name,
                     last_name,
                     email, // 👈 NOW UPDATABLE
-                    is_active, 
+                    is_active,
                     updated_at: new Date()
                 },
                 {
@@ -144,22 +144,22 @@ export const updateUser = async (req, res) => {
                     transaction: t,
                 }
             );
-            
+
             // Update Role
-            await syncUserRole(userId, role, t); 
-            
+            await syncUserRole(userId, role, t);
+
             res.json({ message: "User updated successfully.", userId: userId });
         });
 
     } catch (err) {
         console.error("updateUser error:", err);
         // ... (Error handling remains the same) ...
-        
+
         // ADDED: Handle duplicate email error if your model enforces uniqueness
         if (err.name === 'SequelizeUniqueConstraintError' && err.fields.email) {
             return res.status(400).json({ message: "Email already in use by another user." });
         }
-        
+
         res.status(500).json({ message: "Failed to update user. Database error." });
     }
 };
@@ -176,7 +176,7 @@ export const getSingleUser = async (req, res) => {
     try {
         const { User, Role } = db;
 
-        const user = await User.findByPk(userId, {
+        const user = await db.User.findByPk(userId, {
             attributes: ["id", "first_name", "last_name", "email", "is_active"],
             include: [{
                 model: Role,
@@ -305,9 +305,9 @@ export const getUsers = async (req, res) => {
 // Profile Management (Logged-in User)
 // ====================
 
-// Get logged-in user profile (read-only)
 export const getProfile = async (req, res) => {
     try {
+        // 🔑 CRITICAL CHANGE: Get userId securely from the JWT payload via middleware
         const userId = req.user.id;
 
         const user = await db.User.findByPk(userId, {
@@ -326,13 +326,14 @@ export const getProfile = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Format roles
+        // Format roles: This handles fetching the first assigned role
         const formattedUser = {
             ...user.toJSON(),
             role: user.roles.length > 0 ? user.roles[0].name : "No Role"
         };
 
-        res.json({ user: formattedUser });
+        // 🛑 Changed response format to match frontend expectation (returning the user object directly)
+        res.json(formattedUser);
 
     } catch (err) {
         console.error(err);
@@ -343,72 +344,60 @@ export const getProfile = async (req, res) => {
 // Change logged-in user password
 export const changePassword = async (req, res) => {
     try {
-        console.log("REQ USER:", req.user);
-        console.log("BODY:", req.body);
+        // 🔑 CRITICAL CHANGE: Get userId securely from the JWT payload via middleware
+        // NOTE: While your frontend sends the ID in params, we enforce security via req.user.id
+        const authUserId = req.user.id;
+        const paramUserId = req.params.userId;
 
-        const userId = req.user?.id;
-        const { newPassword } = req.body;
-
-        if (!userId) {
-            console.log("ERROR: Missing user ID from token");
-            return res.status(400).json({ message: "Invalid user" });
+        // Security check: User can only change their OWN password
+        if (String(authUserId) !== String(paramUserId)) {
+            return res.status(403).json({ error: "Unauthorized action." });
         }
 
-        if (!newPassword) {
-            console.log("ERROR: Missing password");
-            return res.status(400).json({ message: "Password is required" });
-        }
+        const { currentPassword, newPassword } = req.body;
 
-        const user = await db.User.findByPk(userId, {
-            include: [
-                {
-                    model: db.Password,
-                    as: "currentPassword",
-                    attributes: ["password"]
-                }
-            ]
+        const user = await db.User.findByPk(authUserId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // 1. Find the current hashed password record
+        const currentPasswordRecord = await db.Password.findOne({
+            where: { user_id: authUserId, is_current: true }
         });
 
-        console.log("USER FETCH RESULT:", user);
-
-        if (!user) {
-            console.log("ERROR: User not found in DB");
-            return res.status(404).json({ message: "User not found" });
+        if (!currentPasswordRecord) {
+            return res.status(500).json({ error: "No current password record found" });
         }
 
-        if (!user.currentPassword) {
-            console.log("❌ NO PASSWORD RECORD FOUND for user:", userId);
-            return res.status(500).json({
-                message: "Password record missing for user"
-            });
-        }
+        // 2. Verify current password against the stored hash
+        const match = await bcrypt.compare(currentPassword, currentPasswordRecord.password);
+        if (!match)
+            return res.status(400).json({ error: "Current password is incorrect" });
 
-        const isSameAsOld = await bcrypt.compare(
-            newPassword,
-            user.currentPassword.password
-        );
+        const hashed = await bcrypt.hash(newPassword, 10);
 
-        if (isSameAsOld) {
-            console.log("❌ Password reused");
-            return res.status(400).json({
-                message: "New password cannot be the same as your old password"
-            });
-        }
+        // Use a transaction for the update to ensure atomicity
+        await db.sequelize.transaction(async (t) => {
+            // 3. Deactivate old password
+            await db.Password.update(
+                { is_current: false },
+                { where: { user_id: authUserId, is_current: true }, transaction: t }
+            );
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        await user.currentPassword.update({
-            password: hashedPassword
+            // 4. Create new current password record
+            await db.Password.create({
+                user_id: authUserId,
+                password: hashed,
+                is_current: true,
+            }, { transaction: t });
         });
 
-        console.log("Password updated successfully!");
-        res.json({ message: "Password changed successfully" });
-
-    } catch (err) {
-        console.error("CHANGE PASSWORD ERROR:", err);
-        res.status(500).json({ message: "Failed to change password" });
+        res.json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error("Password update error:", error);
+        res.status(500).json({ error: "Failed to change password" });
     }
 };
+
 
 // ====================
 // Admin Dashboard

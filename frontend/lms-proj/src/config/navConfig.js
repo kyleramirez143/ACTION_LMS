@@ -35,10 +35,20 @@ export const navLinks = [
     requiredRoles: ['Trainer'],
   },
   {
+    name: 'Dashboard',
+    path: '/trainee/dashboard',
+    requiredRoles: ['Trainee'],
+  },
+  {
     name: 'My Courses',
     path: '/student/dashboard',
     // icon: 'SchoolIcon',
     requiredRoles: ['Trainee'], // Only Students
+  },
+  {
+    name: 'Assessment',
+    path: '/trainee/assessment',
+    requiredRoles: ['Trainee'],
   },
   // {
   //   name: 'Profile',

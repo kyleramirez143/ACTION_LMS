@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./AdminProfileManagement.css";
 
@@ -7,46 +7,50 @@ function AdminProfileManagement() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
 
-    // AUTH CHECK
+    const [profile, setProfile] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
+
+    // ----------------------------
+    // AUTH CHECK 
+    // ----------------------------
     useEffect(() => {
-        if (!token) return navigate("/");
+        if (!token) {
+            // Redirect to login if no token
+            return navigate("/login");
+        }
 
         try {
             const decoded = jwtDecode(token);
-            const roles = decoded.roles || [];
-            if (!roles.includes("Admin")) navigate("/access-denied");
+            // 🔑 CHANGE: Removed the Admin role check. All logged-in users can view their profile now.
+
         } catch (err) {
+            console.error("JWT decode error:", err);
             localStorage.removeItem("authToken");
             navigate("/login");
         }
     }, [token, navigate]);
 
-    const [profile, setProfile] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [passwordForm, setPasswordForm] = useState({
-        newPassword: "",
-        confirmPassword: "",
-    });
-
-    // Open/Close modal
-    const handleOpenModal = () => setShowModal(true);
-    const handleCloseModal = () => {
-        setPasswordForm({ newPassword: "", confirmPassword: "" });
-        setShowModal(false);
-    };
-
-    // Fetch profile info (read-only)
+    // ----------------------------
+    // FETCH PROFILE
+    // ----------------------------
     const fetchProfile = async () => {
         try {
-            const res = await fetch("http://localhost:5000/api/users/profile", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-type": "application/json",
-                }
+            // 🔑 CRITICAL CHANGE: Use the simple /profile route
+            const res = await fetch(`http://localhost:5000/api/users/profile`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
+
             if (!res.ok) throw new Error("Failed to fetch profile");
+
+            // 🔑 Backend now returns the user object directly, not { user: ... }
             const data = await res.json();
-            setProfile(data.user);
+            setProfile(data);
+
         } catch (err) {
             console.error(err);
             alert("Error fetching profile: " + err.message);
@@ -54,33 +58,45 @@ function AdminProfileManagement() {
     };
 
     useEffect(() => {
-        fetchProfile();
-    }, []);
+        if (token) {
+            fetchProfile();
+        }
+    }, [token]);
 
-    // Handle password form change
+    // ----------------------------
+    // CHANGE PASSWORD
+    // ----------------------------
     const handlePasswordChange = (e) => {
         setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
     };
 
-    // Submit new password
     const handleChangePassword = async () => {
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            alert("Passwords do not match!");
+            alert("New passwords do not match!");
             return;
         }
 
         try {
-            const res = await fetch("http://localhost:5000/api/users/change-password", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ newPassword: passwordForm.newPassword }),
-            });
+            const decoded = jwtDecode(token);
+            const userId = decoded.id; // Get ID to use in the URL param (as per your router setup)
+
+            const res = await fetch(
+                `http://localhost:5000/api/users/change-password/${userId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        currentPassword: passwordForm.currentPassword,
+                        newPassword: passwordForm.newPassword,
+                    }),
+                }
+            );
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Error changing password");
+            if (!res.ok) throw new Error(data.error || "Error changing password");
 
             alert("Password changed successfully!");
             handleCloseModal();
@@ -90,8 +106,25 @@ function AdminProfileManagement() {
         }
     };
 
+    // ----------------------------
+    // MODAL HANDLERS (remain the same)
+    // ----------------------------
+    const handleOpenModal = () => setShowModal(true);
+
+    const handleCloseModal = () => {
+        setPasswordForm({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+        });
+        setShowModal(false);
+    };
+
     if (!profile) return <div>Loading profile...</div>;
 
+    // ----------------------------
+    // RENDER (remains the same)
+    // ----------------------------
     return (
         <div style={styles.page}>
             <div style={styles.card}>
@@ -111,104 +144,89 @@ function AdminProfileManagement() {
                     </div>
                 </div>
 
-                {/* View-only profile fields */}
+                {/* --- Profile Fields --- */}
                 <div style={styles.formSection}>
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">First Name</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={profile.first_name}
-                                readOnly
-                            />
+                            <input type="text" className="form-control" value={profile.first_name} readOnly />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">Last Name</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={profile.last_name}
-                                readOnly
-                            />
+                            <input type="text" className="form-control" value={profile.last_name} readOnly />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">Email</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="email"
-                                className="form-control"
-                                value={profile.email}
-                                readOnly
-                            />
+                            <input type="email" className="form-control" value={profile.email} readOnly />
                         </div>
                     </div>
 
-                    {/* Change Password Button */}
                     <div className="mb-3 row">
                         <div className="col-12 col-sm-9">
-                            <button
-                                type="button"
-                                className="btn btn-primary rounded-pill me-2"
-                                onClick={handleOpenModal}
-                            >
+                            <button type="button" className="btn btn-primary rounded-pill" onClick={handleOpenModal}>
                                 Change Password
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Change Password Modal */}
+                {/* Modal (remains the same) */}
                 {showModal && (
                     <div className="modal-overlay">
                         <div className="modal-content">
                             <h4 style={{ textAlign: "center", fontWeight: "600" }}>Change Password</h4>
-                            <form>
-                                <div className="mb-3 row">
-                                    <label className="col-sm-12">New Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        name="newPassword"
-                                        value={passwordForm.newPassword}
-                                        onChange={handlePasswordChange}
-                                    />
-                                </div>
-                                <div className="mb-3 row">
-                                    <label className="col-sm-12">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        name="confirmPassword"
-                                        value={passwordForm.confirmPassword}
-                                        onChange={handlePasswordChange}
-                                    />
-                                </div>
-                                <div className="d-flex justify-content-center gap-2">
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary rounded-pill"
-                                        onClick={handleChangePassword}
-                                    >
-                                        Save
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-primary rounded-pill"
-                                        onClick={handleCloseModal}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
+
+                            <div className="mb-3">
+                                <label>Current Password</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    name="currentPassword"
+                                    value={passwordForm.currentPassword}
+                                    onChange={handlePasswordChange}
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label>New Password</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    name="newPassword"
+                                    value={passwordForm.newPassword}
+                                    onChange={handlePasswordChange}
+                                />
+                            </div>
+
+                            <div className="mb-3">
+                                <label>Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    name="confirmPassword"
+                                    value={passwordForm.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                />
+                            </div>
+
+                            <div className="d-flex justify-content-center gap-2">
+                                <button className="btn btn-primary rounded-pill" onClick={handleChangePassword}>
+                                    Save
+                                </button>
+                                <button className="btn btn-outline-primary rounded-pill" onClick={handleCloseModal}>
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
+
             </div>
         </div>
     );
