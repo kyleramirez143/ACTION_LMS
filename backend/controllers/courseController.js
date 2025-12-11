@@ -61,7 +61,7 @@ export const createCourse = async (req, res) => {
 export const getCourses = async (req, res) => {
     try {
         const data = await Course.findAll({
-            attributes: ["course_id", "title", "description", "is_published"],
+            attributes: ["course_id", "title", "image", "description", "is_published", ],
             include: [
                 {
                     model: CourseInstructor,

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSingleUser, updateUser, getTrainers, getAllUsers, addUser, deleteUser, toggleUserStatus, getUsers, getProfile, changePassword,getUserCounts, getUserGrowth } from "../controllers/userController.js";
+import { changePassword, getSingleUser, updateUser, getTrainers, getAllUsers, addUser, deleteUser, toggleUserStatus, getUsers, getProfile, getUserCounts, getUserGrowth } from "../controllers/userController.js";
 import { protect, checkRole } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -15,8 +15,12 @@ router.get('/users', getUsers);
 
 { /* Profile Routes */ }
 router.get("/profile", protect, getProfile);
-router.put("/change-password", protect, checkRole(["Admin"]), changePassword);
+router.put("/change-password/:userId", protect, changePassword);
 
+// GET /api/users/profile/:userId
+// router.get('/profile/:userId', protect, userController.getProfile);
+
+//Admin Dashboard
 router.get("/counts", getUserCounts);
 router.get("/growth", getUserGrowth);
 

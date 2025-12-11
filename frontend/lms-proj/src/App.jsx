@@ -3,6 +3,23 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 
+function UserProfileRoute() {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) return <Navigate to="/" />;
+
+  try {
+    const decoded = jwtDecode(token);
+    const role = decoded.roles[0].toLowerCase(); // e.g., "Admin" → "admin"
+
+    // Redirect to /userlevel/profile
+    return <Navigate to={`/${role}/profile`} />;
+  } catch (err) {
+    console.error(err);
+    return <Navigate to="/" />;
+  }
+}
+
 // Context & Security
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoutes";
@@ -28,6 +45,11 @@ import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
 import ModuleManagement from "./trainer/ModuleManagement.jsx";
 import AddModule from "./trainer/AddModule.jsx";
+
+//Trainer Imports
+import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
+import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
+import ReviewPage from "./trainee/ReviewPage.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -75,7 +97,8 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
 
             <Route path="/trainer/:course_id/modules/:module_id/create" element={<AddLecture />} />
-            <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />}/>
+            <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
+            <Route path="/trainer/profile" element={<AdminProfileManagement />} />
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -86,7 +109,14 @@ function AppContent() {
             <Route path="/admin/user-management" element={<UserRoleTable />} />
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
-            <Route path="/admin/profilemanagement" element={<AdminProfileManagement />} />
+            <Route path="/admin/profile" element={<AdminProfileManagement />} />
+
+            {/* Admin Side Routes */}
+            <Route path="/trainee/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
+            <Route path="/trainee/assessment" element={<TraineeAssessment />} />
+            <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
+
 
           </Routes>
         </div>
