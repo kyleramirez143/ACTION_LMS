@@ -95,7 +95,7 @@ export default function TrainerModuleScreen() {
     <div className="module-container">
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="module-title">Lectures for "{moduleTitle}"</div>
+          <div className="module-title">{moduleTitle}</div>
           <button
             className="btn btn-primary btn-sm"
             onClick={handleAddLectureClick}

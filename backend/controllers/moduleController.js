@@ -20,6 +20,7 @@ export const createModule = async (req, res) => {
             description,
             image: imageFilename,
             created_by: trainerId,
+            is_visible: false,
             created_at: new Date(),
             updated_at: new Date()
         });
@@ -105,3 +106,33 @@ export const deleteModule = async (req, res) => {
     }
 };
 
+export const updateModuleVisibility = async (req, res) => {
+    try {
+        const { module_id } = req.params;
+        const { is_visible } = req.body; // Expects true or false
+
+        // Basic validation
+        if (typeof is_visible !== 'boolean') {
+            return res.status(400).json({ error: "Invalid value for is_visible. Must be true or false." });
+        }
+
+        const updates = {
+            is_visible: is_visible,
+            updated_at: new Date()
+        };
+
+        const [updated] = await Module.update(updates, { where: { module_id } });
+
+        if (!updated) {
+            return res.status(404).json({ error: "Module not found" });
+        }
+
+        res.json({ 
+            message: `Module visibility set to ${is_visible ? 'visible' : 'hidden'} successfully`,
+            is_visible: is_visible // Return the new state
+        });
+    } catch (error) {
+        console.error("Update Module Visibility Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};

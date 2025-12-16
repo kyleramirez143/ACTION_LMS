@@ -95,6 +95,7 @@ function AppContent() {
             <Route path="/trainer/course-management" element={<CoursePage />} />
             <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
+            <Route path="/trainer/:course_id/modules/:module_id/edit" element={<AddModule />} />
 
             <Route path="/trainer/:course_id/modules/:module_id/create" element={<AddLecture />} />
             <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
