@@ -42,7 +42,7 @@ export const protect = (req, res, next) => {
 
 /**
  * Middleware to restrict access based on user roles.
- * @param {string[]} roles - Array of required role names (e.g., ['Admin', 'Manager']).
+ * @param {string[]} roles - Array of required role names (e.g., ['Admin', 'Trainer', 'Trainee']).
  */
 export const checkRole = (roles = []) => {
     return (req, res, next) => {
