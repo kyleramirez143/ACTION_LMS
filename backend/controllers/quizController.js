@@ -13,7 +13,7 @@ export async function createQuiz(req, res) {
     try {
         const { title = "AI Generated Quiz", source = "ai", questions } = req.body;
         // NOTE: You can check req.user here if you want to store the creator's ID
-        
+
         if (!Array.isArray(questions)) return res.status(400).json({ error: "questions must be an array" });
 
         await client.query("BEGIN");
@@ -65,7 +65,7 @@ export async function getQuiz(req, res) {
         const questionsRes = await pool.query(
             // **FIXED:** Removed q.correct_answer from the SELECT list
             `SELECT q.id as question_id, q.question_text,
-                   json_agg(json_build_object('id', o.id, 'letter', o.letter, 'option_text', o.option_text) ORDER BY o.letter) AS options
+            json_agg(json_build_object('id', o.id, 'letter', o.letter, 'option_text', o.option_text) ORDER BY o.letter) AS options
                FROM questions q
                LEFT JOIN options o ON o.question_id = q.id
                WHERE q.quiz_id = $1
