@@ -17,8 +17,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        content_type: DataTypes.STRING(50),
-        content_url: DataTypes.STRING(500),
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
@@ -26,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
         updated_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
-        }
+        },
+        description: {
+            type: DataTypes.STRING(255),
+            allowNull: true
+        },
+
     }, {
         tableName: "lectures",
         timestamps: false,
@@ -42,6 +45,20 @@ module.exports = (sequelize, DataTypes) => {
         Lecture.belongsTo(models.User, {
             foreignKey: "created_by",
             as: "creator",
+        });
+
+        Lecture.belongsToMany(models.Resource, {
+            through: 'lecture_resources',
+            foreignKey: 'lecture_id',
+            otherKey: 'resources_id',
+            as: 'resources'
+        });
+
+        Lecture.belongsToMany(models.Assessment, {
+            through: 'lecture_assessments',
+            foreignKey: 'lecture_id',
+            otherKey: 'assessment_id',
+            as: 'assessments',
         });
     };
 

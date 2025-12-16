@@ -5,6 +5,7 @@ import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   const { hasRole, logout, loading } = useAuth();
@@ -17,6 +18,19 @@ const Navbar = () => {
 
   if (loading) return null;
 
+  // Determine user role from JWT
+  const token = localStorage.getItem("authToken");
+  let profilePath = "/profile"; // default
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      const role = decoded.roles[0]?.toLowerCase(); // e.g., "Admin" -> "admin"
+      profilePath = `/${role}/profile`;
+    } catch (err) {
+      console.error("Error decoding token:", err);
+    }
+  }
+
   const visibleLinks = navLinks.filter(link => {
     if (!link.requiredRoles || link.requiredRoles.length === 0) return true;
     return hasRole(link.requiredRoles);
@@ -26,7 +40,7 @@ const Navbar = () => {
     <nav className="navbar-wrapper">
       {/* Top Navbar Row */}
       <div className="navbar px-4 d-flex justify-content-between align-items-center">
-        {/* Left - Logo and Brand */}
+        {/* Left - Logo */}
         <div className="d-flex align-items-center gap-2">
           <img src={logo} alt="logo" className="logo-small" />
         </div>
@@ -38,8 +52,7 @@ const Navbar = () => {
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `nav-link fw-semibold ${isActive ? "text-primary" : "text-dark"
-                }`
+                `nav-link fw-semibold ${isActive ? "text-primary" : "text-dark"}`
               }
             >
               {link.name}
@@ -62,7 +75,10 @@ const Navbar = () => {
               ></Dropdown.Toggle>
 
               <Dropdown.Menu className="mt-2 shadow">
-                <Dropdown.Item href="#">Profile</Dropdown.Item>
+                {/* Dynamic Profile Link */}
+                <Dropdown.Item as={Link} to={profilePath}>
+                  Profile
+                </Dropdown.Item>
                 <Dropdown.Item href="#">Settings & Privacy</Dropdown.Item>
                 <Dropdown.Item href="#">Help & Support</Dropdown.Item>
                 <Dropdown.Divider />
@@ -94,4 +110,5 @@ const Navbar = () => {
     </nav>
   );
 };
+
 export default Navbar;
