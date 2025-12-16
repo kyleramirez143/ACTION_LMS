@@ -7,7 +7,7 @@ import "./QuizGenerator.css";
 
 function QuizGenerator() {
     const [file, setFile] = useState(null);
-    const [uploadedFile, setUploadedFile] = useState(null);
+    // const [uploadedFile, setUploadedFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
@@ -133,16 +133,18 @@ function QuizGenerator() {
 
     const handleDrop = (e) => {
         e.preventDefault();
-        const file = e.dataTransfer.files[0];
+        const dropped = e.dataTransfer.files[0];
         if (file && file.type === "application/pdf") {
-            setUploadedFile(file);
+            // setUploadedFile(file);
+            setFile(dropped);
         }
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file && file.type === "application/pdf") {
-            setUploadedFile(file);
+            // setUploadedFile(file);
+            setFile(file);
         }
     };
 
@@ -211,8 +213,8 @@ function QuizGenerator() {
                                     <span className="text-muted" style={{ fontSize: "0.85rem" }}>
                                         Drag & Drop or Click to Upload
                                     </span>
-                                    {uploadedFile && (
-                                        <span className="uploaded-file mt-2">{uploadedFile.name}</span>
+                                    {file && (
+                                        <span className="uploaded-file mt-2">{file.name}</span>
                                     )}
                                     <input
                                         type="file"
@@ -226,7 +228,7 @@ function QuizGenerator() {
                         </div>
 
                         {/* Upload File */}
-                        <div className="mb-3">
+                        {/* <div className="mb-3">
                             <label className="form-label">Upload PDF</label>
                             <input
                                 type="file"
@@ -234,7 +236,7 @@ function QuizGenerator() {
                                 className="form-control shadow-sm"
                                 onChange={(e) => setFile(e.target.files[0])}
                             />
-                        </div>
+                        </div> */}
 
                         {/* Quiz Type Selection */}
                         <div className="mb-3 p-3 shadow-sm rounded bg-white">

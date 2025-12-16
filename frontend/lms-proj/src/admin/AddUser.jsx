@@ -62,7 +62,7 @@ function AddUser() { // Keeping the original function name
                 } catch (err) {
                     console.error("Edit fetch error:", err);
                     alert("Error loading user data: " + err.message);
-                    navigate("/admin/userroles"); // Go back on failure
+                    navigate("/admin/user-management"); // Go back on failure
                 } finally {
                     setIsLoadingData(false);
                 }
@@ -137,7 +137,7 @@ function AddUser() { // Keeping the original function name
             }
 
             alert(`User ${isEditMode ? "updated" : "added"} successfully!`);
-            navigate("/admin/userroles");
+            navigate("/admin/user-management");
 
         } catch (err) {
             console.error("Fetch error:", err);
