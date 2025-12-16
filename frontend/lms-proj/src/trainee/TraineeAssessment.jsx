@@ -24,27 +24,43 @@ export default function AssessmentDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const filteredByCourse = filterCourse !== "All courses"
-    ? assessmentData.filter(r => r.course.toLowerCase() === filterCourse.toLowerCase())
-    : assessmentData;
+  // ✅ Normalize values
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const normalizedCourse = filterCourse.trim().toLowerCase();
 
-  const filteredBySearch = searchTerm
-    ? filteredByCourse.filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  // ✅ Filter by course
+  const filteredByCourse =
+    normalizedCourse !== "all courses"
+      ? assessmentData.filter(r => r.course.trim().toLowerCase() === normalizedCourse)
+      : assessmentData;
+
+  // ✅ Filter by search (title + feedback + status)
+  const filteredBySearch = normalizedSearch
+    ? filteredByCourse.filter(r =>
+        r.title.toLowerCase().includes(normalizedSearch) ||
+        r.feedback.toLowerCase().includes(normalizedSearch) ||
+        r.status.toLowerCase().includes(normalizedSearch)
+      )
     : filteredByCourse;
 
   const totalPages = Math.max(1, Math.ceil(filteredBySearch.length / itemsPerPage));
 
-  React.useEffect(() => { setCurrentPage(1); }, [searchTerm, filterCourse]);
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCourse]);
 
   const displayedResults = filteredBySearch.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const goToPage = (page) => { if (page >= 1 && page <= totalPages) setCurrentPage(page); };
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
   const openAssessment = (r) => {
     const slug = encodeURIComponent(r.title.replace(/\s+/g, '-').toLowerCase());
-    navigate(`/assessments/${slug}`);
+    navigate(`/trainee/assessment/${slug}`);
   };
 
   return (
@@ -57,9 +73,8 @@ export default function AssessmentDashboard() {
           <h2 className="page-title">Assessment</h2>
         </div>
 
-        {/* SINGLE CARD containing filter controls + table + pagination */}
         <div className="white-card">
-          {/* Filter Controls */}
+          {/* FILTER CONTROLS */}
           <div className="filter-controls">
             <div className="search-box">
               <Search size={20} className="search-icon" />
@@ -70,8 +85,9 @@ export default function AssessmentDashboard() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+
             <div className="dropdown-box">
-              <select
+              <select class="form-select"
                 value={filterCourse}
                 onChange={(e) => setFilterCourse(e.target.value)}
                 aria-label="Filter by course"
@@ -83,7 +99,7 @@ export default function AssessmentDashboard() {
             </div>
           </div>
 
-          {/* Assessment Results Table */}
+          {/* TABLE */}
           <div className="results-table-scroll">
             <table className="results-table">
               <thead>
@@ -96,11 +112,12 @@ export default function AssessmentDashboard() {
                   <th>Date</th>
                 </tr>
               </thead>
+
               <tbody>
                 {displayedResults.map((r, i) => (
                   <tr key={i}>
-                    {/* Calculate the global index */}
                     <td>{(currentPage - 1) * itemsPerPage + i + 1}</td>
+
                     <td>
                       <button
                         className="title-link"
@@ -110,26 +127,29 @@ export default function AssessmentDashboard() {
                         {r.title}
                       </button>
                     </td>
+
                     <td>{r.score}</td>
+
                     <td>
                       <span className={`status-pill ${statusClass[r.status] || ""}`}>
                         {r.status}
                       </span>
                     </td>
+
                     <td>{r.feedback}</td>
                     <td>{r.date}</td>
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
 
-          {/* Pagination */}
+          {/* PAGINATION */}
           <div className="pagination-wrapper">
             <nav>
               <ul className="pagination custom-pagination">
-                {/* Previous button */}
+
+                {/* Prev */}
                 <li className="page-item">
                   <button
                     className="page-link"
@@ -138,19 +158,20 @@ export default function AssessmentDashboard() {
                     disabled={currentPage === 1}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black">
-                      <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/>
+                      <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
                     </svg>
                   </button>
                 </li>
 
-                {/* Page numbers */}
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                    <button className="page-link" onClick={() => goToPage(i + 1)}>{i + 1}</button>
+                    <button className="page-link" onClick={() => goToPage(i + 1)}>
+                      {i + 1}
+                    </button>
                   </li>
                 ))}
 
-                {/* Next button */}
+                {/* Next */}
                 <li className="page-item">
                   <button
                     className="page-link"
@@ -159,13 +180,15 @@ export default function AssessmentDashboard() {
                     disabled={currentPage === totalPages}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="black">
-                      <path d="m321-80-71-71 329-329-329-329 71-71 400 400L321-80Z"/>
+                      <path d="m321-80-71-71 329-329-329-329 71-71 400 400L321-80Z" />
                     </svg>
                   </button>
                 </li>
+
               </ul>
             </nav>
           </div>
+
         </div>
       </div>
     </div>

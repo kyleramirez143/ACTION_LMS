@@ -1,25 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  FileText,
-  FileArchive,
-  ChevronUp,
-  ChevronDown,
-  MoreVertical,
-} from "lucide-react";
+import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
 import { createPortal } from "react-dom";
 import { ScreenAccessModal } from "./QuizModals";
 import { useNavigate } from "react-router-dom";
 
-export default function ModuleAccordion({ isTrainerView }) {
-  const [openIndex, setOpenIndex] = useState(0);
-  const [showQuizMenu, setShowQuizMenu] = useState(false);
-  const [showResourcesMenu, setShowResourcesMenu] = useState(false);
+export default function ModuleAccordion({ isTrainerView, lectures = [], courseId }) {
+  const [openIndex, setOpenIndex] = useState(-1);
+  const [showResourcesMenuIndex, setShowResourcesMenuIndex] = useState(-1);
+  const [showQuizMenuIndex, setShowQuizMenuIndex] = useState(-1);
   const [showQuizModal, setShowQuizModal] = useState(false);
 
-  const resourcesRef = useRef();
-  const quizRef = useRef();
-
+  const resourcesRef = useRef(null);
+  const quizRef = useRef(null);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
+
   const navigate = useNavigate();
 
   // Close menus when clicking outside
@@ -29,19 +23,18 @@ export default function ModuleAccordion({ isTrainerView }) {
         (resourcesRef.current && !resourcesRef.current.contains(e.target)) &&
         (quizRef.current && !quizRef.current.contains(e.target))
       ) {
-        setShowResourcesMenu(false);
-        setShowQuizMenu(false);
+        setShowResourcesMenuIndex(-1);
+        setShowQuizMenuIndex(-1);
       }
     }
-
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   const toggleAccordion = (i) => {
     setOpenIndex(i === openIndex ? -1 : i);
-    setShowResourcesMenu(false);
-    setShowQuizMenu(false);
+    setShowResourcesMenuIndex(-1);
+    setShowQuizMenuIndex(-1);
   };
 
   const getCoords = (ref) => {
@@ -52,176 +45,128 @@ export default function ModuleAccordion({ isTrainerView }) {
     return { top: 0, left: 0 };
   };
 
-  const handleQuizClick = (e) => {
-    e.preventDefault();
+  // ✅ Navigate to AddResource page with proper params
+  const handleAddResourceClick = (lecture) => {
+    navigate(`/trainer/addresource/${courseId}/${lecture.module_id}/${lecture.lecture_id}`);
+  };
+
+  const handleQuizClick = () => {
     setShowQuizModal(true);
   };
 
-  // DATA
-  const sections = [
-    {
-      title: "P1 – 1: Basic Theory",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      resources: [
-        "BasicTheoryPart1.pdf",
-        "BasicTheoryPart2.pdf",
-        "BasicTheoryPart3.pdf",
-      ],
-    },
-    {
-      title: "P1 – 2: Data Structure",
-      description: null,
-      resources: [],
-    },
-    {
-      title: "P1 – 3: Algorithm",
-      description: null,
-      resources: [],
-    },
-  ];
-
   return (
     <div className="accordion-wrapper">
-      {sections.map((sec, i) => (
-        <div
-          key={i}
-          className={`accordion-card ${openIndex === i ? "active" : ""}`}
-        >
-          {/* HEADER */}
-          <div className="accordion-header" onClick={() => toggleAccordion(i)}>
-            <span className="accordion-title">{sec.title}</span>
-            {openIndex === i ? <ChevronUp /> : <ChevronDown />}
-          </div>
+      {lectures.length === 0 ? (
+        <p className="no-res">No lectures available.</p>
+      ) : (
+        lectures.map((lec, i) => (
+          <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
+            {/* HEADER */}
+            <div className="accordion-header" onClick={() => toggleAccordion(i)}>
+              <span className="accordion-title">{lec.title}</span>
+              {openIndex === i ? <ChevronUp /> : <ChevronDown />}
+            </div>
 
-          {/* CONTENT */}
-          {openIndex === i && (
-            <div className="accordion-content">
-              {/* DESCRIPTION */}
-              {sec.description && (
-                <p className="accordion-description">{sec.description}</p>
-              )}
+            {/* CONTENT */}
+            {openIndex === i && (
+              <div className="accordion-content">
+                {lec.description && <p className="accordion-description">{lec.description}</p>}
 
-              {/* RESOURCES HEADER */}
-              <div
-                className="resource-header"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <h6 className="resource-heading">Resources</h6>
+                {/* RESOURCES HEADER */}
+                <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h6 className="resource-heading">Resources</h6>
 
-                {isTrainerView && (
-                  <div ref={resourcesRef} style={{ position: "relative" }}>
-                    <button
-                      className="quiz-menu-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCoords(getCoords(resourcesRef));
-                        setShowResourcesMenu(!showResourcesMenu);
-                      }}
-                    >
-                      <MoreVertical size={18} />
-                    </button>
-
-                    {showResourcesMenu &&
-                      createPortal(
-                        <ul
-                          className="quiz-menu"
-                          style={{
-                            position: "absolute",
-                            top: coords.top,
-                            left: coords.left,
-                            zIndex: 9999,
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <li>Add PowerPoint</li>
-                          <li>Add Videos</li>
-                          <li>Add Quiz</li>
-                          <li>Add Activity</li>
-                        </ul>,
-                        document.body
-                      )}
-                  </div>
-                )}
-              </div>
-
-              {/* RESOURCES LIST */}
-              {sec.resources && sec.resources.length > 0 ? (
-                <div className="resources-container">
-                  {sec.resources.map((res, idx) => (
-                    <a
-                      key={idx}
-                      href="#"
-                      className="resource-item"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FileText size={18} /> {res}
-                    </a>
-                  ))}
-
-                  {/* QUIZ LINK (TRAINEE VIEW) */}
-                  {!isTrainerView && (
-                    <button
-                      type="button"
-                      className="resource-item quiz-link"
-                      onClick={handleQuizClick}
-                    >
-                      <FileArchive size={18} /> Quiz for {sec.title}
-                    </button>
-                  )}
-
-
-                  {/* QUIZ LINK + MENU (TRAINER VIEW) */}
                   {isTrainerView && (
-                    <div
-                      className="resource-item quiz-link"
-                      ref={quizRef}
-                      style={{ position: "relative" }}
-                    >
-                      <FileArchive size={18} /> Quiz for {sec.title}
+                    <div ref={resourcesRef} style={{ position: "relative" }}>
                       <button
                         className="quiz-menu-button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setCoords(getCoords(quizRef));
-                          setShowQuizMenu(!showQuizMenu);
+                          setCoords(getCoords(resourcesRef));
+                          setShowResourcesMenuIndex(showResourcesMenuIndex === i ? -1 : i);
                         }}
                       >
                         <MoreVertical size={18} />
                       </button>
 
-                      {showQuizMenu &&
+                      {showResourcesMenuIndex === i &&
                         createPortal(
                           <ul
                             className="quiz-menu"
-                            style={{
-                              position: "absolute",
-                              top: coords.top,
-                              left: coords.left,
-                              zIndex: 9999,
-                            }}
+                            style={{ position: "absolute", top: coords.top, left: coords.left, zIndex: 9999 }}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <li>Quiz Configuration</li>
-                            <li>Delete</li>
+                            <li onClick={() => handleAddResourceClick(lec)}>Add Resources</li>
+                            <li>Add PowerPoint</li>
+                            <li>Add Videos</li>
+                            <li>Add Activity</li>
                           </ul>,
                           document.body
                         )}
                     </div>
                   )}
                 </div>
-              ) : (
-                <p className="no-res">No resources available yet.</p>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+
+                {/* RESOURCES LIST */}
+                {lec.content_url && lec.content_url.length > 0 ? (
+                  <div className="resources-container">
+                    {lec.content_url.map((url, idx) => (
+                      <a
+                        key={idx}
+                        href={`${window.location.origin}/${url.replace(/\\/g, "/")}`}
+                        className="resource-item"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileText size={18} /> {lec.title} Resource {idx + 1}
+                      </a>
+                    ))}
+
+                    {/* QUIZ LINK (TRAINEE VIEW) */}
+                    {!isTrainerView && (
+                      <button type="button" className="resource-item quiz-link" onClick={handleQuizClick}>
+                        <FileArchive size={18} /> Quiz for {lec.title}
+                      </button>
+                    )}
+
+                    {/* QUIZ LINK + MENU (TRAINER VIEW) */}
+                    {isTrainerView && (
+                      <div className="resource-item quiz-link" ref={quizRef} style={{ position: "relative" }}>
+                        <FileArchive size={18} /> Quiz for {lec.title}
+                        <button
+                          className="quiz-menu-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCoords(getCoords(quizRef));
+                            setShowQuizMenuIndex(showQuizMenuIndex === i ? -1 : i);
+                          }}
+                        >
+                          <MoreVertical size={18} />
+                        </button>
+
+                        {showQuizMenuIndex === i &&
+                          createPortal(
+                            <ul
+                              className="quiz-menu"
+                              style={{ position: "absolute", top: coords.top, left: coords.left, zIndex: 9999 }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <li>Quiz Configuration</li>
+                              <li>Delete</li>
+                            </ul>,
+                            document.body
+                          )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="no-res">No resources available yet.</p>
+                )}
+              </div>
+            )}
+          </div>
+        ))
+      )}
 
       {/* QUIZ MODAL */}
       {showQuizModal && (
