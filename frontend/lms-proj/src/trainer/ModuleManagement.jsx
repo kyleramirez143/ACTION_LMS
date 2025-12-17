@@ -265,7 +265,6 @@ export default function ModuleManagement() {
                                             )}
                                         </ul>
                                     </div>
-                                    {/* 👆 MODIFIED: End Dropdown Menu */}
 
 
                                     {/* Card content (clickable area for lectures) */}
@@ -303,7 +302,7 @@ export default function ModuleManagement() {
                                     {!module.is_visible && (
                                         <div className="card-footer bg-warning bg-opacity-10 border-top pt-2 pb-2 px-3">
                                             <span className="text-warning small fw-bold">
-                                                <i className="bi bi-eye-slash-fill me-1"></i> HIDDEN FROM STUDENTS
+                                                <i className="bi bi-eye-slash-fill me-1"></i> HIDDEN FROM TRAINEES
                                             </span>
                                         </div>
                                     )}

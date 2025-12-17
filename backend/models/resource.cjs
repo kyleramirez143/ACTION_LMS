@@ -26,8 +26,9 @@ module.exports = (sequelize, DataTypes) => {
 
     Resource.associate = (models) => {
         Resource.hasMany(models.LectureResource, { foreignKey: 'resources_id', as: 'lectureResources' });
+
         Resource.belongsToMany(models.Lecture, {
-            through: 'lecture_resources',
+            through: models.LectureResource,
             foreignKey: 'resources_id',
             otherKey: 'lecture_id',
             as: 'lectures'

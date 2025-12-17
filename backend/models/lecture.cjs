@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Lecture.belongsToMany(models.Resource, {
-            through: 'lecture_resources',
+            through: models.LectureResource,
             foreignKey: 'lecture_id',
             otherKey: 'resources_id',
             as: 'resources'

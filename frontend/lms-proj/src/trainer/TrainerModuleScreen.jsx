@@ -88,7 +88,7 @@ export default function TrainerModuleScreen() {
   // Navigate to AddLecture page
   const handleAddLectureClick = () => {
     // Pass fetchLectures so AddLecture can call it after creating a lecture
-    navigate(`/trainer/${course_id}/modules/${module_id}/create`);
+    navigate(`/trainer/${course_id}/modules/${module_id}/lectures/create`);
   };
 
   return (
