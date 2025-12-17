@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
+        is_visible: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
@@ -48,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Lecture.belongsToMany(models.Resource, {
-            through: 'lecture_resources',
+            through: models.LectureResource,
             foreignKey: 'lecture_id',
             otherKey: 'resources_id',
             as: 'resources'

@@ -8,7 +8,8 @@ import {
     getModulesByCourse,
     updateModule,
     deleteModule,
-    getModuleById
+    getModuleById,
+    updateModuleVisibility
 } from "../controllers/moduleController.js";
 
 const router = express.Router();
@@ -35,5 +36,6 @@ router.get("/:course_id", protect, checkRole(["Trainer"]), getModulesByCourse);
 router.put("/:module_id", protect, checkRole(["Trainer"]), upload.single("image"), updateModule);
 router.get("/id/:module_id", protect, checkRole(["Trainer"]), getModuleById);
 router.delete("/:module_id", protect, checkRole(["Trainer"]), deleteModule);
+router.put("/:module_id/visibility", protect, checkRole(["Trainer"]), updateModuleVisibility);
 
 export default router;

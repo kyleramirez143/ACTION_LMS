@@ -33,7 +33,7 @@ export const createCourse = async (req, res) => {
             title,
             image: image || null,
             description,
-            is_published: true,
+            is_published: false,
         });
 
         const courseId = course.course_id;
