@@ -379,7 +379,7 @@ export default function LectureForm() {
                     type="file"
                     className="form-control form-control-sm me-2"
                     onChange={(e) => handleNewResourceChange(index, e.target.files[0])}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || existingResources.length + newResources.filter(f => f instanceof File).length >= 5}
                   />
 
                   {/* Add/Remove Button Logic */}
