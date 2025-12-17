@@ -156,7 +156,7 @@ export const getLectureById = async (req, res) => {
     }
 };
 
-// Update lecture visibility (is_hidden flag)
+// Update lecture visibility (is_visible flag)
 export const updateLectureVisibility = async (req, res) => {
     const { lecture_id } = req.params;
     const { is_visible } = req.body;
@@ -317,3 +317,23 @@ export const deleteLecture = async (req, res) => {
     }
 };
 
+export const getLecturesByTrainer = async (req, res) => {
+    const trainerId = req.user.id;
+    try {
+        const modules = await Module.findAll({
+            where: { created_by: trainerId },
+            include: [
+                {
+                    model: Lecture,
+                    as: "lectures",
+                    attributes: ["lecture_id", "title"]
+                }
+            ],
+            order: [["created_at", "ASC"]],
+        });
+        res.json(modules);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch modules and lectures" });
+    }
+};

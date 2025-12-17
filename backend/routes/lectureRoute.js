@@ -9,9 +9,10 @@ import {
     getLecturesByModule,
     getLectureById,
     updateLectureVisibility,
-    updateLecture, // <-- NEW
-    deleteResources, // <-- NEW
-    deleteLecture // <-- NEW
+    updateLecture, 
+    deleteResources, 
+    deleteLecture, 
+    getLecturesByTrainer
 } from "../controllers/lectureController.js";
 
 const router = express.Router();
@@ -56,9 +57,17 @@ router.post("/resource",
     uploadLectureFile);
 
 // DELETE: Delete specific resources (Used by LectureForm existing file deletion)
-router.delete("/resource/delete", 
-    protect, 
-    checkRole(["Trainer"]), 
+router.delete("/resource/delete",
+    protect,
+    checkRole(["Trainer"]),
     deleteResources); // <-- NEW ROUTE
+
+router.get(
+    "/trainer",
+    protect,
+    checkRole(["Trainer"]),
+    getLecturesByTrainer
+);
+
 
 export default router;

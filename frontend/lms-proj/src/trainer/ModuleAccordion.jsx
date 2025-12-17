@@ -10,6 +10,8 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
     const [showQuizMenuIndex, setShowQuizMenuIndex] = useState(-1);
     const [showQuizModal, setShowQuizModal] = useState(false);
 
+    const [localLectures, setLectures] = useState(lectures);
+
     // Using an array of refs to reference each kebab button container
     const lectureMenuRefs = useRef([]);
     const quizRef = useRef(null);
@@ -47,21 +49,14 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
         navigate(`/trainer/${lecture.module.course_id}/modules/${lecture.module_id}/lectures/${lecture.lecture_id}/edit`);
     };
 
-    // Mapping Add Resource to Edit Lecture, as EditLecture handles resources
-    const handleAddResourceClick = (lecture) => {
-        setShowLectureMenuIndex(-1);
-        handleEditLectureClick(lecture);
-    };
+    useEffect(() => {
+        setLectures(lectures);
+    }, [lectures]);
 
     // Implemented logic to call API for "Make Hidden" functionality
-    const handleMakeHiddenClick = async (lecture) => {
-        setShowLectureMenuIndex(-1);
-
-        const newStatus = lecture.is_visible ? false : true;
-        const action = newStatus ? "hide" : "unhide";
-        const confirmMessage = `Are you sure you want to ${action} the lecture: "${lecture.title}"?`;
-
-        if (!window.confirm(confirmMessage)) return;
+    const handleMakeHiddenClick = async (lectureIndex) => {
+        const lecture = localLectures[lectureIndex];
+        const newStatus = !lecture.is_visible;
 
         try {
             const token = localStorage.getItem("authToken");
@@ -76,19 +71,25 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || `Failed to ${action} lecture`);
+                throw new Error(errorData.error || "Failed to update lecture visibility");
             }
 
-            alert(`Lecture "${lecture.title}" is now ${newStatus ? 'hidden' : 'visible'} successfully.`);
+            // Update local state immediately
+            const updatedLectures = [...lectures];
+            updatedLectures[lectureIndex] = {
+                ...lecture,
+                is_visible: newStatus,
+            };
+            setLectures(updatedLectures);
 
-            // In a real app, you would need to refresh the parent component's lecture list state here.
+            // Close menu
+            setShowLectureMenuIndex(-1);
 
         } catch (err) {
             console.error("Update Visibility Error:", err);
-            alert(err.message || `Failed to ${action} lecture.`);
+            // Optionally show a small inline message, not alert
         }
     };
-
 
     const handleQuizClick = () => {
         setShowQuizModal(true);
@@ -99,7 +100,7 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
             {lectures.length === 0 ? (
                 <p className="no-res">No lectures available.</p>
             ) : (
-                lectures.map((lec, i) => (
+                localLectures.map((lec, i) => (
                     <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
                         {/* HEADER */}
                         <div className="accordion-header">
@@ -108,7 +109,19 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                 style={{ display: 'flex', alignItems: 'center', width: '100%' }}
                             >
                                 <span className="accordion-title" onClick={() => toggleAccordion(i)} style={{ flexGrow: 1, cursor: 'pointer' }}>
-                                    {lec.title} {<lec className="is_visible"></lec> && isTrainerView && (<span style={{ color: !lec.is_visible ? 'red' : 'green' }}>({!lec.is_visible ? 'Hidden' : 'Visible'})</span>)}
+                                    {lec.title}
+                                    {isTrainerView && (
+                                        <span
+                                            className={`badge ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
+                                            style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // <- STOP the click from bubbling
+                                                handleMakeHiddenClick(i);
+                                            }}
+                                        >
+                                            {lec.is_visible ? 'Visible' : 'Hidden'}
+                                        </span>
+                                    )}
                                 </span>
 
                                 {/* LECTURE/RESOURCE MENU */}
@@ -168,7 +181,7 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                     padding: '8px 15px',
                                                     cursor: 'pointer',
                                                     color: !lec.is_visible ? 'green' : 'red'
-                                                }} onClick={() => handleMakeHiddenClick(lec)}>
+                                                }} onClick={() => handleMakeHiddenClick(i)}>
                                                     {!lec.is_visible ? "Make Visible" : "Make Hidden"}
                                                 </li>
                                                 {/* <li>Delete Lecture</li> */}
@@ -216,8 +229,13 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                     <p className="no-res">No resources available yet.</p>
                                 )}
 
+                                {/* RESOURCES HEADER */}
+                                <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <h6 className="resource-heading">Quizzes</h6>
+                                </div>
+
                                 {/* QUIZZES LIST */}
-                                {lec.assessments && lec.assessments.length > 0 && (
+                                {lec.assessments && lec.assessments.length > 0 ? (
                                     <div className="quizzes-container">
                                         {lec.assessments.map((quiz) => (
                                             <button
@@ -231,7 +249,11 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                             </button>
                                         ))}
                                     </div>
+                                ) : (
+                                    // If no quizzes, render nothing (header is still shown)
+                                    <p>There are no quiz yet.</p>
                                 )}
+
                             </div>
                         )}
                     </div>

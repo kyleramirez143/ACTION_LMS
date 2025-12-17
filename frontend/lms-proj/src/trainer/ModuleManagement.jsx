@@ -243,7 +243,7 @@ export default function ModuleManagement() {
                                                     <i className="bi bi-pencil me-2"></i> Edit Module
                                                 </button>
                                             </li>
-                                            <li><hr className="dropdown-divider" /></li>
+                                            {/* <li><hr className="dropdown-divider" /></li> */}
                                             {module.is_visible ? (
                                                 <li>
                                                     <button
