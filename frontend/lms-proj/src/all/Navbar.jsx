@@ -8,7 +8,7 @@ import { navLinks } from "../config/navConfig";
 import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
-  const { hasRole, logout, loading } = useAuth();
+  const { userProfile, hasRole, logout, loading } = useAuth();
   const navigate = useNavigate();
 
   const logoutUser = () => {
@@ -62,7 +62,15 @@ const Navbar = () => {
           <i className="bi bi-bell bell-icon"></i>
 
           <div className="d-flex align-items-center gap-2">
-            <div className="trainee-circle"></div>
+            <div className="trainee-circle">
+              {userProfile?.profile_picture ? (
+                <img
+                  src={`http://localhost:5000/${userProfile.profile_picture}`}
+                  alt="Profile"
+                  style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+                />
+              ) : null}
+            </div>
             <div className="text-end">
               <p className="mb-0 fw-semibold text-dark"></p>
             </div>

@@ -2,6 +2,9 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const db = require("../models/index.cjs");
 import bcrypt from "bcrypt";
+import fs from "fs";
+import csvParser from "csv-parser";
+import multer from "multer";
 
 export const getTrainers = async (req, res) => {
     try {
@@ -24,180 +27,242 @@ export const getTrainers = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await db.User.findAll({
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8; // 8 items per page
+        const offset = (page - 1) * limit;
+
+        const search = req.query.search ? req.query.search.toLowerCase() : "";
+        const roleFilter = req.query.role;
+
+        const { Sequelize } = db;
+
+        // Build where condition for User
+        const whereUser = {};
+        if (search) {
+            whereUser[Sequelize.Op.or] = [
+                Sequelize.where(
+                    Sequelize.fn("LOWER", Sequelize.col("first_name")),
+                    "LIKE",
+                    `%${search}%`
+                ),
+                Sequelize.where(
+                    Sequelize.fn("LOWER", Sequelize.col("last_name")),
+                    "LIKE",
+                    `%${search}%`
+                ),
+                Sequelize.where(
+                    Sequelize.fn("LOWER", Sequelize.col("email")),
+                    "LIKE",
+                    `%${search}%`
+                ),
+            ];
+        }
+
+        // Include roles with optional filter
+        const includeRoles = {
+            model: db.Role,
+            as: "roles",
+            attributes: ["name"],
+            through: { attributes: [] },
+            required: roleFilter && roleFilter !== "All", // Only filter when a specific role is selected
+        };
+
+        const includeBatch = {
+            model: db.Batch,
+            as: "batches",
+            attributes: ["name"],
+            through: { attributes: [] },
+        }
+
+        // Apply `where` only if filtering
+        if (roleFilter && roleFilter !== "All") {
+            includeRoles.where = { name: roleFilter };
+        }
+
+        // Fetch users with pagination, search, and role filter
+        const { count, rows } = await db.User.findAndCountAll({
+            where: whereUser,
+            include: [includeRoles, includeBatch],
+            limit,
+            offset,
+            order: [["created_at", "ASC"]], // Oldest first
+        });
+
+        const totalPages = Math.ceil(count / limit);
+
+        // Format the users for frontend
+        const formatted = rows.map(u => ({
+            id: u.id,
+            name: `${u.first_name} ${u.last_name}`,
+            email: u.email,
+            level: u.roles.length ? u.roles[0].name : "No Role",
+            batch: u.batches && u.batches.length > 0 ? u.batches[0].name : "No Batch Assigned",
+            status: u.is_active ? "Active" : "Inactive",
+        }));
+
+        res.json({
+            users: formatted,
+            currentPage: page,
+            totalPages,
+            totalUsers: count,
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch users" });
+    }
+};
+
+// ===== Add User =====
+export const addUser = async (req, res) => {
+    const { first_name, last_name, email, role, batch } = req.body;
+
+    if (!first_name || !last_name || !email || !role) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
+    try {
+        await db.sequelize.transaction(async (t) => {
+            // 1️⃣ Create user
+            const user = await db.User.create(
+                { first_name, last_name, email, is_active: true },
+                { transaction: t }
+            );
+
+            // 2️⃣ Assign role
+            const roleRecord = await db.Role.findOne({ where: { name: role } });
+            if (!roleRecord) throw new Error("Invalid role");
+
+            await db.UserRole.create(
+                { user_id: user.id, role_id: roleRecord.id },
+                { transaction: t }
+            );
+
+            // 3️⃣ Assign batch
+            let batchRecord;
+
+            if (role === "Trainee") {
+                if (!batch) throw new Error("Batch is required for Trainee");
+                batchRecord = await db.Batch.findByPk(batch, { transaction: t });
+                if (!batchRecord) throw new Error("Invalid batch selected");
+            } else {
+                // Admin / Trainer -> Not Applicable batch
+                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t });
+                if (!batchRecord) {
+                    batchRecord = await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
+                }
+            }
+
+            await db.UserBatch.create(
+                { user_id: user.id, batch_id: batchRecord.batch_id },
+                { transaction: t }
+            );
+
+            // 4️⃣ Default password
+            const defaultPass = "actionb40123";
+            const hashedPassword = await bcrypt.hash(defaultPass, 10);
+
+            await db.Password.create(
+                { user_id: user.id, password: hashedPassword, is_current: true },
+                { transaction: t }
+            );
+
+            // ✅ Response
+            res.json({
+                message: "User added successfully",
+                user: {
+                    id: user.id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    role: roleRecord.name,
+                    batch: batchRecord.name
+                },
+                defaultPassword: defaultPass
+            });
+        });
+
+    } catch (err) {
+        console.error("addUser error:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
+
+// ===== Update User =====
+export const updateUser = async (req, res) => {
+    const userId = req.params.id;
+    const { first_name, last_name, email, role, is_active, batch } = req.body;
+
+    if (!first_name || !last_name || !email || !role || typeof is_active === "undefined") {
+        return res.status(400).json({ message: "Missing or invalid data fields." });
+    }
+
+    try {
+        await db.sequelize.transaction(async (t) => {
+            await db.User.update({ first_name, last_name, email, is_active }, { where: { id: userId }, transaction: t });
+
+            // Update role
+            await syncUserRole(userId, role, t);
+
+            // Update batch
+            await db.UserBatch.destroy({ where: { user_id: userId }, transaction: t });
+
+            let batchRecord;
+            if (role === "Trainee") {
+                if (!batch) return res.status(400).json({ message: "Batch is required for Trainee" });
+                batchRecord = await db.Batch.findByPk(batch);
+                if (!batchRecord) return res.status(400).json({ message: "Invalid batch selected" });
+            } else {
+                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" } });
+                if (!batchRecord) batchRecord = await db.Batch.create({ name: "Not Applicable" });
+            }
+
+            await db.UserBatch.create({ user_id: userId, batch_id: batchRecord.id }, { transaction: t });
+        });
+
+        res.json({ message: "User updated successfully." });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+};
+
+
+export const getSingleUser = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const user = await db.User.findByPk(userId, {
+            attributes: ["id", "first_name", "last_name", "email", "is_active"],
             include: [
                 {
                     model: db.Role,
                     as: "roles",
                     attributes: ["name"],
                     through: { attributes: [] }
-                }
-            ],
-            attributes: ["id", "first_name", "last_name", "email", "is_active"]
-        });
-
-        const formatted = users.map(u => ({
-            id: u.id,
-            name: `${u.first_name} ${u.last_name}`,
-            email: u.email,
-            level: u.roles.length ? u.roles[0].name : "No Role",
-            status: u.is_active ? "Active" : "Inactive",
-        }));
-
-        res.json(formatted);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-};
-
-export const addUser = async (req, res) => {
-    try {
-        const { first_name, last_name, email, role } = req.body;
-
-        if (!first_name || !last_name || !email || !role)
-            return res.status(400).json({ error: "All fields are required" });
-
-        // 1️⃣ Create user
-        const user = await db.User.create({
-            first_name,
-            last_name,
-            email,
-            is_active: true
-        });
-
-        // 2️⃣ Assign Role
-        const roleRecord = await db.Role.findOne({ where: { name: role } });
-        if (!roleRecord)
-            return res.status(400).json({ error: "Invalid role" });
-
-        await db.UserRole.create({
-            user_id: user.id,
-            role_id: roleRecord.id
-        });
-
-        // 3️⃣ Create a default password
-        const defaultPass = "actionb40123";
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(defaultPass, saltRounds);
-
-        // 4️⃣ Store hashed password in Password table
-        await db.Password.create({
-            password: hashedPassword,
-            user_id: user.id,
-            is_current: true
-        });
-
-        // 5️⃣ Respond with success
-        res.json({
-            message: "User added successfully",
-            user: {
-                id: user.id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                role: roleRecord.name,
-            },
-            defaultPassword: defaultPass // optional: you may remove this in production
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-};
-
-export const updateUser = async (req, res) => {
-    const userId = req.params.id;
-    // Ensure 'email' is destructured from the request body
-    const { first_name, last_name, email, role, is_active } = req.body;
-
-    // ... (Authorization and Self-Edit Checks remain the same) ...
-
-    // ⚠️ DATA VALIDATION (ensure email is present)
-    if (!first_name || !last_name || !email || !role || typeof is_active === 'undefined') {
-        return res.status(400).json({ message: "Missing or invalid data fields." });
-    }
-
-    try {
-        const { User, sequelize } = db;
-
-        await sequelize.transaction(async (t) => {
-
-            const existingUser = await User.findByPk(userId, { transaction: t });
-            if (!existingUser) {
-                throw new Error("User not found.");
-            }
-
-            // 🛑 CRITICAL CHANGE: Include 'email' in the update payload 🛑
-            await User.update(
-                {
-                    first_name,
-                    last_name,
-                    email, // 👈 NOW UPDATABLE
-                    is_active,
-                    updated_at: new Date()
                 },
                 {
-                    where: { id: userId },
-                    transaction: t,
+                    model: db.Batch,
+                    as: "batches",
+                    attributes: ["name"],
+                    through: { attributes: [] }
                 }
-            );
-
-            // Update Role
-            await syncUserRole(userId, role, t);
-
-            res.json({ message: "User updated successfully.", userId: userId });
+            ]
         });
 
-    } catch (err) {
-        console.error("updateUser error:", err);
-        // ... (Error handling remains the same) ...
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-        // ADDED: Handle duplicate email error if your model enforces uniqueness
-        if (err.name === 'SequelizeUniqueConstraintError' && err.fields.email) {
-            return res.status(400).json({ message: "Email already in use by another user." });
-        }
-
-        res.status(500).json({ message: "Failed to update user. Database error." });
-    }
-};
-
-export const getSingleUser = async (req, res) => {
-    const userId = req.params.id;
-
-    // Authorization Check: Must be Admin
-    const userRoles = req.user?.roles || [];
-    if (!userRoles.includes('Admin')) {
-        return res.status(403).json({ message: "Authorization failed. Admin access required." });
-    }
-
-    try {
-        const { User, Role } = db;
-
-        const user = await db.User.findByPk(userId, {
-            attributes: ["id", "first_name", "last_name", "email", "is_active"],
-            include: [{
-                model: Role,
-                as: "roles",
-                attributes: ["name"],
-                through: { attributes: [] }
-            }]
-        });
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Format the output to match the frontend form state (single 'role' string)
         const formattedUser = {
             id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
             is_active: user.is_active,
-            role: user.roles.length > 0 ? user.roles[0].name : "Trainee"
+            role: user.roles.length ? user.roles[0].name : "No Role",
+            batch: user.batches.length ? user.batches[0].name : "Not Applicable"
         };
 
         res.json(formattedUser);
@@ -252,6 +317,29 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// ===== Bulk Delete Users =====
+export const bulkDeleteUsers = async (req, res) => {
+    try {
+        const { userIds } = req.body;
+        if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ error: "No users selected for deletion" });
+        }
+
+        // Delete related records first
+        await db.UserRole.destroy({ where: { user_id: userIds } });
+        await db.Password.destroy({ where: { user_id: userIds } });
+
+        // Delete users
+        const deleted = await db.User.destroy({ where: { id: userIds } });
+
+        res.json({ message: `${deleted} user(s) deleted successfully` }); // ✅ JSON response
+    } catch (err) {
+        console.error("Bulk delete error:", err);
+        res.status(500).json({ error: "Failed to delete users" }); // ✅ JSON on error
+    }
+};
+
 
 export const toggleUserStatus = async (req, res) => {
     try {
@@ -602,3 +690,165 @@ export const getUserGrowth = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch user growth" });
     }
 };
+
+// ===== Bulk Import =====
+export const importUsers = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: "CSV file is required." });
+    }
+
+    const filePath = req.file.path;
+    const addedUsers = [];
+    const errors = [];
+
+    try {
+        const rows = [];
+
+        fs.createReadStream(filePath)
+            .pipe(csvParser({ headers: false, skipEmptyLines: true }))
+            .on("data", (row) => rows.push(row))
+            .on("end", async () => {
+
+                for (const row of rows) {
+                    const values = Object.values(row).map(v => v?.trim());
+                    const [first_name, last_name, email, role, batch] = values;
+
+                    // Basic validation
+                    if (!first_name || !last_name || !email || !role) {
+                        errors.push({
+                            email: email || "N/A",
+                            error: "Missing required field"
+                        });
+                        continue;
+                    }
+
+                    try {
+                        // Prevent duplicates
+                        const existingUser = await db.User.findOne({ where: { email } });
+                        if (existingUser) {
+                            errors.push({ email, error: "User already exists" });
+                            continue;
+                        }
+
+                        // 🔐 TRANSACTION PER ROW
+                        await db.sequelize.transaction(async (t) => {
+
+                            // 1️⃣ Create User
+                            const user = await db.User.create(
+                                { first_name, last_name, email, is_active: true },
+                                { transaction: t }
+                            );
+
+                            // 2️⃣ Role
+                            const roleRecord = await db.Role.findOne({
+                                where: { name: role },
+                                transaction: t
+                            });
+
+                            if (!roleRecord) {
+                                throw new Error(`Invalid role '${role}'`);
+                            }
+
+                            await db.UserRole.create(
+                                { user_id: user.id, role_id: roleRecord.id },
+                                { transaction: t }
+                            );
+
+                            // 3️⃣ Batch
+                            let batchRecord;
+
+                            if (role === "Trainee") {
+                                if (!batch) {
+                                    throw new Error("Batch required for Trainee");
+                                }
+
+                                batchRecord = await db.Batch.findOne({
+                                    where: { name: batch },
+                                    transaction: t
+                                });
+
+                                if (!batchRecord) {
+                                    throw new Error(`Batch '${batch}' not found`);
+                                }
+                            } else {
+                                batchRecord = await db.Batch.findOne({
+                                    where: { name: "Not Applicable" },
+                                    transaction: t
+                                });
+
+                                if (!batchRecord) {
+                                    batchRecord = await db.Batch.create(
+                                        { name: "Not Applicable" },
+                                        { transaction: t }
+                                    );
+                                }
+                            }
+
+                            await db.UserBatch.create(
+                                { user_id: user.id, batch_id: batchRecord.batch_id },
+                                { transaction: t }
+                            );
+
+                            // 4️⃣ Password
+                            const hashedPassword = await bcrypt.hash("actionb40123", 10);
+
+                            await db.Password.create(
+                                {
+                                    user_id: user.id,
+                                    password: hashedPassword,
+                                    is_current: true
+                                },
+                                { transaction: t }
+                            );
+
+                            // Success
+                            addedUsers.push({ id: user.id, email });
+                        });
+
+                    } catch (err) {
+                        console.error(`Import error (${email}):`, err.message);
+                        errors.push({ email, error: err.message });
+                    }
+                }
+
+                fs.unlinkSync(filePath);
+                res.json({
+                    message: "CSV import completed",
+                    addedUsers,
+                    errors
+                });
+            });
+
+    } catch (err) {
+        console.error("Import users error:", err);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        res.status(500).json({ error: "Failed to import users" });
+    }
+};
+
+//Upload Profile
+export const uploadProfilePicture = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        const user = await db.User.findByPk(userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // ✅ Use the correct DB column
+        user.profile_picture = req.file.path.replace(/\\/g, "/");
+        await user.save();
+
+        res.json({
+            message: "Profile picture updated successfully",
+            profileImageUrl: user.profile_picture,
+        });
+    } catch (err) {
+        console.error("Profile image upload error:", err);
+        res.status(500).json({ error: "Failed to upload profile image" });
+    }
+};
+
