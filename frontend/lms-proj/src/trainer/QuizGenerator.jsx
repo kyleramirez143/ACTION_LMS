@@ -74,8 +74,10 @@ function QuizGenerator() {
             if (!res.ok) throw new Error("Upload failed.");
             const data = await res.json();
             setQuiz({ ...data }); // keep generated quiz preview
-        } catch {
+            console.log(data);
+        } catch (err) {
             alert("Error generating quiz.");
+            console.log("Error: ", err);
         } finally { setLoading(false); }
     };
 
@@ -100,6 +102,7 @@ function QuizGenerator() {
             // ✅ Reset everything
             setQuiz(null);
             setFile(null);
+            document.getElementById("pdfInput").value = "";
             setQuizType("Multiple Choice");
             setQuestionQty(0);
             setSelectedCourse("");
@@ -124,6 +127,7 @@ function QuizGenerator() {
             // ✅ Reset everything
             setQuiz(null);
             setFile(null);
+            document.getElementById("pdfInput").value = "";
             setQuizType("Multiple Choice");
             setQuestionQty(0);
             setSelectedCourse("");
@@ -148,9 +152,16 @@ function QuizGenerator() {
 
                         <div className="assessment-page">
                             <div className="file-upload-wrapper enhanced-upload"
-                                onClick={() => !quiz && document.getElementById("pdfInput").click()}
+                                onClick={() => {
+                                    if (!quiz) {
+                                        const input = document.getElementById("pdfInput");
+                                        input.value = "";
+                                        input.click();
+                                    }
+                                }}
                                 onDragOver={(e) => e.preventDefault()}
-                                onDrop={handleDrop}>
+                                onDrop={handleDrop}
+                            >
                                 <i className="bi bi-upload upload-icon"></i>
                                 <span className="fw-semibold text-primary mb-1">Upload PDF</span>
                                 {file && <span className="uploaded-file mt-2">{file.name}</span>}
@@ -196,7 +207,7 @@ function QuizGenerator() {
                             </select>
                         </div>
 
-                        <button className="btn btn-primary w-100" onClick={handleUpload} disabled={loading}>
+                        <button className="btn btn-primary w-100" onClick={handleUpload} disabled={loading || !!quiz} >
                             {loading ? "Generating..." : "Generate Quiz"}
                         </button>
                     </div>

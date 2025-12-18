@@ -59,7 +59,9 @@ ${text.slice(0, 16000)}
 
         const parsed = JSON.parse(aiText);
 
-        // 🟦 NOTHING IS SAVED TO DB HERE!
+        console.log(`Quiz created with ${questions.length} questions by user ${user.id}`);
+
+        // NOTHING IS SAVED TO DB HERE!
 
         res.json({
             success: true,
@@ -70,6 +72,7 @@ ${text.slice(0, 16000)}
         });
 
     } catch (err) {
+        console.log("Error: ", err);
         res.status(500).json({ error: err.message });
     }
 }
@@ -82,7 +85,7 @@ export async function saveQuizToLecture(req, res) {
         return res.status(400).json({ error: "Lecture ID and questions array required" });
 
     try {
-        // 1️⃣ Create Assessment
+        // Create Assessment
         const assessment = await Assessment.create({
             title,
             pdf_source_url: pdfFilename,
@@ -90,6 +93,8 @@ export async function saveQuizToLecture(req, res) {
             is_published: true,
             created_by: userId
         });
+
+        const assessmentId = assessment.assessment_id;
 
         for (const q of questions) {
             await AssessmentQuestion.create({
@@ -101,11 +106,13 @@ export async function saveQuizToLecture(req, res) {
             });
         }
 
-        // 3️⃣ Link to Lecture
+        // Link to Lecture
         await LectureAssessment.create({
             lecture_id: lectureId,
             assessment_id: assessment.assessment_id
         });
+
+        console.log(`[UPLOAD] Assessment ${assessmentId} created with ${questions.length} questions by user ${user.id}`);
 
         res.json({ success: true, message: "Quiz saved successfully!", assessmentId: assessment.assessment_id });
     } catch (err) {
