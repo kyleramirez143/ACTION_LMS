@@ -219,7 +219,7 @@ export const updateUser = async (req, res) => {
                 if (!batchRecord) batchRecord = await db.Batch.create({ name: "Not Applicable" });
             }
 
-            await db.UserBatch.create({ user_id: userId, batch_id: batchRecord.id }, { transaction: t });
+            await db.UserBatch.create({ user_id: userId, batch_id: batchRecord.batch_id }, { transaction: t });
         });
 
         res.json({ message: "User updated successfully." });

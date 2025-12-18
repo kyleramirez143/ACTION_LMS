@@ -50,6 +50,7 @@ import AddModule from "./trainer/AddModule.jsx";
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
+import ReviewPublish from "./trainer/ReviewPublish.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -90,10 +91,12 @@ function AppContent() {
 
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
             <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
+            <Route path="/trainer/:course_id/modules/:module_id/quizzes/:assessment_id" element={<ReviewPublish />} />
 
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
             <Route path="/trainer/:course_id/modules/:module_id/edit" element={<AddModule />} />

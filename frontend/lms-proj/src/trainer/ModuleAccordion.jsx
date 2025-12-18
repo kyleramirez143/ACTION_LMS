@@ -42,7 +42,6 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
     };
 
     // --- LECTURE/RESOURCE MENU ACTIONS ---
-
     const handleEditLectureClick = (lecture) => {
         setShowLectureMenuIndex(-1);
         // Corrected route: /trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit
@@ -242,10 +241,26 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 key={quiz.assessment_id}
                                                 className="resource-item quiz-link"
                                                 onClick={() => {
-                                                    navigate(`/trainer/quiz/${quiz.assessment_id}`);
+                                                    navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`);
+                                                }}
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    width: "100%",
                                                 }}
                                             >
-                                                <FileArchive size={18} /> {quiz.title} ({quiz.type})
+                                                <span>
+                                                    <FileArchive size={18} /> {quiz.title}
+                                                </span>
+
+                                                {/* STATUS BADGE */}
+                                                <span
+                                                    className={`badge ${quiz.is_published ? "bg-success" : "bg-danger"}`}
+                                                    style={{ marginLeft: "10px" }}
+                                                >
+                                                    {quiz.is_published ? "Published" : "Hidden"}
+                                                </span>
                                             </button>
                                         ))}
                                     </div>

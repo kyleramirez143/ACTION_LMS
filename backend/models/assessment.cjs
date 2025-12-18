@@ -30,6 +30,43 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.UUID,
             allowNull: false
         },
+        // --- NEW QUIZ SETTINGS ---
+        attempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 1,
+            allowNull: false
+        },
+        time_limit: {
+            type: DataTypes.INTEGER,
+            defaultValue: 30,
+            allowNull: false
+        },
+        passing_score: {
+            type: DataTypes.INTEGER,
+            defaultValue: 70,
+            allowNull: false
+        },
+        screen_monitoring: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false
+        },
+        randomize_questions: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false
+        },
+        show_score: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false
+        },
+        show_explanations: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false
+        },
+        // --- timestamps ---
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW

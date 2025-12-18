@@ -1,82 +1,102 @@
-// backend/controllers/quizController.js (FIXED)
+// backend/controllers/quizController.js
 
-import pool from "../db.js";
-// Middleware imports are not needed here, they belong in the routes file.
-// import { protect, checkRole } from '../middleware/authMiddleware.js'; 
-
-/**
- * Save a quiz into DB.
- * Expects body: { title: "Title", source: "uploaded-pdf", questions: [...] }
- */
-export async function createQuiz(req, res) {
-    const client = await pool.connect();
-    try {
-        const { title = "AI Generated Quiz", source = "ai", questions } = req.body;
-        // NOTE: You can check req.user here if you want to store the creator's ID
-
-        if (!Array.isArray(questions)) return res.status(400).json({ error: "questions must be an array" });
-
-        await client.query("BEGIN");
-
-        const quizInsert = await client.query(
-            "INSERT INTO quizzes (title, source) VALUES ($1, $2) RETURNING id, title, created_at",
-            [title, source]
-        );
-        const quizId = quizInsert.rows[0].id;
-
-        // ... (rest of the question/option insertion logic is fine) ...
-        for (const q of questions) {
-            const insertQ = await client.query(
-                "INSERT INTO questions (quiz_id, question_text, correct_answer) VALUES ($1, $2, $3) RETURNING id",
-                [quizId, q.question, q.correct_answer]
-            );
-            const questionId = insertQ.rows[0].id;
-
-            for (const [letter, text] of Object.entries(q.options)) {
-                await client.query(
-                    "INSERT INTO options (question_id, letter, option_text) VALUES ($1, $2, $3)",
-                    [questionId, letter, text]
-                );
-            }
-        }
-        // ... (end of insertion logic) ...
-
-        await client.query("COMMIT");
-        res.json({ success: true, quiz: { id: quizId, title: quizInsert.rows[0].title } });
-    } catch (err) {
-        await client.query("ROLLBACK");
-        console.error("createQuiz error:", err);
-        res.status(500).json({ error: err.message });
-    } finally {
-        client.release();
-    }
-}
+import pkg from '../models/index.cjs';
+const { Assessment, LectureAssessment, AssessmentQuestion } = pkg;
 
 /**
  * Fetch quiz with questions/options (for trainee).
  * IMPORTANT: Removed 'q.correct_answer' to prevent cheating.
  */
 export async function getQuiz(req, res) {
-    const quizId = req.params.id;
+    const { assessment_id } = req.params; // assessment_id
     try {
-        const quizRes = await pool.query("SELECT id, title, source, created_at FROM quizzes WHERE id = $1", [quizId]);
-        if (quizRes.rowCount === 0) return res.status(404).json({ error: "Quiz not found" });
+        // Fetch assessment with questions
+        const assessment = await Assessment.findOne({
+            where: { assessment_id },
+            include: [
+                {
+                    model: AssessmentQuestion,
+                    as: "questions",
+                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer"]
+                }
+            ]
+        });
 
-        const questionsRes = await pool.query(
-            // **FIXED:** Removed q.correct_answer from the SELECT list
-            `SELECT q.id as question_id, q.question_text,
-            json_agg(json_build_object('id', o.id, 'letter', o.letter, 'option_text', o.option_text) ORDER BY o.letter) AS options
-               FROM questions q
-               LEFT JOIN options o ON o.question_id = q.id
-               WHERE q.quiz_id = $1
-               GROUP BY q.id
-               ORDER BY q.id`,
-            [quizId]
-        );
+        if (!assessment) return res.status(404).json({ error: "Quiz not found" });
 
-        res.json({ quiz: quizRes.rows[0], questions: questionsRes.rows });
+        // Transform for frontend
+        const questions = assessment.questions.map(q => ({
+            question_id: q.question_id,
+            question_text: q.question_text,
+            options: q.options || [],
+            correct_answer: q.correct_answer || "",
+            explanation: q.explanations || ""
+        }));
+
+        res.json({
+            quiz: {
+                assessment_id: assessment.assessment_id,
+                title: assessment.title,
+                description: assessment.description,
+                attempts: assessment.attempts,
+                time_limit: assessment.time_limit,
+                passing_score: assessment.passing_score,
+                screen_monitoring: assessment.screen_monitoring,
+                randomize_questions: assessment.randomize_questions,
+                show_score: assessment.show_score,
+                show_explanations: assessment.show_explanations,
+                is_published: assessment.is_published
+            },
+            questions
+        });
     } catch (err) {
         console.error("getQuiz error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+/**
+ * Save or update quiz configuration from ReviewPublish form
+ */
+export async function saveQuizConfig(req, res) {
+    const { assessment_id } = req.params;
+    const {
+        title,
+        attempts,
+        timeLimit,
+        passingScore,
+        description,
+        screenMonitoring,
+        randomization,
+        scoreVisibility,
+        includeExplanationIfWrong,
+        isPublished
+    } = req.body;
+
+    if (!assessment_id) return res.status(400).json({ error: "Assessment ID is required" });
+
+    try {
+        // Fetch the assessment first
+        const assessment = await Assessment.findByPk(assessment_id);
+        if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+
+        // Update fields
+        await assessment.update({
+            title: title || assessment.title,
+            attempts: attempts ?? assessment.attempts,
+            time_limit: timeLimit ?? assessment.time_limit,
+            passing_score: passingScore ?? assessment.passing_score,
+            screen_monitoring: screenMonitoring ?? assessment.screen_monitoring,
+            randomize_questions: randomization ?? assessment.randomize_questions,
+            show_score: scoreVisibility ?? assessment.show_score,
+            show_explanations: includeExplanationIfWrong ?? assessment.show_explanations,
+            description: description || assessment.description, // if you add instructions column
+            is_published: isPublished ?? assessment.is_published,
+        });
+
+        res.json({ success: true, message: "Quiz configuration saved successfully!" });
+    } catch (err) {
+        console.error("saveQuizConfig error:", err);
         res.status(500).json({ error: err.message });
     }
 }

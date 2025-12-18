@@ -15,6 +15,7 @@ function QuizGenerator() {
     const [courses, setCourses] = useState([]);
     const [modules, setModules] = useState([]);
     const [lectures, setLectures] = useState([]);
+    const [quizTitle, setQuizTitle] = useState("");
     const [selectedCourse, setSelectedCourse] = useState("");
     const [selectedModule, setSelectedModule] = useState("");
     const [selectedLecture, setSelectedLecture] = useState("");
@@ -61,6 +62,7 @@ function QuizGenerator() {
 
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("title", quizTitle);
         formData.append("quizType", quizType);
         formData.append("questionQty", questionQty);
 
@@ -174,6 +176,18 @@ function QuizGenerator() {
                                     onChange={e => setFile(e.target.files[0])}
                                 />
                             </div>
+                        </div>
+
+                        <div className="mb-3 p-3 shadow-sm rounded bg-white">
+                            <label className="form-label fw-bold">Quiz Title</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={quizTitle}
+                                onChange={(e) => setQuizTitle(e.target.value)}
+                                disabled={!!quiz}
+                                placeholder="Enter quiz title"
+                            />
                         </div>
 
                         <div className="mb-3 p-3 shadow-sm rounded bg-white mt-3">

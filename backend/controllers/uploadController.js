@@ -112,7 +112,7 @@ export async function saveQuizToLecture(req, res) {
             assessment_id: assessment.assessment_id
         });
 
-        console.log(`[UPLOAD] Assessment ${assessmentId} created with ${questions.length} questions by user ${user.id}`);
+        console.log(`[UPLOAD] Assessment ${assessmentId} created with ${Array.isArray(questions) ? questions.length : 0} questions by user ${userId}`);
 
         res.json({ success: true, message: "Quiz saved successfully!", assessmentId: assessment.assessment_id });
     } catch (err) {
