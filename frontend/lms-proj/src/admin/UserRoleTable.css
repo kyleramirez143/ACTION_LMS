@@ -73,3 +73,8 @@
     border: 2px solid #0047AB;
     background-color: #0047AB;
 }
+
+.form-select {
+    border: 1px solid #5B5B5B !important;
+    box-shadow: none !important;
+}

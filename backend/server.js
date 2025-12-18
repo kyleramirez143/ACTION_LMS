@@ -12,6 +12,7 @@ import courseRoutes from "./routes/courseRoute.js";
 import moduleRoutes from "./routes/moduleRoute.js";
 import lectureRoutes from "./routes/lectureRoute.js";
 import userRoutes from "./routes/userRoute.js";
+import batchRoutes from "./routes/batchesRoute.js";
 
 const app = express();
 // app.use(cors());
@@ -38,6 +39,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/modules", moduleRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/batches", batchRoutes);
 
 app.use("/uploads", express.static("uploads"));
 
