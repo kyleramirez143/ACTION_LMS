@@ -32,9 +32,9 @@ const upload = multer({ storage });
 
 // ROUTES (Trainer Only)
 router.post("/", protect, checkRole(["Trainer"]), upload.single("image"), createModule);
-router.get("/:course_id", protect, checkRole(["Trainer"]), getModulesByCourse);
+router.get("/:course_id", protect, checkRole(["Trainer", "Trainee"]), getModulesByCourse);
 router.put("/:module_id", protect, checkRole(["Trainer"]), upload.single("image"), updateModule);
-router.get("/id/:module_id", protect, checkRole(["Trainer"]), getModuleById);
+router.get("/id/:module_id", protect, checkRole(["Trainer", "Trainee"]), getModuleById);
 router.delete("/:module_id", protect, checkRole(["Trainer"]), deleteModule);
 router.put("/:module_id/visibility", protect, checkRole(["Trainer"]), updateModuleVisibility);
 

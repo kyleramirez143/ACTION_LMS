@@ -52,6 +52,9 @@ import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
 
+// Trainee imports
+import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
+
 function AppContent() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/"; // hide navbar only on login page
@@ -106,7 +109,7 @@ function AppContent() {
 
             <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
 
-            
+
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
 
             {/* Admin Side Routes */}
@@ -126,6 +129,8 @@ function AppContent() {
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
 
+            {/* Trainee Side Routes */}
+            <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
 
           </Routes>
         </div>

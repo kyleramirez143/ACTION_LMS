@@ -41,10 +41,10 @@ router.put("/:lecture_id", protect, checkRole(["Trainer"]), updateLecture); // <
 router.delete("/:lecture_id", protect, checkRole(["Trainer"]), deleteLecture); // <-- NEW ROUTE
 
 // GET: get lectures by module
-router.get("/modules/:module_id", protect, checkRole(["Trainer"]), getLecturesByModule);
+router.get("/modules/:module_id", protect, checkRole(["Trainer", "Trainee"]), getLecturesByModule);
 
 // GET: Get a single lecture by ID (Used by LectureForm to fetch data)
-router.get("/id/:lecture_id", protect, checkRole(["Trainer"]), getLectureById);
+router.get("/id/:lecture_id", protect, checkRole(["Trainer", "Trainee"]), getLectureById);
 
 // PATCH: lecture visibility (Make Hidden/Visible)
 router.patch("/visibility/:lecture_id", protect, checkRole(["Trainer"]), updateLectureVisibility);
@@ -65,7 +65,7 @@ router.delete("/resource/delete",
 router.get(
     "/trainer",
     protect,
-    checkRole(["Trainer"]),
+    checkRole(["Trainer", "Trainee"]),
     getLecturesByTrainer
 );
 

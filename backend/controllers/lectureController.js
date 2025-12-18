@@ -82,14 +82,20 @@ export const uploadLectureFile = async (req, res) => {
 // Get all lectures for a module, including resources
 export const getLecturesByModule = async (req, res) => {
     const { module_id } = req.params;
+    const userRole = req.user?.roles?.[0]; // e.g., "Trainer" or "Trainee"
 
     try {
-        if (!module_id) {
-            return res.status(400).json({ error: "module_id is required" });
+        if (!module_id) return res.status(400).json({ error: "module_id is required" });
+
+        const whereClause = { module_id };
+
+        // Trainees only see visible lectures
+        if (userRole === "Trainee") {
+            whereClause.is_visible = true;
         }
 
         const lectures = await Lecture.findAll({
-            where: { module_id },
+            where: whereClause,
             order: [["created_at", "ASC"]],
             include: [
                 {
@@ -100,13 +106,13 @@ export const getLecturesByModule = async (req, res) => {
                 {
                     model: Resource,
                     as: "resources",
-                    through: { attributes: [] }, // hide junction table info
+                    through: { attributes: [] },
                     attributes: ["resource_id", "file_url", "created_at"],
                 },
                 {
                     model: Assessment,
                     as: "assessments",
-                    through: { attributes: [] }, // hide junction table info
+                    through: { attributes: [] },
                     attributes: ["assessment_id", "title", "description", "pdf_source_url", "assessment_type_id", "is_published"],
                 },
             ],
@@ -118,6 +124,7 @@ export const getLecturesByModule = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch lectures", details: err.message });
     }
 };
+
 
 // Get a single lecture by ID, including resources and assessments
 export const getLectureById = async (req, res) => {

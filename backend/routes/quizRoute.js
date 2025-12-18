@@ -9,7 +9,7 @@ const router = express.Router();
 router.put('/:assessment_id', protect, checkRole(['Trainer']), quizController.saveQuizConfig);
 
 // Route for getting a quiz (to take it): Requires any valid user
-router.get('/:assessment_id', protect, checkRole(['Trainer']), quizController.getQuiz);
+router.get('/:assessment_id', protect, checkRole(['Trainer', 'Trainee']), quizController.getQuiz);
 
 
 export default router;

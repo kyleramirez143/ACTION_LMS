@@ -41,7 +41,7 @@ export const navLinks = [
   },
   {
     name: 'My Courses',
-    path: '/student/dashboard',
+    path: '/trainee/courses',
     // icon: 'SchoolIcon',
     requiredRoles: ['Trainee'], // Only Students
   },

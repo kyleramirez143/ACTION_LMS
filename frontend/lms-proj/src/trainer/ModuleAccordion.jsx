@@ -1,31 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
-import { createPortal } from "react-dom";
-import { ScreenAccessModal } from "./QuizModals";
 import { useNavigate } from "react-router-dom";
 
 export default function ModuleAccordion({ isTrainerView, lectures = [], courseId, moduleId }) {
     const [openIndex, setOpenIndex] = useState(-1);
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
     const [showQuizMenuIndex, setShowQuizMenuIndex] = useState(-1);
-    const [showQuizModal, setShowQuizModal] = useState(false);
+    const [localLectures, setLectures] = useState([]);
 
-    const [localLectures, setLectures] = useState(lectures);
-
-    // Using an array of refs to reference each kebab button container
     const lectureMenuRefs = useRef([]);
     const quizRef = useRef(null);
-
     const navigate = useNavigate();
 
     // Close menus when clicking outside
     useEffect(() => {
         function handleClick(e) {
-            // Check if the click is outside ANY lecture menu or quiz menu
             const isOutsideLectureMenu = !lectureMenuRefs.current.some(
                 (ref) => ref && ref.contains(e.target)
             );
-
             if (isOutsideLectureMenu && (quizRef.current && !quizRef.current.contains(e.target))) {
                 setShowLectureMenuIndex(-1);
                 setShowQuizMenuIndex(-1);
@@ -41,18 +33,11 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
         setShowQuizMenuIndex(-1);
     };
 
-    // --- LECTURE/RESOURCE MENU ACTIONS ---
     const handleEditLectureClick = (lecture) => {
         setShowLectureMenuIndex(-1);
-        // Corrected route: /trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit
         navigate(`/trainer/${lecture.module.course_id}/modules/${lecture.module_id}/lectures/${lecture.lecture_id}/edit`);
     };
 
-    useEffect(() => {
-        setLectures(lectures);
-    }, [lectures]);
-
-    // Implemented logic to call API for "Make Hidden" functionality
     const handleMakeHiddenClick = async (lectureIndex) => {
         const lecture = localLectures[lectureIndex];
         const newStatus = !lecture.is_visible;
@@ -73,40 +58,41 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                 throw new Error(errorData.error || "Failed to update lecture visibility");
             }
 
-            // Update local state immediately
-            const updatedLectures = [...lectures];
-            updatedLectures[lectureIndex] = {
-                ...lecture,
-                is_visible: newStatus,
-            };
+            // Update local state
+            const updatedLectures = [...localLectures];
+            updatedLectures[lectureIndex] = { ...lecture, is_visible: newStatus };
             setLectures(updatedLectures);
 
-            // Close menu
             setShowLectureMenuIndex(-1);
-
         } catch (err) {
             console.error("Update Visibility Error:", err);
-            // Optionally show a small inline message, not alert
         }
     };
 
-    const handleQuizClick = () => {
-        setShowQuizModal(true);
-    };
+    // Update local lectures with visibility/published filtering for trainees
+    useEffect(() => {
+        const filteredLectures = isTrainerView
+            ? lectures
+            : lectures
+                .filter(lec => lec.is_visible)
+                .map(lec => ({
+                    ...lec,
+                    assessments: (lec.assessments || []).filter(q => q.is_published),
+                }));
+
+        setLectures(filteredLectures);
+    }, [lectures, isTrainerView]);
 
     return (
         <div className="accordion-wrapper">
-            {lectures.length === 0 ? (
+            {localLectures.length === 0 ? (
                 <p className="no-res">No lectures available.</p>
             ) : (
                 localLectures.map((lec, i) => (
                     <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
                         {/* HEADER */}
                         <div className="accordion-header">
-                            <div
-                                className="accordion-title-container"
-                                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-                            >
+                            <div className="accordion-title-container" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <span className="accordion-title" onClick={() => toggleAccordion(i)} style={{ flexGrow: 1, cursor: 'pointer' }}>
                                     {lec.title}
                                     {isTrainerView && (
@@ -114,7 +100,7 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                             className={`badge ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
                                             style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}
                                             onClick={(e) => {
-                                                e.stopPropagation(); // <- STOP the click from bubbling
+                                                e.stopPropagation();
                                                 handleMakeHiddenClick(i);
                                             }}
                                         >
@@ -123,24 +109,18 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                     )}
                                 </span>
 
-                                {/* LECTURE/RESOURCE MENU */}
+                                {/* LECTURE MENU */}
                                 {isTrainerView && (
-                                    // Parent container for relative positioning
-                                    <div
-                                        ref={(el) => (lectureMenuRefs.current[i] = el)}
-                                        style={{ position: "relative", marginRight: "10px", flexShrink: 0 }}
-                                    >
-                                        {/* KEBAB ICON (NOW A DIV) */}
+                                    <div ref={(el) => (lectureMenuRefs.current[i] = el)} style={{ position: "relative", marginRight: "10px", flexShrink: 0 }}>
                                         <div
                                             className="kebab-menu-button"
-                                            role="button" // Important for accessibility
-                                            tabIndex={0} // Important for keyboard navigation
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
                                                 setShowQuizMenuIndex(-1);
                                             }}
-                                            // Handle keyboard navigation (Enter/Space)
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' || e.key === ' ') {
                                                     e.preventDefault();
@@ -150,19 +130,18 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 }
                                             }}
                                             aria-label="Lecture Actions"
-                                            style={{ cursor: 'pointer', padding: '4px' }} // Add padding for click area
+                                            style={{ cursor: 'pointer', padding: '4px' }}
                                         >
                                             <MoreVertical size={18} />
                                         </div>
 
-                                        {/* Dropdown Menu - Positioned absolutely relative to its parent div */}
                                         {showLectureMenuIndex === i && (
                                             <ul
                                                 className="quiz-menu"
                                                 style={{
                                                     position: "absolute",
-                                                    top: "100%", // Place it right below the icon
-                                                    right: 0, // Align to the right edge of the icon container
+                                                    top: "100%",
+                                                    right: 0,
                                                     zIndex: 10,
                                                     minWidth: "150px",
                                                     backgroundColor: 'white',
@@ -183,7 +162,6 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 }} onClick={() => handleMakeHiddenClick(i)}>
                                                     {!lec.is_visible ? "Make Visible" : "Make Hidden"}
                                                 </li>
-                                                {/* <li>Delete Lecture</li> */}
                                             </ul>
                                         )}
                                     </div>
@@ -195,45 +173,37 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                             </div>
                         </div>
 
-                        {/* CONTENT (same as before) */}
+                        {/* CONTENT */}
                         {openIndex === i && (
                             <div className="accordion-content">
                                 {lec.description && <p className="accordion-description">{lec.description}</p>}
 
-                                {/* RESOURCES HEADER */}
                                 <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <h6 className="resource-heading">Resources</h6>
                                 </div>
 
-                                {/* RESOURCES LIST */}
                                 {lec.resources && lec.resources.length > 0 ? (
                                     <div className="resources-container">
-                                        {lec.resources.map((res, idx) => {
-                                            const fileName = res.file_url;
-
-                                            return (
-                                                <a
-                                                    key={res.resource_id}
-                                                    href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
-                                                    className="resource-item"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <FileText size={18} /> {fileName}
-                                                </a>
-                                            );
-                                        })}
+                                        {lec.resources.map((res) => (
+                                            <a
+                                                key={res.resource_id}
+                                                href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
+                                                className="resource-item"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <FileText size={18} /> {res.file_url}
+                                            </a>
+                                        ))}
                                     </div>
                                 ) : (
                                     <p className="no-res">No resources available yet.</p>
                                 )}
 
-                                {/* RESOURCES HEADER */}
                                 <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <h6 className="resource-heading">Quizzes</h6>
                                 </div>
 
-                                {/* QUIZZES LIST */}
                                 {lec.assessments && lec.assessments.length > 0 ? (
                                     <div className="quizzes-container">
                                         {lec.assessments.map((quiz) => (
@@ -253,8 +223,6 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 <span>
                                                     <FileArchive size={18} /> {quiz.title}
                                                 </span>
-
-                                                {/* STATUS BADGE */}
                                                 <span
                                                     className={`badge ${quiz.is_published ? "bg-success" : "bg-danger"}`}
                                                     style={{ marginLeft: "10px" }}
@@ -265,25 +233,12 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                         ))}
                                     </div>
                                 ) : (
-                                    // If no quizzes, render nothing (header is still shown)
                                     <p>There are no quiz yet.</p>
                                 )}
-
                             </div>
                         )}
                     </div>
                 ))
-            )}
-
-            {/* QUIZ MODAL */}
-            {showQuizModal && (
-                <ScreenAccessModal
-                    onAllow={() => {
-                        setShowQuizModal(false);
-                        navigate("/trainee/quizpage");
-                    }}
-                    onDeny={() => setShowQuizModal(false)}
-                />
             )}
         </div>
     );

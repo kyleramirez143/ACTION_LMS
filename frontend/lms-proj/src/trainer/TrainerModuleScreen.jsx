@@ -9,17 +9,21 @@ import UpcomingPanel from "../trainer/UpcomingPanel";
 export default function TrainerModuleScreen() {
   const { course_id, module_id } = useParams();
   const navigate = useNavigate();
-
   const token = localStorage.getItem("authToken");
+
+  const [userRole, setUserRole] = useState(null); // Trainer or Trainee
 
   // AUTH CHECK
   useEffect(() => {
-    if (!token) return navigate("/");
+    if (!token) return navigate("/login");
 
     try {
       const decoded = jwtDecode(token);
       const roles = decoded.roles || [];
-      if (!roles.includes("Trainer")) navigate("/access-denied");
+      const allowedRoles = ["Trainer", "Trainee"];
+      const role = roles.find(r => allowedRoles.includes(r));
+      if (!role) return navigate("/access-denied");
+      setUserRole(role);
     } catch (err) {
       localStorage.removeItem("authToken");
       navigate("/login");
@@ -30,13 +34,15 @@ export default function TrainerModuleScreen() {
   const [lectures, setLectures] = useState([]);
   const [error, setError] = useState(null);
 
+  const [moduleTitle, setModuleTitle] = useState("");
+  const [moduleDescription, setModuleDescription] = useState("");
+
   // Fetch lectures
   const fetchLectures = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/lectures/modules/${module_id}`, {
-        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -44,7 +50,6 @@ export default function TrainerModuleScreen() {
       });
 
       const data = await res.json();
-      // Ensure we always have an array
       setLectures(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
@@ -55,9 +60,7 @@ export default function TrainerModuleScreen() {
     }
   };
 
-  const [moduleTitle, setModuleTitle] = useState("");
-  const [moduleDescription, setModuleDescription] = useState("");
-
+  // Fetch module info
   const fetchModule = async () => {
     try {
       const res = await fetch(`/api/modules/id/${module_id}`, {
@@ -76,19 +79,17 @@ export default function TrainerModuleScreen() {
   };
 
   useEffect(() => {
-    if (module_id) fetchModule();
-  }, [module_id]);
-
-  useEffect(() => {
     if (module_id) {
+      fetchModule();
       fetchLectures();
     }
   }, [module_id]);
 
-  // Navigate to AddLecture page
+  // Navigate to AddLecture page (Trainers only)
   const handleAddLectureClick = () => {
-    // Pass fetchLectures so AddLecture can call it after creating a lecture
-    navigate(`/trainer/${course_id}/modules/${module_id}/lectures/create`);
+    if (userRole === "Trainer") {
+      navigate(`/trainer/${course_id}/modules/${module_id}/lectures/create`);
+    }
   };
 
   return (
@@ -96,13 +97,13 @@ export default function TrainerModuleScreen() {
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="module-title">{moduleTitle}</div>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleAddLectureClick}
-          >
-            Add Lecture
-          </button>
+          {userRole === "Trainer" && (
+            <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
+              Add Lecture
+            </button>
+          )}
         </div>
+
         <p className="text-secondary">{moduleDescription}</p>
 
         {loading ? (
@@ -110,9 +111,13 @@ export default function TrainerModuleScreen() {
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : lectures.length === 0 ? (
-          <p>No lectures yet. Click "Add Lecture" to create one.</p>
+          <p>
+            {userRole === "Trainer"
+              ? 'No lectures yet. Click "Add Lecture" to create one.'
+              : "No lectures available yet."}
+          </p>
         ) : (
-          <ModuleAccordion isTrainerView lectures={lectures} />
+          <ModuleAccordion isTrainerView={userRole === "Trainer"} lectures={lectures} />
         )}
       </div>
 

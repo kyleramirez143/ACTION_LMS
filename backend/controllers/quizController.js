@@ -8,9 +8,10 @@ const { Assessment, LectureAssessment, AssessmentQuestion } = pkg;
  * IMPORTANT: Removed 'q.correct_answer' to prevent cheating.
  */
 export async function getQuiz(req, res) {
-    const { assessment_id } = req.params; // assessment_id
+    const { assessment_id } = req.params;
+    const userRole = req.user?.roles?.[0];
+
     try {
-        // Fetch assessment with questions
         const assessment = await Assessment.findOne({
             where: { assessment_id },
             include: [
@@ -24,7 +25,11 @@ export async function getQuiz(req, res) {
 
         if (!assessment) return res.status(404).json({ error: "Quiz not found" });
 
-        // Transform for frontend
+        // Trainees cannot access unpublished quizzes
+        if (userRole === "Trainee" && !assessment.is_published) {
+            return res.status(403).json({ error: "Quiz not available for trainees." });
+        }
+
         const questions = assessment.questions.map(q => ({
             question_id: q.question_id,
             question_text: q.question_text,
@@ -54,6 +59,7 @@ export async function getQuiz(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
 
 /**
  * Save or update quiz configuration from ReviewPublish form

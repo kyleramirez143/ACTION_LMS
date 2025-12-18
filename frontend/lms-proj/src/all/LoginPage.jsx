@@ -82,7 +82,7 @@ function LoginPage() {
           navigate('/trainer/dashboard');
         } else {
           // Default redirect for unrecognized roles
-          navigate('/dashboard');
+          navigate('/trainee/dashboard');
         }
 
         setFormData({ email: '', password: '' });

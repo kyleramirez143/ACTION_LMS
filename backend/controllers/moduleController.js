@@ -39,8 +39,18 @@ export const getModulesByCourse = async (req, res) => {
     try {
         const { course_id } = req.params;
 
+        // Determine user role from req.user
+        const userRole = req.user?.roles?.[0]; // or however your JWT roles are structured
+
+        const whereClause = { course_id };
+
+        // If Trainee, only return visible modules
+        if (userRole === "Trainee") {
+            whereClause.is_visible = true;
+        }
+
         const modules = await Module.findAll({
-            where: { course_id },
+            where: whereClause,
             include: [
                 { model: Lecture, as: "lectures" }
             ],
