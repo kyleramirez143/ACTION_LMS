@@ -6,8 +6,10 @@ import "./ReviewPublish.css";
 const ReviewPublish = () => {
   const { assessment_id, course_id, module_id } = useParams();
   const [quiz, setQuiz] = useState(null);
+  const [originalQuestions, setOriginalQuestions] = useState([]);
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
@@ -24,27 +26,24 @@ const ReviewPublish = () => {
     }
   }, [token, navigate]);
 
-  // Load quiz + settings in one fetch
+  // Load quiz + settings
   useEffect(() => {
     async function loadQuiz() {
       try {
         const res = await fetch(`/api/quizzes/${assessment_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!res.ok) throw new Error("Failed to fetch quiz");
-
         const data = await res.json();
 
-        setQuiz({
-          ...data,
-          questions: (data.questions || []).map(q => ({
-            ...q,
-            options: typeof q.options === "object" ? q.options : {},
-          }))
-        });
+        const questions = (data.questions || []).map(q => ({
+          ...q,
+          options: typeof q.options === "object" ? q.options : {},
+        }));
 
-        // Map DB fields to settings state
+        setQuiz({ ...data, questions });
+        setOriginalQuestions(JSON.parse(JSON.stringify(questions))); // snapshot for cancel
+
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
@@ -64,14 +63,119 @@ const ReviewPublish = () => {
         setLoading(false);
       }
     }
-
     loadQuiz();
   }, [assessment_id, token]);
 
+  // SETTINGS HANDLER
   const handleChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
+  // QUESTIONS HANDLERS
+  const handleQuestionChange = (index, key, value) => {
+    const updatedQuestions = [...quiz.questions];
+    if (key === "options") updatedQuestions[index].options = value;
+    else updatedQuestions[index][key] = value;
+    setQuiz(prev => ({ ...prev, questions: updatedQuestions }));
+  };
+
+  const reletterOptionsForSave = (options) => {
+    const keys = Object.keys(options).sort();
+    const newOptions = {};
+    keys.forEach((_, idx) => {
+      const key = String.fromCharCode(97 + idx); // 'a', 'b', 'c'
+      newOptions[key] = options[keys[idx]];
+    });
+    return newOptions;
+  };
+
+  const handleSaveQuestion = async (index) => {
+    const q = quiz.questions[index];
+    try {
+      const res = await fetch(`/api/quizzes/questions/${q.question_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          question_text: q.question_text,
+          options: reletterOptionsForSave(q.options),
+          correct_answer: q.correct_answer?.toLowerCase(),
+          explanations: q.explanation,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save question");
+
+      // Update original snapshot
+      const updatedOriginal = [...originalQuestions];
+      updatedOriginal[index] = JSON.parse(JSON.stringify(q));
+      setOriginalQuestions(updatedOriginal);
+
+      setEditingQuestionIndex(null);
+    } catch (err) {
+      console.error("Save question error:", err);
+      alert("Failed to save question.");
+    }
+  };
+
+  const handleCancelEdit = (index) => {
+    const updated = [...quiz.questions];
+    updated[index] = JSON.parse(JSON.stringify(originalQuestions[index])); // restore
+    setQuiz(prev => ({ ...prev, questions: updated }));
+    setEditingQuestionIndex(null);
+  };
+
+  const handleAddQuestion = async () => {
+    try {
+      const res = await fetch(`/api/quizzes/questions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          assessment_id,
+          question_text: "New Question",
+          options: { a: "", b: "" },
+          correct_answer: "",
+          explanations: "",
+        }),
+      });
+      const newQuestion = await res.json();
+      setQuiz(prev => ({ ...prev, questions: [...prev.questions, newQuestion] }));
+      setOriginalQuestions(prev => [...prev, JSON.parse(JSON.stringify(newQuestion))]);
+      setEditingQuestionIndex(quiz.questions.length);
+    } catch (err) {
+      console.error("Add question error:", err);
+    }
+  };
+
+  const handleDeleteQuestion = async (index) => {
+    const q = quiz.questions[index];
+    try {
+      const res = await fetch(`/api/quizzes/questions/${q.question_id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete question");
+
+      const updated = [...quiz.questions];
+      updated.splice(index, 1);
+      setQuiz(prev => ({ ...prev, questions: updated }));
+
+      const updatedOriginal = [...originalQuestions];
+      updatedOriginal.splice(index, 1);
+      setOriginalQuestions(updatedOriginal);
+
+      setEditingQuestionIndex(null);
+    } catch (err) {
+      console.error("Delete question error:", err);
+    }
+  };
+
+  // PUBLISH QUIZ SETTINGS
   const handlePublish = async () => {
     try {
       const res = await fetch(`/api/quizzes/${assessment_id}`, {
@@ -82,15 +186,13 @@ const ReviewPublish = () => {
         },
         body: JSON.stringify(settings),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save quiz");
-
-      alert("Quiz settings saved successfully!");
+      alert("Quiz saved successfully!");
       navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
     } catch (err) {
-      console.error("Publish error:", err);
-      alert("Failed to save quiz settings.");
+      console.error(err);
+      alert("Failed to save quiz.");
     }
   };
 
@@ -98,11 +200,7 @@ const ReviewPublish = () => {
     navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
   };
 
-  if (loading || !settings || !quiz) {
-    return <div className="container p-4">Loading quiz and settings...</div>;
-  }
-
-  const questions = quiz.questions || [];
+  if (loading || !settings || !quiz) return <div>Loading...</div>;
 
   return (
     <div className="container-fluid bg-light" style={{ minHeight: "100vh" }}>
@@ -111,33 +209,124 @@ const ReviewPublish = () => {
         <div className="col-lg-9 p-4" style={{ height: "100vh", overflowY: "auto" }}>
           <h2 className="mb-4 fw-bold">Review and Publish</h2>
 
-          {questions.length === 0 ? (
-            <p className="text-muted">No questions found.</p>
-          ) : (
-            questions.map((q, i) => (
-              <div className="card mb-3 shadow-sm" key={i}>
+          <button className="btn btn-outline-success mb-3" onClick={handleAddQuestion}>+ Add Question</button>
+
+          {quiz.questions.map((q, i) => {
+            const isEditing = editingQuestionIndex === i;
+            return (
+              <div className="card mb-3 shadow-sm" key={q.question_id}>
                 <div className="card-body">
-                  <h5 className="card-title">Q{i + 1}: {q.question_text}</h5>
-                  <ul className="list-group list-group-flush mb-2">
+                  <div className="d-flex justify-content-between align-items-start">
+                    <h5 className="card-title">
+                      Q{i + 1}:
+                      {isEditing ? (
+                        <textarea
+                          className="form-control mt-2"
+                          rows={4}
+                          value={q.question_text}
+                          onChange={e => handleQuestionChange(i, "question_text", e.target.value)}
+                        />
+                      ) : (
+                        <span className="ms-2">{q.question_text}</span>
+                      )}
+                    </h5>
+
+                    <div>
+                      {isEditing ? (
+                        <>
+                          <button className="btn btn-success btn-sm me-1" onClick={() => handleSaveQuestion(i)}>Save</button>
+                          <button className="btn btn-secondary btn-sm me-1" onClick={() => handleCancelEdit(i)}>Cancel</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(i)}>Delete</button>
+                        </>
+                      ) : (
+                        <button className="btn btn-outline-primary btn-sm" onClick={() => setEditingQuestionIndex(i)}>Edit</button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* OPTIONS */}
+                  <ul className="list-group list-group-flush mb-2 mt-2">
                     {Object.entries(q.options).map(([k, v]) => (
-                      <li key={k} className="list-group-item">
-                        <strong>{k.toUpperCase()}.</strong> {v}
+                      <li key={k} className="list-group-item d-flex align-items-center">
+                        <strong>{k.toUpperCase()}.</strong>
+                        {isEditing ? (
+                          <>
+                            <input
+                              type="text"
+                              className="form-control ms-2"
+                              value={v}
+                              onChange={e => handleQuestionChange(i, "options", { ...q.options, [k]: e.target.value })}
+                            />
+                            <button
+                              className="btn btn-sm btn-danger ms-2"
+                              onClick={() => {
+                                const updatedOptions = { ...q.options };
+                                delete updatedOptions[k];
+                                // Re-letter options after deletion
+                                const relettered = {};
+                                Object.values(updatedOptions).forEach((val, idx) => {
+                                  const key = String.fromCharCode(97 + idx);
+                                  relettered[key] = val;
+                                });
+                                handleQuestionChange(i, "options", relettered);
+                              }}
+                            >Remove</button>
+                          </>
+                        ) : (
+                          <span className="ms-2">{v}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
-                  {q.correct_answer && (
-                    <p className="text-success mb-1"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
+
+                  {isEditing && (
+                    <button
+                      className="btn btn-sm btn-outline-primary mt-2"
+                      onClick={() => {
+                        const updatedOptions = { ...q.options };
+                        const nextKey = String.fromCharCode(97 + Object.keys(updatedOptions).length);
+                        updatedOptions[nextKey] = "";
+                        handleQuestionChange(i, "options", updatedOptions);
+                      }}
+                    >+ Add Option</button>
                   )}
-                  {q.explanation && (
+
+                  {/* Correct answer */}
+                  {isEditing ? (
+                    <div className="mb-2 mt-2">
+                      <label>Correct Answer:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={q.correct_answer}
+                        onChange={e => handleQuestionChange(i, "correct_answer", e.target.value)}
+                      />
+                    </div>
+                  ) : q.correct_answer ? (
+                    <p className="text-success mb-1 mt-2"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
+                  ) : null}
+
+                  {/* Explanation */}
+                  {isEditing ? (
+                    <div className="mb-2 mt-2">
+                      <label>Explanation:</label>
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        value={q.explanation || ""}
+                        onChange={e => handleQuestionChange(i, "explanation", e.target.value)}
+                      />
+                    </div>
+                  ) : q.explanation ? (
                     <div className="p-2 mt-2 bg-light border rounded">
                       <small className="text-muted d-block fw-bold">Explanation:</small>
                       <small className="text-dark">{q.explanation}</small>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
         {/* RIGHT PANEL */}
@@ -147,109 +336,53 @@ const ReviewPublish = () => {
 
             <div className="mb-3">
               <label className="form-label">Quiz Title</label>
-              <input
-                type="text"
-                className="form-control"
-                value={settings.title}
-                onChange={(e) => handleChange("title", e.target.value)}
-              />
+              <input type="text" className="form-control" value={settings.title} onChange={e => handleChange("title", e.target.value)} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Number of Attempts</label>
-              <input
-                type="number"
-                className="form-control"
-                value={settings.attempts}
-                min={1}
-                onChange={(e) => handleChange("attempts", Number(e.target.value))}
-              />
+              <input type="number" className="form-control" value={settings.attempts} min={1} onChange={e => handleChange("attempts", Number(e.target.value))} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Time Limit (minutes)</label>
-              <input
-                type="number"
-                className="form-control"
-                value={settings.timeLimit}
-                min={1}
-                onChange={(e) => handleChange("timeLimit", Number(e.target.value))}
-              />
+              <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={e => handleChange("timeLimit", Number(e.target.value))} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Passing Score (%)</label>
-              <input
-                type="number"
-                className="form-control"
-                value={settings.passingScore}
-                min={0}
-                max={100}
-                onChange={(e) => handleChange("passingScore", Number(e.target.value))}
-              />
+              <input type="number" className="form-control" value={settings.passingScore} min={0} max={100} onChange={e => handleChange("passingScore", Number(e.target.value))} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Instructions</label>
-              <textarea
-                className="form-control"
-                rows={5}
-                value={settings.description}
-                onChange={(e) => handleChange("description", e.target.value)}
-              />
+              <textarea className="form-control" rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
             </div>
 
             {/* Checkboxes */}
             <div className="form-check mb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={settings.screenMonitoring}
-                onChange={() => handleChange("screenMonitoring", !settings.screenMonitoring)}
-              />
+              <input className="form-check-input" type="checkbox" checked={settings.screenMonitoring} onChange={() => handleChange("screenMonitoring", !settings.screenMonitoring)} />
               <label className="form-check-label">Screen Monitoring</label>
             </div>
 
             <div className="form-check mb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={settings.randomization}
-                onChange={() => handleChange("randomization", !settings.randomization)}
-              />
+              <input className="form-check-input" type="checkbox" checked={settings.randomization} onChange={() => handleChange("randomization", !settings.randomization)} />
               <label className="form-check-label">Question Randomization per Trainee</label>
             </div>
 
             <div className="form-check mb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={settings.scoreVisibility}
-                onChange={() => handleChange("scoreVisibility", !settings.scoreVisibility)}
-              />
+              <input className="form-check-input" type="checkbox" checked={settings.scoreVisibility} onChange={() => handleChange("scoreVisibility", !settings.scoreVisibility)} />
               <label className="form-check-label">Score Visibility</label>
             </div>
 
             <div className="form-check mb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={settings.includeExplanationIfWrong}
-                onChange={() => handleChange("includeExplanationIfWrong", !settings.includeExplanationIfWrong)}
-              />
+              <input className="form-check-input" type="checkbox" checked={settings.includeExplanationIfWrong} onChange={() => handleChange("includeExplanationIfWrong", !settings.includeExplanationIfWrong)} />
               <label className="form-check-label">Include Explanation if Wrong</label>
             </div>
 
             <div className="form-check form-switch mb-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                checked={settings.isPublished}
-                onChange={() => handleChange("isPublished", !settings.isPublished)}
-              />
-              <label className="form-check-label">
-                {settings.isPublished ? "Quiz Visible to Trainees" : "Quiz Hidden from Trainees"}
-              </label>
+              <input className="form-check-input" type="checkbox" checked={settings.isPublished} onChange={() => handleChange("isPublished", !settings.isPublished)} />
+              <label className="form-check-label">{settings.isPublished ? "Quiz Visible to Trainees" : "Quiz Hidden from Trainees"}</label>
             </div>
 
             <div className="d-flex justify-content-center gap-2 mt-4">

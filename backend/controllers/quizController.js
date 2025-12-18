@@ -1,12 +1,7 @@
-// backend/controllers/quizController.js
-
 import pkg from '../models/index.cjs';
-const { Assessment, LectureAssessment, AssessmentQuestion } = pkg;
+const { Assessment, AssessmentQuestion } = pkg;
 
-/**
- * Fetch quiz with questions/options (for trainee).
- * IMPORTANT: Removed 'q.correct_answer' to prevent cheating.
- */
+// Fetch quiz + questions
 export async function getQuiz(req, res) {
     const { assessment_id } = req.params;
     const userRole = req.user?.roles?.[0];
@@ -24,8 +19,6 @@ export async function getQuiz(req, res) {
         });
 
         if (!assessment) return res.status(404).json({ error: "Quiz not found" });
-
-        // Trainees cannot access unpublished quizzes
         if (userRole === "Trainee" && !assessment.is_published) {
             return res.status(403).json({ error: "Quiz not available for trainees." });
         }
@@ -33,7 +26,7 @@ export async function getQuiz(req, res) {
         const questions = assessment.questions.map(q => ({
             question_id: q.question_id,
             question_text: q.question_text,
-            options: q.options || [],
+            options: q.options || {},
             correct_answer: q.correct_answer || "",
             explanation: q.explanations || ""
         }));
@@ -60,10 +53,7 @@ export async function getQuiz(req, res) {
     }
 }
 
-
-/**
- * Save or update quiz configuration from ReviewPublish form
- */
+// Save quiz config
 export async function saveQuizConfig(req, res) {
     const { assessment_id } = req.params;
     const {
@@ -79,14 +69,10 @@ export async function saveQuizConfig(req, res) {
         isPublished
     } = req.body;
 
-    if (!assessment_id) return res.status(400).json({ error: "Assessment ID is required" });
-
     try {
-        // Fetch the assessment first
         const assessment = await Assessment.findByPk(assessment_id);
         if (!assessment) return res.status(404).json({ error: "Assessment not found" });
 
-        // Update fields
         await assessment.update({
             title: title || assessment.title,
             attempts: attempts ?? assessment.attempts,
@@ -96,13 +82,72 @@ export async function saveQuizConfig(req, res) {
             randomize_questions: randomization ?? assessment.randomize_questions,
             show_score: scoreVisibility ?? assessment.show_score,
             show_explanations: includeExplanationIfWrong ?? assessment.show_explanations,
-            description: description || assessment.description, // if you add instructions column
+            description: description || assessment.description,
             is_published: isPublished ?? assessment.is_published,
         });
 
         res.json({ success: true, message: "Quiz configuration saved successfully!" });
     } catch (err) {
         console.error("saveQuizConfig error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Add a new question
+export async function addQuestion(req, res) {
+    const { assessment_id, question_text, options, correct_answer, explanations } = req.body;
+
+    try {
+        const question = await AssessmentQuestion.create({
+            assessment_id,
+            question_text,
+            options,
+            correct_answer: correct_answer?.toLowerCase() || "",
+            explanations
+        });
+        res.json(question);
+    } catch (err) {
+        console.error("addQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Update a question
+export async function updateQuestion(req, res) {
+    const { question_id } = req.params;
+    const { question_text, options, correct_answer, explanations } = req.body;
+
+    try {
+        const question = await AssessmentQuestion.findByPk(question_id);
+        if (!question) return res.status(404).json({ error: "Question not found" });
+
+        // Ensure correct answer is lowercase
+        await question.update({
+            question_text,
+            options,
+            correct_answer: correct_answer?.toLowerCase() || "",
+            explanations
+        });
+
+        res.json({ success: true, message: "Question updated successfully!" });
+    } catch (err) {
+        console.error("updateQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Delete a question
+export async function deleteQuestion(req, res) {
+    const { question_id } = req.params;
+
+    try {
+        const question = await AssessmentQuestion.findByPk(question_id);
+        if (!question) return res.status(404).json({ error: "Question not found" });
+
+        await question.destroy();
+        res.json({ success: true });
+    } catch (err) {
+        console.error("deleteQuestion error:", err);
         res.status(500).json({ error: err.message });
     }
 }
