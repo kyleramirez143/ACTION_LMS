@@ -117,7 +117,7 @@ export default function TrainerModuleScreen() {
               : "No lectures available yet."}
           </p>
         ) : (
-          <ModuleAccordion isTrainerView={userRole === "Trainer"} lectures={lectures} />
+          <ModuleAccordion isTrainerView={userRole === "Trainer"} userRole={userRole} lectures={lectures} />
         )}
       </div>
 

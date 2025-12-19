@@ -61,7 +61,7 @@ export default function LectureForm() {
             setExistingResources(result.lecture.resources || []);
           } else {
             alert(result.error || "Lecture not found or an error occurred.");
-            navigate(`/trainer/${course_id}/modules/${module_id}/lectures`); // Redirect on error
+            navigate(`/${course_id}/modules/${module_id}/lectures`); // Redirect on error
           }
         } catch (err) {
           console.error("Failed to fetch lecture data:", err);
@@ -245,7 +245,7 @@ export default function LectureForm() {
 
       // Final: navigate back to module lectures page
       alert(`Lecture ${isEditMode ? "updated" : "created"} successfully!`);
-      navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
+      navigate(`/${course_id}/modules/${module_id}/lectures`);
 
     } catch (err) {
       console.error("Submission Error:", err);
@@ -276,7 +276,7 @@ export default function LectureForm() {
 
       if (res.ok) {
         alert("Lecture deleted successfully!");
-        navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
+        navigate(`/${course_id}/modules/${module_id}/lectures`);
       } else {
         const data = await res.json();
         alert(data.error || "Failed to delete lecture.");
@@ -294,7 +294,7 @@ export default function LectureForm() {
   // HANDLE CANCEL
   // ================================
   const handleCancel = () => {
-    navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
+    navigate(`/${course_id}/modules/${module_id}/lectures`);
   };
 
 

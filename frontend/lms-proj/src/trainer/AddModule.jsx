@@ -53,7 +53,7 @@ export default function ModuleForm() {
                         }
                     } else {
                         alert("Module not found or an error occurred.");
-                        navigate(`/trainer/${course_id}/modules`); // Redirect on error
+                        navigate(`/${course_id}/modules`); // Redirect on error
                     }
                 } catch (err) {
                     console.error("Failed to fetch module data:", err);
@@ -100,7 +100,7 @@ export default function ModuleForm() {
 
             if (res.ok) {
                 alert(`Module ${isEditMode ? "updated" : "created"} successfully!`);
-                navigate(`/trainer/${course_id}/modules`);
+                navigate(`/${course_id}/modules`);
             } else {
                 alert(data.error || `Failed to ${isEditMode ? "update" : "create"} module`);
             }
@@ -131,7 +131,7 @@ export default function ModuleForm() {
 
             if (res.ok) {
                 alert("Module deleted successfully!");
-                navigate(`/trainer/${course_id}/modules`);
+                navigate(`/${course_id}/modules`);
             } else {
                 const data = await res.json();
                 alert(data.error || "Failed to delete module.");
@@ -148,7 +148,7 @@ export default function ModuleForm() {
     // HANDLE CANCEL
     // ================================
     const handleCancel = () => {
-        navigate(`/trainer/${course_id}/modules`);
+        navigate(`/${course_id}/modules`);
     };
 
     if (loading) {

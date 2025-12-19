@@ -156,7 +156,7 @@ function AdminCourseEditPage() {
                         image
                             ? URL.createObjectURL(image)
                             : currentImage
-                                ? `/uploads/images/${currentImage}`
+                                ? `/uploads/profile/${currentImage}`
                                 : "/images/default-course.jpg"
                     }
                     alt=""
@@ -220,18 +220,6 @@ function AdminCourseEditPage() {
                         </span>
                     ))}
                 </div>
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label">Publish Status</label>
-                <select
-                    className="form-control"
-                    value={isPublished.toString()}
-                    onChange={(e) => setIsPublished(e.target.value === "true")}
-                >
-                    <option value="true">Visible</option>
-                    <option value="false">Hidden</option>
-                </select>
             </div>
 
             {/* ACTION BUTTONS */}

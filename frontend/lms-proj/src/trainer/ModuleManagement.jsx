@@ -179,7 +179,17 @@ export default function ModuleManagement() {
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
                         {pagedModules.map(module => (
                             <div className="col" key={module.module_id}>
-                                <div className={`card h-100 shadow-sm d-flex flex-column position-relative ${!module.is_visible ? 'border-warning' : ''}`}>
+                                <div className="card h-100 shadow-sm d-flex flex-column position-relative">
+
+                                    {/* STATUS BADGE */}
+                                    <span
+                                        className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
+                                            }`}
+                                        style={{ fontSize: '0.75rem', zIndex: 10 }}
+                                        onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
+                                    >
+                                        {module.is_visible ? 'Visible' : 'Hidden'}
+                                    </span>
 
                                     {/* Dropdown (Trainer only) */}
                                     {userRole === "Trainer" && (
@@ -219,7 +229,7 @@ export default function ModuleManagement() {
                                     )}
 
                                     {/* Card content (clickable) */}
-                                    <div onClick={() => navigate(`/trainer/${course_id}/modules/${module.module_id}/lectures`)} style={{ cursor: "pointer", flexGrow: 1 }}>
+                                    <div onClick={() => navigate(`/${course_id}/modules/${module.module_id}/lectures`)} style={{ cursor: "pointer", flexGrow: 1 }}>
                                         <div className="p-3">
                                             <div className="bg-light rounded overflow-hidden" style={{ aspectRatio: "16/9", border: "1px solid #dee2e6", padding: "0.5rem" }}>
                                                 <img src={module.image ? `/uploads/images/${module.image}` : defaultImage} alt={`${module.title} cover`} className="w-100 h-100 rounded" style={{ objectFit: "cover" }} />
@@ -235,14 +245,6 @@ export default function ModuleManagement() {
                                         </div>
                                     </div>
 
-                                    {/* Visibility tag */}
-                                    {!module.is_visible && (
-                                        <div className="card-footer bg-warning bg-opacity-10 border-top pt-2 pb-2 px-3">
-                                            <span className="text-warning small fw-bold">
-                                                <i className="bi bi-eye-slash-fill me-1"></i> HIDDEN FROM TRAINEES
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         ))}

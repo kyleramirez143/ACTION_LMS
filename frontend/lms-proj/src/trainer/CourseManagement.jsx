@@ -57,7 +57,7 @@ function Course() {
                             {courses.map((course) => (
                                 <div
                                     key={course.course_id}
-                                    onClick={() => navigate(`/trainer/${course.course_id}/modules`)}
+                                    onClick={() => navigate(`/${course.course_id}/modules`)}
                                     style={{ cursor: "pointer" }}
                                 >
                                     <div

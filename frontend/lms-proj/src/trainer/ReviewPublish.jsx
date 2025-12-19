@@ -189,7 +189,7 @@ const ReviewPublish = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save quiz");
       alert("Quiz saved successfully!");
-      navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
+      navigate(`/${course_id}/modules/${module_id}/lectures`);
     } catch (err) {
       console.error(err);
       alert("Failed to save quiz.");
@@ -197,7 +197,7 @@ const ReviewPublish = () => {
   };
 
   const handleCancel = () => {
-    navigate(`/trainer/${course_id}/modules/${module_id}/lectures`);
+    navigate(`/${course_id}/modules/${module_id}/lectures`);
   };
 
   if (loading || !settings || !quiz) return <div>Loading...</div>;
@@ -356,7 +356,7 @@ const ReviewPublish = () => {
 
             <div className="mb-3">
               <label className="form-label">Instructions</label>
-              <textarea className="form-control" rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
+              <textarea className="form-control" placeholder="No need to include numbering. Just simply press enter per instructions." rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
             </div>
 
             {/* Checkboxes */}
@@ -367,7 +367,7 @@ const ReviewPublish = () => {
 
             <div className="form-check mb-2">
               <input className="form-check-input" type="checkbox" checked={settings.randomization} onChange={() => handleChange("randomization", !settings.randomization)} />
-              <label className="form-check-label">Question Randomization per Trainee</label>
+              <label className="form-check-label">Shuffle Questions</label>
             </div>
 
             <div className="form-check mb-2">

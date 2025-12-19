@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export default function ModuleAccordion({ isTrainerView, lectures = [], courseId, moduleId }) {
+export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
     const [openIndex, setOpenIndex] = useState(-1);
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
     const [showQuizMenuIndex, setShowQuizMenuIndex] = useState(-1);
@@ -211,7 +211,15 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 key={quiz.assessment_id}
                                                 className="resource-item quiz-link"
                                                 onClick={() => {
-                                                    navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`);
+                                                    if (userRole === "Trainer") {
+                                                        navigate(
+                                                            `/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`
+                                                        );
+                                                    } else if (userRole === "Trainee") {
+                                                        navigate(`/quiz/${quiz.assessment_id}`);
+                                                    } else {
+                                                        navigate(`/quiz/${quiz.assessment_id}`);
+                                                    }
                                                 }}
                                                 style={{
                                                     display: "flex",
@@ -223,12 +231,16 @@ export default function ModuleAccordion({ isTrainerView, lectures = [], courseId
                                                 <span>
                                                     <FileArchive size={18} /> {quiz.title}
                                                 </span>
-                                                <span
-                                                    className={`badge ${quiz.is_published ? "bg-success" : "bg-danger"}`}
-                                                    style={{ marginLeft: "10px" }}
-                                                >
-                                                    {quiz.is_published ? "Published" : "Hidden"}
-                                                </span>
+
+                                                {/* Only show badge for Trainer */}
+                                                {isTrainerView && (
+                                                    <span
+                                                        className={`badge ${quiz.is_published ? "bg-success" : "bg-danger"}`}
+                                                        style={{ marginLeft: "10px" }}
+                                                    >
+                                                        {quiz.is_published ? "Published" : "Hidden"}
+                                                    </span>
+                                                )}
                                             </button>
                                         ))}
                                     </div>
