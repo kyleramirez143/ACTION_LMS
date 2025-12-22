@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import csvParser from "csv-parser";
 import multer from "multer";
+import { Parser } from "json2csv";
 
 export const getTrainers = async (req, res) => {
     try {
@@ -188,48 +189,44 @@ export const addUser = async (req, res) => {
     }
 };
 
-
-
-// ===== Update User =====
+// ===== UPDATE USER (FIXED BATCH ID) =====
 export const updateUser = async (req, res) => {
     const userId = req.params.id;
     const { first_name, last_name, email, role, is_active, batch } = req.body;
 
-    if (!first_name || !last_name || !email || !role || typeof is_active === "undefined") {
-        return res.status(400).json({ message: "Missing or invalid data fields." });
-    }
-
     try {
         await db.sequelize.transaction(async (t) => {
-            await db.User.update({ first_name, last_name, email, is_active }, { where: { id: userId }, transaction: t });
+            const user = await db.User.findByPk(userId, { transaction: t });
+            if (!user) throw new Error("User not found");
 
-            // Update role
+            await user.update({ first_name, last_name, email, is_active }, { transaction: t });
             await syncUserRole(userId, role, t);
 
-            // Update batch
+            // Important: Remove old batch link before creating new one
             await db.UserBatch.destroy({ where: { user_id: userId }, transaction: t });
 
             let batchRecord;
             if (role === "Trainee") {
-                if (!batch) return res.status(400).json({ message: "Batch is required for Trainee" });
-                batchRecord = await db.Batch.findByPk(batch);
-                if (!batchRecord) return res.status(400).json({ message: "Invalid batch selected" });
+                batchRecord = await db.Batch.findByPk(batch, { transaction: t });
+                if (!batchRecord) throw new Error("Batch not found");
             } else {
-                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" } });
-                if (!batchRecord) batchRecord = await db.Batch.create({ name: "Not Applicable" });
+                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t }) ||
+                    await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
             }
 
-            await db.UserBatch.create({ user_id: userId, batch_id: batchRecord.id }, { transaction: t });
+            // Standardized to batch_id as per your error logs
+            await db.UserBatch.create({
+                user_id: userId,
+                batch_id: batchRecord.batch_id || batchRecord.id
+            }, { transaction: t });
         });
 
         res.json({ message: "User updated successfully." });
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });
     }
 };
-
 
 export const getSingleUser = async (req, res) => {
     const userId = req.params.id;
@@ -691,138 +688,91 @@ export const getUserGrowth = async (req, res) => {
     }
 };
 
-// ===== Bulk Import =====
+// ===== BULK IMPORT (FIXED ASYNC & PATHING) =====
 export const importUsers = async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: "CSV file is required." });
-    }
+    if (!req.file) return res.status(400).json({ error: "CSV file is required." });
 
-    const filePath = req.file.path;
     const addedUsers = [];
     const errors = [];
+    const rows = [];
 
-    try {
-        const rows = [];
-
-        fs.createReadStream(filePath)
-            .pipe(csvParser({ headers: false, skipEmptyLines: true }))
-            .on("data", (row) => rows.push(row))
-            .on("end", async () => {
-
-                for (const row of rows) {
-                    const values = Object.values(row).map(v => v?.trim());
-                    const [first_name, last_name, email, role, batch] = values;
-
-                    // Basic validation
-                    if (!first_name || !last_name || !email || !role) {
-                        errors.push({
-                            email: email || "N/A",
-                            error: "Missing required field"
+    fs.createReadStream(req.file.path)
+        .pipe(csvParser({ headers: ["first_name", "last_name", "email", "role", "batch"], skipLines: 1 }))
+        .on("data", (row) => rows.push(row))
+        .on("end", async () => {
+            for (const row of rows) {
+                const { first_name, last_name, email, role, batch } = row;
+                try {
+                    await db.sequelize.transaction(async (t) => {
+                        const [user, created] = await db.User.findOrCreate({
+                            where: { email },
+                            defaults: { first_name, last_name, is_active: true },
+                            transaction: t
                         });
-                        continue;
-                    }
 
-                    try {
-                        // Prevent duplicates
-                        const existingUser = await db.User.findOne({ where: { email } });
-                        if (existingUser) {
-                            errors.push({ email, error: "User already exists" });
-                            continue;
+                        if (!created) throw new Error("User already exists");
+
+                        const roleRec = await db.Role.findOne({ where: { name: role }, transaction: t });
+                        if (!roleRec) throw new Error("Role not found");
+                        await db.UserRole.create({ user_id: user.id, role_id: roleRec.id }, { transaction: t });
+
+                        let batchRec;
+                        let batchNameInput = batch ? batch.trim() : "";
+
+                        if (role === "Trainee") {
+                            if (!batchNameInput) throw new Error("Batch name is required for Trainees");
+                            batchRec = await db.Batch.findOne({ where: { name: batch }, transaction: t });
+                        } else {
+                            // Force "Not Applicable" for Admin and Trainer
+                            batchRec = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t });
+
+                            // Safety check: Create "Not Applicable" if it doesn't exist yet
+                            if (!batchRec) {
+                                batchRec = await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
+                            }
                         }
 
-                        // 🔐 TRANSACTION PER ROW
-                        await db.sequelize.transaction(async (t) => {
+                        if (!batchRec) throw new Error(`Batch '${batch}' not found`);
 
-                            // 1️⃣ Create User
-                            const user = await db.User.create(
-                                { first_name, last_name, email, is_active: true },
-                                { transaction: t }
-                            );
+                        await db.UserBatch.create({
+                            user_id: user.id,
+                            batch_id: batchRec.batch_id || batchRec.id
+                        }, { transaction: t });
 
-                            // 2️⃣ Role
-                            const roleRecord = await db.Role.findOne({
-                                where: { name: role },
-                                transaction: t
-                            });
-
-                            if (!roleRecord) {
-                                throw new Error(`Invalid role '${role}'`);
-                            }
-
-                            await db.UserRole.create(
-                                { user_id: user.id, role_id: roleRecord.id },
-                                { transaction: t }
-                            );
-
-                            // 3️⃣ Batch
-                            let batchRecord;
-
-                            if (role === "Trainee") {
-                                if (!batch) {
-                                    throw new Error("Batch required for Trainee");
-                                }
-
-                                batchRecord = await db.Batch.findOne({
-                                    where: { name: batch },
-                                    transaction: t
-                                });
-
-                                if (!batchRecord) {
-                                    throw new Error(`Batch '${batch}' not found`);
-                                }
-                            } else {
-                                batchRecord = await db.Batch.findOne({
-                                    where: { name: "Not Applicable" },
-                                    transaction: t
-                                });
-
-                                if (!batchRecord) {
-                                    batchRecord = await db.Batch.create(
-                                        { name: "Not Applicable" },
-                                        { transaction: t }
-                                    );
-                                }
-                            }
-
-                            await db.UserBatch.create(
-                                { user_id: user.id, batch_id: batchRecord.batch_id },
-                                { transaction: t }
-                            );
-
-                            // 4️⃣ Password
-                            const hashedPassword = await bcrypt.hash("actionb40123", 10);
-
-                            await db.Password.create(
-                                {
-                                    user_id: user.id,
-                                    password: hashedPassword,
-                                    is_current: true
-                                },
-                                { transaction: t }
-                            );
-
-                            // Success
-                            addedUsers.push({ id: user.id, email });
-                        });
-
-                    } catch (err) {
-                        console.error(`Import error (${email}):`, err.message);
-                        errors.push({ email, error: err.message });
-                    }
+                        const hash = await bcrypt.hash("actionb40123", 10);
+                        await db.Password.create({ user_id: user.id, password: hash, is_current: true }, { transaction: t });
+                        
+                        addedUsers.push({ email });
+                    });
+                } catch (err) {
+                    errors.push({ email: email || "Unknown", error: err.message });
                 }
+            }
+            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+            res.json({ message: "CSV import completed", addedUsers, errors });
+        });
+};
 
-                fs.unlinkSync(filePath);
-                res.json({
-                    message: "CSV import completed",
-                    addedUsers,
-                    errors
-                });
-            });
+// ===== DOWNLOAD TEMPLATE (FIXED EXCEL COMPATIBILITY) =====
+export const downloadTemplate = (req, res) => {
+    try {
+        const fields = ["first_name", "last_name", "email", "role", "batch"];
+        const opts = { fields, header: true };
+        const parser = new Parser(opts);
 
+        // Generate only the header row
+        const csv = parser.parse([]);
+
+        // 1. Set the correct headers manually to be safe
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=user_import_template.csv");
+
+        // 2. Send the CSV
+        return res.status(200).send(csv);
+        
     } catch (err) {
-        console.error("Import users error:", err);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        res.status(500).json({ error: "Failed to import users" });
+        console.error("Template Generation Error:", err);
+        return res.status(500).json({ error: "Failed to generate CSV template" });
     }
 };
 
@@ -851,4 +801,3 @@ export const uploadProfilePicture = async (req, res) => {
         res.status(500).json({ error: "Failed to upload profile image" });
     }
 };
-

@@ -3,7 +3,7 @@ import "./UserRoleTable.css";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-function UserRoleTable() {
+function BatchesTable() {
     const navigate = useNavigate();
 
     const [users, setUsers] = useState([]);
@@ -85,91 +85,6 @@ function UserRoleTable() {
         }
     };
 
-    const handleToggleStatus = async (userId) => {
-        const token = localStorage.getItem("authToken");
-        try {
-            const res = await fetch(`http://localhost:5000/api/users/toggle-status/${userId}`, {
-                method: "PUT",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Toggle failed");
-            fetchUsers();
-        } catch (err) {
-            alert("Error: " + err.message);
-        }
-    };
-
-    // FIXED: CSV Upload handler
-    const handleCSVUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            const token = localStorage.getItem("authToken");
-            const res = await fetch("http://localhost:5000/api/users/import", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to import users");
-
-            const addedIds = data.addedUsers?.map(u => u.id) || [];
-            setNewlyImportedIds(addedIds);
-            alert(`Successfully imported users!`);
-            fetchUsers();
-        } catch (err) {
-            alert("Error importing CSV: " + err.message);
-        }
-        e.target.value = null;
-    };
-
-    // FIXED: Download Template handler
-    const downloadTemplate = async () => {
-        try {
-            const token = localStorage.getItem("authToken");
-
-            const res = await fetch("http://localhost:5000/api/users/download-template", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            });
-
-            // Check if the response is actually a CSV
-            if (!res.ok) {
-                // Try to get error message from server response
-                const errorText = await res.text();
-                throw new Error(`Server responded with ${res.status}: ${errorText}`);
-            }
-
-            const blob = await res.blob();
-
-            // Basic check: is the blob empty?
-            if (blob.size === 0) {
-                throw new Error("The generated template is empty.");
-            }
-
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "user_import_template.csv";
-            document.body.appendChild(a);
-            a.click();
-
-            // Cleanup
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error("Full Error Details:", err);
-            alert("Error downloading template: " + err.message);
-        }
-    };
 
     const handleCheckboxChange = (userId) => {
         setSelectedUsers(prev =>
@@ -213,52 +128,13 @@ function UserRoleTable() {
     return (
         <div className="user-role-card">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">User Role Management</h3>
+                <h3 className="section-title">All Batches</h3>
                 <div className="d-flex gap-2">
                     <Link to="/admin/adduser">
                         <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-person-plus-fill"></i> Add New User
+                            <i className="bi bi-person-plus-fill"></i> Add Batch
                         </button>
                     </Link>
-
-                    <div className="dropdown">
-                        <button
-                            className="btn btn-success rounded-pill"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            <i className="bi bi-person-plus-fill"></i> Import Users
-                        </button>
-
-                        <ul className="dropdown-menu">
-                            <li>
-                                <label className="dropdown-item" onClick={downloadTemplate}>
-                                    Click to Download Template
-                                </label>
-                            </li>
-                            <li>
-                                {/* FIXED: Using label to trigger hidden input for better UI compatibility */}
-                                <label className="dropdown-item" style={{ cursor: "pointer", marginBottom: 0 }}>
-                                    Import Users
-                                    <input
-                                        type="file"
-                                        accept=".csv"
-                                        style={{ display: "none" }}
-                                        onChange={handleCSVUpload}
-                                    />
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <button
-                        className="btn btn-danger rounded-pill"
-                        onClick={handleBulkDelete}
-                        disabled={selectedUsers.length === 0}
-                    >
-                        <i className="bi bi-trash3-fill"></i> Delete ({selectedUsers.length})
-                    </button>
                 </div>
             </div>
 
@@ -295,12 +171,13 @@ function UserRoleTable() {
                         <table className="table">
                             <thead className="table-light">
                                 <tr>
-                                    <th className="text-center">Name</th>
-                                    <th className="text-center">Email</th>
-                                    <th className="text-center">User Level</th>
-                                    <th className="text-center">Batch</th>
+                                    <th className="text-center">Batch Name</th>
+                                    <th className="text-center">Location</th>
+                                    <th className="text-center">Start Date</th>
+                                    <th className="text-center">End Date</th>
+                                    <th className="text-center">Curriculum</th>
                                     <th className="text-center">Status</th>
-                                    <th className="text-center">Actions</th>
+                                    <th className="text-center">Action</th>
                                     <th className="text-center">
                                         <input
                                             className="form-check-input"
@@ -321,12 +198,11 @@ function UserRoleTable() {
                                         .filter((u) => u.id !== currentAdminId)
                                         .map((user) => (
                                             <tr key={user.id} className={newlyImportedIds.includes(user.id) ? "newly-imported" : ""}>
-                                                <td className="text-center">{user.name}</td>
-                                                <td className="text-center text-muted">{user.email}</td>
-                                                <td className="text-center">{user.level}</td>
-                                                <td className="text-center">
-                                                    {user.level === "Trainee" ? user.batch : "Not Applicable"}
-                                                </td>
+                                                <td className="text-center">BD0</td>
+                                                <td className="text-center text-muted">Cebu</td>
+                                                <td className="text-center">10-10-1001</td>
+                                                <td className="text-center">10-10-1001</td>
+                                                <td className="text-center">B36-M Curriculum</td>
                                                 <td className="text-center">
                                                     <span
                                                         className={`badge rounded-pill ${user.status === "Active" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger"}`}
@@ -382,4 +258,4 @@ function UserRoleTable() {
     );
 }
 
-export default UserRoleTable;
+export default BatchesTable;

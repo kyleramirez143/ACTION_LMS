@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // fixed import
+import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../hooks/useAuth";
 import "./AdminProfileManagement.css";
+
+const backendURL = "http://localhost:5000";
 
 function AdminProfileManagement() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
-    const fileInputRef = useRef(null);
+    const { userProfile, setUserProfile } = useAuth();
 
-    const [profile, setProfile] = useState(null);
+    const [preview, setPreview] = useState(userProfile?.profile_picture || null);
     const [showModal, setShowModal] = useState(false);
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: "",
@@ -17,11 +19,7 @@ function AdminProfileManagement() {
         confirmPassword: "",
     });
     const [selectedFile, setSelectedFile] = useState(null);
-    const [preview, setPreview] = useState(null);
-
-    const { setUserProfile } = useAuth();
-
-    const backendURL = "http://localhost:5000"; // Backend base URL
+    const fileInputRef = useRef(null);
 
     // ----------------------------
     // AUTH CHECK
@@ -42,21 +40,66 @@ function AdminProfileManagement() {
     // ----------------------------
     useEffect(() => {
         const fetchProfile = async () => {
+            if (!token) return;
             try {
-                const res = await fetch("http://localhost:5000/api/users/profile", {
+                const res = await fetch(`${backendURL}/api/users/profile`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
-                setProfile(data);
-
-                // ✅ Use correct property from backend
-                if (data.profile_picture) setPreview(data.profile_picture);
+                setUserProfile(data);
+                if (data.profile_picture) setPreview(`${backendURL}/${data.profile_picture}`);
             } catch (err) {
                 console.error(err);
             }
         };
-        if (token) fetchProfile();
-    }, [token]);
+        if (!userProfile && token) fetchProfile();
+    }, [token, userProfile, setUserProfile]);
+
+    // ----------------------------
+    // IMAGE HANDLERS
+    // ----------------------------
+    const handleFileClick = () => fileInputRef.current.click();
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setSelectedFile(file);
+
+        const reader = new FileReader();
+        reader.onloadend = () => setPreview(reader.result);
+        reader.readAsDataURL(file);
+    };
+
+    const handleSaveImage = async (e) => {
+        e.preventDefault();
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append("profileImage", selectedFile);
+
+        try {
+            const res = await fetch(`${backendURL}/api/users/upload-profile`, {
+                method: "PUT",
+                body: formData,
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Upload failed");
+
+            setPreview(`${backendURL}/${data.profileImageUrl}`);
+            setUserProfile((prev) => ({
+                ...prev,
+                profile_picture: data.profileImageUrl,
+            }));
+
+            alert("Profile image updated successfully!");
+            setSelectedFile(null);
+        } catch (err) {
+            console.error(err);
+            alert("Error uploading image: " + err.message);
+        }
+    };
 
     // ----------------------------
     // PASSWORD HANDLERS
@@ -103,58 +146,7 @@ function AdminProfileManagement() {
         setShowModal(false);
     };
 
-    // ----------------------------
-    // IMAGE HANDLERS
-    // ----------------------------
-    const handleFileClick = () => fileInputRef.current.click();
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        setSelectedFile(file);
-
-        const reader = new FileReader();
-        reader.onloadend = () => setPreview(reader.result);
-        reader.readAsDataURL(file);
-    };
-
-    const handleSaveImage = async () => {
-        if (!selectedFile) return alert("No file selected");
-
-        const formData = new FormData();
-        formData.append("profileImage", selectedFile); // must match backend
-
-        try {
-            const res = await fetch("http://localhost:5000/api/users/upload-profile", {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`, // don't set Content-Type manually
-                },
-                body: formData,
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to upload image");
-
-            alert("Profile picture updated successfully!");
-
-            // ✅ Update local state
-            setSelectedFile(null);
-            setPreview(data.profileImageUrl);
-
-            // ✅ Update global userProfile state (for Navbar)
-            setUserProfile(prev => ({
-                ...prev,
-                profile_picture: data.profileImageUrl
-            }));
-
-        } catch (err) {
-            console.error(err);
-            alert("Error uploading image: " + err.message);
-        }
-    };
-
-    if (!profile) return <div>Loading profile...</div>;
+    if (!userProfile) return <div>Loading profile...</div>;
 
     return (
         <div style={styles.page}>
@@ -184,8 +176,10 @@ function AdminProfileManagement() {
 
                     {/* Name and Role */}
                     <div style={styles.profileText}>
-                        <h3 style={styles.profileName}>{profile.first_name} {profile.last_name}</h3>
-                        <p style={styles.profileRole}>{profile.role}</p>
+                        <h3 style={styles.profileName}>
+                            {userProfile.first_name} {userProfile.last_name}
+                        </h3>
+                        <p style={styles.profileRole}>{userProfile.role}</p>
                     </div>
                 </div>
 
@@ -194,27 +188,42 @@ function AdminProfileManagement() {
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">First Name</label>
                         <div className="col-12 col-sm-8">
-                            <input type="text" className="form-control" value={profile.first_name} readOnly />
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={userProfile.first_name}
+                                readOnly
+                            />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">Last Name</label>
                         <div className="col-12 col-sm-8">
-                            <input type="text" className="form-control" value={profile.last_name} readOnly />
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={userProfile.last_name}
+                                readOnly
+                            />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">Email</label>
                         <div className="col-12 col-sm-8">
-                            <input type="email" className="form-control" value={profile.email} readOnly />
+                            <input
+                                type="email"
+                                className="form-control"
+                                value={userProfile.email}
+                                readOnly
+                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Buttons side by side */}
-                <div className="d-flex gap-2">
+                <div className="d-flex gap-2 mt-3">
                     <button
                         type="button"
                         className="btn btn-primary rounded-pill"
@@ -237,7 +246,9 @@ function AdminProfileManagement() {
                 {showModal && (
                     <div className="modal-overlay">
                         <div className="modal-content">
-                            <h4 style={{ textAlign: "center", fontWeight: "600" }}>Change Password</h4>
+                            <h4 style={{ textAlign: "center", fontWeight: "600" }}>
+                                Change Password
+                            </h4>
 
                             <div className="mb-3">
                                 <label>Current Password</label>
@@ -273,10 +284,16 @@ function AdminProfileManagement() {
                             </div>
 
                             <div className="d-flex justify-content-center gap-2">
-                                <button className="btn btn-primary rounded-pill" onClick={handleChangePassword}>
+                                <button
+                                    className="btn btn-primary rounded-pill"
+                                    onClick={handleChangePassword}
+                                >
                                     Save
                                 </button>
-                                <button className="btn btn-outline-primary rounded-pill" onClick={handleCloseModal}>
+                                <button
+                                    className="btn btn-outline-primary rounded-pill"
+                                    onClick={handleCloseModal}
+                                >
                                     Cancel
                                 </button>
                             </div>
@@ -289,11 +306,7 @@ function AdminProfileManagement() {
 }
 
 const styles = {
-    page: {
-        backgroundColor: "#FFFFFF",
-        width: "100vw",
-        padding: "30px",
-    },
+    page: { backgroundColor: "#FFFFFF", width: "100vw", padding: "30px" },
     card: {
         backgroundColor: "#FFFFFF",
         borderRadius: "10px",
@@ -301,7 +314,7 @@ const styles = {
         width: "100%",
         maxWidth: "1400px",
         margin: "0 auto",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.20)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
     },
     title: { fontWeight: 600, marginBottom: "30px", color: "#333" },
     profileLayout: { display: "flex", alignItems: "center", gap: "24px", marginBottom: "30px" },

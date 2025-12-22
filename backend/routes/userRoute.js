@@ -15,6 +15,7 @@ import {
     getUserGrowth,
     bulkDeleteUsers,
     uploadProfilePicture,
+    downloadTemplate,
 } from "../controllers/userController.js";
 import { protect, checkRole } from "../middleware/authMiddleware.js";
 import uploadCSVMiddleware from "../middleware/uploadCSVMiddleware.js";
@@ -41,6 +42,8 @@ router.put("/change-password/:userId", protect, changePassword);
 //Admin Dashboard
 router.get("/counts", getUserCounts);
 router.get("/growth", getUserGrowth);
+
+router.get("/download-template", protect, checkRole(['Admin']), downloadTemplate);
 
 router.get('/:id', protect, getSingleUser);
 router.put('/update/:id', protect, updateUser);
