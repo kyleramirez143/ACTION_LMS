@@ -13,7 +13,7 @@ export async function getQuiz(req, res) {
                 {
                     model: AssessmentQuestion,
                     as: "questions",
-                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer"]
+                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "section"]
                 }
             ]
         });
@@ -28,7 +28,8 @@ export async function getQuiz(req, res) {
             question_text: q.question_text,
             options: q.options || {},
             correct_answer: q.correct_answer || "",
-            explanation: q.explanations || ""
+            explanation: q.explanations || "",
+            section: q.section || "General"
         }));
 
         res.json({
@@ -43,7 +44,7 @@ export async function getQuiz(req, res) {
                 randomize_questions: assessment.randomize_questions,
                 show_score: assessment.show_score,
                 show_explanations: assessment.show_explanations,
-                is_published: assessment.is_published
+                is_published: assessment.is_published,
             },
             questions
         });
@@ -95,7 +96,7 @@ export async function saveQuizConfig(req, res) {
 
 // Add a new question
 export async function addQuestion(req, res) {
-    const { assessment_id, question_text, options, correct_answer, explanations } = req.body;
+    const { assessment_id, question_text, options, correct_answer, explanations, section } = req.body;
 
     try {
         const question = await AssessmentQuestion.create({
@@ -103,7 +104,8 @@ export async function addQuestion(req, res) {
             question_text,
             options,
             correct_answer: correct_answer?.toLowerCase() || "",
-            explanations
+            explanations,
+            section: section || "General"
         });
         res.json(question);
     } catch (err) {
@@ -115,18 +117,18 @@ export async function addQuestion(req, res) {
 // Update a question
 export async function updateQuestion(req, res) {
     const { question_id } = req.params;
-    const { question_text, options, correct_answer, explanations } = req.body;
+    const { question_text, options, correct_answer, explanations, section } = req.body;
 
     try {
         const question = await AssessmentQuestion.findByPk(question_id);
         if (!question) return res.status(404).json({ error: "Question not found" });
 
-        // Ensure correct answer is lowercase
         await question.update({
             question_text,
             options,
             correct_answer: correct_answer?.toLowerCase() || "",
-            explanations
+            explanations,
+            section: section || "General"
         });
 
         res.json({ success: true, message: "Question updated successfully!" });

@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         points: { type: DataTypes.INTEGER, defaultValue: 1 },
         created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+        section: { type: DataTypes.STRING(50), allowNull: true }
     }, {
         tableName: "assessment_questions",
         timestamps: false,

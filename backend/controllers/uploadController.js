@@ -1,4 +1,3 @@
-// controllers/uploadController.js
 import fs from "fs";
 import path from "path";
 import OpenAI from "openai";
@@ -24,10 +23,15 @@ export async function generateQuizFromPdf(req, res) {
     const title = req.body.title || "AI Generated Quiz";
 
     try {
+        // Extract text from PDF
         const text = await extractTextFromPdf(file.path);
 
-        const prompt = `
-Generate JSON with exactly ${questionQty} "${quizType}" questions:
+        let prompt = "";
+
+        if (quizType === "Multiple Choice") {
+            // Generic multiple choice
+            prompt = `
+Generate JSON with exactly ${questionQty} multiple-choice questions in this format:
 {
   "questions": [
     {
@@ -42,16 +46,47 @@ Generate JSON with exactly ${questionQty} "${quizType}" questions:
 Content:
 ${text.slice(0, 16000)}
 `;
+        } else if (quizType === "Nihongo") {
+            // Nihongo quiz with sections
+            prompt = `
+You are an AI generating a Nihongo (Japanese) lesson quiz based on the provided PDF content.
 
+Requirements:
+1️⃣ Grammar: generate fill-in-the-blank questions with 4 options each.
+2️⃣ Vocabulary: generate 6 questions:
+   - First 3: English word → translate to Japanese (characters)
+   - Last 3: Japanese word → translate to English
+3️⃣ Listening: generate 1-3 short-answer questions (no options needed).
+
+Output JSON EXACTLY in this format:
+{
+  "questions": [
+    {
+      "section": "Grammar" | "Vocabulary" | "Listening",
+      "question": "...",
+      "options": {"a":"...", "b":"...", "c":"...", "d":"..."} OR null,
+      "correct_answer": "...",
+      "explanation": "..."
+    }
+  ]
+}
+
+PDF content:
+${text.slice(0, 16000)}
+`;
+        }
+
+        // Call OpenAI
         const aiResp = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
-                { role: "system", content: "You generate quizzes in JSON for a corporate LMS." },
+                { role: "system", content: "You generate structured JSON quizzes for LMS." },
                 { role: "user", content: prompt }
             ],
-            max_tokens: 2000
+            max_tokens: 3000
         });
 
+        // Clean AI response and parse JSON
         let aiText = aiResp.choices[0].message.content
             .replace(/^```json/, "")
             .replace(/```$/, "")
@@ -59,9 +94,7 @@ ${text.slice(0, 16000)}
 
         const parsed = JSON.parse(aiText);
 
-        console.log(`Quiz created with ${questions.length} questions by user ${user.id}`);
-
-        // NOTHING IS SAVED TO DB HERE!
+        console.log(`Quiz created with ${parsed.questions.length} questions by user ${user.id}`);
 
         res.json({
             success: true,
@@ -72,7 +105,7 @@ ${text.slice(0, 16000)}
         });
 
     } catch (err) {
-        console.log("Error: ", err);
+        console.log("Error generating quiz: ", err);
         res.status(500).json({ error: err.message });
     }
 }
@@ -90,19 +123,19 @@ export async function saveQuizToLecture(req, res) {
             title,
             pdf_source_url: pdfFilename,
             assessment_type_id: "9e36d4a6-2330-4b8d-bc3d-65551a7cdd55",
-            is_published: true,
+            is_published: false,
             created_by: userId
         });
 
-        const assessmentId = assessment.assessment_id;
-
+        // Save questions
         for (const q of questions) {
             await AssessmentQuestion.create({
                 assessment_id: assessment.assessment_id,
                 question_text: q.question,
                 options: q.options || {},
                 correct_answer: q.correct_answer,
-                explanations: q.explanation || ""
+                explanations: q.explanation || "",
+                section: q.section || "General"
             });
         }
 
@@ -112,7 +145,7 @@ export async function saveQuizToLecture(req, res) {
             assessment_id: assessment.assessment_id
         });
 
-        console.log(`[UPLOAD] Assessment ${assessmentId} created with ${Array.isArray(questions) ? questions.length : 0} questions by user ${userId}`);
+        console.log(`[UPLOAD] Assessment ${assessment.assessment_id} created with ${questions.length} questions by user ${userId}`);
 
         res.json({ success: true, message: "Quiz saved successfully!", assessmentId: assessment.assessment_id });
     } catch (err) {
@@ -120,7 +153,6 @@ export async function saveQuizToLecture(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-
 
 export async function discardQuiz(req, res) {
     const { pdfFilename } = req.body;
@@ -132,10 +164,8 @@ export async function discardQuiz(req, res) {
 
     try {
         if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
-
         res.json({ success: true, message: "Draft discarded (file deleted only)." });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
-

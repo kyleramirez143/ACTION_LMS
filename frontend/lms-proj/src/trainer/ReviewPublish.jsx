@@ -14,7 +14,7 @@ const ReviewPublish = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
 
-  // Auth check
+  // AUTH CHECK
   useEffect(() => {
     if (!token) return navigate("/login");
     try {
@@ -26,7 +26,7 @@ const ReviewPublish = () => {
     }
   }, [token, navigate]);
 
-  // Load quiz + settings
+  // LOAD QUIZ
   useEffect(() => {
     async function loadQuiz() {
       try {
@@ -39,10 +39,11 @@ const ReviewPublish = () => {
         const questions = (data.questions || []).map(q => ({
           ...q,
           options: typeof q.options === "object" ? q.options : {},
+          section: q.section || "General", // Ensure section always exists
         }));
 
         setQuiz({ ...data, questions });
-        setOriginalQuestions(JSON.parse(JSON.stringify(questions))); // snapshot for cancel
+        setOriginalQuestions(JSON.parse(JSON.stringify(questions)));
 
         setSettings({
           title: data.quiz.title || "",
@@ -67,24 +68,20 @@ const ReviewPublish = () => {
   }, [assessment_id, token]);
 
   // SETTINGS HANDLER
-  const handleChange = (key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
+  const handleChange = (key, value) => setSettings(prev => ({ ...prev, [key]: value }));
 
-  // QUESTIONS HANDLERS
+  // QUESTION HANDLERS
   const handleQuestionChange = (index, key, value) => {
-    const updatedQuestions = [...quiz.questions];
-    if (key === "options") updatedQuestions[index].options = value;
-    else updatedQuestions[index][key] = value;
-    setQuiz(prev => ({ ...prev, questions: updatedQuestions }));
+    const updated = [...quiz.questions];
+    updated[index][key] = value;
+    setQuiz(prev => ({ ...prev, questions: updated }));
   };
 
   const reletterOptionsForSave = (options) => {
     const keys = Object.keys(options).sort();
     const newOptions = {};
     keys.forEach((_, idx) => {
-      const key = String.fromCharCode(97 + idx); // 'a', 'b', 'c'
-      newOptions[key] = options[keys[idx]];
+      newOptions[String.fromCharCode(97 + idx)] = options[keys[idx]];
     });
     return newOptions;
   };
@@ -94,25 +91,21 @@ const ReviewPublish = () => {
     try {
       const res = await fetch(`/api/quizzes/questions/${q.question_id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           question_text: q.question_text,
           options: reletterOptionsForSave(q.options),
           correct_answer: q.correct_answer?.toLowerCase(),
           explanations: q.explanation,
+          section: q.section || "General",
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save question");
 
-      // Update original snapshot
       const updatedOriginal = [...originalQuestions];
       updatedOriginal[index] = JSON.parse(JSON.stringify(q));
       setOriginalQuestions(updatedOriginal);
-
       setEditingQuestionIndex(null);
     } catch (err) {
       console.error("Save question error:", err);
@@ -122,7 +115,7 @@ const ReviewPublish = () => {
 
   const handleCancelEdit = (index) => {
     const updated = [...quiz.questions];
-    updated[index] = JSON.parse(JSON.stringify(originalQuestions[index])); // restore
+    updated[index] = JSON.parse(JSON.stringify(originalQuestions[index]));
     setQuiz(prev => ({ ...prev, questions: updated }));
     setEditingQuestionIndex(null);
   };
@@ -131,16 +124,14 @@ const ReviewPublish = () => {
     try {
       const res = await fetch(`/api/quizzes/questions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           assessment_id,
           question_text: "New Question",
           options: { a: "", b: "" },
           correct_answer: "",
           explanations: "",
+          section: quiz.quizType === "Nihongo" ? "Grammar" : "General",
         }),
       });
       const newQuestion = await res.json();
@@ -180,10 +171,7 @@ const ReviewPublish = () => {
     try {
       const res = await fetch(`/api/quizzes/${assessment_id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(settings),
       });
       const data = await res.json();
@@ -196,11 +184,81 @@ const ReviewPublish = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate(`/${course_id}/modules/${module_id}/lectures`);
-  };
+  const handleCancel = () => navigate(`/${course_id}/modules/${module_id}/lectures`);
 
   if (loading || !settings || !quiz) return <div>Loading...</div>;
+
+  // --- RENDER QUIZ QUESTIONS ---
+  const renderQuestion = (q, index) => {
+    const isEditing = editingQuestionIndex === index;
+    return (
+      <div className="card mb-3 shadow-sm" key={q.question_id}>
+        <div className="card-body">
+          <div className="d-flex justify-content-between align-items-start">
+            <h5 className="card-title">
+              {q.section && quiz.quizType === "Nihongo" && <span className="badge bg-secondary me-2">{q.section}</span>}
+              Q{index + 1}:
+              {isEditing ? (
+                <textarea className="form-control mt-2" rows={4} value={q.question_text} onChange={e => handleQuestionChange(index, "question_text", e.target.value)} />
+              ) : (
+                <span className="ms-2">{q.question_text}</span>
+              )}
+            </h5>
+
+            <div>
+              {isEditing ? (
+                <>
+                  <button className="btn btn-success btn-sm me-1" onClick={() => handleSaveQuestion(index)}>Save</button>
+                  <button className="btn btn-secondary btn-sm me-1" onClick={() => handleCancelEdit(index)}>Cancel</button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(index)}>Delete</button>
+                </>
+              ) : (
+                <button className="btn btn-outline-primary btn-sm" onClick={() => setEditingQuestionIndex(index)}>Edit</button>
+              )}
+            </div>
+          </div>
+
+          {q.options && Object.keys(q.options).length > 0 && (
+            <ul className="list-group list-group-flush mb-2 mt-2">
+              {Object.entries(q.options).map(([k, v]) => (
+                <li key={k} className="list-group-item d-flex align-items-center">
+                  <strong>{k.toUpperCase()}.</strong>
+                  {isEditing ? (
+                    <input type="text" className="form-control ms-2" value={v} onChange={e => handleQuestionChange(index, "options", { ...q.options, [k]: e.target.value })} />
+                  ) : (
+                    <span className="ms-2">{v}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {q.correct_answer && !isEditing && <p className="text-success mb-1 mt-2"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>}
+
+          {isEditing && (
+            <div className="mb-2 mt-2">
+              <label>Correct Answer:</label>
+              <input type="text" className="form-control" value={q.correct_answer} onChange={e => handleQuestionChange(index, "correct_answer", e.target.value)} />
+            </div>
+          )}
+
+          {q.explanation && !isEditing && (
+            <div className="p-2 mt-2 bg-light border rounded">
+              <small className="text-muted d-block fw-bold">Explanation:</small>
+              <small className="text-dark">{q.explanation}</small>
+            </div>
+          )}
+
+          {isEditing && (
+            <div className="mb-2 mt-2">
+              <label>Explanation:</label>
+              <textarea className="form-control" rows={2} value={q.explanation || ""} onChange={e => handleQuestionChange(index, "explanation", e.target.value)} />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="container-fluid bg-light" style={{ minHeight: "100vh" }}>
@@ -208,125 +266,9 @@ const ReviewPublish = () => {
         {/* LEFT PANEL */}
         <div className="col-lg-9 p-4" style={{ height: "100vh", overflowY: "auto" }}>
           <h2 className="mb-4 fw-bold">Review and Publish</h2>
-
           <button className="btn btn-outline-success mb-3" onClick={handleAddQuestion}>+ Add Question</button>
 
-          {quiz.questions.map((q, i) => {
-            const isEditing = editingQuestionIndex === i;
-            return (
-              <div className="card mb-3 shadow-sm" key={q.question_id}>
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <h5 className="card-title">
-                      Q{i + 1}:
-                      {isEditing ? (
-                        <textarea
-                          className="form-control mt-2"
-                          rows={4}
-                          value={q.question_text}
-                          onChange={e => handleQuestionChange(i, "question_text", e.target.value)}
-                        />
-                      ) : (
-                        <span className="ms-2">{q.question_text}</span>
-                      )}
-                    </h5>
-
-                    <div>
-                      {isEditing ? (
-                        <>
-                          <button className="btn btn-success btn-sm me-1" onClick={() => handleSaveQuestion(i)}>Save</button>
-                          <button className="btn btn-secondary btn-sm me-1" onClick={() => handleCancelEdit(i)}>Cancel</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(i)}>Delete</button>
-                        </>
-                      ) : (
-                        <button className="btn btn-outline-primary btn-sm" onClick={() => setEditingQuestionIndex(i)}>Edit</button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* OPTIONS */}
-                  <ul className="list-group list-group-flush mb-2 mt-2">
-                    {Object.entries(q.options).map(([k, v]) => (
-                      <li key={k} className="list-group-item d-flex align-items-center">
-                        <strong>{k.toUpperCase()}.</strong>
-                        {isEditing ? (
-                          <>
-                            <input
-                              type="text"
-                              className="form-control ms-2"
-                              value={v}
-                              onChange={e => handleQuestionChange(i, "options", { ...q.options, [k]: e.target.value })}
-                            />
-                            <button
-                              className="btn btn-sm btn-danger ms-2"
-                              onClick={() => {
-                                const updatedOptions = { ...q.options };
-                                delete updatedOptions[k];
-                                // Re-letter options after deletion
-                                const relettered = {};
-                                Object.values(updatedOptions).forEach((val, idx) => {
-                                  const key = String.fromCharCode(97 + idx);
-                                  relettered[key] = val;
-                                });
-                                handleQuestionChange(i, "options", relettered);
-                              }}
-                            >Remove</button>
-                          </>
-                        ) : (
-                          <span className="ms-2">{v}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {isEditing && (
-                    <button
-                      className="btn btn-sm btn-outline-primary mt-2"
-                      onClick={() => {
-                        const updatedOptions = { ...q.options };
-                        const nextKey = String.fromCharCode(97 + Object.keys(updatedOptions).length);
-                        updatedOptions[nextKey] = "";
-                        handleQuestionChange(i, "options", updatedOptions);
-                      }}
-                    >+ Add Option</button>
-                  )}
-
-                  {/* Correct answer */}
-                  {isEditing ? (
-                    <div className="mb-2 mt-2">
-                      <label>Correct Answer:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={q.correct_answer}
-                        onChange={e => handleQuestionChange(i, "correct_answer", e.target.value)}
-                      />
-                    </div>
-                  ) : q.correct_answer ? (
-                    <p className="text-success mb-1 mt-2"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
-                  ) : null}
-
-                  {/* Explanation */}
-                  {isEditing ? (
-                    <div className="mb-2 mt-2">
-                      <label>Explanation:</label>
-                      <textarea
-                        className="form-control"
-                        rows={2}
-                        value={q.explanation || ""}
-                        onChange={e => handleQuestionChange(i, "explanation", e.target.value)}
-                      />
-                    </div>
-                  ) : q.explanation ? (
-                    <div className="p-2 mt-2 bg-light border rounded">
-                      <small className="text-muted d-block fw-bold">Explanation:</small>
-                      <small className="text-dark">{q.explanation}</small>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+          {quiz.questions.map((q, i) => renderQuestion(q, i))}
         </div>
 
         {/* RIGHT PANEL */}
@@ -356,7 +298,7 @@ const ReviewPublish = () => {
 
             <div className="mb-3">
               <label className="form-label">Instructions</label>
-              <textarea className="form-control" placeholder="No need to include numbering. Just simply press enter per instructions." rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
+              <textarea className="form-control" placeholder="No need to include numbering. Just press enter per instruction." rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
             </div>
 
             {/* Checkboxes */}
