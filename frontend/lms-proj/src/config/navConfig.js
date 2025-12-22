@@ -20,6 +20,20 @@ export const navLinks = [
     requiredRoles: ['Admin'],
   },
   {
+    name: 'Curriculum',
+    requiredRoles: ['Admin'],
+    children: [
+      {
+        name: 'View Batch Table',
+        path: '/admin/batch-management',
+      },
+      {
+        name: 'Action Calendaer',
+        path: '/admin/curriculum/modules',
+      },
+    ],
+  },
+  {
     name: 'Dashboard',
     path: '/trainer/dashboard',
     requiredRoles: ['Trainer'],

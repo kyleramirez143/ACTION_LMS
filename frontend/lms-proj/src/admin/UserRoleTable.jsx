@@ -18,7 +18,6 @@ function UserRoleTable() {
     const [newlyImportedIds, setNewlyImportedIds] = useState([]);
     const ITEMS_PER_PAGE = 8;
 
-    // --- BULK DELETE STATE ---
     const [selectedUsers, setSelectedUsers] = useState([]);
 
     useEffect(() => {
@@ -56,11 +55,7 @@ function UserRoleTable() {
             setTotalPages(data.totalPages || 1);
         } catch (err) {
             console.error("Fetch error:", err);
-            if (err instanceof TypeError) {
-                alert("Network error: Could not connect to server. Is backend running?");
-            } else {
-                alert(`Error fetching users: ${err.message}`);
-            }
+            alert(`Error fetching users: ${err.message}`);
         }
         setLoading(false);
     };
@@ -76,15 +71,13 @@ function UserRoleTable() {
 
     const handleDelete = async (userId) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
-
         const token = localStorage.getItem("authToken");
         try {
             const res = await fetch(`http://localhost:5000/api/users/delete/${userId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
-            const text = await res.text();
-            if (!res.ok) throw new Error(text);
+            if (!res.ok) throw new Error(await res.text());
             fetchUsers();
             alert("User deleted successfully!");
         } catch (err) {
@@ -102,13 +95,12 @@ function UserRoleTable() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Toggle failed");
             fetchUsers();
-            alert(data.message);
         } catch (err) {
             alert("Error: " + err.message);
         }
     };
 
-    // CSV Upload handler
+    // FIXED: CSV Upload handler
     const handleCSVUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -129,24 +121,59 @@ function UserRoleTable() {
 
             const addedIds = data.addedUsers?.map(u => u.id) || [];
             setNewlyImportedIds(addedIds);
-
-            alert(`Successfully imported ${addedIds.length} users!`);
-
-            // Refresh table with current filters/search
+            alert(`Successfully imported users!`);
             fetchUsers();
-
         } catch (err) {
             alert("Error importing CSV: " + err.message);
         }
         e.target.value = null;
     };
 
-    // --- BULK DELETE HANDLERS ---
+    // FIXED: Download Template handler
+    const downloadTemplate = async () => {
+        try {
+            const token = localStorage.getItem("authToken");
+
+            const res = await fetch("http://localhost:5000/api/users/download-template", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            });
+
+            // Check if the response is actually a CSV
+            if (!res.ok) {
+                // Try to get error message from server response
+                const errorText = await res.text();
+                throw new Error(`Server responded with ${res.status}: ${errorText}`);
+            }
+
+            const blob = await res.blob();
+
+            // Basic check: is the blob empty?
+            if (blob.size === 0) {
+                throw new Error("The generated template is empty.");
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "user_import_template.csv";
+            document.body.appendChild(a);
+            a.click();
+
+            // Cleanup
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Full Error Details:", err);
+            alert("Error downloading template: " + err.message);
+        }
+    };
+
     const handleCheckboxChange = (userId) => {
         setSelectedUsers(prev =>
-            prev.includes(userId)
-                ? prev.filter(id => id !== userId)
-                : [...prev, userId]
+            prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
         );
     };
 
@@ -160,15 +187,10 @@ function UserRoleTable() {
     };
 
     const handleBulkDelete = async () => {
-        if (selectedUsers.length === 0) {
-            alert("No users selected for deletion");
-            return;
-        }
-
+        if (selectedUsers.length === 0) return;
         if (!window.confirm(`Are you sure you want to delete ${selectedUsers.length} user(s)?`)) return;
 
         const token = localStorage.getItem("authToken");
-
         try {
             const res = await fetch("http://localhost:5000/api/users/bulk-delete", {
                 method: "DELETE",
@@ -179,21 +201,14 @@ function UserRoleTable() {
                 body: JSON.stringify({ userIds: selectedUsers }),
             });
 
-            if (!res.ok) {
-                const text = await res.text(); // read as plain text if backend returns HTML
-                throw new Error(text);
-            }
-
-            const data = await res.json(); // parse JSON response
-            alert(data.message);
-
-            fetchUsers(); // refresh table
-            setSelectedUsers([]); // clear selected checkboxes
+            if (!res.ok) throw new Error(await res.text());
+            alert("Users deleted successfully!");
+            fetchUsers();
+            setSelectedUsers([]);
         } catch (err) {
             alert("Error deleting users: " + err.message);
         }
     };
-
 
     return (
         <div className="user-role-card">
@@ -206,27 +221,43 @@ function UserRoleTable() {
                         </button>
                     </Link>
 
-                    <button
-                        className="btn btn-success rounded-pill"
-                        onClick={() => document.getElementById("csvUpload").click()}
-                    >
-                        <i className="bi bi-upload"></i> Import Users
-                    </button>
-                    <input
-                        type="file"
-                        id="csvUpload"
-                        accept=".csv"
-                        style={{ display: "none" }}
-                        onChange={handleCSVUpload}
-                    />
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-success rounded-pill"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i className="bi bi-person-plus-fill"></i> Import Users
+                        </button>
 
-                    {/* BULK DELETE BUTTON */}
+                        <ul className="dropdown-menu">
+                            <li>
+                                <label className="dropdown-item" onClick={downloadTemplate}>
+                                    Click to Download Template
+                                </label>
+                            </li>
+                            <li>
+                                {/* FIXED: Using label to trigger hidden input for better UI compatibility */}
+                                <label className="dropdown-item" style={{ cursor: "pointer", marginBottom: 0 }}>
+                                    Import Users
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        style={{ display: "none" }}
+                                        onChange={handleCSVUpload}
+                                    />
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+
                     <button
                         className="btn btn-danger rounded-pill"
                         onClick={handleBulkDelete}
                         disabled={selectedUsers.length === 0}
                     >
-                        <i className="bi bi-trash3-fill"></i> Delete Users
+                        <i className="bi bi-trash3-fill"></i> Delete ({selectedUsers.length})
                     </button>
                 </div>
             </div>
@@ -289,20 +320,17 @@ function UserRoleTable() {
                                     users
                                         .filter((u) => u.id !== currentAdminId)
                                         .map((user) => (
-                                            <tr
-                                                key={user.id}
-                                                className={newlyImportedIds.includes(user.id) ? "newly-imported" : ""}
-                                            >
+                                            <tr key={user.id} className={newlyImportedIds.includes(user.id) ? "newly-imported" : ""}>
                                                 <td className="text-center">{user.name}</td>
-                                                <td className="text-center">{user.email}</td>
+                                                <td className="text-center text-muted">{user.email}</td>
                                                 <td className="text-center">{user.level}</td>
                                                 <td className="text-center">
                                                     {user.level === "Trainee" ? user.batch : "Not Applicable"}
                                                 </td>
                                                 <td className="text-center">
                                                     <span
-                                                        className={`badge ${user.status === "Active" ? "bg-success" : "bg-danger"}`}
-                                                        style={{ cursor: "pointer" }}
+                                                        className={`badge rounded-pill ${user.status === "Active" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger"}`}
+                                                        style={{ cursor: "pointer", padding: "0.5em 1em" }}
                                                         onClick={() => handleToggleStatus(user.id)}
                                                     >
                                                         {user.status}
@@ -310,23 +338,12 @@ function UserRoleTable() {
                                                 </td>
                                                 <td className="text-center">
                                                     <div className="d-flex justify-content-center gap-2">
-                                                        <button
-                                                            className="icon-btn"
-                                                            onClick={() => handleEdit(user.id)}
-                                                            title="Edit"
-                                                        >
+                                                        <button className="icon-btn" onClick={() => handleEdit(user.id)} title="Edit">
                                                             <i className="bi bi-pencil-fill"></i>
                                                         </button>
-
-                                                        {user.id !== currentAdminId && (
-                                                            <button
-                                                                className="icon-btn"
-                                                                onClick={() => handleDelete(user.id)}
-                                                                title="Delete"
-                                                            >
-                                                                <i className="bi bi-trash3-fill"></i>
-                                                            </button>
-                                                        )}
+                                                        <button className="icon-btn" onClick={() => handleDelete(user.id)} title="Delete">
+                                                            <i className="bi bi-trash3-fill"></i>
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 <td className="text-center">
@@ -344,21 +361,16 @@ function UserRoleTable() {
                         </table>
                     </div>
 
-                    {/* PAGINATION */}
                     <div className="pagination-wrapper">
                         <ul className="pagination custom-pagination">
                             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                 <button className="page-link" onClick={handlePrev}>‹</button>
                             </li>
-
                             {Array.from({ length: totalPages }, (_, i) => (
                                 <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                                    <button className="page-link" onClick={() => handlePageClick(i + 1)}>
-                                        {i + 1}
-                                    </button>
+                                    <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
                                 </li>
                             ))}
-
                             <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                 <button className="page-link" onClick={handleNext}>›</button>
                             </li>
