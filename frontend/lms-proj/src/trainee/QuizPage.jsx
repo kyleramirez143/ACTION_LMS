@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios';
 import { SubmitConfirmationModal, QuizResultModal } from './QuizModals';
+import { RecorderState } from './recorder';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const QuizPage = () => {
@@ -10,10 +11,7 @@ const QuizPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const token = localStorage.getItem('authToken');
-
   const sessionId = state?.sessionId;
-  const mediaRecorderRef = state?.mediaRecorderRef;
-  const chunksRef = state?.chunksRef;
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -21,9 +19,9 @@ const QuizPage = () => {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(20 * 60); // default 20 mins
+  const [timeLeft, setTimeLeft] = useState(20 * 60);
 
-  // --- Auth check ---
+  // --- AUTH CHECK ---
   useEffect(() => {
     if (!token) return navigate('/login');
     try {
@@ -38,12 +36,12 @@ const QuizPage = () => {
     }
   }, [token, navigate]);
 
-  // --- Session check ---
+  // --- SESSION CHECK ---
   useEffect(() => {
     if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
   }, [sessionId, assessment_id, navigate]);
 
-  // --- Fetch questions ---
+  // --- FETCH QUESTIONS ---
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -60,13 +58,13 @@ const QuizPage = () => {
     fetchQuestions();
   }, [assessment_id, token, navigate]);
 
-  // --- Timer ---
+  // --- TIMER ---
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmit(true); // auto-submit
+          setShowSubmitModal(true);
           return 0;
         }
         return prev - 1;
@@ -75,7 +73,7 @@ const QuizPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatTime = seconds => {
+  const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
@@ -88,23 +86,22 @@ const QuizPage = () => {
     }));
   };
 
-  const goToQuestion = index => setCurrentQuestion(index);
+  const goToQuestion = (index) => setCurrentQuestion(index);
   const allAnswered = questions.every(q => answers[q.question_id] !== undefined);
 
-  // --- Stop recording and submit ---
-  const handleSubmit = async (fromTimer = false) => {
+  // --- SUBMIT QUIZ ---
+  const onConfirmSubmit = async () => {
     setShowSubmitModal(false);
     setIsUploading(true);
 
     try {
-      // Stop MediaRecorder if active
-      if (mediaRecorderRef?.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
+      // Stop recording first
+      RecorderState.stop();
 
       // Upload recording
-      if (chunksRef?.current?.length > 0) {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      const chunks = RecorderState.getChunks();
+      if (chunks.length > 0) {
+        const blob = new Blob(chunks, { type: 'video/webm' });
         const formData = new FormData();
         formData.append('recording', blob, `session_${sessionId}.webm`);
         await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
@@ -164,6 +161,7 @@ const QuizPage = () => {
               ))}
             </div>
           </div>
+
           <div className="mt-4 d-flex justify-content-between">
             <div>
               {currentQuestion > 0 && (
@@ -177,6 +175,7 @@ const QuizPage = () => {
                 </button>
               )}
             </div>
+
             {allAnswered && (
               <button className="btn btn-success" onClick={() => setShowSubmitModal(true)}>
                 Submit Quiz
@@ -213,7 +212,7 @@ const QuizPage = () => {
 
       {showSubmitModal && (
         <SubmitConfirmationModal
-          onConfirmSubmit={() => handleSubmit(false)}
+          onConfirmSubmit={onConfirmSubmit}
           onCancel={() => setShowSubmitModal(false)}
         />
       )}

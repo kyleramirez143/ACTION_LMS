@@ -47,37 +47,95 @@ export const createLecture = async (req, res) => {
 };
 
 // Upload a file/resource for a lecture
+// export const uploadLectureFile = async (req, res) => {
+//     try {
+//         const { lecture_id } = req.body;
+//         if (!lecture_id || !req.files?.length) {
+//             return res.status(400).json({ error: "lecture_id and files are required" });
+//         }
+
+//         const uploadedResources = [];
+
+//         for (let file of req.files) {
+//             const resource = await Resource.create({
+//                 file_url: file.filename || 
+//             });
+
+//             await LectureResource.create({
+//                 lecture_id,
+//                 resources_id: resource.resource_id
+//             });
+
+//             uploadedResources.push(resource);
+//         }
+
+//         res.status(200).json({
+//             message: "Resources uploaded successfully",
+//             resources: uploadedResources
+//         });
+//     } catch (err) {
+//         console.error("Upload Lecture File Error:", err);
+//         res.status(500).json({ error: "Failed to upload lecture resources", details: err.message });
+//     }
+// };
+
+// Upload a file/resource for a lecture
 export const uploadLectureFile = async (req, res) => {
     try {
-        const { lecture_id } = req.body;
-        if (!lecture_id || !req.files?.length) {
-            return res.status(400).json({ error: "lecture_id and files are required" });
+        const { lecture_id, links } = req.body; // links can be an array of URLs
+
+        if (!lecture_id) {
+            return res.status(400).json({ error: "lecture_id is required" });
         }
 
         const uploadedResources = [];
 
-        for (let file of req.files) {
-            const resource = await Resource.create({
-                file_url: file.filename
-            });
+        // --- Handle file uploads ---
+        if (req.files?.length) {
+            for (let file of req.files) {
+                const resource = await Resource.create({
+                    file_url: file.filename, // store uploaded file name
+                    is_visible: true,
+                });
 
-            await LectureResource.create({
-                lecture_id,
-                resources_id: resource.resource_id
-            });
+                await LectureResource.create({
+                    lecture_id,
+                    resources_id: resource.resource_id
+                });
 
-            uploadedResources.push(resource);
+                uploadedResources.push(resource);
+            }
+        }
+
+        // --- Handle link resources ---
+        if (links && Array.isArray(links)) {
+            for (let link of links) {
+                if (!link) continue;
+                const resource = await Resource.create({
+                    file_url: link, // store link as text
+                    is_visible: true,
+                });
+
+                await LectureResource.create({
+                    lecture_id,
+                    resources_id: resource.resource_id
+                });
+
+                uploadedResources.push(resource);
+            }
         }
 
         res.status(200).json({
             message: "Resources uploaded successfully",
             resources: uploadedResources
         });
+
     } catch (err) {
         console.error("Upload Lecture File Error:", err);
         res.status(500).json({ error: "Failed to upload lecture resources", details: err.message });
     }
 };
+
 
 // Get all lectures for a module, including resources
 export const getLecturesByModule = async (req, res) => {

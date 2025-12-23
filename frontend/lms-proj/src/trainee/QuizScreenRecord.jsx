@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaVideo, FaShieldAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api/axios";
+import { RecorderState } from "./recorder";
 
 const QuizScreenRecord = () => {
     const navigate = useNavigate();
@@ -12,12 +13,8 @@ const QuizScreenRecord = () => {
     const [error, setError] = useState(null);
     const [isPermissionGranted, setIsPermissionGranted] = useState(false);
 
-    const mediaRecorderRef = useRef(null);
-    const chunksRef = useRef([]);
-    const streamRef = useRef(null);
-
-    // --- Auth & Role check ---
-    React.useEffect(() => {
+    // --- AUTH & ROLE CHECK ---
+    useEffect(() => {
         if (!token) return navigate("/login");
         try {
             const decoded = jwtDecode(token);
@@ -31,11 +28,14 @@ const QuizScreenRecord = () => {
         }
     }, [token, navigate]);
 
-    // --- Request screen permission & start recording ---
+    // --- REQUEST SCREEN PERMISSION ---
     const handleRequestPermission = async () => {
         setError(null);
         try {
-            const mediaStream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: "monitor" }, audio: true });
+            const mediaStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { displaySurface: "monitor" },
+                audio: true
+            });
             const videoTrack = mediaStream.getVideoTracks()[0];
             const settings = videoTrack.getSettings();
 
@@ -45,21 +45,15 @@ const QuizScreenRecord = () => {
                 return;
             }
 
-            streamRef.current = mediaStream;
+            RecorderState.start(mediaStream);
             setIsPermissionGranted(true);
-
-            mediaRecorderRef.current = new MediaRecorder(mediaStream, { mimeType: "video/webm" });
-            mediaRecorderRef.current.ondataavailable = e => {
-                if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
-            };
-            mediaRecorderRef.current.start(1000); // start recording
 
         } catch {
             setError("Permission denied. Screen access is required.");
         }
     };
 
-    // --- Start Quiz and navigate to QuizPage ---
+    // --- START QUIZ ---
     const handleStartQuiz = async () => {
         try {
             const res = await API.post(`/quizzes/${assessment_id}/proctor/start`, {}, {
@@ -67,9 +61,8 @@ const QuizScreenRecord = () => {
             });
             const { session_id } = res.data;
 
-            navigate(`/quiz/${assessment_id}/start`, {
-                state: { sessionId: session_id, mediaRecorderRef, chunksRef }
-            });
+            // Navigate to quiz page, passing only serializable data
+            navigate(`/quiz/${assessment_id}/start`, { state: { sessionId: session_id } });
 
         } catch (err) {
             console.error(err);
@@ -100,6 +93,17 @@ const QuizScreenRecord = () => {
                                 ? "Your screen is being shared correctly. You can start the quiz."
                                 : "You must share your ENTIRE SCREEN to continue."}
                         </p>
+
+                        <div className="mb-3 text-start p-3 border rounded-3 bg-light">
+                            <div className="d-flex align-items-center mb-2">
+                                <FaShieldAlt className="text-success me-2" />
+                                <small>Status: {isPermissionGranted ? "Validated" : "Waiting for permission"}</small>
+                            </div>
+                            <div className="d-flex align-items-center">
+                                <FaCheckCircle className="text-success me-2" />
+                                <small>Entire screen sharing check enabled.</small>
+                            </div>
+                        </div>
 
                         {error && (
                             <div className="alert alert-danger py-2 mb-3">

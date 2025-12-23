@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff } from "lucide-react";
+import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff, Link } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
@@ -132,12 +132,28 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                 <h6 className="fw-bold mb-2">Resources</h6>
                                 <div className="resources-list mb-4">
                                     {lec.resources?.length > 0 ? (
-                                        lec.resources.map((res) => (
-                                            <a key={res.resource_id} href={`${window.location.origin}/uploads/lectures/${res.file_url}`} className="resource-item d-block mb-1 text-decoration-none" target="_blank" rel="noopener noreferrer">
-                                                <FileText size={16} className="me-2" /> {res.file_url}
-                                            </a>
-                                        ))
-                                    ) : <p className="small text-muted">No resources available.</p>}
+                                        lec.resources.map((res) => {
+                                            const isLink = res.file_url.startsWith("http://") || res.file_url.startsWith("https://");
+                                            return (
+                                                <a
+                                                    key={res.resource_id}
+                                                    href={isLink ? res.file_url : `${window.location.origin}/uploads/lectures/${res.file_url}`}
+                                                    className="resource-item d-block mb-1 text-decoration-none"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {isLink ? (
+                                                        <Link size={25} className="me-2 text-info" /> // could also use a link icon if you want
+                                                    ) : (
+                                                        <FileText size={25} className="me-2 text-primary" />
+                                                    )}
+                                                    {res.file_url}
+                                                </a>
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="small text-muted">No resources available.</p>
+                                    )}
                                 </div>
 
                                 {/* Quizzes Section */}
