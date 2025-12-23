@@ -33,4 +33,12 @@ router.get('/:assessment_id/sessions', protect, checkRole(['Trainer']), proctorC
 // Save trainee answers
 router.post('/responses', protect, checkRole(['Trainee']), quizController.saveResponse);
 
+// Trainee assessment results
+router.get(
+    '/trainee/results',
+    protect,
+    checkRole(['Trainee']),
+    quizController.getTraineeResults
+);
+
 export default router;

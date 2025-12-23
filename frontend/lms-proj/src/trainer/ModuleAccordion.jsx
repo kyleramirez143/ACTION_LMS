@@ -143,7 +143,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                     rel="noopener noreferrer"
                                                 >
                                                     {isLink ? (
-                                                        <Link size={25} className="me-2 text-info" /> // could also use a link icon if you want
+                                                        <Link size={25} className="me-2 text-primary" /> // could also use a link icon if you want
                                                     ) : (
                                                         <FileText size={25} className="me-2 text-primary" />
                                                     )}
@@ -174,7 +174,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         }
                                                     }}
                                                 >
-                                                    <FileArchive size={18} className="me-2 text-primary" />
+                                                    <FileArchive size={25} className="me-2 text-primary" />
                                                     <span className="fw-medium">{quiz.title}</span>
                                                     {isTrainerView && (
                                                         <span className={`badge ms-2 ${quiz.is_published ? "bg-success" : "bg-danger"}`}>

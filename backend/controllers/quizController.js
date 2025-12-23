@@ -172,3 +172,70 @@ export async function saveResponse(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
+export async function getTraineeResults(req, res) {
+    const user_id = req.user.id;
+
+    try {
+        const responses = await AssessmentResponse.findAll({
+            where: { user_id },
+            include: [
+                {
+                    model: Assessment,
+                    as: 'assessment',
+                    attributes: ['assessment_id', 'title', 'passing_score']
+                },
+                {
+                    model: AssessmentQuestion,
+                    as: 'question',
+                    attributes: ['correct_answer']
+                }
+            ],
+            order: [['submitted_at', 'DESC']]
+        });
+
+        // Group by assessment
+        const grouped = {};
+
+        for (const r of responses) {
+            const aid = r.assessment.assessment_id;
+
+            if (!grouped[aid]) {
+                grouped[aid] = {
+                    assessment_id: aid,
+                    title: r.assessment.title,
+                    correct: 0,
+                    total: 0,
+                    submitted_at: r.submitted_at,
+                    passing_score: r.assessment.passing_score
+                };
+            }
+
+            grouped[aid].total += 1;
+            if (r.answer === r.question.correct_answer) {
+                grouped[aid].correct += 1;
+            }
+        }
+
+        const results = Object.values(grouped).map(r => {
+            const scorePercent = Math.round((r.correct / r.total) * 100);
+            const passed = scorePercent >= r.passing_score;
+
+            return {
+                assessment_id: r.assessment_id,
+                title: r.title,
+                score: `${r.correct} / ${r.total}`,
+                status: passed ? 'Passed' : 'Failed',
+                feedback: passed
+                    ? 'Good work! You passed the assessment.'
+                    : 'Review the materials and try again.',
+                date: r.submitted_at
+            };
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error('getTraineeResults error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
