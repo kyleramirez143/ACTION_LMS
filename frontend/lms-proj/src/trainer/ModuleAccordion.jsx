@@ -1,75 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
+import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
     const [openIndex, setOpenIndex] = useState(-1);
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
-    const [showQuizMenuIndex, setShowQuizMenuIndex] = useState(-1);
+    const [showQuizMenuId, setShowQuizMenuId] = useState(null);
     const [localLectures, setLectures] = useState([]);
 
     const lectureMenuRefs = useRef([]);
-    const quizRef = useRef(null);
+    const quizMenuRefs = useRef({});
     const navigate = useNavigate();
 
-    // Close menus when clicking outside
-    useEffect(() => {
-        function handleClick(e) {
-            const isOutsideLectureMenu = !lectureMenuRefs.current.some(
-                (ref) => ref && ref.contains(e.target)
-            );
-            if (isOutsideLectureMenu && (quizRef.current && !quizRef.current.contains(e.target))) {
-                setShowLectureMenuIndex(-1);
-                setShowQuizMenuIndex(-1);
-            }
-        }
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
-
-    const toggleAccordion = (i) => {
-        setOpenIndex(i === openIndex ? -1 : i);
-        setShowLectureMenuIndex(-1);
-        setShowQuizMenuIndex(-1);
-    };
-
-    const handleEditLectureClick = (lecture) => {
-        setShowLectureMenuIndex(-1);
-        navigate(`/trainer/${lecture.module.course_id}/modules/${lecture.module_id}/lectures/${lecture.lecture_id}/edit`);
-    };
-
-    const handleMakeHiddenClick = async (lectureIndex) => {
-        const lecture = localLectures[lectureIndex];
-        const newStatus = !lecture.is_visible;
-
-        try {
-            const token = localStorage.getItem("authToken");
-            const res = await fetch(`/api/lectures/visibility/${lecture.lecture_id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ is_visible: newStatus }),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || "Failed to update lecture visibility");
-            }
-
-            // Update local state
-            const updatedLectures = [...localLectures];
-            updatedLectures[lectureIndex] = { ...lecture, is_visible: newStatus };
-            setLectures(updatedLectures);
-
-            setShowLectureMenuIndex(-1);
-        } catch (err) {
-            console.error("Update Visibility Error:", err);
-        }
-    };
-
-    // Update local lectures with visibility/published filtering for trainees
+    // 1. RBAC & Visibility Logic: Filter content based on role
     useEffect(() => {
         const filteredLectures = isTrainerView
             ? lectures
@@ -83,6 +26,50 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
         setLectures(filteredLectures);
     }, [lectures, isTrainerView]);
 
+    // 2. Click Outside Logic: Close all menus when clicking elsewhere
+    useEffect(() => {
+        function handleClick(e) {
+            const isOutsideLecture = !lectureMenuRefs.current.some(ref => ref && ref.contains(e.target));
+            const isOutsideQuiz = !Object.values(quizMenuRefs.current).some(ref => ref && ref.contains(e.target));
+
+            if (isOutsideLecture) setShowLectureMenuIndex(-1);
+            if (isOutsideQuiz) setShowQuizMenuId(null);
+        }
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, []);
+
+    const toggleAccordion = (i) => {
+        setOpenIndex(i === openIndex ? -1 : i);
+        setShowLectureMenuIndex(-1);
+        setShowQuizMenuId(null);
+    };
+
+    const handleMakeHiddenClick = async (lectureIndex) => {
+        const lecture = localLectures[lectureIndex];
+        const newStatus = !lecture.is_visible;
+        try {
+            const token = localStorage.getItem("authToken");
+            const res = await fetch(`/api/lectures/visibility/${lecture.lecture_id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ is_visible: newStatus }),
+            });
+
+            if (res.ok) {
+                const updatedLectures = [...localLectures];
+                updatedLectures[lectureIndex] = { ...lecture, is_visible: newStatus };
+                setLectures(updatedLectures);
+                setShowLectureMenuIndex(-1);
+            }
+        } catch (err) {
+            console.error("Update Visibility Error:", err);
+        }
+    };
+
     return (
         <div className="accordion-wrapper">
             {localLectures.length === 0 ? (
@@ -90,76 +77,39 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
             ) : (
                 localLectures.map((lec, i) => (
                     <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
-                        {/* HEADER */}
+
+                        {/* --- LECTURE HEADER --- */}
                         <div className="accordion-header">
-                            <div className="accordion-title-container" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <span className="accordion-title" onClick={() => toggleAccordion(i)} style={{ flexGrow: 1, cursor: 'pointer' }}>
+                            <div className="accordion-title-container d-flex align-items-center w-100">
+                                <span className="accordion-title flex-grow-1 cursor-pointer" onClick={() => toggleAccordion(i)}>
                                     {lec.title}
                                     {isTrainerView && (
                                         <span
-                                            className={`badge ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
-                                            style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleMakeHiddenClick(i);
-                                            }}
+                                            className={`badge ms-2 ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
+                                            onClick={(e) => { e.stopPropagation(); handleMakeHiddenClick(i); }}
                                         >
                                             {lec.is_visible ? 'Visible' : 'Hidden'}
                                         </span>
                                     )}
                                 </span>
 
-                                {/* LECTURE MENU */}
+                                {/* Trainer-Only Lecture Kebab */}
                                 {isTrainerView && (
-                                    <div ref={(el) => (lectureMenuRefs.current[i] = el)} style={{ position: "relative", marginRight: "10px", flexShrink: 0 }}>
-                                        <div
-                                            className="kebab-menu-button"
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
-                                                setShowQuizMenuIndex(-1);
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
-                                                    setShowQuizMenuIndex(-1);
-                                                }
-                                            }}
-                                            aria-label="Lecture Actions"
-                                            style={{ cursor: 'pointer', padding: '4px' }}
-                                        >
+                                    <div ref={(el) => (lectureMenuRefs.current[i] = el)} className="position-relative me-2">
+                                        <div className="kebab-menu-button cursor-pointer p-1" onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
+                                            setShowQuizMenuId(null);
+                                        }}>
                                             <MoreVertical size={18} />
                                         </div>
-
                                         {showLectureMenuIndex === i && (
-                                            <ul
-                                                className="quiz-menu"
-                                                style={{
-                                                    position: "absolute",
-                                                    top: "100%",
-                                                    right: 0,
-                                                    zIndex: 10,
-                                                    minWidth: "150px",
-                                                    backgroundColor: 'white',
-                                                    border: '1px solid #ccc',
-                                                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                                                    listStyle: 'none',
-                                                    padding: '5px 0',
-                                                    margin: '0',
-                                                    borderRadius: '4px',
-                                                }}
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <li style={{ padding: '8px 15px', cursor: 'pointer' }} onClick={() => handleEditLectureClick(lec)}>Edit Lecture</li>
-                                                <li style={{
-                                                    padding: '8px 15px',
-                                                    cursor: 'pointer',
-                                                    color: !lec.is_visible ? 'green' : 'red'
-                                                }} onClick={() => handleMakeHiddenClick(i)}>
+                                            <ul className="dropdown-menu show position-absolute end-0 shadow-sm">
+                                                <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/lectures/${lec.lecture_id}/edit`)}>
+                                                    <Edit size={14} className="me-2" /> Edit Lecture
+                                                </li>
+                                                <li className={`dropdown-item cursor-pointer ${!lec.is_visible ? 'text-success' : 'text-danger'}`} onClick={() => handleMakeHiddenClick(i)}>
+                                                    {!lec.is_visible ? <Eye size={14} className="me-2" /> : <EyeOff size={14} className="me-2" />}
                                                     {!lec.is_visible ? "Make Visible" : "Make Hidden"}
                                                 </li>
                                             </ul>
@@ -167,86 +117,82 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                     </div>
                                 )}
 
-                                <span onClick={() => toggleAccordion(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
+                                <span onClick={() => toggleAccordion(i)} className="cursor-pointer">
                                     {openIndex === i ? <ChevronUp /> : <ChevronDown />}
                                 </span>
                             </div>
                         </div>
 
-                        {/* CONTENT */}
+                        {/* --- ACCORDION CONTENT --- */}
                         {openIndex === i && (
-                            <div className="accordion-content">
-                                {lec.description && <p className="accordion-description">{lec.description}</p>}
+                            <div className="accordion-content p-3">
+                                {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
 
-                                <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h6 className="resource-heading">Resources</h6>
-                                </div>
-
-                                {lec.resources && lec.resources.length > 0 ? (
-                                    <div className="resources-container">
-                                        {lec.resources.map((res) => (
-                                            <a
-                                                key={res.resource_id}
-                                                href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
-                                                className="resource-item"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <FileText size={18} /> {res.file_url}
+                                {/* Resources Section */}
+                                <h6 className="fw-bold mb-2">Resources</h6>
+                                <div className="resources-list mb-4">
+                                    {lec.resources?.length > 0 ? (
+                                        lec.resources.map((res) => (
+                                            <a key={res.resource_id} href={`${window.location.origin}/uploads/lectures/${res.file_url}`} className="resource-item d-block mb-1 text-decoration-none" target="_blank" rel="noopener noreferrer">
+                                                <FileText size={16} className="me-2" /> {res.file_url}
                                             </a>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="no-res">No resources available yet.</p>
-                                )}
-
-                                <div className="resource-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <h6 className="resource-heading">Quizzes</h6>
+                                        ))
+                                    ) : <p className="small text-muted">No resources available.</p>}
                                 </div>
 
-                                {lec.assessments && lec.assessments.length > 0 ? (
-                                    <div className="quizzes-container">
-                                        {lec.assessments.map((quiz) => (
-                                            <button
-                                                key={quiz.assessment_id}
-                                                className="resource-item quiz-link"
-                                                onClick={() => {
-                                                    if (userRole === "Trainer") {
-                                                        navigate(
-                                                            `/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`
-                                                        );
-                                                    } else if (userRole === "Trainee") {
-                                                        navigate(`/quiz/${quiz.assessment_id}`);
-                                                    } else {
-                                                        navigate(`/quiz/${quiz.assessment_id}`);
-                                                    }
-                                                }}
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "space-between",
-                                                    alignItems: "center",
-                                                    width: "100%",
-                                                }}
-                                            >
-                                                <span>
-                                                    <FileArchive size={18} /> {quiz.title}
-                                                </span>
+                                {/* Quizzes Section */}
+                                <h6 className="fw-bold mb-2">Quizzes</h6>
+                                <div className="quizzes-container">
+                                    {lec.assessments?.length > 0 ? (
+                                        lec.assessments.map((quiz) => (
+                                            <div key={quiz.assessment_id} className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border">
 
-                                                {/* Only show badge for Trainer */}
+                                                {/* Quiz Action (Logic varies by Role) */}
+                                                <div
+                                                    className="quiz-link flex-grow-1 cursor-pointer d-flex align-items-center"
+                                                    onClick={() => {
+                                                        if (userRole === "Trainer") {
+                                                            navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`);
+                                                        } else {
+                                                            navigate(`/quiz/${quiz.assessment_id}`);
+                                                        }
+                                                    }}
+                                                >
+                                                    <FileArchive size={18} className="me-2 text-primary" />
+                                                    <span className="fw-medium">{quiz.title}</span>
+                                                    {isTrainerView && (
+                                                        <span className={`badge ms-2 ${quiz.is_published ? "bg-success" : "bg-danger"}`}>
+                                                            {quiz.is_published ? "Published" : "Hidden"}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Trainer-Only Quiz Kebab (Proctoring Access) */}
                                                 {isTrainerView && (
-                                                    <span
-                                                        className={`badge ${quiz.is_published ? "bg-success" : "bg-danger"}`}
-                                                        style={{ marginLeft: "10px" }}
-                                                    >
-                                                        {quiz.is_published ? "Published" : "Hidden"}
-                                                    </span>
+                                                    <div ref={(el) => (quizMenuRefs.current[quiz.assessment_id] = el)} className="position-relative ms-2">
+                                                        <div className="kebab-menu-button cursor-pointer p-1" onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setShowQuizMenuId(showQuizMenuId === quiz.assessment_id ? null : quiz.assessment_id);
+                                                            setShowLectureMenuIndex(-1);
+                                                        }}>
+                                                            <MoreVertical size={18} />
+                                                        </div>
+                                                        {showQuizMenuId === quiz.assessment_id && (
+                                                            <ul className="dropdown-menu show position-absolute end-0 shadow-sm" style={{ minWidth: '180px', zIndex: 1000 }}>
+                                                                <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`)}>
+                                                                    <Edit size={14} className="me-2" /> Edit Content
+                                                                </li>
+                                                                <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
+                                                                    <ShieldAlert size={14} className="me-2 text-danger" /> Proctoring Logs
+                                                                </li>
+                                                            </ul>
+                                                        )}
+                                                    </div>
                                                 )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p>There are no quiz yet.</p>
-                                )}
+                                            </div>
+                                        ))
+                                    ) : <p className="small text-muted">No quizzes available yet.</p>}
+                                </div>
                             </div>
                         )}
                     </div>

@@ -57,6 +57,8 @@ import ReviewPublish from "./trainer/ReviewPublish.jsx";
 import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
 import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
+import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
+import ProctorReview from "./trainer/ProctorReview.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -99,6 +101,7 @@ function AppContent() {
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
             <Route path="/:course_id/modules" element={<ModuleManagement />} />
@@ -111,7 +114,6 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit" element={<AddLecture />} />
 
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
-
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
 
@@ -136,7 +138,8 @@ function AppContent() {
             {/* Trainee Side Routes */}
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
-            <Route path="/quiz/instructions" element={<QuizPage />} />
+            <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
+            <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
 
           </Routes>
         </div>

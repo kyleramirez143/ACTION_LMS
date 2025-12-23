@@ -73,7 +73,7 @@ function Course() {
                                                 }}
                                             >
                                                 <img
-                                                    src={course.image ? `/uploads/images/${course.image}` : defaultImage}
+                                                    src={course.image ? `/uploads/profile/${course.image}` : defaultImage}
                                                     alt={course.title}
                                                     className="card-img-top"
                                                 />

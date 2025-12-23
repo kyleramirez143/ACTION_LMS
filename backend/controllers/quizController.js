@@ -1,5 +1,5 @@
 import pkg from '../models/index.cjs';
-const { Assessment, AssessmentQuestion } = pkg;
+const { Assessment, AssessmentQuestion, AssessmentResponse } = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
@@ -150,6 +150,25 @@ export async function deleteQuestion(req, res) {
         res.json({ success: true });
     } catch (err) {
         console.error("deleteQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function saveResponse(req, res) {
+    const { assessment_id, question_id, answer } = req.body;
+    const user_id = req.user.id;
+
+    try {
+        const response = await AssessmentResponse.create({
+            assessment_id,
+            question_id,
+            user_id,
+            answer,
+            submitted_at: new Date()
+        });
+        res.json(response);
+    } catch (err) {
+        console.error('saveResponse error:', err);
         res.status(500).json({ error: err.message });
     }
 }

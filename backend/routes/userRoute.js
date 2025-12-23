@@ -33,7 +33,7 @@ router.put("/toggle-status/:id", toggleUserStatus);
 router.get('/users', getUsers);
 
 { /* Profile Routes */ }
-router.get("/profile", protect, getProfile);
+router.get("/profile", protect, checkRole(['Admin', 'Trainer', 'Trainee']), getProfile);
 router.put("/change-password/:userId", protect, changePassword);
 
 // GET /api/users/profile/:userId

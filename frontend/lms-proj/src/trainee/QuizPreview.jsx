@@ -81,7 +81,7 @@ const QuizPreview = () => {
 
                     <button
                         className="take-quiz-btn"
-                        onClick={() => navigate(`/quiz/start/${quiz.assessment_id}`)}
+                        onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
                     >
                         Take Quiz
                     </button>
