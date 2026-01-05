@@ -156,7 +156,7 @@ function AdminCourseEditPage() {
                         image
                             ? URL.createObjectURL(image)
                             : currentImage
-                                ? `/uploads/images/${currentImage}`
+                                ? `/uploads/profile/${currentImage}`
                                 : "/images/default-course.jpg"
                     }
                     alt=""
@@ -188,50 +188,68 @@ function AdminCourseEditPage() {
 
             {/* TRAINERS */}
             <div className="mb-3">
-                <label>Trainers</label>
+                <label className="form-label fw-bold">Assign Trainer</label>
+
                 <select
-                    className="form-control"
+                    className="form-select"
                     onChange={(e) => {
                         const id = e.target.value;
+                        if (!id) return;
+
                         const trainer = trainers.find(t => t.id == id);
-                        if (trainer && !selectedTrainers.some(t => t.id == id)) {
-                            setSelectedTrainers([...selectedTrainers, trainer]);
+                        if (trainer) {
+                            // Normalize object to avoid mismatches
+                            const normalized = {
+                                id: trainer.id,
+                                first_name: trainer.first_name,
+                                last_name: trainer.last_name,
+                                email: trainer.email
+                            };
+
+                            setSelectedTrainers(prev => [...prev, normalized]);
                         }
+
                         e.target.value = "";
                     }}
                 >
-                    <option value="">Assign Trainer</option>
-                    {trainers.map(t => (
-                        <option key={t.id} value={t.id}>
-                            {t.first_name} {t.last_name}
-                        </option>
-                    ))}
+                    <option value="">Select Trainer</option>
+
+                    {/* Show only unassigned trainers */}
+                    {trainers
+                        .filter(t => !selectedTrainers.some(st => st.id === t.id))
+                        .map(t => (
+                            <option key={t.id} value={t.id}>
+                                {t.first_name} {t.last_name}
+                            </option>
+                        ))
+                    }
                 </select>
 
-                <div className="mt-2">
-                    {selectedTrainers.map((t, index) => (
-                        <span
-                            key={`${t.id}-${index}`}
-                            className="badge bg-primary p-2 me-2"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setSelectedTrainers(prev => prev.filter(x => x.id !== t.id))}
+                {/* ASSIGNED TRAINERS */}
+                <div className="mt-3 d-flex flex-wrap">
+                    {selectedTrainers.map(t => (
+                        <div
+                            key={t.id}
+                            className="badge bg-primary p-2 me-2 mb-2 d-flex align-items-center"
+                            style={{ fontSize: "0.9rem" }}
                         >
                             {t.first_name} {t.last_name}
-                        </span>
+
+                            {/* Remove button */}
+                            <button
+                                type="button"
+                                className="btn-close btn-close-white ms-2"
+                                aria-label="Remove"
+                                style={{ fontSize: "0.5rem" }}
+                                onClick={() => {
+                                    setSelectedTrainers(prev =>
+                                        prev.filter(x => x.id !== t.id)
+                                    );
+                                }}
+                            ></button>
+                        </div>
                     ))}
                 </div>
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label">Publish Status</label>
-                <select
-                    className="form-control"
-                    value={isPublished.toString()}
-                    onChange={(e) => setIsPublished(e.target.value === "true")}
-                >
-                    <option value="true">Visible</option>
-                    <option value="false">Hidden</option>
-                </select>
             </div>
 
             {/* ACTION BUTTONS */}

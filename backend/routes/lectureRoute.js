@@ -9,9 +9,10 @@ import {
     getLecturesByModule,
     getLectureById,
     updateLectureVisibility,
-    updateLecture, // <-- NEW
-    deleteResources, // <-- NEW
-    deleteLecture // <-- NEW
+    updateLecture, 
+    deleteResources, 
+    deleteLecture, 
+    getLecturesByTrainer
 } from "../controllers/lectureController.js";
 
 const router = express.Router();
@@ -40,10 +41,10 @@ router.put("/:lecture_id", protect, checkRole(["Trainer"]), updateLecture); // <
 router.delete("/:lecture_id", protect, checkRole(["Trainer"]), deleteLecture); // <-- NEW ROUTE
 
 // GET: get lectures by module
-router.get("/modules/:module_id", protect, checkRole(["Trainer"]), getLecturesByModule);
+router.get("/modules/:module_id", protect, checkRole(["Trainer", "Trainee"]), getLecturesByModule);
 
 // GET: Get a single lecture by ID (Used by LectureForm to fetch data)
-router.get("/id/:lecture_id", protect, checkRole(["Trainer"]), getLectureById);
+router.get("/id/:lecture_id", protect, checkRole(["Trainer", "Trainee"]), getLectureById);
 
 // PATCH: lecture visibility (Make Hidden/Visible)
 router.patch("/visibility/:lecture_id", protect, checkRole(["Trainer"]), updateLectureVisibility);
@@ -56,9 +57,17 @@ router.post("/resource",
     uploadLectureFile);
 
 // DELETE: Delete specific resources (Used by LectureForm existing file deletion)
-router.delete("/resource/delete", 
-    protect, 
-    checkRole(["Trainer"]), 
+router.delete("/resource/delete",
+    protect,
+    checkRole(["Trainer"]),
     deleteResources); // <-- NEW ROUTE
+
+router.get(
+    "/trainer",
+    protect,
+    checkRole(["Trainer", "Trainee"]),
+    getLecturesByTrainer
+);
+
 
 export default router;

@@ -1,82 +1,241 @@
-// backend/controllers/quizController.js (FIXED)
+import pkg from '../models/index.cjs';
+const { Assessment, AssessmentQuestion, AssessmentResponse } = pkg;
 
-import pool from "../db.js";
-// Middleware imports are not needed here, they belong in the routes file.
-// import { protect, checkRole } from '../middleware/authMiddleware.js'; 
+// Fetch quiz + questions
+export async function getQuiz(req, res) {
+    const { assessment_id } = req.params;
+    const userRole = req.user?.roles?.[0];
 
-/**
- * Save a quiz into DB.
- * Expects body: { title: "Title", source: "uploaded-pdf", questions: [...] }
- */
-export async function createQuiz(req, res) {
-    const client = await pool.connect();
     try {
-        const { title = "AI Generated Quiz", source = "ai", questions } = req.body;
-        // NOTE: You can check req.user here if you want to store the creator's ID
+        const assessment = await Assessment.findOne({
+            where: { assessment_id },
+            include: [
+                {
+                    model: AssessmentQuestion,
+                    as: "questions",
+                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "section"]
+                }
+            ]
+        });
 
-        if (!Array.isArray(questions)) return res.status(400).json({ error: "questions must be an array" });
-
-        await client.query("BEGIN");
-
-        const quizInsert = await client.query(
-            "INSERT INTO quizzes (title, source) VALUES ($1, $2) RETURNING id, title, created_at",
-            [title, source]
-        );
-        const quizId = quizInsert.rows[0].id;
-
-        // ... (rest of the question/option insertion logic is fine) ...
-        for (const q of questions) {
-            const insertQ = await client.query(
-                "INSERT INTO questions (quiz_id, question_text, correct_answer) VALUES ($1, $2, $3) RETURNING id",
-                [quizId, q.question, q.correct_answer]
-            );
-            const questionId = insertQ.rows[0].id;
-
-            for (const [letter, text] of Object.entries(q.options)) {
-                await client.query(
-                    "INSERT INTO options (question_id, letter, option_text) VALUES ($1, $2, $3)",
-                    [questionId, letter, text]
-                );
-            }
+        if (!assessment) return res.status(404).json({ error: "Quiz not found" });
+        if (userRole === "Trainee" && !assessment.is_published) {
+            return res.status(403).json({ error: "Quiz not available for trainees." });
         }
-        // ... (end of insertion logic) ...
 
-        await client.query("COMMIT");
-        res.json({ success: true, quiz: { id: quizId, title: quizInsert.rows[0].title } });
+        const questions = assessment.questions.map(q => ({
+            question_id: q.question_id,
+            question_text: q.question_text,
+            options: q.options || {},
+            correct_answer: q.correct_answer || "",
+            explanation: q.explanations || "",
+            section: q.section || "General"
+        }));
+
+        res.json({
+            quiz: {
+                assessment_id: assessment.assessment_id,
+                title: assessment.title,
+                description: assessment.description,
+                attempts: assessment.attempts,
+                time_limit: assessment.time_limit,
+                passing_score: assessment.passing_score,
+                screen_monitoring: assessment.screen_monitoring,
+                randomize_questions: assessment.randomize_questions,
+                show_score: assessment.show_score,
+                show_explanations: assessment.show_explanations,
+                is_published: assessment.is_published,
+            },
+            questions
+        });
     } catch (err) {
-        await client.query("ROLLBACK");
-        console.error("createQuiz error:", err);
+        console.error("getQuiz error:", err);
         res.status(500).json({ error: err.message });
-    } finally {
-        client.release();
     }
 }
 
-/**
- * Fetch quiz with questions/options (for trainee).
- * IMPORTANT: Removed 'q.correct_answer' to prevent cheating.
- */
-export async function getQuiz(req, res) {
-    const quizId = req.params.id;
+// Save quiz config
+export async function saveQuizConfig(req, res) {
+    const { assessment_id } = req.params;
+    const {
+        title,
+        attempts,
+        timeLimit,
+        passingScore,
+        description,
+        screenMonitoring,
+        randomization,
+        scoreVisibility,
+        includeExplanationIfWrong,
+        isPublished
+    } = req.body;
+
     try {
-        const quizRes = await pool.query("SELECT id, title, source, created_at FROM quizzes WHERE id = $1", [quizId]);
-        if (quizRes.rowCount === 0) return res.status(404).json({ error: "Quiz not found" });
+        const assessment = await Assessment.findByPk(assessment_id);
+        if (!assessment) return res.status(404).json({ error: "Assessment not found" });
 
-        const questionsRes = await pool.query(
-            // **FIXED:** Removed q.correct_answer from the SELECT list
-            `SELECT q.id as question_id, q.question_text,
-            json_agg(json_build_object('id', o.id, 'letter', o.letter, 'option_text', o.option_text) ORDER BY o.letter) AS options
-               FROM questions q
-               LEFT JOIN options o ON o.question_id = q.id
-               WHERE q.quiz_id = $1
-               GROUP BY q.id
-               ORDER BY q.id`,
-            [quizId]
-        );
+        await assessment.update({
+            title: title || assessment.title,
+            attempts: attempts ?? assessment.attempts,
+            time_limit: timeLimit ?? assessment.time_limit,
+            passing_score: passingScore ?? assessment.passing_score,
+            screen_monitoring: screenMonitoring ?? assessment.screen_monitoring,
+            randomize_questions: randomization ?? assessment.randomize_questions,
+            show_score: scoreVisibility ?? assessment.show_score,
+            show_explanations: includeExplanationIfWrong ?? assessment.show_explanations,
+            description: description || assessment.description,
+            is_published: isPublished ?? assessment.is_published,
+        });
 
-        res.json({ quiz: quizRes.rows[0], questions: questionsRes.rows });
+        res.json({ success: true, message: "Quiz configuration saved successfully!" });
     } catch (err) {
-        console.error("getQuiz error:", err);
+        console.error("saveQuizConfig error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Add a new question
+export async function addQuestion(req, res) {
+    const { assessment_id, question_text, options, correct_answer, explanations, section } = req.body;
+
+    try {
+        const question = await AssessmentQuestion.create({
+            assessment_id,
+            question_text,
+            options,
+            correct_answer: correct_answer?.toLowerCase() || "",
+            explanations,
+            section: section || "General"
+        });
+        res.json(question);
+    } catch (err) {
+        console.error("addQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Update a question
+export async function updateQuestion(req, res) {
+    const { question_id } = req.params;
+    const { question_text, options, correct_answer, explanations, section } = req.body;
+
+    try {
+        const question = await AssessmentQuestion.findByPk(question_id);
+        if (!question) return res.status(404).json({ error: "Question not found" });
+
+        await question.update({
+            question_text,
+            options,
+            correct_answer: correct_answer?.toLowerCase() || "",
+            explanations,
+            section: section || "General"
+        });
+
+        res.json({ success: true, message: "Question updated successfully!" });
+    } catch (err) {
+        console.error("updateQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// Delete a question
+export async function deleteQuestion(req, res) {
+    const { question_id } = req.params;
+
+    try {
+        const question = await AssessmentQuestion.findByPk(question_id);
+        if (!question) return res.status(404).json({ error: "Question not found" });
+
+        await question.destroy();
+        res.json({ success: true });
+    } catch (err) {
+        console.error("deleteQuestion error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function saveResponse(req, res) {
+    const { assessment_id, question_id, answer } = req.body;
+    const user_id = req.user.id;
+
+    try {
+        const response = await AssessmentResponse.create({
+            assessment_id,
+            question_id,
+            user_id,
+            answer,
+            submitted_at: new Date()
+        });
+        res.json(response);
+    } catch (err) {
+        console.error('saveResponse error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+export async function getTraineeResults(req, res) {
+    const user_id = req.user.id;
+
+    try {
+        const responses = await AssessmentResponse.findAll({
+            where: { user_id },
+            include: [
+                {
+                    model: Assessment,
+                    as: 'assessment',
+                    attributes: ['assessment_id', 'title', 'passing_score']
+                },
+                {
+                    model: AssessmentQuestion,
+                    as: 'question',
+                    attributes: ['correct_answer']
+                }
+            ],
+            order: [['submitted_at', 'DESC']]
+        });
+
+        // Group by assessment
+        const grouped = {};
+
+        for (const r of responses) {
+            const aid = r.assessment.assessment_id;
+
+            if (!grouped[aid]) {
+                grouped[aid] = {
+                    assessment_id: aid,
+                    title: r.assessment.title,
+                    correct: 0,
+                    total: 0,
+                    submitted_at: r.submitted_at,
+                    passing_score: r.assessment.passing_score
+                };
+            }
+
+            grouped[aid].total += 1;
+            if (r.answer === r.question.correct_answer) {
+                grouped[aid].correct += 1;
+            }
+        }
+
+        const results = Object.values(grouped).map(r => {
+            const scorePercent = Math.round((r.correct / r.total) * 100);
+            const passed = scorePercent >= r.passing_score;
+
+            return {
+                assessment_id: r.assessment_id,
+                title: r.title,
+                score: `${r.correct} / ${r.total}`,
+                status: passed ? 'Passed' : 'Failed',
+                feedback: passed
+                    ? 'Good work! You passed the assessment.'
+                    : 'Review the materials and try again.',
+                date: r.submitted_at
+            };
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error('getTraineeResults error:', err);
         res.status(500).json({ error: err.message });
     }
 }

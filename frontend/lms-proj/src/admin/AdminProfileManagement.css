@@ -89,6 +89,11 @@ button {
     text-align: center;
 }
 
+.image-square-img {
+    width: 150px;
+    height: 150px;
+}
+
 .image-square {
     width: 150px;
     height: 150px;

@@ -20,6 +20,24 @@ export const navLinks = [
     requiredRoles: ['Admin'],
   },
   {
+    name: 'Curriculum',
+    requiredRoles: ['Admin'],
+    children: [
+      {
+        name: 'View Batch Table',
+        path: '/admin/batch-management',
+      },
+      {
+        name: 'View Module Table',
+        path: '/admin/module-management',
+      },
+      {
+        name: 'Action Calendar',
+        path: '/admin/calendar',
+      },
+    ],
+  },
+  {
     name: 'Dashboard',
     path: '/trainer/dashboard',
     requiredRoles: ['Trainer'],
@@ -41,7 +59,7 @@ export const navLinks = [
   },
   {
     name: 'My Courses',
-    path: '/student/dashboard',
+    path: '/trainee/courses',
     // icon: 'SchoolIcon',
     requiredRoles: ['Trainee'], // Only Students
   },

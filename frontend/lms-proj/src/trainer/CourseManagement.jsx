@@ -57,7 +57,7 @@ function Course() {
                             {courses.map((course) => (
                                 <div
                                     key={course.course_id}
-                                    onClick={() => navigate(`/trainer/${course.course_id}/modules`)}
+                                    onClick={() => navigate(`/${course.course_id}/modules`)}
                                     style={{ cursor: "pointer" }}
                                 >
                                     <div
@@ -73,7 +73,7 @@ function Course() {
                                                 }}
                                             >
                                                 <img
-                                                    src={course.image ? `/uploads/images/${course.image}` : defaultImage}
+                                                    src={course.image ? `/uploads/profile/${course.image}` : defaultImage}
                                                     alt={course.title}
                                                     className="card-img-top"
                                                 />
