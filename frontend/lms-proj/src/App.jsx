@@ -38,6 +38,10 @@ import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
 import BatchesTable from "./admin/BatchesTable.jsx";
+import ModuleTable from "./admin/ModuleTable.jsx";
+import SetPeriodModule from "./admin/SetPeriodModule.jsx";
+import CalendarView from "./admin/CalendarView.jsx";
+import NewSchedule from "./admin/NewSchedule.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
@@ -52,6 +56,8 @@ import AddModule from "./trainer/AddModule.jsx";
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
+import AddBatch from "./admin/AddBatch.jsx";
+
 
 function AppContent() {
   const location = useLocation();
@@ -113,7 +119,13 @@ function AppContent() {
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
-            <Route path="admin/batch-management" element={<BatchesTable/>} />
+            <Route path="/admin/batch-management" element={<BatchesTable/>} />
+            <Route path="/admin/add-batch" element={<AddBatch/>} />
+            <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
+            <Route path="/admin/module-management" element={<ModuleTable/>} />
+            <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
+            <Route path="/admin/calendar" element={<CalendarView/>} />
+            <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />

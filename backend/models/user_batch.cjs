@@ -3,12 +3,12 @@ module.exports = (sequelize, DataTypes) => {
         user_id: {
             type: DataTypes.UUID,
             allowNull: false,
-            primaryKey: true
+            references: { model: 'users', key: 'id' }
         },
         batch_id: {
             type: DataTypes.UUID,
             allowNull: false,
-            primaryKey: true
+            references: { model: 'batches', key: 'batch_id' }
         },
         assigned_at: {
             type: DataTypes.DATE,
