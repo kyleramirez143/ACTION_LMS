@@ -715,18 +715,18 @@ export const importUsers = async (req, res) => {
                         if (!roleRec) throw new Error("Role not found");
                         await db.UserRole.create({ user_id: user.id, role_id: roleRec.id }, { transaction: t });
 
-                        let batchRec;
                         let batchNameInput = batch ? batch.trim() : "";
-
+                        console.log("BATCH NAME FETCHED: ", batchNameInput);
                         if (role === "Trainee") {
                             if (!batchNameInput) throw new Error("Batch name is required for Trainees");
-                            
-                            const batchRec = await db.Batch.findOne({ 
-                                where: { 
+
+                            const batchRec = await db.Batch.findOne({
+                                where: {
                                     name: batch.trim(),
                                     location: location ? location.trim() : ""
-                                }, 
-                                transaction: t });
+                                },
+                                transaction: t
+                            });
 
                             if (!batchRec) throw new Error(`Batch '${batch}' in '${location}' not found`);
 
@@ -736,19 +736,13 @@ export const importUsers = async (req, res) => {
                             }, { transaction: t });
                         }
 
-                        if (!batchRec) throw new Error(`Batch '${batch}' not found`);
-
-                        await db.UserBatch.create({
-                            user_id: user.id,
-                            batch_id: batchRec.batch_id || batchRec.id
-                        }, { transaction: t });
-
                         const hash = await bcrypt.hash("actionb40123", 10);
                         await db.Password.create({ user_id: user.id, password: hash, is_current: true }, { transaction: t });
 
                         addedUsers.push({ email });
                     });
                 } catch (err) {
+                    console.log(err);
                     errors.push({ email: email || "Unknown", error: err.message });
                 }
             }
