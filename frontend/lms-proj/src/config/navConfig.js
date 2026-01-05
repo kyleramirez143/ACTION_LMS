@@ -28,8 +28,12 @@ export const navLinks = [
         path: '/admin/batch-management',
       },
       {
-        name: 'Action Calendaer',
-        path: '/admin/curriculum/modules',
+        name: 'View Module Table',
+        path: '/admin/module-management',
+      },
+      {
+        name: 'Action Calendar',
+        path: '/admin/calendar',
       },
     ],
   },

@@ -44,15 +44,19 @@ function AddUser() {
                 });
                 if (!res.ok) throw new Error("Failed to fetch batches");
                 const data = await res.json();
-                setBatches(data);
+                setBatches(Array.isArray(data.batches) ? data.batches : []);
             } catch (err) {
                 console.error("Batch fetch error:", err);
+                setBatches([]);
             }
         };
 
         if (formData.role === "Trainee") {
             fetchBatches();
-        }
+        } else {
+            setBatches([]);
+            setFormData(prev => ({ ...prev, batch: "" }));
+        } 
     }, [formData.role, token]);
 
     // --- FETCH USER DATA (EDIT MODE ONLY) ---
@@ -258,7 +262,7 @@ function AddUser() {
                                     <option value="">Select Batch</option>
                                     {batches.map((b) => (
                                         <option key={b.batch_id} value={b.batch_id}>
-                                            {b.name}
+                                            {b.name} {b.location}
                                         </option>
                                     ))}
                                 </select>

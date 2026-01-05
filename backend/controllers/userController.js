@@ -29,77 +29,74 @@ export const getTrainers = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 8; // 8 items per page
+        const limit = 8;
         const offset = (page - 1) * limit;
 
         const search = req.query.search ? req.query.search.toLowerCase() : "";
         const roleFilter = req.query.role;
 
         const { Sequelize } = db;
-
-        // Build where condition for User
         const whereUser = {};
+
         if (search) {
             whereUser[Sequelize.Op.or] = [
-                Sequelize.where(
-                    Sequelize.fn("LOWER", Sequelize.col("first_name")),
-                    "LIKE",
-                    `%${search}%`
-                ),
-                Sequelize.where(
-                    Sequelize.fn("LOWER", Sequelize.col("last_name")),
-                    "LIKE",
-                    `%${search}%`
-                ),
-                Sequelize.where(
-                    Sequelize.fn("LOWER", Sequelize.col("email")),
-                    "LIKE",
-                    `%${search}%`
-                ),
+                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.first_name")), "LIKE", `%${search}%`),
+                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.last_name")), "LIKE", `%${search}%`),
+                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.email")), "LIKE", `%${search}%`),
             ];
         }
 
-        // Include roles with optional filter
         const includeRoles = {
             model: db.Role,
             as: "roles",
             attributes: ["name"],
             through: { attributes: [] },
-            required: roleFilter && roleFilter !== "All", // Only filter when a specific role is selected
+            required: roleFilter && roleFilter !== "All",
         };
 
-        const includeBatch = {
-            model: db.Batch,
-            as: "batches",
-            attributes: ["name"],
-            through: { attributes: [] },
-        }
-
-        // Apply `where` only if filtering
         if (roleFilter && roleFilter !== "All") {
             includeRoles.where = { name: roleFilter };
         }
 
-        // Fetch users with pagination, search, and role filter
+        const includeBatch = {
+            model: db.Batch,
+            as: "batches",
+            attributes: ["batch_id", "name", "location"], // Matches your CREATE TABLE 'name' column
+            through: { attributes: [] },
+        };
+
         const { count, rows } = await db.User.findAndCountAll({
             where: whereUser,
             include: [includeRoles, includeBatch],
             limit,
             offset,
-            order: [["created_at", "ASC"]], // Oldest first
+            distinct: true,
+            order: [["created_at", "ASC"]],
         });
 
         const totalPages = Math.ceil(count / limit);
 
-        // Format the users for frontend
-        const formatted = rows.map(u => ({
-            id: u.id,
-            name: `${u.first_name} ${u.last_name}`,
-            email: u.email,
-            level: u.roles.length ? u.roles[0].name : "No Role",
-            batch: u.batches && u.batches.length > 0 ? u.batches[0].name : "No Batch Assigned",
-            status: u.is_active ? "Active" : "Inactive",
-        }));
+        const formatted = rows.map(u => {
+            const roleName = u.roles.length ? u.roles[0].name : "No Role";
+
+            let displayBatch = "Not Applicable";
+            let batchLocation = null;
+
+            if (roleName === "Trainee" && u.batches && u.batches.length > 0) {
+                displayBatch = u.batches[0].name;
+                batchLocation = u.batches[0].location; // ✅ Include location
+            }
+
+            return {
+                id: u.id,
+                name: `${u.first_name} ${u.last_name}`,
+                email: u.email,
+                level: roleName,
+                batch: displayBatch,
+                location: batchLocation,
+                status: u.is_active ? "Active" : "Inactive",
+            };
+        });
 
         res.json({
             users: formatted,
@@ -109,7 +106,7 @@ export const getAllUsers = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("Database Error:", err);
         res.status(500).json({ error: "Failed to fetch users" });
     }
 };
@@ -131,7 +128,8 @@ export const addUser = async (req, res) => {
             );
 
             // 2️⃣ Assign role
-            const roleRecord = await db.Role.findOne({ where: { name: role } });
+            const roleRecord = await db.Role.findOne({ 
+                where: { name: role } });
             if (!roleRecord) throw new Error("Invalid role");
 
             await db.UserRole.create(
@@ -139,25 +137,22 @@ export const addUser = async (req, res) => {
                 { transaction: t }
             );
 
-            // 3️⃣ Assign batch
-            let batchRecord;
+            // 3️⃣ Conditional Batch logic
+            let batchName = "Not Applicable"; // Default for the response
 
             if (role === "Trainee") {
                 if (!batch) throw new Error("Batch is required for Trainee");
-                batchRecord = await db.Batch.findByPk(batch, { transaction: t });
-                if (!batchRecord) throw new Error("Invalid batch selected");
-            } else {
-                // Admin / Trainer -> Not Applicable batch
-                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t });
-                if (!batchRecord) {
-                    batchRecord = await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
-                }
-            }
 
-            await db.UserBatch.create(
-                { user_id: user.id, batch_id: batchRecord.batch_id },
-                { transaction: t }
-            );
+                const batchRecord = await db.Batch.findByPk(batch, { transaction: t });
+                if (!batchRecord) throw new Error("Invalid batch selected");
+
+                await db.UserBatch.create(
+                    { user_id: user.id, batch_id: batchRecord.batch_id },
+                    { transaction: t }
+                );
+
+                batchName = batchRecord.name; // Update for the response
+            }
 
             // 4️⃣ Default password
             const defaultPass = "actionb40123";
@@ -177,7 +172,7 @@ export const addUser = async (req, res) => {
                     last_name: user.last_name,
                     email: user.email,
                     role: roleRecord.name,
-                    batch: batchRecord.name
+                    batch: batchName
                 },
                 defaultPassword: defaultPass
             });
@@ -199,31 +194,35 @@ export const updateUser = async (req, res) => {
             const user = await db.User.findByPk(userId, { transaction: t });
             if (!user) throw new Error("User not found");
 
+            // 1. Update basic info
             await user.update({ first_name, last_name, email, is_active }, { transaction: t });
+            
+            // 2. Sync Role
             await syncUserRole(userId, role, t);
 
-            // Important: Remove old batch link before creating new one
+            // 3. Clear existing batch link (Cleanup)
             await db.UserBatch.destroy({ where: { user_id: userId }, transaction: t });
 
-            let batchRecord;
+            // 4. Assign new batch ONLY if the role is Trainee
             if (role === "Trainee") {
-                batchRecord = await db.Batch.findByPk(batch, { transaction: t });
-                if (!batchRecord) throw new Error("Batch not found");
-            } else {
-                batchRecord = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t }) ||
-                    await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
-            }
+                if (!batch) throw new Error("Batch is required for Trainee");
 
-            // Standardized to batch_id as per your error logs
-            await db.UserBatch.create({
-                user_id: userId,
-                batch_id: batchRecord.batch_id || batchRecord.id
-            }, { transaction: t });
+                const batchRecord = await db.Batch.findByPk(batch, { transaction: t });
+                if (!batchRecord) throw new Error("Batch not found");
+
+                await db.UserBatch.create({
+                    user_id: userId,
+                    batch_id: batchRecord.batch_id // Standardized to your schema
+                }, { transaction: t });
+            }
+            
+            // ❌ REMOVED: The duplicate create call that was outside the IF block.
+            // This was causing the "batchRecord is not defined" error for Admins/Trainers.
         });
 
         res.json({ message: "User updated successfully." });
     } catch (err) {
-        console.error(err);
+        console.error("updateUser error:", err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -697,11 +696,11 @@ export const importUsers = async (req, res) => {
     const rows = [];
 
     fs.createReadStream(req.file.path)
-        .pipe(csvParser({ headers: ["first_name", "last_name", "email", "role", "batch"], skipLines: 1 }))
+        .pipe(csvParser({ headers: ["first_name", "last_name", "email", "role", "batch", "location"], skipLines: 1 }))
         .on("data", (row) => rows.push(row))
         .on("end", async () => {
             for (const row of rows) {
-                const { first_name, last_name, email, role, batch } = row;
+                const { first_name, last_name, email, role, batch, location } = row;
                 try {
                     await db.sequelize.transaction(async (t) => {
                         const [user, created] = await db.User.findOrCreate({
@@ -721,15 +720,20 @@ export const importUsers = async (req, res) => {
 
                         if (role === "Trainee") {
                             if (!batchNameInput) throw new Error("Batch name is required for Trainees");
-                            batchRec = await db.Batch.findOne({ where: { name: batch }, transaction: t });
-                        } else {
-                            // Force "Not Applicable" for Admin and Trainer
-                            batchRec = await db.Batch.findOne({ where: { name: "Not Applicable" }, transaction: t });
+                            
+                            const batchRec = await db.Batch.findOne({ 
+                                where: { 
+                                    name: batch.trim(),
+                                    location: location ? location.trim() : ""
+                                }, 
+                                transaction: t });
 
-                            // Safety check: Create "Not Applicable" if it doesn't exist yet
-                            if (!batchRec) {
-                                batchRec = await db.Batch.create({ name: "Not Applicable" }, { transaction: t });
-                            }
+                            if (!batchRec) throw new Error(`Batch '${batch}' in '${location}' not found`);
+
+                            await db.UserBatch.create({
+                                user_id: user.id,
+                                batch_id: batchRec.batch_id
+                            }, { transaction: t });
                         }
 
                         if (!batchRec) throw new Error(`Batch '${batch}' not found`);
@@ -741,7 +745,7 @@ export const importUsers = async (req, res) => {
 
                         const hash = await bcrypt.hash("actionb40123", 10);
                         await db.Password.create({ user_id: user.id, password: hash, is_current: true }, { transaction: t });
-                        
+
                         addedUsers.push({ email });
                     });
                 } catch (err) {
@@ -756,7 +760,7 @@ export const importUsers = async (req, res) => {
 // ===== DOWNLOAD TEMPLATE (FIXED EXCEL COMPATIBILITY) =====
 export const downloadTemplate = (req, res) => {
     try {
-        const fields = ["first_name", "last_name", "email", "role", "batch"];
+        const fields = ["first_name", "last_name", "email", "role", "batch", "location"];
         const opts = { fields, header: true };
         const parser = new Parser(opts);
 
@@ -769,7 +773,7 @@ export const downloadTemplate = (req, res) => {
 
         // 2. Send the CSV
         return res.status(200).send(csv);
-        
+
     } catch (err) {
         console.error("Template Generation Error:", err);
         return res.status(500).json({ error: "Failed to generate CSV template" });
