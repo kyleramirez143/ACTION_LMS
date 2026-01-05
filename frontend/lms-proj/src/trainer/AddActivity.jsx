@@ -1,13 +1,48 @@
 import React from "react";
-import "./AddPowerpoint.css";
+import "./AddResource.css";
 
-function AddActivity() {
+function AddActivity({ courseId, module }) {
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const file = document.getElementById("uploadFile").files[0];
+        const title = document.getElementById("fileTitle").value;
+        const description = document.getElementById("fileDescription").value;
+
+        if (!file) return alert("Please upload a file");
+        if (!courseId || !module?.module_id) return alert("Course or Module not selected");
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("module_id", module.module_id);
+        formData.append("course_id", courseId);
+        formData.append("content_type", "activity");
+
+        const token = localStorage.getItem("token");
+
+        try {
+            const res = await fetch("/api/lectures", {
+                method: "POST",
+                headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (res.ok) alert("Activity added successfully!");
+            else alert(data.error || "Failed to upload");
+        } catch (err) {
+            console.error(err);
+            alert("Error adding activity");
+        }
+    }
+
+
     return (
         <div style={styles.page}>
             <div style={styles.card}>
                 <h3 style={styles.title}>Add Activity</h3>
-                <form>
-                    {/* Upload File */}
+                <form onSubmit={handleSubmit}>
                     <div className="mb-3 row">
                         <label htmlFor="uploadFile" className="col-12 col-sm-2 col-form-label">Upload File</label>
                         <div className="col-12 col-sm-8">
@@ -35,7 +70,7 @@ function AddActivity() {
                     <div className="mb-3 row">
                         <label htmlFor="deadline" className="col-12 col-sm-2 col-form-label">Set Deadline</label>
                         <div className="col-12 col-sm-8">
-                            <input type="datetime-local" className="form-control" id="deadline"/>
+                            <input type="datetime-local" className="form-control" id="deadline" />
                         </div>
                     </div>
 
@@ -75,7 +110,7 @@ function AddActivity() {
                 <div className="mb-3 row">
                     <div className="col-12 col-sm-9">
                         <button type="submit" className="btn btn-primary rounded-pill me-2" style={styles.btn}>
-                            Add Powerpoint
+                            Add Activity
                         </button>
                         <button type="button" className="btn btn-outline-primary rounded-pill me-2" style={styles.btn}>
                             Cancel

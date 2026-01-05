@@ -1,0 +1,151 @@
+/* General button styling */
+.btn {
+    min-width: 130px;
+    padding: 10px 16px;
+    font-weight: 500;
+    border-radius: 50px;
+    /* rounded-pill effect */
+}
+
+/* Filled button (Add Course) */
+.btn-primary {
+    background-color: #0047AB !important;
+    border-color: #0047AB !important;
+    color: #ffffff !important;
+}
+
+/* Outline button (Cancel) */
+.btn-outline-primary {
+    background-color: #ffffff !important;
+    color: #0047AB !important;
+    border: 1px solid #0047AB !important;
+}
+
+/* Hover states */
+.btn-primary:hover {
+    background-color: #003b94 !important;
+    border-color: #003b94 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0047AB !important;
+    color: #ffffff !important;
+}
+
+/* Target all form controls inside your form */
+.form-control {
+    border: 1px solid #5B5B5B !important;
+    /* custom outline color */
+    box-shadow: none !important;
+    /* remove Bootstrap glow */
+}
+
+/* Optional: change focus state */
+.form-control:focus {
+    border-color: #5B5B5B !important;
+    box-shadow: 0 0 0 0.2rem rgba(91, 91, 91, 0.25) !important;
+}
+
+.form-check-input {
+    border-color: #0047AB !important;
+}
+
+body,
+.form-control,
+.col-form-label,
+legend,
+h3,
+button {
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 600 !important;
+    /* bold */
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 20px;
+    }
+
+    .btn {
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+}
+
+.profile-image-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    /* border: 1px solid #ccc;
+    border-radius: 8px; */
+    padding: 16px;
+    width: 200px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.image-square-img {
+    width: 150px;
+    height: 150px;
+}
+
+.image-square {
+    width: 150px;
+    height: 150px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.image-placeholder {
+    font-size: 100px;
+}
+
+.upload-link {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #0047AB;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    /* align-items: center; */
+    /* justify-content: center; */
+    /* z-index: 1000; */
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-family: 'Poppins', sans-serif;
+    /* text-align: left; */
+}
+
+.modal-content {
+    transform: scale(1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.modal-overlay:active .modal-content {
+    transform: scale(1.02);
+}

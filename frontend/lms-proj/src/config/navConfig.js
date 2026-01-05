@@ -20,13 +20,31 @@ export const navLinks = [
     requiredRoles: ['Admin'],
   },
   {
+    name: 'Curriculum',
+    requiredRoles: ['Admin'],
+    children: [
+      {
+        name: 'View Batch Table',
+        path: '/admin/batch-management',
+      },
+      {
+        name: 'View Module Table',
+        path: '/admin/module-management',
+      },
+      {
+        name: 'Action Calendar',
+        path: '/admin/calendar',
+      },
+    ],
+  },
+  {
     name: 'Dashboard',
     path: '/trainer/dashboard',
     requiredRoles: ['Trainer'],
   },
   {
-    name: 'Lecture Management',
-    path: '/trainer/lecture-management',
+    name: 'Courses',
+    path: '/trainer/course-management',
     requiredRoles: ['Trainer'],
   },
   {
@@ -35,10 +53,20 @@ export const navLinks = [
     requiredRoles: ['Trainer'],
   },
   {
+    name: 'Dashboard',
+    path: '/trainee/dashboard',
+    requiredRoles: ['Trainee'],
+  },
+  {
     name: 'My Courses',
-    path: '/student/dashboard',
+    path: '/trainee/courses',
     // icon: 'SchoolIcon',
     requiredRoles: ['Trainee'], // Only Students
+  },
+  {
+    name: 'Assessment',
+    path: '/trainee/assessment',
+    requiredRoles: ['Trainee'],
   },
   // {
   //   name: 'Profile',

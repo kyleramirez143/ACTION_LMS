@@ -14,9 +14,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         description: DataTypes.TEXT,
+        image: DataTypes.STRING(255),
         created_by: {
             type: DataTypes.UUID,
             allowNull: false,
+        },
+        is_visible: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
         },
         created_at: {
             type: DataTypes.DATE,

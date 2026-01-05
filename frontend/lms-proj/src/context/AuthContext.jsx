@@ -1,72 +1,78 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { jwtDecode } from 'jwt-decode';
+// src/context/AuthContext.jsx
+import React, { createContext, useState, useEffect, useCallback } from "react";
+import {jwtDecode } from "jwt-decode";
 
-export const AuthContext = createContext({
-    isAuthenticated: false,
-    user: null,
-    userRoles: [],
-    login: () => {}, 
-    logout: () => {},
-    setIsAuthenticated: () => {} 
-});
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
     const [userRoles, setUserRoles] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem('authToken');
+    // Logout function: clears auth but keeps userProfile for UI
+    const logout = useCallback(() => {
+        localStorage.removeItem("authToken");
         setIsAuthenticated(false);
-        setUser(null);
         setUserRoles([]);
+        // ✅ Keep userProfile for Navbar display
     }, []);
 
-    const handleLogin = useCallback((token) => {
-        localStorage.setItem('authToken', token);
-        const decoded = jwtDecode(token);
-        setIsAuthenticated(true);
-        setUser({ id: decoded.id, email: decoded.email });
-        setUserRoles(decoded.roles || []);
-    }, []);
-    
-    useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                
-                if (decoded.exp * 1000 > Date.now()) {
-                    setIsAuthenticated(true);
-                    setUser({ id: decoded.id, email: decoded.email });
-                    setUserRoles(decoded.roles || []);
-                } else {
-                    handleLogout(); 
-                }
-            } catch (error) {
-                console.error("Invalid token found in storage:", error);
-                handleLogout(); 
-            }
+    const fetchProfile = useCallback(async (token) => {
+        try {
+            const res = await fetch("http://localhost:5000/api/users/profile", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch profile");
+            const data = await res.json();
+            setUserProfile(data); // store profile for Navbar
+            setUserRoles([data.role]);
+            setIsAuthenticated(true);
+        } catch (err) {
+            console.error(err);
+            logout();
         }
-        setLoading(false); 
-    }, [handleLogout]);
+    }, [logout]);
 
-    const contextValue = {
-        isAuthenticated,
-        user,
-        userRoles,
-        login: handleLogin, 
-        logout: handleLogout,
-        setIsAuthenticated,
+    useEffect(() => {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+        try {
+            const decoded = jwtDecode(token);
+            if (decoded.exp * 1000 < Date.now()) {
+                logout();
+            } else {
+                fetchProfile(token);
+            }
+        } catch (err) {
+            console.error("Invalid token:", err);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchProfile, logout]);
+
+    const login = async (token) => {
+        localStorage.setItem("authToken", token);
+        await fetchProfile(token);
     };
-    
-    if (loading) {
-        return <div>Loading authentication state...</div>; 
-    }
 
     return (
-        <AuthContext.Provider value={contextValue}>
+        <AuthContext.Provider
+            value={{
+                isAuthenticated,
+                userProfile,
+                setUserProfile,
+                userRoles,
+                setUserRoles,
+                login,
+                logout,
+                loading,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
