@@ -47,27 +47,52 @@ const QuizPreview = () => {
     return (
         <div className="quiz-preview-page">
             {/* Header */}
-            <div className="quiz-preview-header">
-                <FaArrowLeft
-                    className="back-icon"
-                    onClick={() => navigate(-1)}
-                />
-                <h2>{quiz.title}</h2>
-            </div>
+            <div className="card shadow-sm p-4">
+                <div className="quiz-preview-header d-flex align-items-center mb-4">
+                    <FaArrowLeft
+                        className="back-icon me-3"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate(-1)}
+                    />
+                    <h2 className="mb-0">{quiz.title}</h2>
+                </div>
 
-            {/* Card */}
-            <div className="quiz-preview-card">
-                {/* Left Section */}
-                <div className="quiz-preview-left">
-                    {/* <h3>Instructions</h3>
-                    {quiz.description ? (
-                        quiz.description.split("\n").map((line, idx) => (
-                            <p key={idx}>{line}</p>
-                        ))
-                    ) : (
-                        <p>No instructions provided.</p>
-                    )} */}
+                <hr />
 
+                {/* Quiz details */}
+                <div className="quiz-details mb-2">
+                    <div className="row">
+                        <div className="col-6">
+                            <strong>Due Date:</strong>
+                            <p className="text-danger">{quiz.due_date ? new Date(quiz.due_date).toLocaleString() : "No due date set"}</p>
+                        </div>
+                        <div className="col-6">
+                            <strong>Points:</strong>
+                            <p className="text-danger">{quiz.totalPoints || "Not specified"}</p>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-6">
+                            <strong>Questions:</strong>
+                            <p className="text-danger">{(quiz.questions || []).length} Questions</p>
+                        </div>
+                        <div className="col-6">
+                            <strong>Time Limit:</strong>
+                            <p className="text-danger">{quiz.time_limit ? `${quiz.time_limit} minutes` : "No time limit"}</p>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div>
+                            <strong>Attempts: </strong>
+                            <p className="text-danger">{quiz.attempts}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                {/* Quiz Instructions */}
+                <div className="quiz-preview-center">
                     <h3>Instructions</h3>
                     {quiz.description ? (
                         <ol>
@@ -80,41 +105,11 @@ const QuizPreview = () => {
                     )}
 
                     <button
-                        className="take-quiz-btn"
+                        className="btn btn-primary mt-4 w-100"
                         onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
                     >
                         Take Quiz
                     </button>
-                </div>
-
-                {/* Right Section */}
-                <div className="quiz-preview-right">
-                    <div className="form-group">
-                        <label>Number of Attempts</label>
-                        <input
-                            type="text"
-                            value={quiz.attempts || "1"}
-                            disabled
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Time Limit</label>
-                        <input
-                            type="text"
-                            value={quiz.time_limit ? `${quiz.time_limit}:00` : "No limit"}
-                            disabled
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Passing Score</label>
-                        <input
-                            type="text"
-                            value={quiz.passing_score ? `${quiz.passing_score}%` : "Not set"}
-                            disabled
-                        />
-                    </div>
                 </div>
             </div>
         </div>

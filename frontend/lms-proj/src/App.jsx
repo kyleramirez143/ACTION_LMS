@@ -147,7 +147,6 @@ function AppContent() {
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
 
-            {/* Trainee Side Routes */}
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />

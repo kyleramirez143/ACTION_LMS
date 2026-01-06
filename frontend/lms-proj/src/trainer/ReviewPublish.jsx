@@ -39,17 +39,19 @@ const ReviewPublish = () => {
         const questions = (data.questions || []).map(q => ({
           ...q,
           options: typeof q.options === "object" ? q.options : {},
-          section: q.section || "General", // Ensure section always exists
+          section: q.section || "General",
         }));
 
         setQuiz({ ...data, questions });
         setOriginalQuestions(JSON.parse(JSON.stringify(questions)));
 
+        // --- Display exactly what is in the backend ---
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
           timeLimit: data.quiz.time_limit ?? 30,
-          passingScore: data.quiz.passing_score ?? 70,
+          dueDate: data.quiz.due_date ? data.quiz.due_date.slice(0, 16) : "", // no conversion
+          noDueDate: !data.quiz.due_date,
           description: data.quiz.description || "",
           screenMonitoring: data.quiz.screen_monitoring ?? true,
           randomization: data.quiz.randomize_questions ?? true,
@@ -292,8 +294,40 @@ const ReviewPublish = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Passing Score (%)</label>
-              <input type="number" className="form-control" value={settings.passingScore} min={0} max={100} onChange={e => handleChange("passingScore", Number(e.target.value))} />
+              <label className="form-label fw-semibold">Due Date</label>
+              <div className="input-group">
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={settings.noDueDate ? "" : settings.dueDate || ""}
+                  disabled={settings.noDueDate}
+                  onChange={(e) => handleChange("dueDate", e.target.value || null)}
+                />
+                <span className="input-group-text">
+                  <i className="bi bi-calendar-event"></i>
+                </span>
+              </div>
+
+              <div className="form-check mt-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="noDueDateCheck"
+                  checked={settings.noDueDate}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    handleChange("noDueDate", checked);
+                    handleChange("dueDate", checked ? null : settings.dueDate);
+                  }}
+                />
+                <label className="form-check-label" htmlFor="noDueDateCheck">
+                  This quiz has no due date
+                </label>
+              </div>
+
+              <div className="form-text">
+                Leave unchecked to set a deadline. Check to allow unlimited time.
+              </div>
             </div>
 
             <div className="mb-3">

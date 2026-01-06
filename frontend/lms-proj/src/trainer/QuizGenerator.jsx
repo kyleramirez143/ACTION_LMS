@@ -284,7 +284,44 @@ function QuizGenerator() {
                     <h2 className="mb-4">Generated Quiz</h2>
                     {!quiz ? <p className="text-muted">No quiz generated yet.</p> :
                         <>
-                            {["Grammar", "Vocabulary", "Listening"].map(section => renderQuizSection(section))}
+                            {quiz.quizType === "Nihongo" ? (
+                                ["Grammar", "Vocabulary", "Listening"].map(section =>
+                                    renderQuizSection(section)
+                                )
+                            ) : (
+                                <div className="mb-4">
+                                    {quiz.questions.map((q, i) => (
+                                        <div className="card shadow-sm mb-3" key={i}>
+                                            <div className="card-body">
+                                                <h5 className="card-title">
+                                                    Q{i + 1}: {q.question}
+                                                </h5>
+
+                                                {q.options && (
+                                                    <ul className="list-group list-group-flush mb-2">
+                                                        {Object.entries(q.options).map(([k, v]) => (
+                                                            <li key={k} className="list-group-item">
+                                                                <strong>{k.toUpperCase()}.</strong> {v}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+
+                                                <p className="text-success mb-1">
+                                                    <strong>Answer:</strong> {q.correct_answer}
+                                                </p>
+
+                                                {q.explanation && (
+                                                    <div className="mt-2 p-2 bg-light rounded border">
+                                                        <small className="fw-bold d-block">Explanation:</small>
+                                                        <small>{q.explanation}</small>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             <div className="d-flex justify-content-between mt-3 pb-5">
                                 <button className="btn btn-success px-5" onClick={handleDirectSave} disabled={saving}>
                                     {saving ? "Saving..." : "Save to Lecture"}

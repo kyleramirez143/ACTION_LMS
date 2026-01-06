@@ -13,7 +13,7 @@ export async function getQuiz(req, res) {
                 {
                     model: AssessmentQuestion,
                     as: "questions",
-                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "section"]
+                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "points", "section"]
                 }
             ]
         });
@@ -23,14 +23,19 @@ export async function getQuiz(req, res) {
             return res.status(403).json({ error: "Quiz not available for trainees." });
         }
 
-        const questions = assessment.questions.map(q => ({
-            question_id: q.question_id,
-            question_text: q.question_text,
-            options: q.options || {},
-            correct_answer: q.correct_answer || "",
-            explanation: q.explanations || "",
-            section: q.section || "General"
-        }));
+        let totalPoints = 0;
+        const questions = assessment.questions.map(q => {
+            totalPoints += q.points || 0; // sum points, default 0 if null
+            return {
+                question_id: q.question_id,
+                question_text: q.question_text,
+                options: q.options || {},
+                correct_answer: q.correct_answer || "",
+                explanation: q.explanations || "",
+                section: q.section || "General",
+                points: q.points || 0
+            };
+        });
 
         res.json({
             quiz: {
@@ -39,12 +44,14 @@ export async function getQuiz(req, res) {
                 description: assessment.description,
                 attempts: assessment.attempts,
                 time_limit: assessment.time_limit,
-                passing_score: assessment.passing_score,
+                due_date: assessment.due_date,
                 screen_monitoring: assessment.screen_monitoring,
                 randomize_questions: assessment.randomize_questions,
                 show_score: assessment.show_score,
                 show_explanations: assessment.show_explanations,
                 is_published: assessment.is_published,
+                questions,
+                totalPoints
             },
             questions
         });
@@ -67,7 +74,8 @@ export async function saveQuizConfig(req, res) {
         randomization,
         scoreVisibility,
         includeExplanationIfWrong,
-        isPublished
+        isPublished,
+        dueDate,
     } = req.body;
 
     try {
@@ -85,6 +93,7 @@ export async function saveQuizConfig(req, res) {
             show_explanations: includeExplanationIfWrong ?? assessment.show_explanations,
             description: description || assessment.description,
             is_published: isPublished ?? assessment.is_published,
+            due_date: dueDate !== undefined ? dueDate : assessment.due_date,
         });
 
         res.json({ success: true, message: "Quiz configuration saved successfully!" });

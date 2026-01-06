@@ -56,7 +56,7 @@ Requirements:
 2️⃣ Vocabulary: generate 6 questions:
    - First 3: English word → translate to Japanese (characters)
    - Last 3: Japanese word → translate to English
-3️⃣ Listening: generate 1-3 short-answer questions (no options needed).
+3️⃣ Listening: generate 1-3 answer fields only.
 
 Output JSON EXACTLY in this format:
 {
