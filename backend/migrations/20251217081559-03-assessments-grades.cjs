@@ -52,6 +52,11 @@ module.exports = {
       randomize_questions: { type: Sequelize.BOOLEAN, defaultValue: true },
       show_score: { type: Sequelize.BOOLEAN, defaultValue: true },
       show_explanations: { type: Sequelize.BOOLEAN, defaultValue: true },
+      due_date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: true
+      },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
