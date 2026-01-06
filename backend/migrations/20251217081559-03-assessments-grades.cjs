@@ -45,7 +45,6 @@ module.exports = {
       is_published: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
       attempts: { type: Sequelize.INTEGER, defaultValue: 1 },
-      instructions: { type: Sequelize.TEXT },
       passing_score: { type: Sequelize.DECIMAL(5, 2), defaultValue: 70 },
       time_limit: { type: Sequelize.INTEGER, defaultValue: 30 },
       screen_monitoring: { type: Sequelize.BOOLEAN, defaultValue: true },
