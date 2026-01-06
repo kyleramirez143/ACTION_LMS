@@ -123,7 +123,7 @@ export const QuizResultModal = ({ score, total, onReview }) => {
         <button
           type="button"
           className="btn-cancel"
-          onClick={() => navigate('/modules')}
+          onClick={() => navigate('/trainee/assessment')}
         >
           Exit
         </button>

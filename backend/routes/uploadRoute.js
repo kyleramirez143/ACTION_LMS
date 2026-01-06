@@ -4,7 +4,12 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { protect, checkRole } from "../middleware/authMiddleware.js";
-import { generateQuizFromPdf, saveQuiz, discardQuiz } from "../controllers/uploadController.js";
+import {
+  generateQuizFromPdf,
+  // saveQuiz,
+  discardQuiz,
+  saveQuizToLecture
+} from "../controllers/uploadController.js";
 
 const router = express.Router();
 
@@ -25,7 +30,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/", protect, checkRole(["Trainer"]), upload.single("file"), generateQuizFromPdf);
-router.post("/:assessmentId/publish", protect, checkRole(["Trainer"]), saveQuiz);
-router.delete("/:assessmentId", protect, checkRole(["Trainer"]), discardQuiz);
+
+// This now CREATES the assessment + questions + link to lecture
+router.post("/save-to-lecture", protect, checkRole(["Trainer"]), saveQuizToLecture);
+
+// Discard now ONLY deletes the uploaded PDF
+router.delete("/discard", protect, checkRole(["Trainer"]), discardQuiz);
+
 
 export default router;

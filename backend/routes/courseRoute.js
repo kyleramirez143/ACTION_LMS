@@ -19,8 +19,8 @@ router.post("/upload-image", protect, checkRole(["Admin"]), uploadImage.single("
 });
 
 // Admin full list
-router.get("/", protect, checkRole(["Admin"]), getCourses);
-router.get("/id/:course_id", protect, checkRole(["Admin", "Trainer"]), getCourseById)
+router.get("/", protect, checkRole(["Admin", "Trainee"]), getCourses);
+router.get("/id/:course_id", protect, checkRole(["Admin", "Trainer", "Trainee"]), getCourseById)
 router.post("/", protect, checkRole(["Admin"]), createCourse);
 router.put("/:course_id", protect, checkRole(["Admin"]), updateCourse);
 router.delete("/:course_id", protect, checkRole(["Admin"]), deleteCourse);

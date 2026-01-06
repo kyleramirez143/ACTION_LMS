@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       allowNull: false,
     },
+    profile_picture: {
+      type: DataTypes.STRING,
+      allowNull: true, // optional
+    },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -52,6 +56,13 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.hasMany(models.UserRole, { foreignKey: "user_id", as: "user_roles" });
+
+    User.belongsToMany(models.Batch, {
+      through: models.UserBatch,
+      foreignKey: "user_id",
+      otherKey: "batch_id",
+      as: "batches"
+    });
   };
 
   return User;

@@ -36,6 +36,11 @@ import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
+import BatchesTable from "./admin/BatchesTable.jsx";
+import ModuleTable from "./admin/ModuleTable.jsx";
+import SetPeriodModule from "./admin/SetPeriodModule.jsx";
+import CalendarView from "./admin/CalendarView.jsx";
+import NewSchedule from "./admin/NewSchedule.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
@@ -50,6 +55,16 @@ import AddModule from "./trainer/AddModule.jsx";
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
+import ReviewPublish from "./trainer/ReviewPublish.jsx";
+
+// Trainee imports
+import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
+import QuizPage from "./trainee/QuizPage.jsx";
+import QuizPreview from "./trainee/QuizPreview.jsx";
+import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
+import ProctorReview from "./trainer/ProctorReview.jsx";
+import AddBatch from "./admin/AddBatch.jsx";
+
 
 function AppContent() {
   const location = useLocation();
@@ -90,14 +105,22 @@ function AppContent() {
 
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
-            <Route path="/trainer/:course_id/modules" element={<ModuleManagement />} />
-            <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
+            <Route path="/:course_id/modules" element={<ModuleManagement />} />
+            <Route path="/trainer/:course_id/modules/:module_id/quizzes/:assessment_id" element={<ReviewPublish />} />
 
-            <Route path="/trainer/:course_id/modules/:module_id/create" element={<AddLecture />} />
-            <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
+            <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
+            <Route path="/trainer/:course_id/modules/:module_id/edit" element={<AddModule />} />
+
+            <Route path="/trainer/:course_id/modules/:module_id/lectures/create" element={<AddLecture />} />
+            <Route path="/trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit" element={<AddLecture />} />
+
+            <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
+
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
 
             {/* Admin Side Routes */}
@@ -110,13 +133,25 @@ function AppContent() {
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
+            <Route path="/admin/batch-management" element={<BatchesTable/>} />
+            <Route path="/admin/add-batch" element={<AddBatch/>} />
+            <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
+            <Route path="/admin/module-management" element={<ModuleTable/>} />
+            <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
+            <Route path="/admin/calendar" element={<CalendarView/>} />
+            <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
 
-            {/* Admin Side Routes */}
+            {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
 
+            {/* Trainee Side Routes */}
+            <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
+            <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
+            <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
+            <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
 
           </Routes>
         </div>
