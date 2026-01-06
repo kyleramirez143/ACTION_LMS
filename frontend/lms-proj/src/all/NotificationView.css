@@ -1,0 +1,75 @@
+/* Page container */
+.page-container {
+    padding: 40px 20px; /* top/bottom 40px, left/right 20px */
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+}
+
+/* Notification card */
+.notification-card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    width: 100%;          /* stretch to full width */
+    max-width: 1400px;    /* limit width on large screens */
+}
+
+/* Section title */
+.section-title {
+    font-weight: 600;
+}
+
+/* Status badge */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.badge.bg-warning:hover {
+    background-color: #ffc107; /* slightly brighter */
+    color: #000;
+    transform: scale(1.05);
+}
+
+.badge.bg-secondary:hover {
+    background-color: #6c757d; /* slightly darker */
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* Pagination */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.custom-pagination .page-link {
+    background-color: #fff;
+    color: black;
+    border: none;
+    margin: 0 6px;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+    color: white;
+    font-weight: 600;
+    border: 2px solid #0047AB;
+    background-color: #0047AB;
+}

@@ -27,6 +27,9 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 // Navbar & Shared
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
+import NotificationView from "./all/NotificationView";
+import HelpSupport from "./all/HelpSupport";
+import CheckpointView from "./all/CheckpointView.jsx";
 
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
@@ -37,6 +40,7 @@ import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
 
+
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
@@ -45,11 +49,14 @@ import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
 import ModuleManagement from "./trainer/ModuleManagement.jsx";
 import AddModule from "./trainer/AddModule.jsx";
+import TraineeGrade from "./trainer/TraineeGrade.jsx";
+import QuizManual from "./trainer/QuizManual.jsx";
 
-//Trainer Imports
+//Trainee Imports
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
+import QuizPreview from "./trainee/QuizPreview";
 
 function AppContent() {
   const location = useLocation();
@@ -88,6 +95,15 @@ function AppContent() {
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
 
+            {/* Notification Page*/}
+            <Route path="/all/NotificationView" element={<NotificationView/>} />
+
+            {/* Help & Support */}
+            <Route path="/all/HelpSupport" element={<HelpSupport/>} />
+
+            {/* Checkpoint View */}
+            <Route path="/all/CheckpointView" element={<CheckpointView/>} />
+
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
@@ -99,6 +115,8 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules/:module_id/create" element={<AddLecture />} />
             <Route path="/trainer/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainer/traineegrade" element={<TraineeGrade/>} />
+            <Route path="/trainer/quizmanual" element={<QuizManual/>} />
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -110,12 +128,14 @@ function AppContent() {
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
+          
 
             {/* Admin Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
+            <Route path="/trainee/quizpreview" element={<QuizPreview/>} />
 
 
           </Routes>

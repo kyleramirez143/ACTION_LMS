@@ -1,128 +1,220 @@
 :root {
-    --primary-blue: #0047AB;
-    --white: #FFFFFF;
-    --light-gray: #D9D9D9;
-    --dark-gray: #333333;
-  }
+  --primary-blue: #0047AB;
+  --white: #FFFFFF;
+  --light-gray: #D9D9D9;
+  --dark-gray: #333333;
+}
 
-  /* Navbar Container */
-  .navbar {
-    background-color: var(--white);
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    padding: 0 1.25rem;
-    z-index: 2000;
-    border-bottom: 1px solid var(--light-gray);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    position: relative;
-  }
+.navbar {
+  background-color: var(--white);
+  height: 70px;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--light-gray);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2000;
+}
 
-  .navbar-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    position: fixed; /* allows stacking */
-    top: 0;
-    z-index: 2000;
-  }
+.navbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 2000;
+}
 
-  .navbar-wrapper + * {
+.navbar-wrapper + * {
   padding-top: 140px;
-  }
+}
 
-  /* Logo */
-  .logo-small {
-    width: 80px;
-    height: 50px;
-    object-fit: contain;
-  }
+.logo-small {
+  width: 80px;
+  height: 50px;
+  object-fit: contain;
+}
 
-  /* Brand Text */
-  .brand-text {
-    color: var(--dark-gray);
-  }
+.navbar a {
+  color: var(--dark-gray);
+  font-weight: 500;
+  text-decoration: none;
+}
 
-  /* Navigation Links */
-  .navbar a {
-    color: var(--dark-gray);
-    text-decoration: none;
-    font-weight: 500;
-  }
+.navbar a:hover {
+  color: var(--primary-blue);
+}
 
-  .navbar a:hover {
-    color: var(--primary-blue);
-  }
+.bell-icon {
+  font-size: 28px;
+  color: var(--dark-gray);
+  cursor: pointer;
+  position: relative;
+}
 
-  /* Bell Icon */
-  .bell-icon {
-    font-size: 28px;
-    color: var(--dark-gray);
-    cursor: pointer;
-  }
+.trainee-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--white);
+  border: 1px solid var(--dark-gray);
+}
 
-  /* Trainee Circle */
-  .trainee-circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--white);
-    border: 1px solid var(--dark-gray);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+/* ================= SEARCH BAR ================= */
+.search-bar-section {
+  background-color: var(--primary-blue);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--light-gray);
+  flex-wrap: wrap;
+}
 
-  /* Search Bar Section */
-  .search-bar-section {
-    background-color: var(--primary-blue);
-    padding: 1rem 1.5rem;
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    border-bottom: 1px solid var(--light-gray);
-  }
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  height: 50px;
+  background-color: var(--white);
+  border-radius: 40px;
+  padding: 0 20px;
+  border: none;
+  font-size: 1rem;
+}
 
-  /* White Search Input */
-  .search-input {
-    flex: 1;
-    height: 50px;
-    background-color: var(--white);
-    border: none;
-    border-radius: 40px;
-    padding: 0 20px;
-    font-size: 1rem;
-  }
+.search-bar-section > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-  /* White Rounded Buttons */
-  .btn-primary-custom {
-    height: 50px;
-    min-width: 150px;
-    border-radius: 40px;
-    background-color: var(--white);
-    color: var(--primary-blue);
-    font-weight: 600;
-    border: none;
-    padding: 0 20px;
-    transition: background-color 0.2s ease;
-  }
+/* ================= SEARCH BUTTONS ================= */
+.search-button {
+  height: 50px;
+  min-width: 150px;
+  background-color: var(--white);
+  border-radius: 40px;
+  border: none;
+  color: var(--primary-blue);
+  font-weight: 600;
+}
 
-  .btn-primary-custom:hover {
-    background-color: var(--light-gray);
-  }
+/* ================= HAMBURGER & MOBILE ================= */
+.hamburger-icon {
+  font-size: 28px;
+  cursor: pointer;
+}
 
-  .search-button {
-    height: 50px;
-    min-width: 150px;
-    background-color: var(--white);
-    border: none;
-    border-radius: 40px;
-    padding: 0 20px;
-    font-size: 1rem;
-    color: var(--primary-blue);
-    font-weight: 600;
-    transition: background-color 0.2s ease;
-  }
+.mobile-menu {
+  background-color: var(--white);
+  border-top: 1px solid var(--light-gray);
+}
 
-  .search-button:hover {
-    background-color: var(--light-gray);
+.mobile-menu .nav-link {
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+
+/* ================= RIGHT SLIDE PANEL ================= */
+.side-panel {
+  position: fixed;
+  top: 140px; /* navbar + search bar */
+  right: -320px;
+  width: 320px;
+  height: calc(100vh - 140px);
+  background-color: var(--white);
+  padding: 24px;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+  transition: right 0.35s ease;
+  z-index: 3000;
+  overflow-y: auto;
+}
+
+.side-panel.open {
+  right: 0;
+}
+
+.side-panel a {
+  display: block;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+.logout-btn {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: red;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.side-overlay {
+  position: fixed;
+  top: 140px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2500;
+}
+
+/* ================= NOTIFICATION POPOUT ================= */
+.notification-popout {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.notification-popout h6 {
+  margin-bottom: 0.5rem;
+}
+
+.notification-popout ul {
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.notification-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: #f1f1f1;
+}
+
+.notification-item.unread {
+  background-color: #fffbe6;
+  font-weight: 500;
+}
+
+.notification-item.read {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (min-width: 992px) {
+  .side-panel,
+  .side-overlay {
+    display: none;
   }
+}
+/* Expand the profile dropdown width */
+.dropdown-menu.show {
+  min-width: 320px; /* increase this value to make it wider */
+  max-width: 400px; /* optional maximum width */
+  padding: 0.75rem 1rem;
+}

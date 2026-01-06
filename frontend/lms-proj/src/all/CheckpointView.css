@@ -1,0 +1,171 @@
+/* ===========================
+   Container & Title
+=========================== */
+.checkpoint-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 24px;
+}
+
+.checkpoint-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* ===========================
+   Card wrapper (Floating)
+=========================== */
+.checkpoint-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow-x: auto;
+  background: #ffffff;
+  padding: 24px;
+
+  /* Float effect */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* ===========================
+   Table Styling
+=========================== */
+.checkpoint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+/* Table Header */
+.checkpoint-table thead th {
+  padding: 12px 10px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Table Body Cells */
+.checkpoint-table tbody td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  color: #374151;
+}
+
+/* Last Row Border */
+.checkpoint-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===========================
+   Name Column
+=========================== */
+.name-col {
+  text-align: left;
+  font-weight: 500;
+  background-color: #f3f4f6;
+}
+
+/* ===========================
+   Section Colors (Headers)
+=========================== */
+.header-green { background-color: #dcfce7; }
+.header-purple { background-color: #f3e8ff; }
+.header-orange { background-color: #ffedd5; }
+.header-yellow { background-color: #fef9c3; }
+
+/* Body Section Cells */
+.payroll-cell { background-color: #ecfdf5; }
+.hr-cell { background-color: #faf5ff; }
+.telework-cell { background-color: #fff7ed; }
+.passport-cell { background-color: #fefce8; }
+.ims-cell { background-color: #ecfdf5; }
+
+/* ===========================
+   Status Styles
+=========================== */
+.status-ok {
+  color: #065f46;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #92400e;
+  font-weight: 600;
+}
+
+.status-missing {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+/* ===========================
+   Row Hover
+=========================== */
+.checkpoint-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ===========================
+   Edit Button
+=========================== */
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #2563eb;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: #1d4ed8;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+@media (max-width: 768px) {
+  .checkpoint-container {
+    padding: 16px;
+  }
+
+  .checkpoint-title {
+    font-size: 22px;
+  }
+
+  .checkpoint-table {
+    font-size: 13px;
+  }
+}
+/* ===========================
+   Header Layout (Title + Button)
+=========================== */
+.checkpoint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* ===========================
+   Add Employee Button
+=========================== */
+.add-employee-btn {
+  padding: 8px 16px;
+  background-color: #0047AB;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-employee-btn:hover {
+  background-color: #3f6baa;
+}

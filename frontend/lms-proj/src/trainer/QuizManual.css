@@ -1,0 +1,33 @@
+.manual-container-full {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f0f2f5;
+  gap: 2rem;
+}
+
+.manual-left,
+.manual-right {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* Make left container border more visible */
+.manual-left {
+  border: 5px solid #ffffff; /* primary blue border */
+}
+
+.manual-left textarea,
+.manual-right textarea {
+  resize: vertical;
+}
+
+.card-body h5 {
+  word-break: break-word;
+}
