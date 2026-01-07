@@ -77,6 +77,7 @@ module.exports = {
       module_id: foreignKey('modules', 'module_id'),
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
       title: { type: Sequelize.STRING(255), allowNull: false },
+      description: { type: Sequelize.STRING(255), allowNull: true },
       start_date: { type: Sequelize.DATEONLY },
       end_date: { type: Sequelize.DATEONLY },
       is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
