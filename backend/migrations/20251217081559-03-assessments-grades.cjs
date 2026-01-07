@@ -95,7 +95,6 @@ module.exports = {
       grade_id: uuidColumn,
       user_id: foreignKey('users', 'id'),
       assessment_id: foreignKey('assessments', 'assessment_id'),
-      grade_type: { type: Sequelize.STRING(50) },
       score: { type: Sequelize.DECIMAL(5, 2) },
       weight: { type: Sequelize.DECIMAL(5, 2) },
       remarks: { type: Sequelize.TEXT },

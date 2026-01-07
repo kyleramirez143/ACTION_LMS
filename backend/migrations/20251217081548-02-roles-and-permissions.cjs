@@ -58,7 +58,6 @@ module.exports = {
       description: { type: Sequelize.TEXT },
       start_date: { type: Sequelize.DATEONLY, allowNull: false },
       end_date: { type: Sequelize.DATEONLY, allowNull: false },
-      is_virtual: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
       is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
       image: { type: Sequelize.STRING(255), allowNull: true }, 
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
