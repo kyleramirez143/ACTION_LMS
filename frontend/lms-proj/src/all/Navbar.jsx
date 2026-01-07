@@ -184,16 +184,8 @@ const Navbar = () => {
 
                 <Dropdown.Divider />
 
-                {/* SETTINGS & PRIVACY */}
-                <Dropdown.Header className="fw-bold text-uppercase small">
-                  Settings & Privacy
-                </Dropdown.Header>
-
                 <Dropdown.Item as={Link} to="/settings-privacy">
                   Profile Settings
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/settings-privacy">
-                  Account Settings
                 </Dropdown.Item>
                 <Dropdown.Item as={Link} to="/settings-privacy">
                   Privacy Settings
