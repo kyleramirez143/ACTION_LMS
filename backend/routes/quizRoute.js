@@ -41,4 +41,13 @@ router.get(
     quizController.getTraineeResults
 );
 
+// Trainer: assessment results
+router.get(
+    '/:assessment_id/results',
+    protect,
+    checkRole(['Trainer']),
+    proctorController.getAssessmentResults
+);
+
+
 export default router;

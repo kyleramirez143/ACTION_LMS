@@ -52,11 +52,11 @@ ${text.slice(0, 16000)}
 You are an AI generating a Nihongo (Japanese) lesson quiz based on the provided PDF content.
 
 Requirements:
-1️⃣ Grammar: generate fill-in-the-blank questions with 4 options each.
-2️⃣ Vocabulary: generate 6 questions:
+1 Grammar: generate fill-in-the-blank questions with 4 options each.
+2 Vocabulary: generate 6 questions:
    - First 3: English word → translate to Japanese (characters)
-   - Last 3: Japanese word → translate to English
-3️⃣ Listening: generate 1-3 answer fields only.
+   - Last 3: Japanese word (should be in Japanese character) → translate to English (correct_answer should be in English and in small-caps)
+3 Listening: generate 3 answer fields only.
 
 Output JSON EXACTLY in this format:
 {

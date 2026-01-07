@@ -1,5 +1,8 @@
 import pkg from '../models/index.cjs';
-const { AssessmentScreenSession } = pkg;
+const { AssessmentScreenSession, User,
+    Grade,
+    Assessment,
+    AssessmentQuestion } = pkg;
 
 // Initialize a recording session record
 export async function startSession(req, res) {
@@ -59,3 +62,61 @@ export async function getAssessmentSessions(req, res) {
         res.status(500).json({ error: "Failed to fetch sessions" });
     }
 };
+
+export async function getAssessmentResults(req, res) {
+    const { assessment_id } = req.params;
+
+    try {
+        // total possible score
+        const totalPoints = await AssessmentQuestion.sum('points', {
+            where: { assessment_id }
+        });
+
+        const sessions = await AssessmentScreenSession.findAll({
+            where: { assessment_id },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['first_name', 'last_name', 'email']
+                },
+                // {
+                //     model: Grade,
+                //     as: 'grade',
+                //     attributes: ['score']
+                // },
+                {
+                    model: Assessment,
+                    as: 'assessment',
+                    attributes: ['passing_score']
+                }
+            ],
+            order: [['created_at', 'DESC']]
+        });
+
+        const results = sessions.map(session => {
+            const score = session.grade?.score ?? 0;
+            const passingScore = session.assessment.passing_score ?? 0;
+
+            const percentage = totalPoints
+                ? (score / totalPoints) * 100
+                : 0;
+
+            return {
+                session_id: session.session_id,
+                user: session.user,
+                started_at: session.created_at,
+                completed_at: session.completed_at,
+                score,
+                total_score: totalPoints,
+                status: percentage >= passingScore ? 'pass' : 'fail',
+                recording_url: session.recording_url
+            };
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error('getAssessmentResults error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}

@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         assessment_id: { type: DataTypes.UUID, allowNull: false },
         grade_type: { type: DataTypes.STRING(50), defaultValue: 'quiz' },
         score: { type: DataTypes.DECIMAL(5, 2) },
-        weight: { type: DataTypes.DECIMAL(5, 2), defaultValue: 100 },
+        weight: { type: DataTypes.DECIMAL(5, 2), defaultValue: 70 },
         calculated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         remarks: { type: DataTypes.TEXT },
         overridden_by: { type: DataTypes.UUID, allowNull: true }

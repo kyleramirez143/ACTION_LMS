@@ -1,5 +1,6 @@
+import { where } from 'sequelize';
 import pkg from '../models/index.cjs';
-const { Assessment, AssessmentQuestion, AssessmentResponse } = pkg;
+const { Assessment, AssessmentQuestion, AssessmentResponse, Grade, sequelize } = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
@@ -163,84 +164,90 @@ export async function deleteQuestion(req, res) {
     }
 }
 
+// Trainee answers per quiz
 export async function saveResponse(req, res) {
-    const { assessment_id, question_id, answer } = req.body;
+    const { assessment_id, answers } = req.body; // answers = { [question_id]: answer }
     const user_id = req.user.id;
 
     try {
-        const response = await AssessmentResponse.create({
-            assessment_id,
-            question_id,
-            user_id,
-            answer,
-            submitted_at: new Date()
+        for (const [question_id, answer] of Object.entries(answers)) {
+            const question = await AssessmentQuestion.findByPk(question_id, {
+                attributes: ['correct_answer', 'points']
+            });
+
+            if (!question) continue;
+
+            const score = String(answer || '').trim() === String(question.correct_answer).trim()
+                ? question.points
+                : 0;
+
+            await AssessmentResponse.upsert({
+                assessment_id,
+                question_id,
+                user_id,
+                answer,
+                score,
+                submitted_at: new Date()
+            });
+        }
+
+        const totalScore = await AssessmentResponse.sum('score', {
+            where: { assessment_id, user_id }
         });
-        res.json(response);
+
+        await Grade.upsert({
+            assessment_id,
+            user_id,
+            score: totalScore
+        });
+
+        res.json({ totalScore });
     } catch (err) {
-        console.error('saveResponse error:', err);
+        console.error('saveResponses error:', err);
         res.status(500).json({ error: err.message });
     }
 }
+
 
 export async function getTraineeResults(req, res) {
     const user_id = req.user.id;
 
     try {
-        const responses = await AssessmentResponse.findAll({
+        // 1️⃣ Get all grades for this user
+        const grades = await Grade.findAll({
             where: { user_id },
             include: [
                 {
                     model: Assessment,
                     as: 'assessment',
                     attributes: ['assessment_id', 'title', 'passing_score']
-                },
-                {
-                    model: AssessmentQuestion,
-                    as: 'question',
-                    attributes: ['correct_answer']
                 }
             ],
-            order: [['submitted_at', 'DESC']]
+            order: [['updated_at', 'DESC']]
         });
 
-        // Group by assessment
-        const grouped = {};
+        // 2️⃣ For each grade, fetch total points dynamically
+        const results = await Promise.all(
+            grades.map(async (g) => {
+                const totalPoints = await AssessmentQuestion.sum('points', {
+                    where: { assessment_id: g.assessment.assessment_id }
+                });
 
-        for (const r of responses) {
-            const aid = r.assessment.assessment_id;
+                const userPercentage = (g.score / totalPoints) * 100;
+                const passed = userPercentage >= g.assessment.passing_score;
 
-            if (!grouped[aid]) {
-                grouped[aid] = {
-                    assessment_id: aid,
-                    title: r.assessment.title,
-                    correct: 0,
-                    total: 0,
-                    submitted_at: r.submitted_at,
-                    passing_score: r.assessment.passing_score
+                return {
+                    assessment_id: g.assessment.assessment_id,
+                    title: g.assessment.title,
+                    score: `${g.score} / ${totalPoints || 0}`,
+                    status: passed ? 'Passed' : 'Failed',
+                    feedback: passed
+                        ? 'Good work! You passed the assessment.'
+                        : 'Review the materials and try again.',
+                    date: g.updated_at
                 };
-            }
-
-            grouped[aid].total += 1;
-            if (r.answer === r.question.correct_answer) {
-                grouped[aid].correct += 1;
-            }
-        }
-
-        const results = Object.values(grouped).map(r => {
-            const scorePercent = Math.round((r.correct / r.total) * 100);
-            const passed = scorePercent >= r.passing_score;
-
-            return {
-                assessment_id: r.assessment_id,
-                title: r.title,
-                score: `${r.correct} / ${r.total}`,
-                status: passed ? 'Passed' : 'Failed',
-                feedback: passed
-                    ? 'Good work! You passed the assessment.'
-                    : 'Review the materials and try again.',
-                date: r.submitted_at
-            };
-        });
+            })
+        );
 
         res.json(results);
     } catch (err) {
@@ -248,3 +255,5 @@ export async function getTraineeResults(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
+

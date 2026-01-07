@@ -109,16 +109,11 @@ const QuizPage = () => {
         });
       }
 
-      // Upload answers
-      await Promise.all(
-        questions.map(q =>
-          API.post(`/quizzes/responses`, {
-            assessment_id,
-            question_id: q.question_id,
-            answer: answers[q.question_id] || null
-          }, { headers: { Authorization: `Bearer ${token}` } })
-        )
-      );
+      // Upload all answers at once
+      await API.post(`/quizzes/responses`, {
+        assessment_id,
+        answers
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
       setIsUploading(false);
       setShowResultModal(true);
@@ -129,6 +124,7 @@ const QuizPage = () => {
       setIsUploading(false);
     }
   };
+
 
   if (!questions.length) return <p>Loading quiz...</p>;
 
@@ -150,15 +146,32 @@ const QuizPage = () => {
             </div>
             <p className="fw-bold">{question.question_text}</p>
             <div className="d-grid gap-2">
-              {Object.entries(question.options || {}).map(([key, option]) => (
-                <button
-                  key={key}
-                  className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => handleAnswer(currentQuestion, key)}
-                >
-                  {option}
-                </button>
-              ))}
+              {/* --- MULTIPLE CHOICE --- */}
+              {question.options && Object.keys(question.options).length > 0 ? (
+                Object.entries(question.options).map(([key, option]) => (
+                  <button
+                    key={key}
+                    className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => handleAnswer(currentQuestion, key)}
+                  >
+                    {option}
+                  </button>
+                ))
+              ) : (
+                /* Free-text input for Nihongo questions */
+                <input
+                  type="text"
+                  className="form-control"
+                  value={answers[question.question_id] || ''}
+                  onChange={(e) =>
+                    setAnswers((prev) => ({
+                      ...prev,
+                      [question.question_id]: e.target.value.toLowerCase() // lowercase before sending
+                    }))
+                  }
+                  placeholder="Type your answer here"
+                />
+              )}
             </div>
           </div>
 
