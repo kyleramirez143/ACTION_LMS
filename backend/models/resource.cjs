@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(500),
             allowNull: false
         },
+        is_visible: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
@@ -22,8 +26,9 @@ module.exports = (sequelize, DataTypes) => {
 
     Resource.associate = (models) => {
         Resource.hasMany(models.LectureResource, { foreignKey: 'resources_id', as: 'lectureResources' });
+
         Resource.belongsToMany(models.Lecture, {
-            through: 'lecture_resources',
+            through: models.LectureResource,
             foreignKey: 'resources_id',
             otherKey: 'lecture_id',
             as: 'lectures'

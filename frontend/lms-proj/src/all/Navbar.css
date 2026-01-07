@@ -5,6 +5,7 @@
   --dark-gray: #333333;
 }
 
+<<<<<<< HEAD
 .navbar {
   background-color: var(--white);
   height: 70px;
@@ -217,4 +218,200 @@
   min-width: 320px; /* increase this value to make it wider */
   max-width: 400px; /* optional maximum width */
   padding: 0.75rem 1rem;
+=======
+/* Remove unwanted after elements */
+.navbar *::after {
+  content: none !important;
+}
+
+.dropdown{
+  background-color: none;
+}
+
+.nav-item .dropdown-toggle {
+  cursor: pointer;
+}
+
+.nav-item .dropdown-toggle::after {
+  display: none; /* remove caret */
+}
+
+/* Navbar Container */
+.navbar {
+  background-color: var(--white);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  padding: 0 1.25rem;
+  z-index: 2000;
+  border-bottom: 1px solid var(--light-gray);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.navbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 2000;
+}
+
+.navbar-wrapper + * {
+  padding-top: 140px;
+}
+
+/* Logo */
+.logo-small {
+  width: 80px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* Navigation Links */
+.navbar a {
+  color: var(--dark-gray);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar a:hover {
+  color: var(--primary-blue);
+}
+
+/* Bell Icon */
+.bell-icon {
+  font-size: 28px;
+  color: var(--dark-gray);
+  cursor: pointer;
+}
+
+/* Trainee Circle */
+.trainee-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--white);
+  border: 1px solid var(--dark-gray);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Search Bar Section */
+.search-bar-section {
+  background-color: var(--primary-blue);
+  padding: 1rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--light-gray);
+  flex-wrap: wrap;
+}
+
+/* Search Input */
+.search-input {
+  flex: 1;
+  height: 50px;
+  background-color: var(--white);
+  border: none;
+  border-radius: 40px;
+  padding: 0 20px;
+  font-size: 1rem;
+}
+
+/* Buttons */
+.btn-primary-custom,
+.search-button {
+  height: 50px;
+  min-width: 150px;
+  border-radius: 40px;
+  background-color: var(--white);
+  color: var(--primary-blue);
+  font-weight: 600;
+  border: none;
+  padding: 0 20px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary-custom:hover,
+.search-button:hover {
+  background-color: var(--light-gray);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .navbar .d-flex.align-items-center.gap-3 {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Hide nav links by default */
+  .nav-link {
+    display: none;
+  }
+
+  /* Show nav links when menu is active */
+  .nav-links-active .nav-link {
+    display: block;
+    padding: 8px 0;
+  }
+
+  /* Hamburger Menu */
+  .hamburger {
+    display: block;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--dark-gray);
+  }
+
+  /* Adjust search bar layout on mobile */
+  .search-bar-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-bar-section input {
+    width: 100%;
+  }
+
+  .search-bar-section .d-flex.gap-2 {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+/* Desktop */
+@media (min-width: 769px) {
+  .hamburger {
+    display: none;
+  }
+}
+
+/* Make Curriculum link match other nav links */
+.curriculum-link {
+  display: inline-block;        /* same as normal links */
+  padding: 0.5rem 1rem;         /* same padding as other nav-links */
+  font-size: 1rem;              /* match Dashboard, User Management */
+  line-height: 1.5;             /* match others */
+  color: #000;                  /* match text-dark */
+  cursor: pointer;
+}
+
+.curriculum-link:hover {
+  color: var(--primary-blue);   /* match hover effect of other links */
+  text-decoration: none;
+}
+
+.nav-item .dropdown-menu {
+  min-width: 200px;             /* optional: ensure dropdown width */
+>>>>>>> ee429b0f19565ec6d4190c62d8969fe7c1951f05
 }

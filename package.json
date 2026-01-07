@@ -2,11 +2,13 @@
   "dependencies": {
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "jwt-decode": "^4.0.0",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "react-bootstrap": "^2.10.10",
+    "react-datepicker": "^9.1.0",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3"
   }

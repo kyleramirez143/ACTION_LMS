@@ -153,7 +153,7 @@
     position: relative;
 }
 
-.dropdown-toggle {
+/* .dropdown-toggle {
     background-color: var(--blue);
     color: #fff;
     border: none;
@@ -162,13 +162,13 @@
     cursor: pointer;
     font-size: 0.85rem;
     box-shadow: none;
-}
+} */
 
-.dropdown-toggle::after {
+/* .dropdown-toggle::after {
     content: "▾";
     margin-left: 6px;
     font-size: 0.8rem;
-}
+} */
 
 .dropdown-menu {
     position: absolute;
@@ -182,7 +182,6 @@
     padding: 0;
     margin: 0;
     z-index: 1000;
-    width: 160px;
 }
 
 .dropdown-menu li {

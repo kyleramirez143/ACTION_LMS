@@ -33,7 +33,7 @@ export const createCourse = async (req, res) => {
             title,
             image: image || null,
             description,
-            is_published: true,
+            is_published: false,
         });
 
         const courseId = course.course_id;
@@ -70,7 +70,7 @@ export const getCourses = async (req, res) => {
                         {
                             model: User,
                             as: "instructor",
-                            attributes: ["first_name", "last_name", "email"]
+                            attributes: ["id", "first_name", "last_name", "email"]
                         }
                     ]
                 }

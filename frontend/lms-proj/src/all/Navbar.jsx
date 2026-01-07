@@ -8,12 +8,14 @@ import { navLinks } from "../config/navConfig";
 import * as jwtDecode from "jwt-decode";
 
 const Navbar = () => {
-  const { hasRole, logout, loading } = useAuth();
+  const { userProfile, hasRole, logout, loading } = useAuth();
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef(null);
+
+  if (loading) return null;
 
   const logoutUser = () => {
     logout();
@@ -21,11 +23,9 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
-  if (loading) return null;
-
-  /* =====================
-     PROFILE PATH BY ROLE
-  ====================== */
+  // =====================
+  // PROFILE PATH BY ROLE
+  // =====================
   const token = localStorage.getItem("authToken");
   let profilePath = "/profile";
 
@@ -39,17 +39,23 @@ const Navbar = () => {
     }
   }
 
-  /* =====================
-     NAV LINKS BY ROLE
-  ====================== */
+  const profileImageUrl = userProfile?.profile_picture
+    ? userProfile.profile_picture.startsWith("http")
+      ? userProfile.profile_picture
+      : `http://localhost:5000/${userProfile.profile_picture}`
+    : null;
+
+  // =====================
+  // NAV LINKS BY ROLE
+  // =====================
   const visibleLinks = navLinks.filter((link) => {
     if (!link.requiredRoles || link.requiredRoles.length === 0) return true;
     return hasRole(link.requiredRoles);
   });
 
-  /* =====================
-     NOTIFICATIONS (MOCK)
-  ====================== */
+  // =====================
+  // NOTIFICATIONS (MOCK)
+  // =====================
   const [notifications] = useState([
     {
       id: 1,
@@ -118,43 +124,50 @@ const Navbar = () => {
 
   return (
     <nav className="navbar-wrapper">
-      {/* =====================
-          TOP NAVBAR
-      ====================== */}
       <div className="navbar px-4 d-flex justify-content-between align-items-center">
         <img src={logo} alt="logo" className="logo-small" />
 
-        {/* MOBILE ICONS */}
-        <div className="d-lg-none d-flex align-items-center gap-3">
-          <div className="position-relative" ref={notifRef}>
-            <i
-              className="bi bi-bell bell-icon"
-              onClick={() => setNotifOpen(!notifOpen)}
-            />
-            {notifOpen && renderNotificationPopout()}
-          </div>
+        <div className="d-flex align-items-center gap-3">
+          {/* NAV LINKS */}
+          {visibleLinks.map((link, index) =>
+            link.children && link.children.length > 0 ? (
+              <Dropdown key={index} className="nav-link fw-semibold text-dark">
+                <Dropdown.Toggle
+                  variant="link"
+                  className="nav-link fw-semibold text-dark"
+                >
+                  {link.name}
+                </Dropdown.Toggle>
 
-          <i
-            className={`bi ${menuOpen ? "bi-x" : "bi-list"} hamburger-icon`}
-            onClick={() => setMenuOpen(!menuOpen)}
-          />
-        </div>
-
-        {/* DESKTOP NAV */}
-        <div className="d-none d-lg-flex align-items-center gap-3">
-          {visibleLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                `nav-link fw-semibold ${
-                  isActive ? "text-primary" : "text-dark"
-                }`
-              }
-            >
-              {link.name}
-            </NavLink>
-          ))}
+                <Dropdown.Menu className="shadow">
+                  {link.children.map((child) => (
+                    <Dropdown.Item
+                      key={child.path}
+                      as={NavLink}
+                      to={child.path}
+                      className={({ isActive }) =>
+                        isActive ? "text-primary fw-semibold" : ""
+                      }
+                    >
+                      {child.name}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) =>
+                  `nav-link fw-semibold ${
+                    isActive ? "text-primary" : "text-dark"
+                  }`
+                }
+              >
+                {link.name}
+              </NavLink>
+            )
+          )}
 
           {/* NOTIFICATIONS */}
           <div className="position-relative" ref={notifRef}>
@@ -166,122 +179,64 @@ const Navbar = () => {
           </div>
 
           {/* PROFILE DROPDOWN */}
-          <div className="d-flex align-items-center gap-2">
-            <div className="trainee-circle" />
-
-            <Dropdown align="end">
-              <Dropdown.Toggle
-                as="div"
-                className="rounded-circle border d-flex align-items-center justify-content-center bg-light"
-                style={{ width: "40px", height: "40px", cursor: "pointer" }}
-              />
-
-              <Dropdown.Menu className="mt-2 shadow">
-
-                <Dropdown.Item as={Link} to={profilePath}>
-                  Profile
-                </Dropdown.Item>
-
-                <Dropdown.Divider />
-
-                <Dropdown.Item as={Link} to="/settings-privacy">
-                  Profile Settings
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/settings-privacy">
-                  Privacy Settings
-                </Dropdown.Item>
-                {/* <Dropdown.Item as={Link} to="/settings-privacy">
-                  Notification Settings
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/settings-privacy">
-                  Language & Region
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/settings-privacy">
-                  Connected Apps
-                </Dropdown.Item> */}
-
-                <Dropdown.Divider />
-
-                {/* HELP & SUPPORT */}
-                <Dropdown.Item as={Link} to="/help-support">
-                  Help & Support
-                </Dropdown.Item>
-
-                {/* <Dropdown.Item as={Link} to="/help-support">
-                  FAQ / Knowledge Base
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/help-support">
-                  Tutorials / Guides
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/help-support">
-                  Contact Support
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/help-support">
-                  Report a Problem / Feedback
-                </Dropdown.Item>
-                <Dropdown.Divider /> */}
-
-                <Dropdown.Item
-                  as={Link}
-                  to="/"
-                  className="text-danger"
-                  onClick={logoutUser}
+          <Dropdown align="end">
+            <Dropdown.Toggle as="div">
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="trainee-circle"
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                  }}
                 >
-                  Sign Out
-                </Dropdown.Item>
+                  {profileImageUrl ? (
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div
+                      className="bg-secondary text-white d-flex align-items-center justify-content-center"
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <i className="bi bi-person"></i>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Dropdown.Toggle>
 
-              </Dropdown.Menu>
-            </Dropdown>
-          </div>
+            <Dropdown.Menu className="mt-2 shadow">
+              <Dropdown.Item as={Link} to={profilePath}>
+                Profile
+              </Dropdown.Item>
+              <Dropdown.Item href="#">Settings & Privacy</Dropdown.Item>
+              <Dropdown.Item href="#">Help & Support</Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item
+                as={Link}
+                to="/"
+                className="text-danger"
+                onClick={logoutUser}
+              >
+                Sign Out
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </div>
 
-      {/* =====================
-          MOBILE SIDE PANEL
-      ====================== */}
-      <div className={`side-panel ${menuOpen ? "open" : ""}`}>
-        {visibleLinks.map((link) => (
-          <NavLink
-            key={link.path}
-            to={link.path}
-            className="nav-link mb-3"
-            onClick={() => setMenuOpen(false)}
-          >
-            {link.name}
-          </NavLink>
-        ))}
-
-        <hr />
-
-        <Link to={profilePath} onClick={() => setMenuOpen(false)}>
-          Profile
-        </Link>
-        <Link to="/settings-privacy" onClick={() => setMenuOpen(false)}>
-          Settings & Privacy
-        </Link>
-        <Link to="/help-support" onClick={() => setMenuOpen(false)}>
-          Help & Support
-        </Link>
-
-        <button className="logout-btn" onClick={logoutUser}>
-          Sign Out
-        </button>
-      </div>
-
-      {menuOpen && (
-        <div className="side-overlay" onClick={() => setMenuOpen(false)} />
-      )}
-
-      {/* =====================
-          SEARCH BAR
-      ====================== */}
-      <div className="search-bar-section py-3 px-4">
+      {/* SEARCH BAR */}
+      <div className="search-bar-section py-3 px-4 d-flex gap-3 flex-wrap">
         <input
           type="text"
           className="form-control search-input"
           placeholder="Search your Available Courses"
         />
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <button className="search-button">Search</button>
           <button className="search-button">Export</button>
         </div>
