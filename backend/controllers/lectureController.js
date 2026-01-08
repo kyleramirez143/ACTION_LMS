@@ -47,39 +47,6 @@ export const createLecture = async (req, res) => {
 };
 
 // Upload a file/resource for a lecture
-// export const uploadLectureFile = async (req, res) => {
-//     try {
-//         const { lecture_id } = req.body;
-//         if (!lecture_id || !req.files?.length) {
-//             return res.status(400).json({ error: "lecture_id and files are required" });
-//         }
-
-//         const uploadedResources = [];
-
-//         for (let file of req.files) {
-//             const resource = await Resource.create({
-//                 file_url: file.filename || 
-//             });
-
-//             await LectureResource.create({
-//                 lecture_id,
-//                 resources_id: resource.resource_id
-//             });
-
-//             uploadedResources.push(resource);
-//         }
-
-//         res.status(200).json({
-//             message: "Resources uploaded successfully",
-//             resources: uploadedResources
-//         });
-//     } catch (err) {
-//         console.error("Upload Lecture File Error:", err);
-//         res.status(500).json({ error: "Failed to upload lecture resources", details: err.message });
-//     }
-// };
-
-// Upload a file/resource for a lecture
 export const uploadLectureFile = async (req, res) => {
     try {
         const { lecture_id, links } = req.body; // links can be an array of URLs
@@ -165,7 +132,7 @@ export const getLecturesByModule = async (req, res) => {
                     model: Resource,
                     as: "resources",
                     through: { attributes: [] },
-                    attributes: ["resource_id", "file_url", "created_at"],
+                    attributes: ["resource_id", "file_url", "is_visible", "created_at", "display_name"],
                 },
                 {
                     model: Assessment,
@@ -400,5 +367,99 @@ export const getLecturesByTrainer = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch modules and lectures" });
+    }
+};
+
+// PATCH /api/lectures/resource/visibility/:resource_id
+export const updateResourceVisibility = async (req, res) => {
+    const { resource_id } = req.params;
+    const { is_visible } = req.body;
+
+    if (typeof is_visible !== "boolean") {
+        return res.status(400).json({ error: "is_visible must be boolean" });
+    }
+
+    try {
+        const [updated] = await Resource.update(
+            { is_visible },
+            { where: { resource_id } }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ error: "Resource not found" });
+        }
+
+        res.json({
+            message: `Resource ${is_visible ? "made visible" : "hidden"}`,
+            is_visible
+        });
+    } catch (err) {
+        console.error("Update Resource Visibility Error:", err);
+        res.status(500).json({ error: "Failed to update resource visibility" });
+    }
+};
+
+
+// PATCH /api/lectures/resource/rename/:resource_id
+export const renameResource = async (req, res) => {
+    const { resource_id } = req.params;
+    const { display_name } = req.body;
+
+    if (!display_name) {
+        return res.status(400).json({ error: "display_name is required" });
+    }
+
+    try {
+        const resource = await Resource.findByPk(resource_id);
+        if (!resource) {
+            return res.status(404).json({ error: "Resource not found" });
+        }
+
+        await resource.update({ display_name });
+
+        res.json({
+            message: "Resource filename updated",
+            resource
+        });
+    } catch (err) {
+        console.error("Rename Resource Error:", err);
+        res.status(500).json({ error: "Failed to rename resource" });
+    }
+};
+
+
+// DELETE /api/lectures/resource/:resource_id
+export const deleteResource = async (req, res) => {
+    const { resource_id } = req.params;
+
+    try {
+        const resource = await Resource.findByPk(resource_id);
+        if (!resource) {
+            return res.status(404).json({ error: "Resource not found" });
+        }
+
+        await sequelize.transaction(async (t) => {
+            await LectureResource.destroy({
+                where: { resources_id: resource_id },
+                transaction: t
+            });
+
+            await Resource.destroy({
+                where: { resource_id },
+                transaction: t
+            });
+        });
+
+        // delete file if it’s not a link
+        if (!resource.file_url.startsWith("http")) {
+            const filePath = path.join("uploads/lectures", resource.file_url);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
+
+        res.json({ message: "Resource removed successfully" });
+
+    } catch (err) {
+        console.error("Delete Resource Error:", err);
+        res.status(500).json({ error: "Failed to delete resource" });
     }
 };

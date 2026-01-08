@@ -9,10 +9,13 @@ import {
     getLecturesByModule,
     getLectureById,
     updateLectureVisibility,
-    updateLecture, 
-    deleteResources, 
-    deleteLecture, 
-    getLecturesByTrainer
+    updateLecture,
+    deleteResources,
+    deleteLecture,
+    getLecturesByTrainer,
+    updateResourceVisibility,
+    renameResource,
+    deleteResource
 } from "../controllers/lectureController.js";
 
 const router = express.Router();
@@ -56,6 +59,7 @@ router.post("/resource",
     uploadLecture.array("files", 5),
     uploadLectureFile);
 
+// Routes for Form view
 // DELETE: Delete specific resources (Used by LectureForm existing file deletion)
 router.delete("/resource/delete",
     protect,
@@ -69,5 +73,29 @@ router.get(
     getLecturesByTrainer
 );
 
+// Routes for accordion view
+// Resource visibility
+router.patch(
+    "/resource/visibility/:resource_id",
+    protect,
+    checkRole(["Trainer"]),
+    updateResourceVisibility
+);
+
+// Rename resource
+router.patch(
+    "/resource/rename/:resource_id",
+    protect,
+    checkRole(["Trainer"]),
+    renameResource
+);
+
+// Delete single resource
+router.delete(
+    "/resource/:resource_id",
+    protect,
+    checkRole(["Trainer"]),
+    deleteResource
+);
 
 export default router;

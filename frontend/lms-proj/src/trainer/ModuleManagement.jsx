@@ -182,14 +182,16 @@ export default function ModuleManagement() {
                                 <div className="card h-100 shadow-sm d-flex flex-column position-relative">
 
                                     {/* STATUS BADGE */}
-                                    <span
-                                        className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
-                                            }`}
-                                        style={{ fontSize: '0.75rem', zIndex: 10 }}
-                                        onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
-                                    >
-                                        {module.is_visible ? 'Visible' : 'Hidden'}
-                                    </span>
+                                    {userRole === "Trainer" && (
+                                        <span
+                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
+                                                }`}
+                                            style={{ fontSize: '0.75rem', zIndex: 10 }}
+                                            onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
+                                        >
+                                            {module.is_visible ? 'Visible' : 'Hidden'}
+                                        </span>
+                                    )}
 
                                     {/* Dropdown (Trainer only) */}
                                     {userRole === "Trainer" && (

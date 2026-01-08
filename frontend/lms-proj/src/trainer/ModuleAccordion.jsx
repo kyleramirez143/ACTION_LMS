@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff, Link } from "lucide-react";
+import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff, Link, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
@@ -7,9 +7,13 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
     const [showQuizMenuId, setShowQuizMenuId] = useState(null);
     const [localLectures, setLectures] = useState([]);
+    const [showResourceMenuId, setShowResourceMenuId] = useState(null);
+    const [editingResourceId, setEditingResourceId] = useState(null); // which resource is being edited
+    const [tempDisplayName, setTempDisplayName] = useState(""); // temporary input value
 
     const lectureMenuRefs = useRef([]);
     const quizMenuRefs = useRef({});
+    const resourceMenuRefs = useRef({});
     const navigate = useNavigate();
 
     // 1. RBAC & Visibility Logic: Filter content based on role
@@ -21,6 +25,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                 .map(lec => ({
                     ...lec,
                     assessments: (lec.assessments || []).filter(q => q.is_published),
+                    resources: (lec.resources || []).filter(r => r.is_visible),
                 }));
 
         setLectures(filteredLectures);
@@ -70,6 +75,96 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
         }
     };
 
+    const handleRenameResource = async (resourceId, newName) => {
+        if (!newName || newName.trim() === "") return;
+
+        try {
+            const token = localStorage.getItem("authToken");
+
+            const res = await fetch(`/api/lectures/resource/rename/${resourceId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ display_name: newName }),
+            });
+
+            if (res.ok) {
+                const updatedLectures = localLectures.map((lec) => ({
+                    ...lec,
+                    resources: lec.resources.map((r) =>
+                        r.resource_id === resourceId
+                            ? { ...r, display_name: newName }
+                            : r
+                    ),
+                }));
+                setLectures(updatedLectures);
+            } else {
+                console.error("Failed to rename resource");
+            }
+        } catch (err) {
+            console.error("Rename resource error:", err);
+        } finally {
+            setEditingResourceId(null);
+        }
+    };
+
+    const toggleResourceVisibility = async (resourceId, newStatus) => {
+        try {
+            const token = localStorage.getItem("authToken");
+            const res = await fetch(`/api/lectures/resource/visibility/${resourceId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ is_visible: newStatus }),
+            });
+
+            if (res.ok) {
+                const updatedLectures = localLectures.map((lec) => ({
+                    ...lec,
+                    resources: lec.resources.map((r) =>
+                        r.resource_id === resourceId ? { ...r, is_visible: newStatus } : r
+                    ),
+                }));
+                setLectures(updatedLectures);
+            } else {
+                console.error("Failed to update resource visibility");
+            }
+        } catch (err) {
+            console.error("Error toggling resource visibility:", err);
+        }
+    };
+
+    const handleDeleteResource = async (resourceId) => {
+        if (!window.confirm("Are you sure you want to remove this resource?")) return;
+
+        try {
+            const token = localStorage.getItem("authToken");
+            const res = await fetch(`/api/lectures/resource/${resourceId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (res.ok) {
+                const updatedLectures = localLectures.map((lec) => ({
+                    ...lec,
+                    resources: lec.resources.filter((r) => r.resource_id !== resourceId),
+                }));
+                setLectures(updatedLectures);
+            } else {
+                console.error("Failed to delete resource");
+            }
+        } catch (err) {
+            console.error("Error deleting resource:", err);
+        }
+    };
+
     return (
         <div className="accordion-wrapper">
             {localLectures.length === 0 ? (
@@ -82,15 +177,15 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                         <div className="accordion-header">
                             <div className="accordion-title-container d-flex align-items-center w-100">
                                 <span className="accordion-title flex-grow-1 cursor-pointer" onClick={() => toggleAccordion(i)}>
-                                    {lec.title}
                                     {isTrainerView && (
                                         <span
-                                            className={`badge ms-2 ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
+                                            className={`badge ms-2 me-2 p-1 ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
                                             onClick={(e) => { e.stopPropagation(); handleMakeHiddenClick(i); }}
                                         >
                                             {lec.is_visible ? 'Visible' : 'Hidden'}
                                         </span>
                                     )}
+                                    {lec.title}
                                 </span>
 
                                 {/* Trainer-Only Lecture Kebab */}
@@ -130,31 +225,154 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
 
                                 {/* Resources Section */}
                                 <h6 className="fw-bold mb-2">Resources</h6>
-                                <div className="resources-list mb-4">
+
+                                <div className="resources-container">
                                     {lec.resources?.length > 0 ? (
                                         lec.resources.map((res) => {
-                                            const isLink = res.file_url.startsWith("http://") || res.file_url.startsWith("https://");
+                                            const isLink =
+                                                res.file_url.startsWith("http://") ||
+                                                res.file_url.startsWith("https://");
+
+                                            const resourceUrl = isLink
+                                                ? res.file_url
+                                                : `${window.location.origin}/uploads/lectures/${res.file_url}`;
+
                                             return (
-                                                <a
+                                                <div
                                                     key={res.resource_id}
-                                                    href={isLink ? res.file_url : `${window.location.origin}/uploads/lectures/${res.file_url}`}
-                                                    className="resource-item d-block mb-1 text-decoration-none"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border"
                                                 >
-                                                    {isLink ? (
-                                                        <Link size={25} className="me-2 text-primary" /> // could also use a link icon if you want
+                                                    {/* Resource clickable area */}
+                                                    {editingResourceId === res.resource_id ? (
+                                                        <div className="d-flex align-items-center flex-grow-1">
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm me-2"
+                                                                value={tempDisplayName}
+                                                                autoFocus
+                                                                onChange={(e) => setTempDisplayName(e.target.value)}
+                                                                onKeyDown={async (e) => {
+                                                                    if (e.key === "Enter") {
+                                                                        await handleRenameResource(res.resource_id, tempDisplayName);
+                                                                    }
+                                                                    if (e.key === "Escape") {
+                                                                        setEditingResourceId(null);
+                                                                    }
+                                                                }}
+                                                                onBlur={async () => {
+                                                                    await handleRenameResource(res.resource_id, tempDisplayName);
+                                                                }}
+                                                            />
+                                                            <button
+                                                                className="btn btn-sm btn-primary"
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation(); // ⚡ Prevent triggering <a> click
+                                                                    await handleRenameResource(res.resource_id, tempDisplayName);
+                                                                }}
+                                                            >
+                                                                Save
+                                                            </button>
+                                                        </div>
                                                     ) : (
-                                                        <FileText size={25} className="me-2 text-primary" />
+                                                        <a
+                                                            href={resourceUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark"
+                                                        >
+                                                            {userRole === "Trainer" && (
+                                                                <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
+                                                                    {res.is_visible ? "Visible" : "Hidden"}
+                                                                </span>
+                                                            )}
+                                                            {isLink ? (
+                                                                <Link size={25} className="me-2 text-primary" />
+                                                            ) : (
+                                                                <FileText size={25} className="me-2 text-primary" />
+                                                            )}
+                                                            <span className="fw-medium text-truncate">{res.display_name || res.file_url}</span>
+                                                        </a>
                                                     )}
-                                                    {res.file_url}
-                                                </a>
+
+                                                    {/* Trainer-only Resource Kebab */}
+                                                    {isTrainerView && (
+                                                        <div
+                                                            ref={(el) =>
+                                                                (resourceMenuRefs.current[res.resource_id] = el)
+                                                            }
+                                                            className="position-relative ms-2"
+                                                        >
+                                                            <div
+                                                                className="kebab-menu-button cursor-pointer p-1"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    setShowResourceMenuId(
+                                                                        showResourceMenuId === res.resource_id
+                                                                            ? null
+                                                                            : res.resource_id
+                                                                    );
+                                                                    setShowLectureMenuIndex(-1);
+                                                                    setShowQuizMenuId(null);
+                                                                }}
+                                                            >
+                                                                <MoreVertical size={18} />
+                                                            </div>
+
+                                                            {/* Configuration Popup */}
+                                                            {showResourceMenuId === res.resource_id && (
+                                                                <ul
+                                                                    className="dropdown-menu show position-absolute end-0 shadow-sm"
+                                                                    style={{ minWidth: "200px", zIndex: 1000 }}
+                                                                >
+                                                                    {/* Visibility toggle */}
+                                                                    <li
+                                                                        className="dropdown-item cursor-pointer"
+                                                                        onClick={() => {
+                                                                            toggleResourceVisibility(res.resource_id, !res.is_visible);
+                                                                            setShowResourceMenuId(null);
+                                                                        }}
+                                                                    >
+                                                                        <Eye size={14} className="me-2" />
+                                                                        {res.is_visible ? "Hide" : "Make visible"}
+                                                                    </li>
+
+                                                                    {/* Edit filename */}
+                                                                    <li
+                                                                        className="dropdown-item cursor-pointer"
+                                                                        onClick={() => {
+                                                                            setEditingResourceId(res.resource_id);
+                                                                            setTempDisplayName(res.display_name || res.file_url);
+                                                                            setShowResourceMenuId(null);
+                                                                        }}
+                                                                    >
+                                                                        <Edit size={14} className="me-2" />
+                                                                        Edit filename
+                                                                    </li>
+
+                                                                    {/* Remove */}
+                                                                    <li
+                                                                        className="dropdown-item cursor-pointer text-danger"
+                                                                        onClick={() => {
+                                                                            handleDeleteResource(res.resource_id);
+                                                                            setShowResourceMenuId(null);
+                                                                        }}
+                                                                    >
+                                                                        <Trash2 size={14} className="me-2" />
+                                                                        Remove
+                                                                    </li>
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             );
                                         })
                                     ) : (
                                         <p className="small text-muted">No resources available.</p>
                                     )}
                                 </div>
+
 
                                 {/* Quizzes Section */}
                                 <h6 className="fw-bold mb-2">Quizzes</h6>
@@ -174,13 +392,13 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         }
                                                     }}
                                                 >
-                                                    <FileArchive size={25} className="me-2 text-primary" />
-                                                    <span className="fw-medium">{quiz.title}</span>
                                                     {isTrainerView && (
-                                                        <span className={`badge ms-2 ${quiz.is_published ? "bg-success" : "bg-danger"}`}>
+                                                        <span className={`badge ms-2 me-2 p-1 ${quiz.is_published ? "bg-success" : "bg-danger"}`}>
                                                             {quiz.is_published ? "Published" : "Hidden"}
                                                         </span>
                                                     )}
+                                                    <FileArchive size={25} className="me-2 text-primary" />
+                                                    <span className="fw-medium">{quiz.title}</span>
                                                 </div>
 
                                                 {/* Trainer-Only Quiz Kebab (Proctoring Access) */}
@@ -199,7 +417,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                     <Edit size={14} className="me-2" /> Edit Content
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
-                                                                    <ShieldAlert size={14} className="me-2 text-danger" /> Proctoring Logs
+                                                                    <ShieldAlert size={14} className="me-2 text-danger" /> Quiz Results
                                                                 </li>
                                                             </ul>
                                                         )}
