@@ -67,7 +67,6 @@ module.exports = {
     await queryInterface.addIndex('modules', ['course_id'], { name: 'idx_modules_course_id' });
     await queryInterface.addIndex('modules', ['created_by'], { name: 'idx_modules_created_by' });
     await queryInterface.addIndex('modules', ['start_date', 'end_date'], { name: 'idx_modules_date_range' });
-    await queryInterface.addIndex('modules', ['is_virtual'], { name: 'idx_modules_is_virtual' });
     await queryInterface.addIndex('modules', ['is_visible'], { name: 'idx_modules_is_visible' });
 
 

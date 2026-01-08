@@ -30,6 +30,7 @@ module.exports = {
     // Enable Extensions
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+    await queryInterface.sequelize.query(`CREATE EXTENSION IF NOT EXISTS btree_gist;`);
 
     // --------------------------
     // BATCH & CURRICULUM TABLES
