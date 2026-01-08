@@ -152,8 +152,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="search-bar-section py-3 px-4 d-flex gap-3 flex-wrap">
-        <input
+      <div className="search-bar-section py-4 px-4 d-flex gap-3 flex-wrap">
+        {/* <input
           type="text"
           className="form-control search-input"
           placeholder="Search your Available Courses"
@@ -161,7 +161,7 @@ const Navbar = () => {
         <div className="d-flex gap-2 flex-wrap">
           <button className="search-button">Search</button>
           <button className="search-button">Export</button>
-        </div>
+        </div> */}
       </div>
     </nav>
   );

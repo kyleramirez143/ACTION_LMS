@@ -252,21 +252,15 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                 autoFocus
                                                                 onChange={(e) => setTempDisplayName(e.target.value)}
                                                                 onKeyDown={async (e) => {
-                                                                    if (e.key === "Enter") {
-                                                                        await handleRenameResource(res.resource_id, tempDisplayName);
-                                                                    }
-                                                                    if (e.key === "Escape") {
-                                                                        setEditingResourceId(null);
-                                                                    }
+                                                                    if (e.key === "Enter") await handleRenameResource(res.resource_id, tempDisplayName);
+                                                                    if (e.key === "Escape") setEditingResourceId(null);
                                                                 }}
-                                                                onBlur={async () => {
-                                                                    await handleRenameResource(res.resource_id, tempDisplayName);
-                                                                }}
+                                                                onBlur={async () => await handleRenameResource(res.resource_id, tempDisplayName)}
                                                             />
                                                             <button
                                                                 className="btn btn-sm btn-primary"
                                                                 onClick={async (e) => {
-                                                                    e.stopPropagation(); // ⚡ Prevent triggering <a> click
+                                                                    e.stopPropagation(); // Prevent triggering <a> click
                                                                     await handleRenameResource(res.resource_id, tempDisplayName);
                                                                 }}
                                                             >
@@ -278,7 +272,8 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                             href={resourceUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark"
+                                                            className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark overflow-hidden"
+                                                            title={res.display_name || res.file_url} 
                                                         >
                                                             {userRole === "Trainer" && (
                                                                 <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
@@ -286,11 +281,13 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                 </span>
                                                             )}
                                                             {isLink ? (
-                                                                <Link size={25} className="me-2 text-primary" />
+                                                                <Link size={25} className="me-2 text-primary flex-shrink-0" />
                                                             ) : (
-                                                                <FileText size={25} className="me-2 text-primary" />
+                                                                <FileText size={25} className="me-2 text-primary flex-shrink-0" />
                                                             )}
-                                                            <span className="fw-medium text-truncate">{res.display_name || res.file_url}</span>
+                                                            <span className="text-truncate fw-medium" style={{ maxWidth: "calc(100% - 50px)" }}>
+                                                                {res.display_name || res.file_url}
+                                                            </span>
                                                         </a>
                                                     )}
 
