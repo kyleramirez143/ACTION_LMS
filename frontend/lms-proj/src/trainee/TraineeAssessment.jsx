@@ -76,8 +76,8 @@ export default function AssessmentDashboard() {
   // =========================
   // NAVIGATION
   // =========================
-  const openAssessment = (assessment_id) => {
-    navigate(`/trainee/assessment/${assessment_id}`);
+  const openAssessment = (assessment_id, attempt_id) => {
+    navigate(`/trainee/assessment/${assessment_id}/review?attempt=${attempt_id}`);
   };
 
   const statusClass = {
@@ -154,7 +154,7 @@ export default function AssessmentDashboard() {
                         <button
                           className="title-link"
                           type="button"
-                          onClick={() => openAssessment(r.assessment_id)}
+                          onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
                         >
                           {r.title}
                         </button>

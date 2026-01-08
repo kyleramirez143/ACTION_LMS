@@ -1,6 +1,6 @@
 import { where } from 'sequelize';
 import pkg from '../models/index.cjs';
-const { Assessment, AssessmentQuestion, AssessmentResponse, Grade, sequelize } = pkg;
+const { Assessment, AssessmentQuestion, AssessmentResponse, AssessmentAttempt, Grade, sequelize } = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
@@ -166,94 +166,138 @@ export async function deleteQuestion(req, res) {
 
 // Trainee answers per quiz
 export async function saveResponse(req, res) {
-    const { assessment_id, answers } = req.body; // answers = { [question_id]: answer }
+    const { assessment_id, answers } = req.body;
     const user_id = req.user.id;
 
+    const transaction = await sequelize.transaction();
     try {
-        for (const [question_id, answer] of Object.entries(answers)) {
-            const question = await AssessmentQuestion.findByPk(question_id, {
-                attributes: ['correct_answer', 'points']
-            });
+        // 1. Create a new entry in assessment_attempts
+        // This ensures every time they click 'Submit', a new history record is born
+        const newAttempt = await AssessmentAttempt.create({
+            assessment_id,
+            user_id,
+            start_time: req.body.start_time || new Date(),
+            end_time: new Date(),
+            status: 'completed'
+        }, { transaction });
 
+        let totalScore = 0;
+        const responsesToSave = [];
+
+        // 2. Score the answers
+        for (const [question_id, answer] of Object.entries(answers)) {
+            const question = await AssessmentQuestion.findByPk(question_id);
             if (!question) continue;
 
-            const score = String(answer || '').trim() === String(question.correct_answer).trim()
-                ? question.points
-                : 0;
+            const isCorrect = String(answer || '').trim().toLowerCase() === String(question.correct_answer).trim().toLowerCase();
+            const pointsEarned = isCorrect ? (question.points || 0) : 0;
+            totalScore += pointsEarned;
 
-            await AssessmentResponse.upsert({
-                assessment_id,
+            responsesToSave.push({
+                attempt_id: newAttempt.attempt_id, // Link to the new attempt
                 question_id,
                 user_id,
+                assessment_id,
                 answer,
-                score,
-                submitted_at: new Date()
+                score: pointsEarned
             });
         }
 
-        const totalScore = await AssessmentResponse.sum('score', {
-            where: { assessment_id, user_id }
-        });
+        // 3. Bulk insert responses & update attempt final score
+        await AssessmentResponse.bulkCreate(responsesToSave, { transaction });
+        await newAttempt.update({ total_score: totalScore }, { transaction });
 
+        // 4. Update the overall Grade (highest score or latest)
         await Grade.upsert({
             assessment_id,
             user_id,
             score: totalScore
-        });
+        }, { transaction });
 
-        res.json({ totalScore });
+        await transaction.commit();
+        res.json({ success: true, attempt_id: newAttempt.attempt_id, totalScore });
     } catch (err) {
-        console.error('saveResponses error:', err);
+        await transaction.rollback();
         res.status(500).json({ error: err.message });
     }
 }
-
 
 export async function getTraineeResults(req, res) {
     const user_id = req.user.id;
-
     try {
-        // 1️⃣ Get all grades for this user
-        const grades = await Grade.findAll({
+        const attempts = await AssessmentAttempt.findAll({
             where: { user_id },
-            include: [
-                {
-                    model: Assessment,
-                    as: 'assessment',
-                    attributes: ['assessment_id', 'title', 'passing_score']
-                }
-            ],
-            order: [['updated_at', 'DESC']]
+            include: [{
+                model: Assessment,
+                as: 'assessment',
+                attributes: ['title', 'passing_score']
+            }],
+            order: [['created_at', 'DESC']] // Show latest attempt first
         });
 
-        // 2️⃣ For each grade, fetch total points dynamically
-        const results = await Promise.all(
-            grades.map(async (g) => {
-                const totalPoints = await AssessmentQuestion.sum('points', {
-                    where: { assessment_id: g.assessment.assessment_id }
-                });
+        const results = await Promise.all(attempts.map(async (att) => {
+            const totalPoints = await AssessmentQuestion.sum('points', {
+                where: { assessment_id: att.assessment_id }
+            });
 
-                const userPercentage = (g.score / totalPoints) * 100;
-                const passed = userPercentage >= g.assessment.passing_score;
+            const userPercentage = (att.total_score / totalPoints) * 100;
+            const passed = userPercentage >= att.assessment.passing_score;
 
-                return {
-                    assessment_id: g.assessment.assessment_id,
-                    title: g.assessment.title,
-                    score: `${g.score} / ${totalPoints || 0}`,
-                    status: passed ? 'Passed' : 'Failed',
-                    feedback: passed
-                        ? 'Good work! You passed the assessment.'
-                        : 'Review the materials and try again.',
-                    date: g.updated_at
-                };
-            })
-        );
+            return {
+                attempt_id: att.attempt_id, // CRITICAL: Used for the Review link
+                assessment_id: att.assessment_id,
+                title: att.assessment.title,
+                score: `${att.total_score} / ${totalPoints || 0}`,
+                status: passed ? 'Passed' : 'Failed',
+                feedback: passed ? 'Great job!' : 'Needs improvement.',
+                date: att.end_time
+            };
+        }));
 
         res.json(results);
     } catch (err) {
-        console.error('getTraineeResults error:', err);
+        console.log(err);
         res.status(500).json({ error: err.message });
     }
 }
 
+export async function getQuizReview(req, res) {
+    const { assessment_id } = req.params;
+    const user_id = req.user.id;
 
+    try {
+        const responses = await AssessmentResponse.findAll({
+            where: { assessment_id, user_id },
+            include: [
+                {
+                    model: AssessmentQuestion,
+                    as: 'question',
+                    attributes: [
+                        'question_text',
+                        'options',
+                        'correct_answer',
+                        'explanations',
+                        'points'
+                    ]
+                }
+            ],
+            order: [['created_at', 'ASC']]
+        });
+
+        const formatted = responses.map(r => ({
+            question: r.question.question_text,
+            options: r.question.options || [],
+            correctAnswer: r.question.correct_answer,
+            explanation: r.question.explanations,
+            userAnswer: r.answer,
+            isCorrect: r.score > 0,
+            points: r.question.points
+        }));
+
+        res.json(formatted);
+
+    } catch (err) {
+        console.error("getQuizReview error:", err);
+        res.status(500).json({ error: err.message });
+    }
+}

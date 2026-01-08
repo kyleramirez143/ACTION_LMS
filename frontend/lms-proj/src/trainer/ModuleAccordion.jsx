@@ -273,7 +273,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark overflow-hidden"
-                                                            title={res.display_name || res.file_url} 
+                                                            title={res.display_name || res.file_url}
                                                         >
                                                             {userRole === "Trainer" && (
                                                                 <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>

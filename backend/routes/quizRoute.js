@@ -49,5 +49,7 @@ router.get(
     proctorController.getAssessmentResults
 );
 
+// Trainee: Review quiz after taking
+router.get('/:assessment_id/review', protect, checkRole(['Trainee']), quizController.getQuizReview)
 
 export default router;

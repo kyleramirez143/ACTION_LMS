@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
         answer: { type: DataTypes.JSON },
         score: { type: DataTypes.DECIMAL(5, 2) },
         feedback: { type: DataTypes.TEXT },
-        submitted_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+        submitted_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+        attempt_id: { type: DataTypes.UUID },
     }, {
         tableName: 'assessment_responses',
         underscored: true,
