@@ -6,10 +6,13 @@ import {
     updateBatch, 
     deleteBatch, 
     getBatchById,
-    bulkDeleteBatches
+    bulkDeleteBatches,
+    getAllBatchesForDropdown
 } from "../controllers/batchController.js";
 
 const router = express.Router();
+
+router.get("/dropdown", getAllBatchesForDropdown); // Add this line
 
 // GET all batches (with optional pagination, search, filter)
 router.get("/", getAllBatches);
@@ -28,5 +31,6 @@ router.delete("/bulk-delete", bulkDeleteBatches);
 
 router.delete("/delete/:id", deleteBatch);
 
+router.get("/:id", getBatchById);
 
 export default router;

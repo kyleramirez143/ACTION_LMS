@@ -4,133 +4,136 @@ import { jwtDecode } from "jwt-decode";
 
 function SetPeriodModule() {
     const navigate = useNavigate();
-    const { id: userId } = useParams();
-    const isEditMode = !!userId;
+    const { id } = useParams(); // Note: if this is for a batch period, 'id' might be a batchId
+    const isEditMode = !!id;
     const token = localStorage.getItem("authToken");
 
-    // --- State Management ---
+    // --- Fixed State Management (Matching the form fields) ---
     const [formData, setFormData] = useState({
-        first_name: "",
-        last_name: "",
-        email: "",
-        role: "Trainee",
-        is_active: true,
-        batch: "", // store batch ID
+        batch: "",
+        mod1_start: "", mod1_end: "",
+        mod2_start: "", mod2_end: "",
+        mod3_start: "", mod3_end: "",
+        mod4_start: "", mod4_end: "",
     });
 
     const [isLoadingData, setIsLoadingData] = useState(isEditMode);
-    const [batches, setBatches] = useState([]); // store all batches
+    const [batches, setBatches] = useState([]);
 
     // --- AUTH CHECK ---
     useEffect(() => {
         if (!token) return navigate("/");
-
         try {
             const decoded = jwtDecode(token);
-            const roles = decoded.roles || [];
-            if (!roles.includes("Admin")) navigate("/access-denied");
-        } catch (err) {
+            if (!decoded.roles?.includes("Admin")) navigate("/access-denied");
+        } catch {
             localStorage.removeItem("authToken");
             navigate("/login");
         }
     }, [token, navigate]);
 
-    // --- FETCH BATCHES (ONLY FOR TRAINEE) ---
+    // --- FETCH BATCHES ---
     useEffect(() => {
         const fetchBatches = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/batches", {
+                const res = await fetch("http://localhost:5000/api/batches/dropdown", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error("Failed to fetch batches");
                 const data = await res.json();
-                setBatches(data);
+
+                // IMPORTANT: Ensure data is an array before setting state
+                if (Array.isArray(data)) {
+                    setBatches(data);
+                } else {
+                    console.error("API Error or non-array data:", data);
+                    setBatches([]);
+                }
             } catch (err) {
                 console.error("Batch fetch error:", err);
+                setBatches([]);
             }
         };
+        fetchBatches();
+    }, [token]);
 
-        if (formData.role === "Trainee") {
-            fetchBatches();
-        }
-    }, [formData.role, token]);
-
-    // --- FETCH USER DATA (EDIT MODE ONLY) ---
     useEffect(() => {
-        if (!isEditMode) {
-            setIsLoadingData(false);
-            return;
-        }
+        if (isEditMode) {
+            const fetchExistingData = async () => {
+                try {
+                    // 1. Get the curriculum_id from this specific quarter
+                    const res = await fetch(`http://localhost:5000/api/quarters/single/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const currentQuarter = await res.json();
 
-        const fetchUserData = async () => {
-            try {
-                const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error("Failed to fetch user data for editing.");
-                const data = await res.json();
+                    if (currentQuarter && currentQuarter.curriculum_id) {
+                        // 2. Fetch all modules for that batch/curriculum
+                        const allRes = await fetch(`http://localhost:5000/api/quarters/batch/${currentQuarter.curriculum_id}`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        const modules = await allRes.json();
 
-                // Map batch name to batch ID
-                let batchId = "";
-                if (data.role === "Trainee" && batches.length > 0) {
-                    const batchObj = batches.find(b => b.name === data.batch);
-                    batchId = batchObj ? batchObj.batch_id : "";
+                        // 3. Map the array back to your flat mod1_start...mod4_end state
+                        const updatedData = { batch: currentQuarter.curriculum_id };
+                        modules.forEach((m) => {
+                            const match = m.name.match(/\d+/);
+                            if (match) {
+                                const num = match[0];
+                                // split('T')[0] ensures 2024-01-01T00:00:00 becomes 2024-01-01 for the input
+                                updatedData[`mod${num}_start`] = m.start_date?.split('T')[0] || "";
+                                updatedData[`mod${num}_end`] = m.end_date?.split('T')[0] || "";
+                            }
+                        });
+
+                        setFormData(prev => ({ ...prev, ...updatedData }));
+                    }
+                } catch (err) {
+                    console.error("Fetch Edit Data Error:", err);
+                } finally {
+                    setIsLoadingData(false);
                 }
-
-                setFormData({
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    email: data.email,
-                    role: data.role || "Trainee",
-                    is_active: data.is_active,
-                    batch: batchId,
-                });
-            } catch (err) {
-                console.error("Edit fetch error:", err);
-                alert("Error loading user data: " + err.message);
-                navigate("/admin/userroles");
-            } finally {
-                setIsLoadingData(false);
-            }
-        };
-
-        fetchUserData();
-    }, [isEditMode, userId, token, navigate, batches]);
+            };
+            fetchExistingData();
+        }
+    }, [id, isEditMode, token]);
 
     // --- HANDLERS ---
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const handleStatusChange = (e) => {
-        setFormData(prev => ({ ...prev, is_active: e.target.checked }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const method = isEditMode ? "PUT" : "POST";
-        const url = isEditMode
-            ? `http://localhost:5000/api/users/update/${userId}`
-            : "http://localhost:5000/api/users/add";
-
-        const payload = isEditMode
-            ? { ...formData, roles: [formData.role] }
-            : formData;
-
-        try {
-            if (isEditMode && String(jwtDecode(token).id) === String(userId)) {
-                alert("Self-editing of roles/status is restricted via this administrative form.");
-                return;
-            }
-        } catch (error) {
-            console.error("Token decoding error:", error);
+        // 1. PRE-SUBMIT VALIDATION
+        if (!formData.batch || formData.batch.length < 30) {
+            alert("Please select a valid Batch from the dropdown.");
+            return;
         }
+
+        const url = isEditMode
+            ? `http://localhost:5000/api/quarters/update/${userId}`
+            : "http://localhost:5000/api/quarters/set-periods";
+
+        // 2. CLEAN PAYLOAD: Backend specifically expects 'batch' as the curriculum_id
+        const payload = {
+            batch: formData.batch,
+            mod1_start: formData.mod1_start,
+            mod1_end: formData.mod1_end,
+            mod2_start: formData.mod2_start,
+            mod2_end: formData.mod2_end,
+            mod3_start: formData.mod3_start,
+            mod3_end: formData.mod3_end,
+            mod4_start: formData.mod4_start,
+            mod4_end: formData.mod4_end
+        };
+
+        console.log("Submitting Payload:", payload);
 
         try {
             const response = await fetch(url, {
-                method,
+                method: isEditMode ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -138,268 +141,170 @@ function SetPeriodModule() {
                 body: JSON.stringify(payload),
             });
 
-            const text = await response.text();
+            const result = await response.json();
 
             if (!response.ok) {
-                let errorMessage = text;
-                try {
-                    errorMessage = JSON.parse(text).message || JSON.parse(text).error || text;
-                } catch (e) { }
-                throw new Error(errorMessage);
+                throw new Error(result.error || "Server rejected the request");
             }
 
-            alert(`User ${isEditMode ? "updated" : "added"} successfully!`);
-            navigate("/admin/batch-management");
-
+            alert("Module periods saved successfully!");
+            navigate("/admin/module-management");
         } catch (err) {
-            console.error("Fetch error:", err);
-            alert(`Operation failed: ${err.message}`);
+            console.error("Submit Error:", err);
+            alert("Save failed: " + err.message);
         }
     };
 
     const formTitle = isEditMode ? "Edit Module Period" : "Set Module Period";
-    const submitButtonText = isEditMode ? "Save Changes" : "Save";
+    const submitButtonText = isEditMode ? "Save Changes" : "Set Module Period";
 
     if (isEditMode && isLoadingData) {
         return (
             <div style={styles.page}>
-                <div style={styles.card}>
-                    <h3 style={styles.title}>Loading User Data...</h3>
-                </div>
+                <div style={styles.card}><h3 style={styles.title}>Loading...</h3></div>
             </div>
         );
     }
 
-    // --- RENDER ---
     return (
         <div style={styles.page}>
             <div style={styles.card}>
                 <h3 style={styles.title}>{formTitle}</h3>
-
                 <h5 className="mb-4 text-center" style={{ fontWeight: 1000, color: "#555" }}>
                     Module Period Information
                 </h5>
 
                 <form onSubmit={handleSubmit}>
-                    {/* Batch Name */}
+                    {/* Batch Dropdown Fix */}
                     <div className="row mb-3">
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label">Batch </label>
+                                <label className="col-sm-3 col-form-label">Batch</label>
                                 <div className="col-sm-9">
-                                    <select class="form-select" aria-label="Default select example">
-                                        <option selected>Select Batch</option>
-                                        <option value="1">One</option>
-                                        <option value="2">Two</option>
-                                        <option value="3">Three</option>
+                                    <select
+                                        className="form-select"
+                                        name="batch"
+                                        value={formData.batch}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Select Batch</option>
+
+                                        {Array.isArray(batches) && batches.map((b) => {
+                                            const idToUse = b.curriculum_id || b.batch_id;
+
+                                            // LOGIC: Disable if batch is full, UNLESS we are currently editing this specific batch
+                                            const isCurrentlySelected = formData.batch === idToUse;
+                                            const isDisabled = b.isFull && !isCurrentlySelected;
+
+                                            return (
+                                                <option
+                                                    key={b.batch_id}
+                                                    value={idToUse}
+                                                    disabled={isDisabled}
+                                                    style={isDisabled ? { color: '#a0a0a0', backgroundColor: '#f8f9fa' } : {}}
+                                                >
+                                                    {b.name} {b.location} {isDisabled ? " — Modules already set" : ""}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="col">
-                            <div className="row">
-                                <div className="col-sm-9">
-                                </div>
-                            </div>
-                        </div>
+                        <div className="col"></div>
                     </div>
 
-                    {/* Module 1: Start Date & End Date */}
+                    {/* Module 1 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>
-                            Module 1
-                        </label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 1</label>
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="start_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    Start Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod1_start" value={formData.mod1_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
-
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="end_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    End Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod1_end" value={formData.mod1_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Module 2: Start Date & End Date */}
+                    {/* Module 2 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>
-                            Module 2
-                        </label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 2</label>
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="start_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    Start Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod2_start" value={formData.mod2_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
-
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="end_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    End Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod2_end" value={formData.mod2_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Module 3: Start Date & End Date */}
+                    {/* Module 3 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>
-                            Module 3
-                        </label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 3</label>
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="start_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    Start Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod3_start" value={formData.mod3_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
-
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="end_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    End Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod3_end" value={formData.mod3_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Module 4: Start Date & End Date */}
+                    {/* Module 4 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>
-                            Module 4
-                        </label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 4</label>
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="start_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    Start Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod4_start" value={formData.mod4_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
-
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="end_date" className="col-sm-3 col-form-label" style={styles.label}>
-                                    End Date
-                                </label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
                                 <div className="col-sm-9">
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        className="form-control date-input"
-                                        name="end_date"
-                                        value={formData.end_date}
-                                        onChange={handleChange}
-                                        onClick={(e) => e.target.showPicker()}
-                                        required
-                                    />
+                                    <input type="date" className="form-control" name="mod4_end" value={formData.mod4_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Buttons */}
                     <div className="mb-3 mt-4 d-flex justify-content-center">
                         <button type="submit" className="btn btn-primary rounded-pill me-2" style={styles.btn}>
                             {submitButtonText}
                         </button>
-                        <button
-                            type="button"
-                            className="btn btn-outline-primary rounded-pill"
-                            style={styles.btn}
-                            onClick={() => navigate("/admin/module-management")}
-                        >
+                        <button type="button" className="btn btn-outline-primary rounded-pill" style={styles.btn} onClick={() => navigate("/admin/module-management")}>
                             Cancel
                         </button>
                     </div>

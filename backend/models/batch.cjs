@@ -6,9 +6,9 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4,
         },
-        name: { 
-            type: DataTypes.STRING(255), 
-            allowNull: false 
+        name: {
+            type: DataTypes.STRING(255),
+            allowNull: false
         },
         location: { type: DataTypes.STRING(50) },
         start_date: { type: DataTypes.DATEONLY },
@@ -19,11 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         underscored: true,
 
         indexes: [
-                {
-                    unique: true,
-                    fields: ['name', 'location'],
-                },
-            ],
+            {
+                unique: true,
+                fields: ['name', 'location'],
+            },
+        ],
     });
 
     Batch.associate = function (models) {
@@ -32,6 +32,12 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'batch_id',
             otherKey: 'user_id',
             as: 'users'
+        });
+
+        // Inside Batch.associate
+        Batch.hasOne(models.Curriculum, {
+            foreignKey: 'batch_id',
+            as: 'curriculum'
         });
     };
 

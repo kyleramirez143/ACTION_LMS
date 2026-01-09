@@ -119,9 +119,28 @@ function UserRoleTable() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to import users");
 
-            const addedIds = data.addedUsers?.map(u => u.id) || [];
-            setNewlyImportedIds(addedIds);
-            alert(`Successfully imported users!`);
+            const added = data.addedUsers || [];
+            const errors = data.errors || [];
+
+            if (added.length === 0 && errors.length > 0) {
+                throw new Error(
+                    "Users already exists."
+                );
+            }
+
+            if (added.length > 0 && errors.length > 0) {
+                alert(
+                    `Import completed with warnings.\n\n` +
+                    `Imported: ${added.length}\n` +
+                    `Failed:\n` +
+                    errors.map(e => `• ${e.email}: ${e.error}`).join("\n")
+                );
+            }
+            else {
+                alert(`Successfully imported ${added.length} users!`);
+            }
+
+            setNewlyImportedIds(added.map(u => u.id));
             fetchUsers();
         } catch (err) {
             alert("Error importing CSV: " + err.message);

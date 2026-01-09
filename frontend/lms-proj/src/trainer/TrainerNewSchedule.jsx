@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-function NewSchedule() {
+function TrainerNewSchedule() {
     const navigate = useNavigate();
     const { id: userId } = useParams();
     const isEditMode = !!userId;
@@ -171,11 +171,40 @@ function NewSchedule() {
                                 required
                             >
                                 <option value="">Select Type</option>
+                                <option value="lecture">Lecture</option>
+                                <option value="module_session">Module</option>
+                                <option value="assessments">Assessment</option>
                                 <option value="holiday">Holiday</option>
                                 <option value="events">Events</option>
                             </select>
                         </div>
                     </div>
+
+                    {/* Conditional Dropdown: Module */}
+                    {formData.event_type === "module_session" && (
+                        <div className="row mb-3 animate-fade">
+                            <label className="col-sm-3 col-form-label">Select Module</label>
+                            <div className="col-sm-9">
+                                <select name="module_id" className="form-select" onChange={handleChange} required>
+                                    <option value="">-- Choose Module --</option>
+                                    {/* Map modules here */}
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Conditional Dropdown: Lecture */}
+                    {formData.event_type === "lecture" && (
+                        <div className="row mb-3 animate-fade">
+                            <label className="col-sm-3 col-form-label">Select Lecture</label>
+                            <div className="col-sm-9">
+                                <select name="lecture_id" className="form-select" onChange={handleChange} required>
+                                    <option value="">-- Choose Lecture --</option>
+                                    {/* Map lectures here */}
+                                </select>
+                            </div>
+                        x</div>
+                    )}
 
                     <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
@@ -389,4 +418,4 @@ const styles = {
     },
 };
 
-export default NewSchedule;
+export default TrainerNewSchedule;

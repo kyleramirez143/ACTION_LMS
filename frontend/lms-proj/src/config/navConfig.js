@@ -53,6 +53,11 @@ export const navLinks = [
     requiredRoles: ['Trainer'],
   },
   {
+    name: 'Action Calendar',
+    path: '/trainer/calendar',
+    requiredRoles: ['Trainer'],
+  },
+  {
     name: 'Dashboard',
     path: '/trainee/dashboard',
     requiredRoles: ['Trainee'],

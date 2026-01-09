@@ -1,30 +1,82 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from 'react'
+import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
+import { Link } from "react-router-dom"
 import {
     createViewDay,
     createViewMonthAgenda,
     createViewMonthGrid,
     createViewWeek,
-} from '@schedule-x/calendar';
-import { createEventsServicePlugin } from '@schedule-x/events-service';
-import 'temporal-polyfill/global';
-import '@schedule-x/theme-default/dist/index.css';
-import "./CalendarView.css";
+} from '@schedule-x/calendar'
+import { createEventsServicePlugin } from '@schedule-x/events-service'
+import 'temporal-polyfill/global'
+import '@schedule-x/theme-default/dist/index.css'
+import "./CalendarView.css"
 
-// Helper to convert date to YYYY-MM-DD
-const toYYYYMMDD = (dateValue) => {
-    if (!dateValue) return null;
-    const d = new Date(dateValue);
-    if (isNaN(d.getTime())) return null;
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-};
+// FIXED: Dates must be wrapped in Temporal.PlainDate.from()
+const RAW_EVENTS = [
+    // --- NIHONGO (Purple) ---
+    {
+        id: '1', title: 'L1 Vocab Quiz',
+        start: Temporal.PlainDate.from('2024-07-02'),
+        end: Temporal.PlainDate.from('2024-07-02'),
+        color: 'purple', subject: 'Nihongo'
+    },
+    {
+        id: '2', title: 'Kanji Introduction',
+        start: Temporal.PlainDate.from('2024-07-04'),
+        end: Temporal.PlainDate.from('2024-07-04'),
+        color: 'purple', subject: 'Nihongo'
+    },
+    {
+        id: '3', title: 'JLPT Mock Exam',
+        start: Temporal.PlainDate.from('2024-07-10'),
+        end: Temporal.PlainDate.from('2024-07-10'),
+        color: 'purple', subject: 'Nihongo'
+    },
 
-// Calendar wrapper component
-const Calendar = ({ events, selectedDate, eventsService }) => {
+    // --- PHILNITS (Orange) ---
+    {
+        id: '4', title: 'Hardware Architecture',
+        start: Temporal.PlainDate.from('2024-07-03'),
+        end: Temporal.PlainDate.from('2024-07-03'),
+        color: 'orange', subject: 'PhilNits'
+    },
+    {
+        id: '5', title: 'Binary & Logic Gates',
+        start: Temporal.PlainDate.from('2024-07-05'),
+        end: Temporal.PlainDate.from('2024-07-05'),
+        color: 'orange', subject: 'PhilNits'
+    },
+    {
+        id: '6', title: 'FE Exam Review',
+        start: Temporal.PlainDate.from('2024-07-08'),
+        end: Temporal.PlainDate.from('2024-07-09'), // Multi-day event
+        color: 'orange', subject: 'PhilNits'
+    },
+
+    // --- ORIENTATION / HR (Blue) ---
+    {
+        id: '7', title: 'Culture Fit Workshop',
+        start: Temporal.PlainDate.from('2024-07-01'),
+        end: Temporal.PlainDate.from('2024-07-01'),
+        color: 'blue', subject: 'Orientation'
+    },
+    {
+        id: '8', title: 'HR Policy Briefing',
+        start: Temporal.PlainDate.from('2024-07-12'),
+        end: Temporal.PlainDate.from('2024-07-12'),
+        color: 'blue', subject: 'Orientation'
+    },
+];
+
+function TrainerCalendarView() {
+    const [eventsService] = useState(() => createEventsServicePlugin())
+    const [visibleSubjects, setVisibleSubjects] = useState(['Nihongo', 'PhilNits', 'Orientation']);
+
+    const filteredEvents = useMemo(() => {
+        return RAW_EVENTS.filter(event => visibleSubjects.includes(event.subject));
+    }, [visibleSubjects]);
+
     const calendar = useCalendarApp({
         views: [
             createViewDay(),
@@ -32,173 +84,75 @@ const Calendar = ({ events, selectedDate, eventsService }) => {
             createViewMonthGrid(),
             createViewMonthAgenda(),
         ],
-        events,
-        selectedDate,
+        events: filteredEvents,
         plugins: [eventsService],
-    });
+    })
 
-    return <ScheduleXCalendar calendarApp={calendar} />;
-};
-
-function CalendarView() {
-    const [eventsService] = useState(() => createEventsServicePlugin());
-    const [visibleSubjects, setVisibleSubjects] = useState(['holiday', 'events', 'module_session']);
-
-    const [batches, setBatches] = useState([]);
-    const [selectedBatch, setSelectedBatch] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [dbEvents, setDbEvents] = useState([]);
-
-    // Fetch batches
-    useEffect(() => {
-        const fetchBatches = async () => {
-            try {
-                const res = await fetch("http://localhost:5000/api/batches/dropdown");
-                if (!res.ok) throw new Error("Failed to fetch batches");
-                const data = await res.json();
-                setBatches(data);
-                if (data.length) setSelectedBatch(data[0]);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchBatches();
-    }, []);
-
-    // Fetch schedules for selected batch
-    useEffect(() => {
-        if (!selectedBatch?.batch_id) return;
-
-        const fetchSchedules = async () => {
-            try {
-                const res = await fetch(`http://localhost:5000/api/schedules/batch/${selectedBatch.batch_id}`);
-                if (!res.ok) throw new Error("Failed to fetch schedules");
-
-                const data = await res.json();
-
-                const formatted = data.map((event) => {
-                    let color = "#3b82f6"; // default blue
-                    if (event.event_type === "holiday") color = "#ef4444";
-                    if (event.event_type === "exam") color = "#f59e0b";
-
-                    return {
-                        id: String(event.event_id),
-                        title: event.title,
-                        start: event.start_time.replace("T", " ").slice(0, 16),
-                        end: event.end_time.replace("T", " ").slice(0, 16),
-                        subject: event.event_type,
-                        color,
-                    };
-                });
-
-                setDbEvents(formatted);
-            } catch (err) {
-                console.error("Error fetching schedules:", err);
-            }
-        };
-
-        fetchSchedules();
-    }, [selectedBatch]);
-
-    // Compute safe selectedDate for calendar
-    const safeSelectedDate = toYYYYMMDD(selectedBatch?.start_date) || toYYYYMMDD(new Date());
-
-    // Filtered events based on visible subjects
-    const filteredEvents = useMemo(
-        () => dbEvents.filter((e) => visibleSubjects.includes(e.subject)),
-        [dbEvents, visibleSubjects]
-    );
-
-    // Toggle subject filter
     const toggleSubject = (subject) => {
-        setVisibleSubjects((prev) =>
+        setVisibleSubjects(prev =>
             prev.includes(subject)
-                ? prev.filter((s) => s !== subject)
+                ? prev.filter(s => s !== subject)
                 : [...prev, subject]
         );
-    };
-
-    // Handle batch dropdown change
-    const handleBatchChange = (e) => {
-        const batchId = e.target.value;
-        const batch = batches.find(b => b.batch_id.toString() === batchId.toString());
-        if (batch) setSelectedBatch(batch);
-    };
-
-    const getShortBatchName = (name) => {
-        if (!name) return "";
-        const match = name.match(/\d+/);
-        return match ? `B${match[0]}` : name;
-    };
-
-    const formatDateRange = (start, end) => {
-        if (!start || !end) return "No dates available";
-        const options = { month: 'short', day: 'numeric' };
-        return `${new Date(start).toLocaleDateString('en-US', options)} - ${new Date(end).toLocaleDateString('en-US', { ...options, year: 'numeric' })}`;
-    };
-
-    if (loading) return <div>Loading Batches and Schedules...</div>;
+    }
 
     return (
         <div className="user-role-card">
             <div className="d-flex justify-content-between align-items-center mb-4 flex-nowrap">
                 {/* LEFT (stacked title + date) */}
                 <div>
-                    <h3 className="section-title mb-1">
-                        {selectedBatch
-                            ? `${getShortBatchName(selectedBatch.name)} ${selectedBatch.location} - Everything About Action`
-                            : "Select a Batch"}
-                    </h3>
-                    <p className="text-muted mb-0">
-                        {selectedBatch ? formatDateRange(selectedBatch.start_date, selectedBatch.end_date) : "..."}
-                    </p>
+                    <h3 className="section-title mb-1">Batch 40 - Everything About Action</h3>
+                    <p className="text-muted mb-0">Jul 21 - Dec 12, 2025</p>
                 </div>
                 {/* RIGHT (horizontal controls) */}
                 <div className="d-flex align-items-center gap-3">
-                    <Link to="/admin/add-new-schedule" className="text-decoration-none">
+                    <Link to="/trainer/add-new-schedule" className="text-decoration-none">
                         <button type="button" className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
                             style={{ height: "45px" }}>
                             <i className="bi bi-plus-lg"></i> Add Schedule
                         </button>
                     </Link>
-                    <select className="form-select"
-                        style={{ width: "300px", height: "45px" }}
-                        value={selectedBatch?.batch_id || ""}
-                        onChange={handleBatchChange}
-                    >
-                        {batches.map(batch => (
-                            <option key={batch.batch_id} value={batch.batch_id}>
-                                {batch.name} {batch.location}
-                            </option>
-                        ))}
+                    <select className="form-select" style={{ width: "300px", height: "45px" }}>
+                        <option>Batch 40 Manila</option>
+                        <option>Batch 39 Cebu</option>
                     </select>
                 </div>
             </div>
 
+
             <div className="row">
                 <div className="col-sm-9">
-                    {safeSelectedDate && dbEvents.length > 0 && (
-                        <Calendar
-                            events={filteredEvents}
-                            selectedDate={safeSelectedDate}
-                            eventsService={eventsService}
-                        />
-                    )}
+                    <ScheduleXCalendar calendarApp={calendar} />
                 </div>
                 <div className="col-sm-3">
                     <div className="mb-4">
                         <h5 className="section-title fs-6">Filter Subjects</h5>
                         <div className="d-flex flex-column gap-2">
                             {['Nihongo', 'PhilNits', 'Orientation', 'Java'].map(sub => (
-                                <div key={sub} onClick={() => toggleSubject(sub)} className="p-2 rounded d-flex align-items-center"
+                                <div
+                                    key={sub}
+                                    onClick={() => toggleSubject(sub)}
+                                    className="p-2 rounded d-flex align-items-center"
                                     style={{
                                         cursor: 'pointer',
-                                        backgroundColor: visibleSubjects.includes(sub) ? '#f8f9fa' : 'transparent',
-                                        borderLeft: `4px solid ${sub === 'Nihongo' ? 'purple' : sub === 'PhilNits' ? 'orange' : sub === 'Orientation' ? 'blue' : '#ADD8E6'}`,
-                                    }}>
-                                    <i className={`bi ${visibleSubjects.includes(sub) ? 'bi-check-square-fill' : 'bi-square'} me-2`}></i>
+                                        backgroundColor: visibleSubjects.includes(sub) ? '#f0f0f0' : 'transparent',
+                                        borderLeft: `4px solid ${sub === 'Nihongo'
+                                            ? 'purple'
+                                            : sub === 'PhilNits'
+                                                ? 'orange'
+                                                : sub === 'Orientation'
+                                                    ? 'blue'
+                                                    : '#ADD8E6'
+                                            }`,
+                                        transition: '0.3s'
+                                    }}
+                                >
+                                    <i
+                                        className={`bi ${visibleSubjects.includes(sub)
+                                            ? 'bi-check-square-fill'
+                                            : 'bi-square'
+                                            } me-2`}
+                                    ></i>
                                     <span>{sub}</span>
                                 </div>
                             ))}
@@ -267,4 +221,5 @@ function CalendarView() {
     )
 }
 
-export default CalendarView;
+// MAKE SURE THIS LINE EXISTS AT THE VERY BOTTOM
+export default TrainerCalendarView
