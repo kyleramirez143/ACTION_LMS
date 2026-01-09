@@ -34,14 +34,17 @@ module.exports = {
     // COURSES
     await queryInterface.createTable('courses', {
       course_id: uuidColumn,
+      batch_id: foreignKey('batches', 'batch_id'),
       title: { type: Sequelize.STRING(255), allowNull: false },
       image: { type: Sequelize.STRING(255) },
       description: { type: Sequelize.TEXT },
       is_published: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
-      instructor_id: foreignKey('users', 'id', true, 'SET NULL'),
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
+
+    await queryInterface.addIndex('courses', ['batch_id'], { name: 'idx_courses_batch_id' });
+
 
     // COURSE INSTRUCTORS
     await queryInterface.createTable('course_instructors', {
@@ -59,7 +62,8 @@ module.exports = {
       description: { type: Sequelize.TEXT },
       start_date: { type: Sequelize.DATEONLY, allowNull: false },
       end_date: { type: Sequelize.DATEONLY, allowNull: false },
-      is_virtual: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
+      image: { type: Sequelize.STRING(255), allowNull: true }, 
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
@@ -67,17 +71,19 @@ module.exports = {
     await queryInterface.addIndex('modules', ['course_id'], { name: 'idx_modules_course_id' });
     await queryInterface.addIndex('modules', ['created_by'], { name: 'idx_modules_created_by' });
     await queryInterface.addIndex('modules', ['start_date', 'end_date'], { name: 'idx_modules_date_range' });
-    await queryInterface.addIndex('modules', ['is_virtual'], { name: 'idx_modules_is_virtual' });
+    await queryInterface.addIndex('modules', ['is_visible'], { name: 'idx_modules_is_visible' });
+
 
     // LECTURES
     await queryInterface.createTable('lectures', {
       lecture_id: uuidColumn,
-      course_id: foreignKey('courses', 'course_id'),
       module_id: foreignKey('modules', 'module_id'),
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
       title: { type: Sequelize.STRING(255), allowNull: false },
+      description: { type: Sequelize.STRING(255), allowNull: true },
       start_date: { type: Sequelize.DATEONLY },
       end_date: { type: Sequelize.DATEONLY },
+      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });

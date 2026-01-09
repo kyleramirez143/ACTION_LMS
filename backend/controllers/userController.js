@@ -718,7 +718,6 @@ export const importUsers = async (req, res) => {
 
                         let batchNameInput = batch ? batch.trim() : "";
                         console.log("BATCH NAME FETCHED: ", batchNameInput);
-
                         if (role === "Trainee") {
                             if (!batchNameInput) throw new Error("Batch name is required for Trainees");
 

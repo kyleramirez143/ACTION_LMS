@@ -30,6 +30,7 @@ module.exports = {
     // Enable Extensions
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
     await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+    await queryInterface.sequelize.query(`CREATE EXTENSION IF NOT EXISTS btree_gist;`);
 
     // --------------------------
     // BATCH & CURRICULUM TABLES
@@ -77,7 +78,7 @@ module.exports = {
       id: uuidColumn,
       first_name: { type: Sequelize.STRING(100) },
       last_name: { type: Sequelize.STRING(100) },
-      email: { type: Sequelize.STRING(150), allowNull: false, unique: true },
+      email: { type: Sequelize.STRING(150), allowNull: false, unique: true }, 
       is_active: { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
       profile_picture: { type: Sequelize.STRING(255) },
       location: { type: Sequelize.STRING(150) },
@@ -123,10 +124,36 @@ module.exports = {
       permission_id: foreignKey('permissions', 'id'),
       created_at: standardTimestamp,
     });
+    
+    // ONBOARDING_CHECKPOINTS
+    await queryInterface.createTable('onboarding_checkpoints', {
+
+      user_id: foreignKey('users', 'id'),
+
+      bpi_account_no: { type: Sequelize.STRING(50), allowNull: true },
+      sss_no: { type: Sequelize.STRING(50), allowNull: true },
+      tin_no: { type: Sequelize.STRING(50), allowNull: true },
+      pagibig_no: { type: Sequelize.STRING(50), allowNull: true },
+      philhealth_no: { type: Sequelize.STRING(50), allowNull: true },
+
+      uaf_ims: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      office_pc_telework: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      personal_pc_telework: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      passport_ok: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+      imf_awareness_ok: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
+
+    await queryInterface.addIndex('onboarding_checkpoints', ['user_id']);
   },
+
+  
 
   async down(queryInterface, Sequelize) {
     // Drop in reverse order to respect foreign key constraints
+    await queryInterface.dropTable('onboarding_checkpoints');
     await queryInterface.dropTable('role_permissions');
     await queryInterface.dropTable('user_roles');
     await queryInterface.dropTable('permissions');
