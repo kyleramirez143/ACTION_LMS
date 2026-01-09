@@ -27,6 +27,9 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 // Navbar & Shared
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
+import NotificationView from "./all/NotificationView.jsx";
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
@@ -41,6 +44,8 @@ import ModuleTable from "./admin/ModuleTable.jsx";
 import SetPeriodModule from "./admin/SetPeriodModule.jsx";
 import CalendarView from "./admin/CalendarView.jsx";
 import NewSchedule from "./admin/NewSchedule.jsx";
+import CheckpointView from "./admin/CheckpointView.jsx";
+import AddBatch from "./admin/AddBatch.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
@@ -50,6 +55,8 @@ import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
 import ModuleManagement from "./trainer/ModuleManagement.jsx";
 import AddModule from "./trainer/AddModule.jsx";
+import QuizManual from "./trainer/QuizManual.jsx";
+import TraineeGrade from "./trainer/TraineeGrade.jsx";
 
 //Trainer Imports
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
@@ -63,7 +70,8 @@ import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
-import AddBatch from "./admin/AddBatch.jsx";
+import ViewGrades from "./trainee/ViewGrades.jsx";
+
 
 
 function AppContent() {
@@ -103,8 +111,17 @@ function AppContent() {
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
 
+            {/* Notifications */}
+            <Route path="all/notificationview" element={<NotificationView />} />
+
+            {/* Help & Support */}
+            <Route path="all/helpandsupport" element={<HelpAndSupport />} />
+
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+            <Route path="trainer/quizmanual" element={<QuizManual />} />
+
+            
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
@@ -122,6 +139,8 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainer/quiz-manual" element={<QuizManual />} />
+            <Route path="/trainer/trainee-grades" element={<TraineeGrade />} />
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -140,12 +159,14 @@ function AppContent() {
             <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
             <Route path="/admin/calendar" element={<CalendarView/>} />
             <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
+            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
+            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
