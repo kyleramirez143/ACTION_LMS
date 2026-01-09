@@ -56,6 +56,8 @@ import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
+import TrainerCalendarView from "./trainer/TrainerCalendarView.jsx";
+import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
 
 // Trainee imports
 import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
@@ -122,6 +124,9 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
+            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule/>} />
+            
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -138,6 +143,7 @@ function AppContent() {
             <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
             <Route path="/admin/module-management" element={<ModuleTable/>} />
             <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
+            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule/>} />
             <Route path="/admin/calendar" element={<CalendarView/>} />
             <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
 

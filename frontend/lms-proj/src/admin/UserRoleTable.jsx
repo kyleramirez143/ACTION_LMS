@@ -124,7 +124,7 @@ function UserRoleTable() {
 
             if (added.length === 0 && errors.length > 0) {
                 throw new Error(
-                    errors.map(e => `${e.email}: ${e.error}`).join("\n")
+                    "Users already exists."
                 );
             }
 
@@ -135,7 +135,8 @@ function UserRoleTable() {
                     `Failed:\n` +
                     errors.map(e => `• ${e.email}: ${e.error}`).join("\n")
                 );
-            } else {
+            }
+            else {
                 alert(`Successfully imported ${added.length} users!`);
             }
 
