@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Monitor, FileArchive, CheckCircle } from 'lucide-react'; 
+import { Monitor, FileArchive, CheckCircle } from 'lucide-react';
 import './QuizModals.css';
 
 // --- Base Modal Component ---
@@ -20,7 +20,7 @@ export const ScreenAccessModal = ({ onAllow, onDeny }) => {
   if (showInstructions) {
     return <InstructionsModal onStartQuiz={onAllow} onCancel={onDeny} />;
   }
-  
+
   return (
     <Modal>
       <Monitor size={50} className="access-icon" />
@@ -84,10 +84,9 @@ export const SubmitConfirmationModal = ({ onConfirmSubmit, onCancel }) => (
 );
 
 // --- 4. Quiz Submitted / Result Modal---
-export const QuizResultModal = ({ score, total, onReview }) => {
-  const navigate = useNavigate();
-
-  const scoreRatio = score / total;
+export const QuizResultModal = ({ score, total, onReview, onExit }) => {
+  // Logic for the SVG ring
+  const scoreRatio = total > 0 ? score / total : 0;
   const circumference = 2 * Math.PI * 50;
   const dashoffset = circumference * (1 - scoreRatio);
 
@@ -116,14 +115,14 @@ export const QuizResultModal = ({ score, total, onReview }) => {
         <button
           type="button"
           className="btn-review"
-          onClick={() => navigate("/trainee/review")} // navigate to review page
+          onClick={onReview} // Call the function passed from QuizPage
         >
           Review Answers
         </button>
         <button
           type="button"
           className="btn-cancel"
-          onClick={() => navigate('/trainee/assessment')}
+          onClick={onExit} // Call the function passed from QuizPage
         >
           Exit
         </button>

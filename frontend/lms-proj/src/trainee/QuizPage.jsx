@@ -20,6 +20,7 @@ const QuizPage = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20 * 60);
+  const [submissionResult, setSubmissionResult] = useState(null);
 
   // --- AUTH CHECK ---
   useEffect(() => {
@@ -89,6 +90,9 @@ const QuizPage = () => {
   const goToQuestion = (index) => setCurrentQuestion(index);
   const allAnswered = questions.every(q => answers[q.question_id] !== undefined);
 
+  const courseId = state?.course_id;
+  const moduleId = state?.module_id;
+
   // --- SUBMIT QUIZ ---
   const onConfirmSubmit = async () => {
     setShowSubmitModal(false);
@@ -110,10 +114,13 @@ const QuizPage = () => {
       }
 
       // Upload all answers at once
-      await API.post(`/quizzes/responses`, {
+      const response = await API.post(`/quizzes/responses`, {
         assessment_id,
-        answers
+        answers,
+        start_time: state?.startTime
       }, { headers: { Authorization: `Bearer ${token}` } });
+
+      setSubmissionResult(response.data);
 
       setIsUploading(false);
       setShowResultModal(true);
@@ -232,9 +239,23 @@ const QuizPage = () => {
 
       {showResultModal && (
         <QuizResultModal
-          score={Object.keys(answers).length}
-          total={questions.length}
-          onReview={() => navigate('/trainee/review')}
+          score={submissionResult?.totalScore || 0}
+          total={questions.reduce((acc, q) => acc + (q.points || 0), 0)}
+
+          // 1. Handle Review: Navigate to the review page with the attempt UUID
+          onReview={() =>
+            navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`)
+          }
+
+          // 2. Handle Exit: Navigate to the TrainerModuleScreen route
+          onExit={() => {
+            if (courseId && moduleId) {
+              navigate(`/${courseId}/modules/${moduleId}/lectures`);
+            } else {
+              // Fallback if IDs aren't available
+              navigate('/trainee/dashboard');
+            }
+          }}
         />
       )}
 

@@ -268,6 +268,7 @@ export async function saveResponse(req, res) {
     } catch (err) {
         await transaction.rollback();
         console.error("Save response error:", err);
+        console.log("Error: ", err);
         res.status(500).json({ error: err.message });
     }
 }
