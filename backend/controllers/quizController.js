@@ -6,6 +6,7 @@ const { Assessment, AssessmentQuestion, AssessmentResponse, AssessmentAttempt, G
 export async function getQuiz(req, res) {
     const { assessment_id } = req.params;
     const userRole = req.user?.roles?.[0];
+    const user_id = req.user.id;
 
     try {
         const assessment = await Assessment.findOne({
@@ -23,6 +24,10 @@ export async function getQuiz(req, res) {
         if (userRole === "Trainee" && !assessment.is_published) {
             return res.status(403).json({ error: "Quiz not available for trainees." });
         }
+
+        const currentAttemptCount = await AssessmentAttempt.count({
+            where: { assessment_id, user_id }
+        });
 
         let totalPoints = 0;
         const questions = assessment.questions.map(q => {
@@ -43,6 +48,8 @@ export async function getQuiz(req, res) {
                 assessment_id: assessment.assessment_id,
                 title: assessment.title,
                 description: assessment.description,
+                attempts_allowed: assessment.attempts,
+                attempts_taken: currentAttemptCount,
                 attempts: assessment.attempts,
                 time_limit: assessment.time_limit,
                 due_date: assessment.due_date,

@@ -82,9 +82,12 @@ const QuizPreview = () => {
                         </div>
                     </div>
                     <div className="row">
-                        <div>
+                        <div className="col-12">
                             <strong>Attempts: </strong>
-                            <p className="text-danger">{quiz.attempts}</p>
+                            {/* Updated display: current / max */}
+                            <p className={quiz.attempts_taken >= quiz.attempts_allowed ? "text-danger fw-bold" : "text-success"}>
+                                {quiz.attempts_taken} / {quiz.attempts_allowed} attempts used
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -104,11 +107,19 @@ const QuizPreview = () => {
                         <p>No instructions provided.</p>
                     )}
 
+                    {quiz.attempts_taken >= quiz.attempts_allowed ? (
+                        <div className="alert alert-danger mt-4">
+                            You have reached the maximum number of attempts allowed for this quiz.
+                        </div>
+                    ) : null}
+
                     <button
                         className="btn btn-primary mt-4 w-100"
+                        // Disable button if limit reached
+                        disabled={quiz.attempts_taken >= quiz.attempts_allowed}
                         onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
                     >
-                        Take Quiz
+                        {quiz.attempts_taken >= quiz.attempts_allowed ? "Limit Reached" : "Take Quiz"}
                     </button>
                 </div>
             </div>
