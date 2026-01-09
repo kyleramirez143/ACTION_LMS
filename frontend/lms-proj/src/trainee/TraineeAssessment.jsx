@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./TraineeAssessment.css";
 import { Search, ArrowLeft } from "lucide-react";
 
 export default function AssessmentDashboard() {
+  const { assessment_id, attempt_id } = useParams();
   const navigate = useNavigate();
 
   // =========================
@@ -148,7 +149,7 @@ export default function AssessmentDashboard() {
                   </tr>
                 ) : (
                   displayedResults.map((r, i) => (
-                    <tr key={r.assessment_id}>
+                    <tr key={r.attempt_id}>
 
                       <td>
                         <button

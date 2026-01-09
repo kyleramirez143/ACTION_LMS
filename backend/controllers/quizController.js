@@ -170,32 +170,54 @@ export async function saveResponse(req, res) {
     const user_id = req.user.id;
 
     const transaction = await sequelize.transaction();
+
     try {
-        // 1. Create a new entry in assessment_attempts
-        // This ensures every time they click 'Submit', a new history record is born
+        // 1. Get attempt count
+        const previousAttempts = await AssessmentAttempt.count({
+            where: { assessment_id, user_id },
+            transaction
+        });
+
+        const attempt_number = previousAttempts + 1;
+
+        // 2. Calculate max score from questions
+        const questions = await AssessmentQuestion.findAll({
+            where: { assessment_id },
+            transaction
+        });
+
+        const max_score = questions.reduce(
+            (sum, q) => sum + Number(q.points || 0),
+            0
+        );
+
+        // 3. Create new attempt (ALWAYS new row)
         const newAttempt = await AssessmentAttempt.create({
             assessment_id,
             user_id,
-            start_time: req.body.start_time || new Date(),
-            end_time: new Date(),
-            status: 'completed'
+            attempt_number,
+            max_score,
+            status: "completed"
         }, { transaction });
 
         let totalScore = 0;
         const responsesToSave = [];
 
-        // 2. Score the answers
-        for (const [question_id, answer] of Object.entries(answers)) {
-            const question = await AssessmentQuestion.findByPk(question_id);
-            if (!question) continue;
+        // 4. Score answers
+        for (const q of questions) {
+            const answer = answers[q.question_id];
 
-            const isCorrect = String(answer || '').trim().toLowerCase() === String(question.correct_answer).trim().toLowerCase();
-            const pointsEarned = isCorrect ? (question.points || 0) : 0;
+            const isCorrect =
+                String(answer || "").trim().toLowerCase() ===
+                String(q.correct_answer).trim().toLowerCase();
+
+            const pointsEarned = isCorrect ? Number(q.points || 0) : 0;
+
             totalScore += pointsEarned;
 
             responsesToSave.push({
-                attempt_id: newAttempt.attempt_id, // Link to the new attempt
-                question_id,
+                attempt_id: newAttempt.attempt_id,
+                question_id: q.question_id,
                 user_id,
                 assessment_id,
                 answer,
@@ -203,24 +225,53 @@ export async function saveResponse(req, res) {
             });
         }
 
-        // 3. Bulk insert responses & update attempt final score
+        // 5. Save responses
         await AssessmentResponse.bulkCreate(responsesToSave, { transaction });
-        await newAttempt.update({ total_score: totalScore }, { transaction });
 
-        // 4. Update the overall Grade (highest score or latest)
-        await Grade.upsert({
-            assessment_id,
-            user_id,
-            score: totalScore
+        // 6. Compute final score (percentage or same)
+        const final_score = max_score > 0
+            ? ((totalScore / max_score) * 100).toFixed(2)
+            : 0;
+
+        // 7. Update attempt record
+        await newAttempt.update({
+            total_score: totalScore,
+            final_score,
+            status: "completed"
         }, { transaction });
 
+        // 8. Update Grade table (keep highest score)
+        const existingGrade = await Grade.findOne({
+            where: { assessment_id, user_id },
+            transaction
+        });
+
+        if (!existingGrade || totalScore > existingGrade.score) {
+            await Grade.upsert({
+                assessment_id,
+                user_id,
+                score: totalScore
+            }, { transaction });
+        }
+
         await transaction.commit();
-        res.json({ success: true, attempt_id: newAttempt.attempt_id, totalScore });
+
+        res.json({
+            success: true,
+            attempt_id: newAttempt.attempt_id,
+            attempt_number,
+            totalScore,
+            max_score,
+            final_score
+        });
+
     } catch (err) {
         await transaction.rollback();
+        console.error("Save response error:", err);
         res.status(500).json({ error: err.message });
     }
 }
+
 
 export async function getTraineeResults(req, res) {
     const user_id = req.user.id;
@@ -263,11 +314,12 @@ export async function getTraineeResults(req, res) {
 
 export async function getQuizReview(req, res) {
     const { assessment_id } = req.params;
+    const { attempt_id } = req.query;
     const user_id = req.user.id;
 
     try {
         const responses = await AssessmentResponse.findAll({
-            where: { assessment_id, user_id },
+            where: { assessment_id, user_id, attempt_id },
             include: [
                 {
                     model: AssessmentQuestion,

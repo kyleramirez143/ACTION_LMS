@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function ReviewPage() {
   const navigate = useNavigate();
   const { assessment_id, slug } = useParams();
+  const location = useLocation();
 
   const readableTitle = slug
     ? slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())
@@ -23,17 +24,18 @@ export default function ReviewPage() {
     const fetchReview = async () => {
       try {
         const token = localStorage.getItem("authToken");
+
+        // 1. Get the attempt UUID from the URL
+        const queryParams = new URLSearchParams(location.search);
+        const attemptId = queryParams.get('attempt');
+
+        // 2. Pass that attemptId to your backend API
         const res = await fetch(`/api/quizzes/${assessment_id}/review?attempt_id=${attemptId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+
         const data = await res.json();
         setQuizData(data);
-
-        const initialExplanations = {};
-        data.forEach((q, i) => {
-          initialExplanations[i + 1] = !q.isCorrect;
-        });
-        setShowExplanations(initialExplanations);
       } catch (err) {
         console.error("Review fetch error:", err);
       } finally {
@@ -41,7 +43,7 @@ export default function ReviewPage() {
       }
     };
     fetchReview();
-  }, [assessment_id]);
+  }, [assessment_id, location.search]);
 
   // In ReviewPage.jsx
   // useEffect(() => {

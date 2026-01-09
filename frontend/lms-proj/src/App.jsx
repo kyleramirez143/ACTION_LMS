@@ -145,7 +145,7 @@ function AppContent() {
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
-            <Route path="/trainee/assessment/:assessment_id/review/:attempt_id" element={<ReviewPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
 
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
