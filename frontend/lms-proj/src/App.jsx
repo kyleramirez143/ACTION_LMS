@@ -71,7 +71,7 @@ import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import ViewGrades from "./trainee/ViewGrades.jsx";
-
+import ProfileInfo from "./trainee/ProfileInfo";
 
 
 function AppContent() {
@@ -167,6 +167,7 @@ function AppContent() {
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
             <Route path="/trainee/viewgrades" element={<ViewGrades />} />
+            <Route path="/trainee/profileinfo" element={<ProfileInfo />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
