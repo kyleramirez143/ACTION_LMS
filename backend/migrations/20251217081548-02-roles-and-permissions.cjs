@@ -34,6 +34,7 @@ module.exports = {
     // COURSES
     await queryInterface.createTable('courses', {
       course_id: uuidColumn,
+      batch_id: foreignKey('batches', 'batch_id'),
       title: { type: Sequelize.STRING(255), allowNull: false },
       image: { type: Sequelize.STRING(255) },
       description: { type: Sequelize.TEXT },
@@ -41,6 +42,9 @@ module.exports = {
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
+
+    await queryInterface.addIndex('courses', ['batch_id'], { name: 'idx_courses_batch_id' });
+
 
     // COURSE INSTRUCTORS
     await queryInterface.createTable('course_instructors', {
