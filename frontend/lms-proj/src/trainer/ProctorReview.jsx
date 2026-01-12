@@ -5,11 +5,15 @@ import API from '../api/axios'; // Your Axios instance
 import { FaPlay, FaUser, FaClock } from 'react-icons/fa';
 
 const ProctorReview = () => {
-    const { assessment_id } = useParams();
+    const { assessment_id, user_id } = useParams();
     const [sessions, setSessions] = useState([]);
     const [selectedVideo, setSelectedVideo] = useState(null);
     const navigate = useNavigate();
     const token = localStorage.getItem('authToken');
+
+    const [stats, setStats] = useState(null);
+    const [attemptHistory, setAttemptHistory] = useState([]);
+    const [historyUser, setHistoryUser] = useState(null);
 
     // --- AUTH CHECK ---
     useEffect(() => {
@@ -33,12 +37,30 @@ const ProctorReview = () => {
             }
         })
             .then(res => res.json())
-            .then(setSessions);
+            .then(data => {
+                setSessions(data.rows);
+                setStats(data.stats);
+            });
     }, [assessment_id]);
 
+    const totalTrainees = stats?.totalTrainees || 0;
+    const tookQuiz = stats?.tookQuiz || 0;
+    const didNotTake = stats?.didNotTake || 0;
+    const passedCount = stats?.passedCount || 0;
+    const passingRate = stats?.passingRate || 0;
+
+    const openHistory = async (user_id, name) => {
+        const res = await fetch(
+            `/api/quizzes/${assessment_id}/user/${user_id}/attempts`,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        setAttemptHistory(data);
+        setHistoryUser(name);
+    };
 
     return (
-        <div className="container mt-5">
+        <div className="container mt-1">
             <h2 className="mb-4">Quiz Result</h2>
             {/* Details part */}
             <div className="mt-3">
@@ -52,19 +74,19 @@ const ProctorReview = () => {
                                 <div className="col-4">
                                     <i className="bi bi-people-fill fs-2 text-primary"></i>
                                     <div className="mt-2 fw-semibold">Total Trainees</div>
-                                    <div className="fs-4 fw-bold">30</div>
+                                    <div className="fs-4 fw-bold">{totalTrainees}</div>
                                 </div>
 
                                 <div className="col-4">
                                     <i className="bi bi-check-circle-fill fs-2 text-success"></i>
                                     <div className="mt-2 fw-semibold">Took Quiz</div>
-                                    <div className="fs-4 fw-bold">24</div>
+                                    <div className="fs-4 fw-bold">{tookQuiz}</div>
                                 </div>
 
                                 <div className="col-4">
                                     <i className="bi bi-x-circle-fill fs-2 text-danger"></i>
                                     <div className="mt-2 fw-semibold">Did Not Take</div>
-                                    <div className="fs-4 fw-bold">6</div>
+                                    <div className="fs-4 fw-bold">{didNotTake}</div>
                                 </div>
                             </div>
                         </div>
@@ -81,7 +103,7 @@ const ProctorReview = () => {
                                     width: "160px",
                                     height: "160px",
                                     borderRadius: "50%",
-                                    background: "conic-gradient(#198754 75%, #e9ecef 0)"
+                                    background: `conic-gradient(#198754 ${passingRate}%, #e9ecef 0)`
                                 }}
                             >
                                 <div
@@ -92,14 +114,14 @@ const ProctorReview = () => {
                                     }}
                                 >
                                     <div className="text-center">
-                                        <div className="fs-3 fw-bold text-success">75%</div>
+                                        <div className="fs-3 fw-bold text-success">{passingRate}%</div>
                                         <div className="small text-muted">Passed</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-4 text-center small text-muted">
-                                18 out of 24 trainees passed
+                                {passedCount} out of {tookQuiz} trainees passed
                             </div>
                         </div>
                     </div>
@@ -107,7 +129,7 @@ const ProctorReview = () => {
             </div>
 
             {/* Table and Summary part */}
-            <div className="mt-5">
+            <div className="my-5">
                 <div className="row">
                     {/* Table part */}
                     <div className="col-8">
@@ -125,87 +147,83 @@ const ProctorReview = () => {
                                 </thead>
 
                                 <tbody>
-                                    {sessions.map(session => {
-                                        const isPassed = session.score >= session.passing_score; // adjust if needed
-
-                                        return (
-                                            <tr key={session.session_id}>
-                                                {/* Student */}
-                                                <td>
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="bg-secondary rounded-circle p-2 text-white me-3">
-                                                            <FaUser />
-                                                        </div>
-                                                        <div>
-                                                            {session.user.first_name} {session.user.last_name}
-                                                            <div className="small text-muted">
-                                                                {session.user.email}
-                                                            </div>
-                                                        </div>
+                                    {sessions.map((item) => (
+                                        <tr key={item.attempt_id}>
+                                            {/* Student Info */}
+                                            <td>
+                                                <div className="d-flex align-items-center">
+                                                    <div className="bg-secondary rounded-circle p-2 text-white me-3">
+                                                        <FaUser />
                                                     </div>
-                                                </td>
-
-                                                {/* Date Started */}
-                                                <td>
-                                                    {new Date(session.created_at).toLocaleDateString()}
-                                                    <div className="small text-muted">
-                                                        {new Date(session.created_at).toLocaleTimeString()}
+                                                    <div>
+                                                        <div className="fw-bold">{item.user.first_name} {item.user.last_name}</div>
+                                                        <div className="small text-muted">Attempt #{item.attempt_number}</div>
                                                     </div>
-                                                </td>
+                                                </div>
+                                            </td>
 
-                                                {/* Time Finished */}
-                                                <td>
-                                                    {session.completed_at ? (
-                                                        <>
-                                                            {new Date(session.completed_at).toLocaleDateString()}
-                                                            <div className="small text-muted">
-                                                                {new Date(session.completed_at).toLocaleTimeString()}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <span className="text-muted small">—</span>
-                                                    )}
-                                                </td>
+                                            {/* Date Started */}
+                                            <td>
+                                                {new Date(item.created_at).toLocaleDateString()}
+                                                <div className="small text-muted">
+                                                    {new Date(item.created_at).toLocaleTimeString()}
+                                                </div>
+                                            </td>
 
-                                                {/* Score */}
-                                                <td>
-                                                    <span className="fw-semibold">
-                                                        {session.score ?? 0}
-                                                    </span>
-                                                    <span className="text-muted"> / {session.total_score}</span>
-                                                </td>
+                                            {/* Date Finished */}
+                                            <td>
+                                                {item.completed_at ? (
+                                                    <>
+                                                        {new Date(item.completed_at).toLocaleDateString()}
+                                                        <div className="small text-muted">
+                                                            {new Date(item.completed_at).toLocaleTimeString()}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-muted small">Incomplete</span>
+                                                )}
+                                            </td>
 
-                                                {/* Status */}
-                                                <td>
-                                                    <span
-                                                        className={`badge ${isPassed ? "bg-success" : "bg-danger"
-                                                            }`}
+                                            {/* Score Column: Displays 5 / 10 */}
+                                            <td>
+                                                <span className="fw-bold">{Math.floor(item.total_score)}</span>
+                                                <span className="text-muted"> / {Math.floor(item.max_score)}</span>
+                                                <div className="small text-muted">{item.final_score}%</div>
+                                            </td>
+
+                                            {/* Status */}
+                                            <td>
+                                                <span className={`badge ${item.status === 'Pass' ? "bg-success" : "bg-danger"}`}>
+                                                    {item.status}
+                                                </span>
+                                            </td>
+
+                                            {/* Action (Video) */}
+                                            <td className="text-end">
+                                                {item.recording_url ? (
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        onClick={() => setSelectedVideo(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
                                                     >
-                                                        {isPassed ? "Pass" : "Fail"}
-                                                    </span>
-                                                </td>
+                                                        <FaPlay className="me-1" /> View
+                                                    </button>
 
-                                                {/* Action */}
-                                                <td className="text-end">
-                                                    {session.recording_url ? (
-                                                        <button
-                                                            className="btn btn-sm btn-outline-primary"
-                                                            onClick={() =>
-                                                                setSelectedVideo(
-                                                                    `http://localhost:5000/uploads/recordings/${session.recording_url}`
-                                                                )
-                                                            }
-                                                        >
-                                                            <FaPlay className="me-1" />
-                                                            View
-                                                        </button>
-                                                    ) : (
-                                                        <span className="text-muted small">No Recording</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                                ) : (
+                                                    <span className="text-muted small">No Recording</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                {/* {item.user?.id && ( */}
+                                                    <button
+                                                        className="btn btn-sm btn-outline-secondary me-2"
+                                                        onClick={() => openHistory(item.user.id, item.user.first_name)}
+                                                    >
+                                                        Attempts
+                                                    </button>
+                                                {/* )}  */}
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -221,6 +239,47 @@ const ProctorReview = () => {
                 </div>
 
             </div>
+
+            {attemptHistory.length > 0 && (
+                <div className="modal d-block" style={{ background: "rgba(0,0,0,.6)" }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5>{historyUser}'s Attempt History</h5>
+                                <button className="btn-close" onClick={() => setAttemptHistory([])} />
+                            </div>
+                            <div className="modal-body">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Attempt</th>
+                                            <th>Score</th>
+                                            <th>Percentage</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {attemptHistory.map(a => (
+                                            <tr key={a.attempt_id}>
+                                                <td>#{a.attempt_number}</td>
+                                                <td>{a.total_score}/{a.max_score}</td>
+                                                <td>{a.final_score}%</td>
+                                                <td>
+                                                    <span className={`badge ${a.status === 'Pass' ? 'bg-success' : 'bg-danger'}`}>
+                                                        {a.status}
+                                                    </span>
+                                                </td>
+                                                <td>{new Date(a.created_at).toLocaleString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Video Player Modal */}
             {selectedVideo && (

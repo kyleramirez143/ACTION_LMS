@@ -153,7 +153,7 @@ export default function AssessmentDashboard() {
 
                       <td>
                         <button
-                          className="title-link"
+                          className="title-link text-primary text-decoration-underline"
                           type="button"
                           onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
                         >

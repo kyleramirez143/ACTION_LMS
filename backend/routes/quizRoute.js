@@ -53,3 +53,10 @@ router.get(
 router.get('/:assessment_id/review', protect, checkRole(['Trainee']), quizController.getQuizReview)
 
 export default router;
+
+router.get(
+    '/:assessment_id/user/:user_id/attempts',
+    protect,
+    checkRole(['Trainer']),
+    proctorController.getUserAttemptHistory
+);
