@@ -348,7 +348,7 @@ export async function getTraineeResults(req, res) {
                 score: `${att.total_score} / ${totalPoints || 0}`,
                 status: passed ? 'Passed' : 'Failed',
                 feedback: passed ? 'Great job!' : 'Needs improvement.',
-                date: att.end_time
+                date: att.created_at
             };
         }));
 
