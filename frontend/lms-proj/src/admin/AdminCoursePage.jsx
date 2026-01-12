@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import './AdminCoursePage.css';
 
 function AdminCoursePage() {
     const navigate = useNavigate();
+    const { course_id } = useParams(); // For edit mode
+    const isEditMode = Boolean(course_id);
     const token = localStorage.getItem("authToken");
 
     // AUTH CHECK
@@ -27,8 +29,9 @@ function AdminCoursePage() {
     const [courseImage, setCourseImage] = useState(null);
     const [trainers, setTrainers] = useState([]);
     const [selectedTrainers, setSelectedTrainers] = useState([]);
-
-    const apiEndpoint = `/api/courses`;
+    const [selectedBatch, setSelectedBatch] = useState("");
+    const [batches, setBatches] = useState([]);
+    const [existingImage, setExistingImage] = useState(null);
 
     // Fetch trainers
     useEffect(() => {
@@ -48,20 +51,73 @@ function AdminCoursePage() {
         fetchTrainers();
     }, []);
 
-    // Handler to add trainer
-    const handleSelectTrainer = (e) => {
-        const trainerId = e.target.value;
-        if (!trainerId) return;
+    // Fetch batches
+    useEffect(() => {
+        const fetchBatches = async () => {
+            try {
+                const res = await fetch("/api/batches", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                setBatches(Array.isArray(data) ? data : data.batches || []);
+            } catch (err) {
+                console.error("Error fetching batches:", err);
+            }
+        };
+        fetchBatches();
+    }, [token]);
 
-        const trainer = trainers.find(t => t.id === trainerId);
+    // Load course data if editing
+    useEffect(() => {
+        if (!isEditMode) return;
+
+        const fetchCourse = async () => {
+            try {
+                const res = await fetch(`/api/courses/id/${course_id}`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await res.json();
+
+                setCourseTitle(data.title || "");
+                setCourseDescription(data.description || "");
+                setSelectedBatch(data.batch_id || "");
+                setExistingImage(data.image || null);
+
+                const existingTrainers = data.course_instructors?.map(ci => ({
+                    id: ci.instructor.id,
+                    first_name: ci.instructor.first_name,
+                    last_name: ci.instructor.last_name,
+                    email: ci.instructor.email
+                })) || [];
+
+                setSelectedTrainers(existingTrainers);
+            } catch (err) {
+                console.error("Error fetching course:", err);
+            }
+        };
+        fetchCourse();
+    }, [course_id, isEditMode, token]);
+
+    const handleSelectTrainer = (e) => {
+        const id = e.target.value;
+        if (!id) return;
+
+        const trainer = trainers.find(t => t.id == id);
         if (!trainer) return;
 
-        // Avoid duplicates
-        if (!selectedTrainers.some(tr => tr.id === trainerId)) {
-            setSelectedTrainers(prev => [...prev, trainer]);
-        }
+        setSelectedTrainers(prev => [
+            ...prev,
+            {
+                id: trainer.id,
+                first_name: trainer.first_name,
+                last_name: trainer.last_name,
+                email: trainer.email
+            }
+        ]);
 
-        // Reset the dropdown to the placeholder
         e.target.value = "";
     };
 
@@ -78,11 +134,11 @@ function AdminCoursePage() {
     // CREATE COURSE
     const createCourse = async () => {
         if (!courseTitle.trim()) return alert("Course Title is required");
+        if (!selectedBatch) return alert("Please select a batch");
         if (selectedTrainers.length === 0) return alert("Select at least one trainer");
 
-        let uploadedFilename = null;
-
-        const trainerEmails = selectedTrainers.map(t => t.email);
+        let uploadedFilename = existingImage;
+        // const trainerEmails = selectedTrainers.map(t => t.email);
 
         if (courseImage) {
             const formData = new FormData();
@@ -111,17 +167,16 @@ function AdminCoursePage() {
             title: courseTitle,
             image: uploadedFilename,
             description: courseDescription,
-            trainer_email: trainerEmails, // array sent to backend
+            trainer_email: selectedTrainers.map(t => t.email),
+            batch_id: selectedBatch,
         };
 
-        const formData = new FormData();
-        formData.append("title", courseTitle);
-        formData.append("description", courseDescription);
-        formData.append("instructor_ids", JSON.stringify(selectedTrainers.map(t => t.id)));
+        const endpoint = isEditMode ? `/api/courses/${course_id}` : "/api/courses";
+        const method = isEditMode ? "PUT" : "POST";
 
         try {
-            const res = await fetch(apiEndpoint, {
-                method: "POST",
+            const res = await fetch(endpoint, {
+                method,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
@@ -130,16 +185,14 @@ function AdminCoursePage() {
             });
 
             if (res.ok) {
-                alert("Course successfully added!");
-                setCourseTitle("");
-                setCourseDescription("");
-                setSelectedTrainers([]);
-                setCourseImage(null);
+                alert(isEditMode ? "Course updated!" : "Course added!");
+                navigate("/admin/course-management");
             } else {
                 const err = await res.json();
                 alert("Error: " + err.error);
             }
         } catch (error) {
+            console.log(error);
             console.error(error);
             alert("Something went wrong. Please try again later.");
         }
@@ -148,7 +201,7 @@ function AdminCoursePage() {
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-                <h3 style={styles.title}>Add Course</h3>
+                <h3 style={styles.title}>{isEditMode ? "Edit Course" : "Add Course"}</h3>
 
                 {/* COVER PHOTO AREA */}
                 <div style={styles.profileLayout}>
@@ -158,13 +211,19 @@ function AdminCoursePage() {
                                 <img
                                     src={URL.createObjectURL(courseImage)}
                                     alt="Course Cover"
-                                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "4px" }}
+                                    style={{ width: "100%" }}
+                                />
+                            ) : existingImage ? (
+                                <img
+                                    src={`/uploads/profile/${existingImage}`}
+                                    alt="Course Cover"
+                                    style={{ width: "100%" }}
                                 />
                             ) : (
                                 <img
-                                    src="/images/default-course.jpg"   // fallback local image
+                                    src="/images/default-course.jpg"
                                     alt="Default Course"
-                                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "4px" }}
+                                    style={{ width: "100%"}}
                                 />
                             )}
                         </div>
@@ -212,25 +271,69 @@ function AdminCoursePage() {
                         </div>
                     </div>
 
+                    {/* Batch */}
+                    <div className="mb-3 row">
+                        <label className="col-12 col-sm-2 col-form-label">Batch</label>
+                        <div className="col-12 col-sm-8">
+                            <select
+                                className="form-control"
+                                value={selectedBatch}
+                                onChange={(e) => setSelectedBatch(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Batch</option>
+                                {batches.map((b) => (
+                                    <option key={b.batch_id} value={b.batch_id}>
+                                        {b.name} {b.location}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
                     {/* Trainer Multi-Select */}
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">Trainers</label>
                         <div className="col-12 col-sm-8">
-                            <select className="form-control" onChange={handleSelectTrainer} defaultValue="">
+                            <select className="form-control"
+                                onChange={(e) => {
+                                    const id = e.target.value;
+                                    if (!id) return;
+
+                                    const trainer = trainers.find(t => t.id === id);
+                                    if (!trainer) return;
+
+                                    setSelectedTrainers(prev => {
+                                        // Avoid duplicates
+                                        if (prev.some(t => t.id === trainer.id)) return prev;
+                                        return [...prev, {
+                                            id: trainer.id,
+                                            first_name: trainer.first_name,
+                                            last_name: trainer.last_name,
+                                            email: trainer.email
+                                        }];
+                                    });
+
+                                    // Reset dropdown
+                                    e.target.value = "";
+                                }}
+                                value="">
+
                                 <option value="">Select Trainer</option>
-                                {trainers.map(trainer => (
-                                    <option key={trainer.id} value={trainer.id}>
-                                        {trainer.first_name} {trainer.last_name} ({trainer.email})
-                                    </option>
-                                ))}
+                                {trainers
+                                    .filter(t => !selectedTrainers.some(st => st.id === t.id)) // avoid duplicates
+                                    .map(t => (
+                                        <option key={t.id} value={t.id}>{t.first_name} {t.last_name}</option>
+                                    ))
+                                }
                             </select>
 
                             {/* Display selected trainers */}
                             <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                                {selectedTrainers.map(tr => (
-                                    <div key={tr.id} style={styles.trainerTag}>
-                                        {tr.first_name} {tr.last_name}
-                                        <span style={styles.removeBtn} onClick={() => removeTrainer(tr.id)}>×</span>
+                                {selectedTrainers.map(t => (
+                                    <div key={t.id} style={styles.trainerTag}>
+                                        {t.first_name} {t.last_name}
+                                        <span style={styles.removeBtn} onClick={() => setSelectedTrainers(prev => prev.filter(tr => tr.id !== t.id))}>×</span>
                                     </div>
                                 ))}
                             </div>
@@ -246,7 +349,7 @@ function AdminCoursePage() {
                                 style={styles.btn}
                                 onClick={createCourse}
                             >
-                                Add
+                                {isEditMode ? "Update Course" : "Add Course"}
                             </button>
 
                             <button
@@ -260,8 +363,8 @@ function AdminCoursePage() {
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 
@@ -271,7 +374,7 @@ const styles = {
     title: { fontWeight: 600, marginBottom: "30px", color: "#333", fontFamily: "Poppins, sans-serif" },
     btn: { minWidth: "200px", padding: "10px 16px", fontWeight: 600, borderRadius: "6px", fontFamily: "Poppins, sans-serif" },
     profileLayout: { display: "flex", alignItems: "center", gap: "24px", marginBottom: "30px" },
-    imageSquare: { width: "80px", height: "80px", backgroundColor: "#e0e0e0", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" },
+    imageSquare: { width: "150px", height: "150px", backgroundColor: "#e0e0e0", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" },
     imagePlaceholder: { fontSize: "32px" },
     uploadLink: { marginLeft: "10px", fontSize: "0.9rem", color: "#0047AB", cursor: "pointer", textDecoration: "underline" },
     profileText: { fontFamily: "Poppins, sans-serif" },

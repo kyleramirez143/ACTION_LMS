@@ -5,6 +5,16 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4,
         },
+        batch_id: {
+            type: DataTypes.UUID,
+            allowNull: false,
+            references: {
+                model: "batches",
+                key: "batch_id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "CASCADE",
+        },
         title: {
             type: DataTypes.STRING(255),
             allowNull: false,
@@ -34,11 +44,13 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Course.associate = function (models) {
-        Course.hasMany(models.Module, {
-            foreignKey: "course_id",
-            as: "modules",
-        });
+        // Batch association
+        Course.belongsTo(models.Batch, { foreignKey: "batch_id", as: "batch" });
 
+        // Modules
+        Course.hasMany(models.Module, { foreignKey: "course_id", as: "modules" });
+
+        // Many-to-many CourseInstructor
         Course.hasMany(models.CourseInstructor, { foreignKey: "course_id", as: "course_instructors" });
     };
 
