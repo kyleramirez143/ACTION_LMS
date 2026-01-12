@@ -8,10 +8,12 @@ const { Op } = Sequelize;
 
 export const createCourse = async (req, res) => {
     try {
-        const { title, description, trainer_email, image } = req.body;
+        const { title, description, trainer_email, image, batch_id } = req.body;
         // const image = req.file ? req.file.filename : null;
 
         if (!title) return res.status(400).json({ error: "Title is required" });
+        if (!batch_id) return res.status(400).json({ error: "Batch is required" });
+
         if (!trainer_email || !Array.isArray(trainer_email) || trainer_email.length === 0) {
             return res.status(400).json({ error: "Trainer emails are required" });
         }
@@ -33,6 +35,7 @@ export const createCourse = async (req, res) => {
             title,
             image: image || null,
             description,
+            batch_id,
             is_published: false,
         });
 
@@ -61,7 +64,7 @@ export const createCourse = async (req, res) => {
 export const getCourses = async (req, res) => {
     try {
         const data = await Course.findAll({
-            attributes: ["course_id", "title", "image", "description", "is_published", ],
+            attributes: ["course_id", "title", "image", "description", "is_published", "batch_id"],
             include: [
                 {
                     model: CourseInstructor,
@@ -86,15 +89,29 @@ export const getCourseById = async (req, res) => {
     try {
         const { course_id } = req.params;
         const course = await Course.findOne({
-            where: { course_id }
+            where: { course_id },
+            include: [
+                {
+                    model: CourseInstructor,
+                    as: "course_instructors",
+                    include: [
+                        {
+                            model: User,
+                            as: "instructor",
+                            attributes: ["id", "first_name", "last_name", "email"]
+                        }
+                    ]
+                }
+            ]
         });
 
         res.status(200).json(course);
     } catch (err) {
         console.error("Get Course Error: ", err);
-        res.status(500).json({ error: "Failed to fetch course", details: err.message});
+        res.status(500).json({ error: "Failed to fetch course", details: err.message });
     }
-}
+};
+
 
 export const updateCourse = async (req, res) => {
     const { course_id } = req.params;
@@ -243,7 +260,7 @@ export const getTrainerCourses = async (req, res) => {
         const trainerId = req.user.id;
 
         const data = await Course.findAll({
-            where: { is_published: true},
+            where: { is_published: true },
             include: [
                 {
                     model: CourseInstructor,

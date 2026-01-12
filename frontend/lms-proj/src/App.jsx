@@ -66,6 +66,7 @@ import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
+import AdminCoursePage from "./admin/AdminCoursePage";
 
 
 function AppContent() {
@@ -86,7 +87,7 @@ function AppContent() {
             element={
               <ProtectedRoute roles={["Admin", "Trainer", "Trainee"]}>
                 <ObjectOfWebPage ex.ModuleScreen/>
-              </ProtectedRoute>
+              </ProtectedRoute>c
             }
           />
 
@@ -132,8 +133,8 @@ function AppContent() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
             <Route path="/admin/course-management" element={<AdminCourseManagement />} />
-            <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
-            <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
+            <Route path="/admin/course-management/create" element={<AdminCoursePage />} />
+            <Route path="/admin/course-management/edit/:course_id" element={<AdminCoursePage />} />
             <Route path="/admin/user-management" element={<UserRoleTable />} />
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />

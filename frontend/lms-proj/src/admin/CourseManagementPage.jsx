@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import logo from "../image/courses.svg";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -12,6 +13,11 @@ export default function CourseManagementPage() {
     const [userRole, setUserRole] = useState(null);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [page, setPage] = useState(1);
+    const [updatingVisibility, setUpdatingVisibility] = useState([]);
+    const [batches, setBatches] = useState([]);
+    const [selectedBatch, setSelectedBatch] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+
 
     // -------------------------------
     // AUTH CHECK
@@ -51,14 +57,41 @@ export default function CourseManagementPage() {
         fetchCourses();
     }, [token]);
 
-    // -------------------------------
-    // PAGINATION
-    // -------------------------------
-    const totalPages = Math.ceil(courses.length / ITEMS_PER_PAGE);
+    useEffect(() => {
+        const fetchBatches = async () => {
+            try {
+                const res = await fetch("/api/batches", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                setBatches(Array.isArray(data) ? data : data.batches || []);
+            } catch (err) {
+                console.error("Error fetching batches:", err);
+            }
+        };
+        fetchBatches();
+    }, [token]);
+
+    const handleBatchChange = (e) => {
+        setSelectedBatch(e.target.value);
+        setPage(1); // Reset to first page when filter changes
+    };
+
+    const filteredCourses = useMemo(() => {
+        if (!selectedBatch) return courses;   // All batches
+        return courses.filter(c => String(c.batch_id) === String(selectedBatch));
+    }, [courses, selectedBatch]);
+
+    const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
+
     const pagedCourses = useMemo(() => {
         const start = (page - 1) * ITEMS_PER_PAGE;
-        return courses.slice(start, start + ITEMS_PER_PAGE);
-    }, [page, courses]);
+        return filteredCourses.slice(start, start + ITEMS_PER_PAGE);
+    }, [page, filteredCourses]);
+
+    useEffect(() => {
+        if (page > totalPages) setPage(totalPages || 1);
+    }, [totalPages]);
 
     const goToPage = (p) => {
         if (p >= 1 && p <= totalPages && p !== page) setPage(p);
@@ -91,20 +124,42 @@ export default function CourseManagementPage() {
             });
 
             if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                alert(errorData.error || "Failed to update visibility");
-                // rollback
-                setCourses(prev =>
-                    prev.map(c => (c.course_id === courseId ? { ...c, is_published: !isVisible } : c))
-                );
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || "Failed to update visibility");
+            }
+        } catch (err) {
+            alert(err.message);
+            // rollback
+            setCourses((prev) =>
+                prev.map((c) => (c.course_id === courseId ? { ...c, is_published: !isVisible } : c))
+            );
+        } finally {
+            setUpdatingVisibility((prev) => prev.filter((id) => id !== courseId));
+        }
+    };
+
+    const handleDeleteCourse = async (courseId) => {
+        if (!window.confirm("Are you sure you want to delete this course?")) return;
+
+        try {
+            const res = await fetch(`/api/courses/${courseId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (res.ok) {
+                alert("Course deleted successfully!");
+                setCourses(prev => prev.filter(c => c.course_id !== courseId));
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to delete course");
             }
         } catch (err) {
             console.error(err);
-            alert("Network error. Visibility change failed.");
-            // rollback
-            setCourses(prev =>
-                prev.map(c => (c.course_id === courseId ? { ...c, is_published: !isVisible } : c))
-            );
+            alert("Something went wrong. Please try again.");
         }
     };
 
@@ -126,20 +181,64 @@ export default function CourseManagementPage() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">Courses</h3>
-                {userRole === "Admin" && (
+                {userRole === "Admin" && courses.length > 0 &&  (
                     <button
                         className="btn btn-primary"
                         onClick={() => navigate("/admin/course-management/create")}
                     >
-                        Add Course
+                        <i class="bi bi-file-earmark-plus-fill"></i> Add New Course
                     </button>
                 )}
             </div>
 
+            {courses.length > 0 && (
+                <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                    <label className="mb-0 fw-semibold">Filter by Batch:</label>
+
+                    <select
+                        className="form-select w-auto"
+                        value={selectedBatch}
+                        onChange={(e) => {
+                            setSelectedBatch(e.target.value);
+                            setPage(1);
+                        }}
+                    >
+                        <option value="">All Batches</option>
+                        {batches.map(batch => (
+                            <option key={batch.batch_id} value={batch.batch_id}>
+                                {batch.name} {batch.location}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
+
             {/* Empty */}
-            {courses.length === 0 ? (
-                <p className="text-center text-muted py-4">No courses found.</p>
+            {filteredCourses.length === 0 ? (
+                <div className="text-center text-muted py-5">
+                    <img src={logo} alt="Logo" className="img-fluid mb-3"
+                        style={{ maxWidth: "200px" }} />
+                    <h3 className="mb-0">
+                        {selectedBatch ? "No courses in this batch" : "No courses yet"}
+                    </h3>
+                    {selectedBatch ? (
+                        <p className="text-muted mb-3">This batch does not have any assigned courses yet.</p>
+                    ) : (
+                        <p className="text-muted mb-3">Start by creating your first course.</p>
+                    )}
+                    
+                    {userRole === "Admin" && !selectedBatch &&  (
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate("/admin/course-management/create")}
+                        >
+                            <i class="bi bi-file-earmark-plus-fill"></i> Add New Course
+                        </button>
+                    )}
+                </div>
             ) : (
+
                 <>
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
                         {pagedCourses.map(course => (
@@ -148,13 +247,24 @@ export default function CourseManagementPage() {
 
                                     {/* STATUS BADGE */}
                                     <span
-                                        className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${course.is_published ? 'bg-success' : 'bg-danger'
+                                        className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${course.is_published ? "bg-success" : "bg-danger"
                                             }`}
-                                        style={{ fontSize: '0.75rem', zIndex: 10, cursor: userRole === "Admin" ? 'pointer' : 'default' }}
-                                        onClick={(e) => userRole === "Admin" && handleToggleVisibility(e, course.course_id, !course.is_published)}
-                                        title={userRole === "Admin" ? "Click to toggle visibility" : ""} // tooltip for UX
+                                        style={{
+                                            fontSize: "0.75rem",
+                                            zIndex: 10,
+                                            cursor:
+                                                userRole === "Admin" && !updatingVisibility.includes(course.course_id)
+                                                    ? "pointer"
+                                                    : "default",
+                                        }}
+                                        onClick={(e) =>
+                                            userRole === "Admin" &&
+                                            !updatingVisibility.includes(course.course_id) &&
+                                            handleToggleVisibility(e, course.course_id, !course.is_published)
+                                        }
+                                        title={userRole === "Admin" ? "Click to toggle visibility" : ""}
                                     >
-                                        {course.is_published ? 'Visible' : 'Hidden'}
+                                        {course.is_published ? "Visible" : "Hidden"}
                                     </span>
 
                                     {/* Dropdown */}
@@ -181,7 +291,15 @@ export default function CourseManagementPage() {
                                                         className="dropdown-item"
                                                         onClick={() => navigate(`/admin/course-management/edit/${course.course_id}`)}
                                                     >
-                                                        Edit Course
+                                                        <i class="bi bi-pencil-fill"></i>  Edit Course
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button
+                                                        className="dropdown-item text-danger"
+                                                        onClick={() => handleDeleteCourse(course.course_id)}
+                                                    >
+                                                        <i class="bi bi-trash3-fill"></i> Delete Course
                                                     </button>
                                                 </li>
                                                 {course.is_published ? (
@@ -190,7 +308,7 @@ export default function CourseManagementPage() {
                                                             className="dropdown-item text-danger"
                                                             onClick={(e) => handleToggleVisibility(e, course.course_id, false)}
                                                         >
-                                                            Make Hidden
+                                                            <i class="bi bi-eye-slash"></i> Make Hidden
                                                         </button>
                                                     </li>
                                                 ) : (
@@ -199,7 +317,7 @@ export default function CourseManagementPage() {
                                                             className="dropdown-item text-success"
                                                             onClick={(e) => handleToggleVisibility(e, course.course_id, true)}
                                                         >
-                                                            Make Visible
+                                                            <i class="bi bi-eye"></i> Make Visible
                                                         </button>
                                                     </li>
                                                 )}
@@ -208,10 +326,7 @@ export default function CourseManagementPage() {
                                     )}
 
                                     {/* Card content */}
-                                    <div
-                                        onClick={() => navigate(`/admin/course-management/edit/${course.course_id}`)}
-                                        style={{ cursor: "pointer" }}
-                                    >
+                                    <div style={{ cursor: "pointer" }}>
                                         <div className="p-3">
                                             <div
                                                 className="bg-light rounded overflow-hidden"
