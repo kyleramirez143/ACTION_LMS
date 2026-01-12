@@ -1,6 +1,16 @@
 import { where } from 'sequelize';
 import pkg from '../models/index.cjs';
-const { Assessment, AssessmentQuestion, AssessmentResponse, AssessmentAttempt, Grade, sequelize } = pkg;
+const {
+    Course,
+    Module,
+    Lecture,
+    Assessment,
+    AssessmentQuestion,
+    AssessmentResponse,
+    AssessmentAttempt,
+    Grade,
+    sequelize
+} = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
@@ -286,12 +296,36 @@ export async function getTraineeResults(req, res) {
     try {
         const attempts = await AssessmentAttempt.findAll({
             where: { user_id },
-            include: [{
-                model: Assessment,
-                as: 'assessment',
-                attributes: ['title', 'passing_score']
-            }],
-            order: [['created_at', 'DESC']] // Show latest attempt first
+            include: [
+                {
+                    model: Assessment,
+                    as: 'assessment',
+                    attributes: ['title', 'passing_score'],
+                    include: [
+                        {
+                            model: Lecture,
+                            as: 'lectures',
+                            through: { attributes: [] }, // ignore lecture_assessments table
+                            attributes: ['lecture_id', 'title'],
+                            include: [
+                                {
+                                    model: Module,
+                                    as: 'module',
+                                    attributes: ['module_id', 'title'],
+                                    include: [
+                                        {
+                                            model: Course,
+                                            as: 'course',
+                                            attributes: ['course_id', 'title']
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            order: [['created_at', 'DESC']]
         });
 
         const results = await Promise.all(attempts.map(async (att) => {
@@ -302,10 +336,15 @@ export async function getTraineeResults(req, res) {
             const userPercentage = (att.total_score / totalPoints) * 100;
             const passed = userPercentage >= att.assessment.passing_score;
 
+            // Get the first course name (if multiple lectures exist, take the first course)
+            const courseName = att.assessment.lectures?.[0]?.module?.course?.title || 'N/A';
+            const moduleName = att.assessment.lectures?.[0]?.module?.title || 'N/A';
             return {
                 attempt_id: att.attempt_id, // CRITICAL: Used for the Review link
                 assessment_id: att.assessment_id,
                 title: att.assessment.title,
+                course: courseName,
+                module: moduleName,
                 score: `${att.total_score} / ${totalPoints || 0}`,
                 status: passed ? 'Passed' : 'Failed',
                 feedback: passed ? 'Great job!' : 'Needs improvement.',

@@ -126,6 +126,8 @@ export default function AssessmentDashboard() {
             <table className="results-table">
               <thead>
                 <tr>
+                  <th>Course</th>
+                  <th>Module</th>
                   <th>Quiz Title</th>
                   <th>Score</th>
                   <th>Status</th>
@@ -150,7 +152,12 @@ export default function AssessmentDashboard() {
                 ) : (
                   displayedResults.map((r, i) => (
                     <tr key={r.attempt_id}>
-
+                      <td>
+                        {r.course}
+                      </td>
+                      <td>
+                        {r.module}
+                      </td>
                       <td>
                         <button
                           className="title-link text-primary text-decoration-underline"
