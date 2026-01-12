@@ -3,7 +3,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
 const db = require("../models/index.cjs");
-const { Course, User, CourseInstructor, sequelize, Sequelize } = db;
+const { Course, User, UserRole, CourseInstructor, sequelize, Sequelize } = db;
 const { Op } = Sequelize;
 
 export const createCourse = async (req, res) => {
@@ -63,7 +63,15 @@ export const createCourse = async (req, res) => {
 
 export const getCourses = async (req, res) => {
     try {
+        const userRoles = req.user?.roles || []; // e.g., ["Admin"] or ["Trainee"]
+        const isAdmin = userRoles.includes("Admin");
+
+        const whereCondition = isAdmin
+            ? {} // Admin sees all courses
+            : { is_published: true };
+
         const data = await Course.findAll({
+            where: whereCondition,
             attributes: ["course_id", "title", "image", "description", "is_published", "batch_id"],
             include: [
                 {
@@ -73,7 +81,7 @@ export const getCourses = async (req, res) => {
                         {
                             model: User,
                             as: "instructor",
-                            attributes: ["id", "first_name", "last_name", "email"]
+                            attributes: ["id", "first_name", "last_name", "email"],
                         }
                     ]
                 }
@@ -90,7 +98,7 @@ export const getCourseById = async (req, res) => {
     try {
         const { course_id } = req.params;
         const course = await Course.findOne({
-            where: { course_id },
+            where: { course_id, is_published: true },
             include: [
                 {
                     model: CourseInstructor,
