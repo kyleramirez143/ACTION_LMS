@@ -81,6 +81,7 @@ export const getCourses = async (req, res) => {
         });
         res.json(data);
     } catch (e) {
+        console.log(e);
         res.status(500).json({ error: e.message });
     }
 };

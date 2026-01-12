@@ -30,9 +30,9 @@ import LoginPage from "./all/LoginPage";
 
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
-import AdminCreateCourse from './admin/AdminCoursePage';
+// import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
-import AdminCourseEditPage from './admin/AdminCourseEditPage';
+// import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
