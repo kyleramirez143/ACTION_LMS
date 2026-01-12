@@ -357,6 +357,10 @@ export default function CourseManagementPage() {
                                                         .join(", ")
                                                     : "No trainers assigned"}
                                             </p>
+                                            <p className="card-text mt-1">
+                                                <strong>Location:</strong>{" "}
+                                                {batches.find(b => String(b.batch_id) === String(course.batch_id))?.location || "No location"}
+                                            </p>
                                         </div>
                                     </div>
 
