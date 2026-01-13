@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios';
-import { SubmitConfirmationModal, QuizResultModal } from './QuizModals';
+import { SubmitConfirmationModal, QuizResultModal, TimeUpModal } from './QuizModals';
 import { RecorderState } from './recorder';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -18,6 +18,9 @@ const QuizPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(0);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20 * 60);
   const [submissionResult, setSubmissionResult] = useState(null);
@@ -61,18 +64,42 @@ const QuizPage = () => {
 
   // --- TIMER ---
   useEffect(() => {
+    if (showTimeUpModal || hasSubmitted) return;
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          setShowSubmitModal(true);
+          setShowTimeUpModal(true);
+          setAutoSubmitCountdown(5);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [showTimeUpModal, hasSubmitted]);
+
+  // --- COUNTDOWN EFFECT ---
+  useEffect(() => {
+    if (!showTimeUpModal || hasSubmitted) return;
+
+    const countdownTimer = setInterval(() => {
+      setAutoSubmitCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownTimer);
+          setShowTimeUpModal(false);
+          onConfirmSubmit();   // unified submit
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownTimer);
+  }, [showTimeUpModal, hasSubmitted]);
+
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -93,27 +120,33 @@ const QuizPage = () => {
   const courseId = state?.course_id;
   const moduleId = state?.module_id;
 
+  if (isUploading) return <p>Submitting quiz...</p>;
+
+
   // --- SUBMIT QUIZ ---
   const onConfirmSubmit = async () => {
+    if (hasSubmitted) return;
+    setHasSubmitted(true);
+
     setShowSubmitModal(false);
+    setShowTimeUpModal(false);
+    setAutoSubmitCountdown(0);
     setIsUploading(true);
 
     try {
-      // Stop recording first
       RecorderState.stop();
 
-      // Upload recording
       const chunks = RecorderState.getChunks();
       if (chunks.length > 0) {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const formData = new FormData();
         formData.append('recording', blob, `session_${sessionId}.webm`);
+
         await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
 
-      // Upload all answers at once
       const response = await API.post(`/quizzes/responses`, {
         assessment_id,
         answers,
@@ -121,17 +154,14 @@ const QuizPage = () => {
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       setSubmissionResult(response.data);
-
-      setIsUploading(false);
       setShowResultModal(true);
-
     } catch (err) {
       console.error('Submission error:', err);
-      alert('Failed to submit quiz. Please try again.');
+      alert('Failed to submit quiz.');
+    } finally {
       setIsUploading(false);
     }
   };
-
 
   if (!questions.length) return <p>Loading quiz...</p>;
 
@@ -196,7 +226,7 @@ const QuizPage = () => {
               )}
             </div>
 
-            {allAnswered && (
+            {allAnswered && !hasSubmitted && (
               <button className="btn btn-success" onClick={() => setShowSubmitModal(true)}>
                 Submit Quiz
               </button>
@@ -258,6 +288,8 @@ const QuizPage = () => {
           }}
         />
       )}
+
+      {showTimeUpModal && <TimeUpModal countdown={autoSubmitCountdown} />}
 
       {isUploading && <div className="alert alert-info mt-3">Submitting quiz...</div>}
     </div>
