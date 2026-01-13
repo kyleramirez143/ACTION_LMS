@@ -93,7 +93,7 @@ export async function saveQuizConfig(req, res) {
         scoreVisibility,
         includeExplanationIfWrong,
         isPublished,
-        dueDate,
+        due_date,
     } = req.body;
 
     try {
@@ -111,7 +111,9 @@ export async function saveQuizConfig(req, res) {
             show_explanations: includeExplanationIfWrong ?? assessment.show_explanations,
             description: description || assessment.description,
             is_published: isPublished ?? assessment.is_published,
-            due_date: dueDate !== undefined ? dueDate : assessment.due_date,
+            due_date: due_date === null || due_date === ""
+                ? null
+                : due_date,
         });
 
         res.json({ success: true, message: "Quiz configuration saved successfully!" });

@@ -3,19 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./ReviewPublish.css";
 
-/**
- * ReviewPublish - Trainer UI to review questions and publish quiz
- * - Supports Nihongo answer fields (dynamic)
- * - Supports dynamic multiple-choice options (add / remove / reletter)
- *
- * Assumes backend endpoints:
- * GET  /api/quizzes/:assessment_id
- * PUT  /api/quizzes/:assessment_id
- * PUT  /api/quizzes/questions/:question_id
- * POST /api/quizzes/questions
- * DELETE /api/quizzes/questions/:question_id
- */
-
 const ReviewPublish = () => {
   const { assessment_id, course_id, module_id } = useParams();
   const [quiz, setQuiz] = useState(null);
@@ -89,11 +76,18 @@ const ReviewPublish = () => {
 
         setOriginalQuestions(JSON.parse(JSON.stringify(questions)));
 
+        const formatForDatetimeLocal = (dateString) => {
+          const d = new Date(dateString);
+          const offset = d.getTimezoneOffset() * 60000;
+          const local = new Date(d.getTime() - offset);
+          return local.toISOString().slice(0, 16);
+        };
+
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
           timeLimit: data.quiz.time_limit ?? 30,
-          dueDate: data.quiz.due_date ? data.quiz.due_date.slice(0, 16) : "",
+          dueDate: data.quiz.due_date ? formatForDatetimeLocal(data.quiz.due_date) : "",
           noDueDate: !data.quiz.due_date,
           description: data.quiz.description || "",
           screenMonitoring: data.quiz.screen_monitoring ?? true,
@@ -427,52 +421,6 @@ const ReviewPublish = () => {
               )}
             </>
           )}
-
-          {/* --- TEXT FIELD FOR FREE-TEXT QUESTIONS --- */}
-          {/* {isFreeText && (
-            <div className="mb-2 mt-2">
-              <label>Answer:</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  className="form-control"
-                  value={q.correct_answer || ""}
-                  onChange={(e) => handleQuestionChange(index, "correct_answer", e.target.value)}
-                />
-              ) : (
-                <p className="text-success">{q.correct_answer || "No answer provided"}</p>
-              )}
-            </div>
-          )} */}
-
-          {/* --- NIHONGO ANSWER FIELDS --- */}
-          {/* {isFreeText && (
-            <div className="mb-2 mt-2">
-              <label><strong>Answer Fields</strong></label>
-              {Array.isArray(q.answers) && q.answers.length > 0 ? (
-                q.answers.map((ans, aIndex) => (
-                  <div key={aIndex} className="d-flex align-items-center mb-2">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={ans}
-                      onChange={(e) => handleAnswerChange(index, aIndex, e.target.value)}
-                    />
-                    {isEditing && (
-                      <button className="btn btn-danger btn-sm ms-2" onClick={() => handleRemoveAnswer(index, aIndex)}>Remove</button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-muted mb-2">No answer fields defined.</div>
-              )}
-              {isEditing && (
-                <button className="btn btn-outline-success btn-sm" onClick={() => handleAddAnswer(index)}>
-                  + Add Answer Field
-                </button>
-              )}
-            </div>
-          )} */}
 
           {/* --- EXPLANATION --- */}
           {q.correct_answer && !isEditing && <p className="text-success mb-1 mt-2"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>}

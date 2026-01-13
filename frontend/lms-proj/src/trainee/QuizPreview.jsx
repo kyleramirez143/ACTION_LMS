@@ -12,6 +12,10 @@ const QuizPreview = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const isExpired = quiz?.due_date
+        ? new Date(quiz.due_date) < new Date()
+        : false;
+
     // Fetch Quiz Details
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -84,12 +88,16 @@ const QuizPreview = () => {
                     <div className="row">
                         <div className="col-12">
                             <strong>Attempts: </strong>
-                            {/* Updated display: current / max */}
-                            <p className={quiz.attempts_taken >= quiz.attempts_allowed ? "text-danger fw-bold" : "text-success"}>
+                            <p className={
+                                quiz.attempts_taken >= quiz.attempts_allowed || isExpired
+                                    ? "text-danger fw-bold"
+                                    : "text-success"
+                            }>
                                 {quiz.attempts_taken} / {quiz.attempts_allowed} attempts used
                             </p>
                         </div>
                     </div>
+
                 </div>
 
                 <hr />
@@ -97,6 +105,11 @@ const QuizPreview = () => {
                 {/* Quiz Instructions */}
                 <div className="quiz-preview-center">
                     <h3>Instructions</h3>
+                    {isExpired && (
+                        <div className="alert alert-danger mt-3">
+                            This quiz is already past its due date and can no longer be taken.
+                        </div>
+                    )}
                     {quiz.description ? (
                         <ol>
                             {quiz.description.split("\n").map((line, idx) => (
@@ -115,12 +128,16 @@ const QuizPreview = () => {
 
                     <button
                         className="btn btn-primary mt-4 w-100"
-                        // Disable button if limit reached
-                        disabled={quiz.attempts_taken >= quiz.attempts_allowed}
+                        disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
                         onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
                     >
-                        {quiz.attempts_taken >= quiz.attempts_allowed ? "Limit Reached" : "Take Quiz"}
+                        {isExpired
+                            ? "Quiz Expired"
+                            : quiz.attempts_taken >= quiz.attempts_allowed
+                                ? "Limit Reached"
+                                : "Take Quiz"}
                     </button>
+
                 </div>
             </div>
         </div>
