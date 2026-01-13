@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // ✅ Added axios
 import "./QuizManual.css";
 
 function QuizManual() {
   const navigate = useNavigate();
   const [quizType, setQuizType] = useState("Multiple Choice");
   const [questions, setQuestions] = useState([]);
+
   const [newQuestion, setNewQuestion] = useState({
     question: "",
     options: { a: "", b: "", c: "", d: "" },
@@ -13,13 +15,17 @@ function QuizManual() {
     explanation: "",
   });
 
+  /* -------------------------------
+     ADD QUESTION
+  -------------------------------- */
   const handleAddQuestion = () => {
-    if (!newQuestion.question) {
+    if (!newQuestion.question.trim()) {
       alert("Please enter a question.");
       return;
     }
 
     setQuestions([...questions, newQuestion]);
+
     setNewQuestion({
       question: "",
       options: { a: "", b: "", c: "", d: "" },
@@ -29,23 +35,60 @@ function QuizManual() {
   };
 
   const handleOptionChange = (key, value) => {
-    setNewQuestion({
-      ...newQuestion,
-      options: { ...newQuestion.options, [key]: value },
-    });
+    setNewQuestion((prev) => ({
+      ...prev,
+      options: { ...prev.options, [key]: value },
+    }));
   };
 
-  const handleSaveQuiz = () => {
+  /* -------------------------------
+     SAVE QUIZ → REVIEW & PUBLISH
+  -------------------------------- */
+  const handleSaveQuiz = async () => {
     if (questions.length === 0) {
       alert("Add at least one question before saving!");
       return;
     }
 
-    // TODO: Replace with your API call to save the quiz
-    console.log("Quiz saved:", { quizType, questions });
+    const transformedQuestions = questions.map((q) => ({
+      question_text: q.question,
+      options: quizType === "Multiple Choice" ? q.options : { a: q.options.a || "" },
+      correct_answer: q.correctAnswer.toLowerCase(),
+      explanation: q.explanation,
+      section: "General",
+    }));
 
-    alert("Quiz saved successfully!");
-    navigate("/trainer/dashboard"); // Redirect to Trainer Dashboard
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.post(
+        "/api/manual-quizzes",
+        {
+          title: "Manual Quiz",
+          description: "",
+          attempts: 1,
+          timeLimit: 30,
+          passingScore: 70,
+          questions: transformedQuestions,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { assessmentId } = res.data;
+
+      // Save draft locally for review
+      localStorage.setItem(
+        "manualQuizDraft",
+        JSON.stringify({
+          questions: transformedQuestions,
+          settings: { title: "Manual Quiz" },
+        })
+      );
+
+      navigate(`/trainer/reviewmanual/${assessmentId}`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save quiz.");
+    }
   };
 
   const handleDiscardQuiz = () => {
@@ -62,7 +105,7 @@ function QuizManual() {
 
   return (
     <div className="manual-container-full">
-      {/* Left Panel: Manual Input */}
+      {/* LEFT PANEL */}
       <div className="manual-left p-4 shadow-sm rounded">
         <h3 className="mb-4">Manual Quiz Input</h3>
 
@@ -84,21 +127,19 @@ function QuizManual() {
           ))}
         </div>
 
-        {/* Question Input */}
+        {/* Question */}
         <div className="mb-3">
           <label className="form-label fw-bold">Question</label>
           <textarea
             className="form-control mb-2"
             rows={4}
             value={newQuestion.question}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, question: e.target.value })
-            }
+            onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
             placeholder="Type your question here..."
           />
         </div>
 
-        {/* Options for Multiple Choice */}
+        {/* Options */}
         {quizType === "Multiple Choice" && (
           <div className="mb-3">
             {["a", "b", "c", "d"].map((key) => (
@@ -121,9 +162,7 @@ function QuizManual() {
             type="text"
             className="form-control"
             value={newQuestion.correctAnswer}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })
-            }
+            onChange={(e) => setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })}
           />
         </div>
 
@@ -134,19 +173,16 @@ function QuizManual() {
             className="form-control"
             rows={3}
             value={newQuestion.explanation}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, explanation: e.target.value })
-            }
-            placeholder="Add explanation if needed..."
+            onChange={(e) => setNewQuestion({ ...newQuestion, explanation: e.target.value })}
           />
         </div>
 
-        <button className="btn btn-primary mb-4 w-100" onClick={handleAddQuestion}>
+        <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
           + Add Question
         </button>
       </div>
 
-      {/* Right Panel: Quiz Preview */}
+      {/* RIGHT PANEL */}
       <div className="manual-right p-4 shadow-sm rounded">
         <h3 className="mb-3">Quiz Preview</h3>
 
@@ -155,12 +191,14 @@ function QuizManual() {
         {questions.map((q, index) => (
           <div className="card mb-3 shadow-sm" key={index}>
             <div className="card-body">
-              <h5>Q{index + 1}: {q.question}</h5>
+              <h5>
+                Q{index + 1}: {q.question}
+              </h5>
 
               {quizType === "Multiple Choice" && (
                 <ul className="list-group list-group-flush mb-2">
                   {Object.entries(q.options).map(([k, v]) => (
-                    <li className="list-group-item" key={k}>
+                    <li key={k} className="list-group-item">
                       <strong>{k.toUpperCase()}.</strong> {v}
                     </li>
                   ))}
@@ -168,8 +206,7 @@ function QuizManual() {
               )}
 
               <p className="text-success mb-1">
-                <strong>Answer:</strong>{" "}
-                {quizType === "Multiple Choice" ? q.correctAnswer.toUpperCase() : q.options.a}
+                <strong>Answer:</strong> {q.correctAnswer.toUpperCase()}
               </p>
 
               {q.explanation && (

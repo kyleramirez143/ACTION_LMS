@@ -29,7 +29,7 @@
 }
 
 .navbar-wrapper + * {
-  padding-top: 140px; /* navbar + search bar */
+  padding-top: 100px; /* navbar + search bar */
 }
 
 /* ================= LOGO ================= */

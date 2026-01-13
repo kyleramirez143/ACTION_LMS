@@ -63,6 +63,7 @@ import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
+import ReviewManual from "./trainer/ReviewManual.jsx";
 
 // Trainee imports
 import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
@@ -120,6 +121,8 @@ function AppContent() {
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="trainer/quizmanual" element={<QuizManual />} />
+            <Route path="/trainer/reviewmanual/:assessmentId" element={<ReviewManual />} />
+
 
             
 
@@ -129,6 +132,8 @@ function AppContent() {
             <Route path="/trainer/course-management" element={<CoursePage />} />
             <Route path="/:course_id/modules" element={<ModuleManagement />} />
             <Route path="/trainer/:course_id/modules/:module_id/quizzes/:assessment_id" element={<ReviewPublish />} />
+            <Route path="/review-publish" element={<ReviewPublish />} />
+
 
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
             <Route path="/trainer/:course_id/modules/:module_id/edit" element={<AddModule />} />
@@ -139,7 +144,6 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
-            <Route path="/trainer/quiz-manual" element={<QuizManual />} />
             <Route path="/trainer/trainee-grades" element={<TraineeGrade />} />
 
             {/* Admin Side Routes */}

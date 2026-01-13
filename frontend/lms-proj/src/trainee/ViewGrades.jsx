@@ -1,119 +1,62 @@
 import React, { useState } from "react";
 import "./ViewGrades.css";
 
-/* ========================
-   TABS
-======================== */
-const TABS = [
-  "Skill Checks",
-  "Practice Exam",
-  "Mock Exam",
-  "Course-end",
-  "Vocabulary Test",
-  "Lesson Test",
-  "Kanji Homework",
-  "Kanji Test",
-  "Oral Exam",
+const TABS = ["Summary of Grades", "PhilNITS", "Nihongo"];
+
+const SUMMARY_DATA = [
+  { code: "M1-1", category: "Attendance", weight: "5%", criteria: "90.00", rating: "98.21", assessment: "Pass", rank: "12", remarks: "" },
+  { code: "M1-2", category: "PhilNITS / Gen IT", weight: "55%", criteria: "61.00", rating: "63.45", assessment: "Pass", rank: "10", remarks: "" },
+  { code: "M1-3", category: "日本語", weight: "40%", criteria: "66.00", rating: "83.97", assessment: "Pass", rank: "9", remarks: "" },
+  { code: "", category: "OVERALL", weight: "100%", criteria: "64.45", rating: "73.40", assessment: "Pass", rank: "10", remarks: "PASSED", overall: true },
 ];
 
-/* ========================
-   MOCK DATA
-======================== */
-const DATA = {
-  "Skill Checks": [
-    { title: "P1 - 1 Basic Theory", due: "12/19/2025 · 3:00 PM", score: "14/20" },
-    { title: "P1 - 2 Data Structure", due: "12/19/2025 · 3:00 PM", score: "11/20", alert: true },
-    { title: "P1 - 3 Algorithm", due: "12/19/2025 · 3:00 PM", score: "16/20" },
-  ],
+const PHILNITS_DATA = [
+  { item: "Skill Checks", criteria: 70, rating: 74.36 },
+  { item: "Course-end Exams", criteria: 70, rating: 86.33 },
+  { item: "Practice Exam 1", criteria: 50, rating: 50.0 },
+  { item: "Mock Exam 1-A", criteria: 60, rating: 60.0 },
+  { item: "Mock Exam 1-B", criteria: 60, rating: 55.0 },
+];
 
-  "Practice Exam": [
-    { title: "PhilNITS Practice Exam 1", due: "12/19/2025 · 3:00 PM", score: "48/60" },
-    { title: "PhilNITS Practice Exam 2", due: "12/19/2025 · 3:00 PM", score: "35/60", alert: true },
-  ],
+const NIHONGO_COMBINED = [
+  { category: "Attendance", criteria: 90, rating: 100 },
+  { category: "Homework", criteria: 70, rating: 98 },
+  { category: "Work Etiquette", criteria: 70, rating: 97 },
+  { category: "N5M1", criteria: 50, rating: 62 },
+  { category: "Oral 1", criteria: 70, rating: 96 },
+];
 
-  "Mock Exam": [
-    { title: "Mock Exam 1", due: "01/05/2026 · 1:00 PM", score: "52/60" },
-    { title: "Mock Exam 2", due: "01/05/2026 · 1:00 PM", score: "52/60" },
-  ],
-
-  "Course-end": [
-    { title: "Course-end P1 Basic Theory", due: "01/30/2026 · 5:00 PM", score: "85/100" },
-  ],
-
-  "Vocab Test": [
-    { title: "Vocabulary Lesson 2", due: "01/10/2026 · 10:00 AM", score: "18/20" },
-  ],
-
-  "Lesson Test": [
-    { title: "Lesson 2", due: "01/12/2026 · 3:00 PM", score: "9/10" },
-  ],
-
-  "Kanji Homework": [
-    { title: "Kanji Lesson 1", due: "01/08/2026 · 11:59 PM", score: "20/20" },
-  ],
-
-  "Kanji Test": [
-    { title: "Kanji Lesson 1 - 3", due: "01/15/2026 · 9:00 AM", score: "17/20" },
-  ],
-
-  "Oral Exam": [
-    { title: "Oral Exam 1", due: "01/20/2026 · 2:00 PM", score: "28/30" },
-  ],
+const NIHONGO_QUIZZES = {
+  criteria: 70,
+  weeks: [88, 83, 75, 85, 87, 83],
 };
 
 const GradeView = () => {
-  const [activeTab, setActiveTab] = useState("Skill Checks");
-  const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("Summary of Grades");
+  const [selectedQuarter, setSelectedQuarter] = useState("");
 
-  const rows = DATA[activeTab] || [];
-
-  /* ========================
-     PRINT HANDLER
-  ======================== */
-  const handlePrint = () => {
-    window.print();
-  };
-
-  /* ========================
-     TOTAL COMPUTATION
-  ======================== */
-  const calculateTotal = () => {
-    if (rows.length === 0) return 0;
-
-    let totalPercent = 0;
-    rows.forEach(row => {
-      if (!row.score) return;
-      const [scored, max] = row.score.split("/").map(Number);
-      totalPercent += (scored / max) * 100;
-    });
-
-    return Math.round(totalPercent / rows.length);
-  };
-
-  const totalPercent = calculateTotal();
-  const isPass = totalPercent >= 75;
+  const handlePrint = () => window.print();
 
   return (
     <div className="gradeview-container">
-       <h3 className="gradeview-title">Grades — {activeTab}</h3>
-      {/* Filters + Print */}
+      <h3 className="gradeview-title">Quarterly Evaluation — {activeTab}</h3>
+
+      {/* FILTER + PRINT */}
       <div className="row align-items-center mb-3 no-print">
         <div className="col-md-9 d-flex align-items-center gap-2">
           <span className="filter-label">Filter by:</span>
-
-          <select className="form-select form-select-sm w-auto">
-            <option disabled selected>Module</option>
-            <option>Module 1</option>
-            <option>Module 2</option>
-          </select>
-
-          <select className="form-select form-select-sm w-auto">
-            <option disabled selected>Course</option>
-            <option>PhilNITS</option>
-            <option>Nihongo</option>
+          <select
+            className="form-select form-select-sm w-auto"
+            value={selectedQuarter}
+            onChange={(e) => setSelectedQuarter(e.target.value)}
+          >
+            <option value="">Quarter</option>
+            <option>Quarter 1</option>
+            <option>Quarter 2</option>
+            <option>Quarter 3</option>
+            <option>Quarter 4</option>
           </select>
         </div>
-
         <div className="col-md-3 text-end">
           <button className="btn btn-primary rounded-pill" onClick={handlePrint}>
             Print Grades
@@ -121,9 +64,9 @@ const GradeView = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="gradeview-tabs no-print">
-        {TABS.map(tab => (
+      {/* TABS */}
+      <div className="gradeview-tabs no-print mb-3">
+        {TABS.map((tab) => (
           <button
             key={tab}
             className={`gradeview-tab ${activeTab === tab ? "active" : ""}`}
@@ -134,68 +77,138 @@ const GradeView = () => {
         ))}
       </div>
 
-      {/* Printable Area */}
       <div className="print-area">
 
-        <div className="table-responsive gradeview-table-wrapper shadow-sm">
-          <table className="table gradeview-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th className="due-col">Due date</th>
-                <th className="score-col">Score</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {rows.length === 0 && (
+        {/* SUMMARY */}
+        {activeTab === "Summary of Grades" && (
+          <div className="table-responsive shadow-sm">
+            <table className="table gradeview-table">
+              <thead>
                 <tr>
-                  <td colSpan="3" className="text-center text-muted py-4">
-                    No records available
-                  </td>
+                  <th>Code</th>
+                  <th>Category</th>
+                  <th>Weight</th>
+                  <th>Criteria</th>
+                  <th>Rating</th>
+                  <th>Assessment</th>
+                  <th>Rank</th>
+                  <th>Remarks</th>
                 </tr>
-              )}
+              </thead>
+              <tbody>
+                {SUMMARY_DATA.map((row, i) => (
+                  <tr key={i} className={row.overall ? "overall-row" : ""}>
+                    <td>{row.code}</td>
+                    <td className={row.overall ? "fw-bold" : ""}>{row.category}</td>
+                    <td className={row.overall ? "fw-bold" : ""}>{row.weight}</td>
+                    <td>{row.criteria}</td>
+                    <td>{row.rating}</td>
+                    <td className="text-success fw-semibold">{row.assessment}</td>
+                    <td>{row.rank}</td>
+                    <td className="fw-bold text-success">{row.remarks}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              {rows.map((row, index) => (
-                <tr key={index}>
-                  <td className={row.alert ? "text-danger" : ""}>{row.title}</td>
-                  <td className={row.alert ? "text-danger" : ""}>{row.due}</td>
-                  <td>{row.score}</td>
+        {/* PHILNITS */}
+        {activeTab === "PhilNITS" && (
+          <div className="table-responsive shadow-sm">
+            <h5 className="fw-bold mb-3">PhilNITS Evaluation</h5>
+            <table className="table gradeview-table">
+              <thead>
+                <tr>
+                  <th>Criteria</th>
+                  <th>Passing (%)</th>
+                  <th>Rating (%)</th>
+                  <th>Assessment</th>
                 </tr>
-              ))}
+              </thead>
+              <tbody>
+                {PHILNITS_DATA.map((row, i) => (
+                  <tr key={i}>
+                    <td>{row.item}</td>
+                    <td>{row.criteria}</td>
+                    <td>{row.rating.toFixed(2)}</td>
+                    <td className={row.rating >= row.criteria ? "text-success" : "text-danger"}>
+                      {row.rating >= row.criteria ? "Pass" : "Fail"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              {rows.length > 0 && (
-                <tr className="gradeview-total-row">
-                  <td colSpan="2">Total (%)</td>
-                  <td className={isPass ? "text-success" : "text-danger"}>
-                    {totalPercent}%
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        {/* NIHONGO */}
+        {activeTab === "Nihongo" && (
+          <>
+            <h5 className="fw-bold mb-3">日本語 (Nihongo) Evaluation</h5>
 
-      {/* Pagination */}
-      <div className="pagination-wrapper no-print">
-        <ul className="pagination custom-pagination">
-          <li className="page-item">
-            <button className="page-link nav-btn">‹</button>
-          </li>
+            {/* REGULAR CATEGORIES */}
+            <div className="table-responsive shadow-sm mb-4">
+              <table className="table gradeview-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Criteria</th>
+                    <th>Rating</th>
+                    <th>Assessment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {NIHONGO_COMBINED.map((row, i) => (
+                    <tr key={i}>
+                      <td>{row.category}</td>
+                      <td>{row.criteria}</td>
+                      <td>{row.rating}</td>
+                      <td className={row.rating >= row.criteria ? "text-success" : "text-danger"}>
+                        {row.rating >= row.criteria ? "Pass" : "Fail"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          {[1, 2, 3, 4, 5].map(p => (
-            <li key={p} className={`page-item ${page === p ? "active" : ""}`}>
-              <button className="page-link" onClick={() => setPage(p)}>
-                {p}
-              </button>
-            </li>
-          ))}
-
-          <li className="page-item">
-            <button className="page-link nav-btn">›</button>
-          </li>
-        </ul>
+            {/* QUIZZES SEPARATE */}
+            <div className="table-responsive shadow-sm">
+              <h6 className="fw-bold mb-2">Quizzes</h6>
+              <table className="table gradeview-table">
+                <thead>
+                  <tr>
+                    <th>Criteria</th>
+                    {NIHONGO_QUIZZES.weeks.map((_, idx) => (
+                      <th key={idx}>Week {idx + 1}</th>
+                    ))}
+                    <th>Assessment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="overall-row">
+                    <td>{NIHONGO_QUIZZES.criteria}</td>
+                    {NIHONGO_QUIZZES.weeks.map((score, idx) => (
+                      <td key={idx} className={score >= NIHONGO_QUIZZES.criteria ? "text-success" : "text-danger"}>
+                        {score}
+                      </td>
+                    ))}
+                    <td className={
+                      NIHONGO_QUIZZES.weeks.reduce((a, b) => a + b, 0) / NIHONGO_QUIZZES.weeks.length >= NIHONGO_QUIZZES.criteria
+                        ? "text-success fw-bold"
+                        : "text-danger fw-bold"
+                    }>
+                      {NIHONGO_QUIZZES.weeks.reduce((a, b) => a + b, 0) / NIHONGO_QUIZZES.weeks.length >= NIHONGO_QUIZZES.criteria
+                        ? "Pass"
+                        : "Fail"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

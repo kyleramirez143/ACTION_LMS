@@ -243,8 +243,15 @@ function BatchesTable() {
                         <tbody>
                             {batches.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="text-center py-5 text-muted">
-                                        No batches found.
+                                    <td colSpan="100%">
+                                        <div className="text-center text-muted py-4">
+                                            <img
+                                                src="/no_data.svg"
+                                                alt="No data"
+                                                style={{ width: "200px", marginBottom: "1rem", opacity: 0.8 }}
+                                            />
+                                            <p>No Batch found.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (

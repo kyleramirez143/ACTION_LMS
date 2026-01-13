@@ -21,6 +21,8 @@ export default function ModuleManagement() {
     const [loading, setLoading] = useState(true);
     const [openDropdownId, setOpenDropdownId] = useState(null);
 
+    const [searchTerm, setSearchTerm] = useState(""); // <-- New state for search
+
     const ITEMS_PER_PAGE = 8;
     const [page, setPage] = useState(1);
 
@@ -84,17 +86,27 @@ export default function ModuleManagement() {
         fetchCourse();
     }, [course_id, token]);
 
-    const totalPages = Math.ceil(modulesData.length / ITEMS_PER_PAGE);
+    // -------------------------------
+    // FILTER MODULES BY SEARCH
+    // -------------------------------
+    const filteredModules = useMemo(() => {
+        return modulesData.filter(module =>
+            module.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [modulesData, searchTerm]);
+
+    const totalPages = Math.ceil(filteredModules.length / ITEMS_PER_PAGE);
     const pagedModules = useMemo(() => {
         const start = (page - 1) * ITEMS_PER_PAGE;
-        return modulesData.slice(start, start + ITEMS_PER_PAGE);
-    }, [page, modulesData]);
+        return filteredModules.slice(start, start + ITEMS_PER_PAGE);
+    }, [page, filteredModules]);
+
     const goToPage = (p) => {
         if (p >= 1 && p <= totalPages && p !== page) setPage(p);
     };
 
     // -------------------------------
-    // Handlers
+    // HANDLERS (edit, toggle, dropdown)
     // -------------------------------
     const handleEditClick = (e, moduleId) => {
         e.stopPropagation();
@@ -103,11 +115,9 @@ export default function ModuleManagement() {
 
     const handleToggleVisibility = async (e, moduleId, isVisible) => {
         e.stopPropagation();
-        // Optimistic UI update
         setModulesData(prev =>
             prev.map(m => m.module_id === moduleId ? { ...m, is_visible: isVisible } : m)
         );
-
         try {
             const res = await fetch(`/api/modules/${moduleId}/visibility`, {
                 method: "PUT",
@@ -120,7 +130,6 @@ export default function ModuleManagement() {
             if (!res.ok) {
                 const error = await res.json();
                 alert(`Failed to update module: ${error.error || "Server error"}`);
-                // Rollback
                 setModulesData(prev =>
                     prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
                 );
@@ -128,7 +137,6 @@ export default function ModuleManagement() {
         } catch (err) {
             console.error(err);
             alert("Network error. Visibility change failed.");
-            // Rollback
             setModulesData(prev =>
                 prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
             );
@@ -150,9 +158,6 @@ export default function ModuleManagement() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, [openDropdownId]);
 
-    // -------------------------------
-    // RENDER
-    // -------------------------------
     if (loading) return <p className="text-center py-5">Loading modules...</p>;
 
     return (
@@ -170,9 +175,29 @@ export default function ModuleManagement() {
                 )}
             </div>
 
+            {/* Search input */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search courses..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ width: "340px", height: "40px" }} // adjust as needed
+                />
+            </div>
+
             {/* Empty */}
-            {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">No modules found.</p>
+            {filteredModules.length === 0 ? (
+                <div className="text-center text-muted py-4">
+                    <img
+                        src="/no_data.svg"
+                        alt="No data"
+                        style={{ width: "200px", marginBottom: "1rem", opacity: 0.8 }}
+                    />
+                    <p>No modules found.</p>
+                </div>
+
             ) : (
                 <>
                     {/* Grid */}
@@ -180,7 +205,6 @@ export default function ModuleManagement() {
                         {pagedModules.map(module => (
                             <div className="col" key={module.module_id}>
                                 <div className="card h-100 shadow-sm d-flex flex-column position-relative">
-
                                     {/* STATUS BADGE */}
                                     <span
                                         className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
