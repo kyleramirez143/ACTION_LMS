@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         description: DataTypes.TEXT,
+        start_date: { type: DataTypes.DATEONLY },
+        end_date: { type: DataTypes.DATEONLY },
         image: DataTypes.STRING(255),
         created_by: {
             type: DataTypes.UUID,
