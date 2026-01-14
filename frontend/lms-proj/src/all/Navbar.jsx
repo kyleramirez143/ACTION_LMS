@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
-import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   // ================= HOOKS (top level) =================
