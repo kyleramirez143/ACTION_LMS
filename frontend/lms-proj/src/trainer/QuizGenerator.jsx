@@ -4,6 +4,46 @@ import { jwtDecode } from "jwt-decode";
 import { usePrompt } from "../hooks/usePrompt";
 import "./QuizGenerator.css";
 
+function useUnsavedQuizPrompt(quiz, isSaved) {
+    const navigate = useNavigate();
+
+    // --- Handle browser refresh/close ---
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (quiz && !isSaved) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [quiz, isSaved]);
+
+    // Only trigger prompt for other pages, not review & publish
+    const handleNavigation = (e) => {
+        if (quiz && !isSaved) {
+            const target = e.target?.getAttribute("href") || "";
+            if (!target.includes("/quizzes/")) {
+                if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+                    e.preventDefault();
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        // Attach to all links in page
+        document.querySelectorAll("a").forEach(link =>
+            link.addEventListener("click", handleNavigation)
+        );
+        return () => {
+            document.querySelectorAll("a").forEach(link =>
+                link.removeEventListener("click", handleNavigation)
+            );
+        };
+    }, [quiz, isSaved]);
+}
+
 function QuizGenerator() {
     const [file, setFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
@@ -23,6 +63,8 @@ function QuizGenerator() {
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
+
+    useUnsavedQuizPrompt(quiz, isSaved);
 
     // --- AUTH + FETCH COURSES ---
     useEffect(() => {
@@ -103,8 +145,6 @@ function QuizGenerator() {
             setLoading(false);
         }
     };
-
-    usePrompt("You have an unsaved quiz. Are you sure you want to leave?", quiz !== null && !isSaved);
 
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
     const handleReviewPublish = async () => {
