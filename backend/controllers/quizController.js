@@ -212,6 +212,15 @@ export async function saveResponse(req, res) {
             0
         );
 
+        const existingAttempt = await AssessmentAttempt.findOne({
+            where: { assessment_id, user_id, attempt_number },
+            transaction
+        });
+
+        if (existingAttempt) {
+            throw new Error("Attempt already exists for this user.");
+        }
+
         // 3. Create new attempt (ALWAYS new row)
         const newAttempt = await AssessmentAttempt.create({
             assessment_id,
