@@ -96,6 +96,7 @@ module.exports = {
       file_url: { type: Sequelize.TEXT, allowNull: false },
       display_name: { type: Sequelize.STRING(255) },
       content_type: { type: Sequelize.STRING(50) },
+      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
