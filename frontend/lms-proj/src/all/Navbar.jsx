@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
-import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   // ================= HOOKS (top level) =================
@@ -274,8 +274,8 @@ const Navbar = () => {
       {menuOpen && <div className="side-overlay" onClick={() => setMenuOpen(false)} />}
 
       {/* ================= SEARCH BAR ================= */}
-      <div className="search-bar-section py-3 px-4">
-        <input
+      <div className="search-bar-section py-4 px-4">
+        {/* <input
           type="text"
           className="form-control search-input"
           placeholder="Search your Available Courses"
@@ -283,7 +283,7 @@ const Navbar = () => {
         <div className="d-flex gap-2">
           <button className="search-button">Search</button>
           <button className="search-button">Export</button>
-        </div> 
+        </div>  */}
       </div>
     </nav>
   );
