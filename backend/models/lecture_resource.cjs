@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             allowNull: false
         },
-        resources_id: {
+        resource_id: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 
     LectureResource.associate = (models) => {
         LectureResource.belongsTo(models.Lecture, { foreignKey: 'lecture_id', as: 'lecture' });
-        LectureResource.belongsTo(models.Resource, { foreignKey: 'resources_id', as: 'resource' });
+        LectureResource.belongsTo(models.Resource, { foreignKey: 'resource_id', as: 'resource' });
     };
 
     return LectureResource;

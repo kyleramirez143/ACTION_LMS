@@ -67,7 +67,7 @@ export const uploadLectureFile = async (req, res) => {
 
                 await LectureResource.create({
                     lecture_id,
-                    resources_id: resource.resource_id
+                    resource_id: resource.resource_id
                 });
 
                 uploadedResources.push(resource);
@@ -265,7 +265,7 @@ export const deleteResources = async (req, res) => {
         await sequelize.transaction(async (t) => {
             // 2. Delete entries in the junction table (LectureResource)
             await LectureResource.destroy({
-                where: { resources_id: resource_ids },
+                where: { resource_id: resource_ids },
                 transaction: t
             });
 
@@ -440,7 +440,7 @@ export const deleteResource = async (req, res) => {
 
         await sequelize.transaction(async (t) => {
             await LectureResource.destroy({
-                where: { resources_id: resource_id },
+                where: { resource_id: resource_id },
                 transaction: t
             });
 
