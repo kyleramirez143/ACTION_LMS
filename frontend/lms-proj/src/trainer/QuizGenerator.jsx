@@ -9,6 +9,7 @@ function QuizGenerator() {
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
     const [questionQty, setQuestionQty] = useState(0);
 
@@ -103,8 +104,10 @@ function QuizGenerator() {
         }
     };
 
+    usePrompt("You have an unsaved quiz. Are you sure you want to leave?", quiz !== null && !isSaved);
+
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
-    const handleDirectSave = async () => {
+    const handleReviewPublish = async () => {
         if (!quiz || !selectedLecture) return;
         setSaving(true);
         try {
@@ -119,13 +122,21 @@ function QuizGenerator() {
                 })
             });
             if (!res.ok) throw new Error("Failed to save");
-            alert("Quiz saved to lecture successfully!");
+            const { assessmentId } = await res.json();
+            setIsSaved(true); // mark quiz as saved
 
-            // ✅ Reset everything
+            // Navigate to Review & Publish page
+            navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
+
+             // ✅ Reset everything
             resetForm();
-        } catch {
-            alert("Error saving quiz.");
-        } finally { setSaving(false); }
+
+        } catch (err) {
+            console.error("Error saving and navigating:", err);
+            alert("Failed to go to Review & Publish page.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     // --- DISCARD QUIZ ---
@@ -156,8 +167,6 @@ function QuizGenerator() {
         setModules([]);
         setLectures([]);
     };
-
-    usePrompt("You have an unsaved quiz. Are you sure you want to leave?", quiz);
 
     // --- RENDER QUIZ BY SECTION ---
     const renderQuizSection = (section) => {
@@ -323,8 +332,8 @@ function QuizGenerator() {
                                 </div>
                             )}
                             <div className="d-flex justify-content-between mt-3 pb-5">
-                                <button className="btn btn-success px-5" onClick={handleDirectSave} disabled={saving}>
-                                    {saving ? "Saving..." : "Save to Lecture"}
+                                <button className="btn btn-success px-5" onClick={handleReviewPublish} disabled={!quiz || saving}>
+                                    {saving ? "Saving..." : "Review & Publish"}
                                 </button>
                                 <button className="btn btn-outline-danger" onClick={handleDiscardQuiz}>Discard</button>
                             </div>
