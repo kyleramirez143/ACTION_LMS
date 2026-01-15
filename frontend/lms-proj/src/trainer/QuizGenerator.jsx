@@ -56,10 +56,23 @@ function QuizGenerator() {
     const [courses, setCourses] = useState([]);
     const [modules, setModules] = useState([]);
     const [lectures, setLectures] = useState([]);
+    const [assessmentTypes, setAssessmentTypes] = useState([
+        "Skill Check",
+        "Course-End Exam",
+        "Mock Exam",
+        "Practice Exam",
+        "Oral Exam",
+        "Daily Quiz",
+        "Homework",
+        "Exercises",
+        "Activity"
+    ]);
+
     const [quizTitle, setQuizTitle] = useState("");
     const [selectedCourse, setSelectedCourse] = useState("");
     const [selectedModule, setSelectedModule] = useState("");
     const [selectedLecture, setSelectedLecture] = useState("");
+    const [assessmentType, setAssessmentType] = useState("");
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -148,7 +161,11 @@ function QuizGenerator() {
 
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
     const handleReviewPublish = async () => {
-        if (!quiz || !selectedLecture) return;
+        if (!quiz || !selectedLecture || !quizType) {
+            alert("Please select a quiz type before saving.");
+            return;
+        }
+
         setSaving(true);
         try {
             const res = await fetch("/api/upload/save-to-lecture", {
@@ -158,7 +175,9 @@ function QuizGenerator() {
                     lectureId: selectedLecture,
                     title: quiz.title,
                     pdfFilename: quiz.pdf_filename,
-                    questions: quiz.questions
+                    questions: quiz.questions,
+                    assessmentTypeName: assessmentType // send name
+
                 })
             });
             if (!res.ok) throw new Error("Failed to save");
@@ -168,7 +187,7 @@ function QuizGenerator() {
             // Navigate to Review & Publish page
             navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
 
-             // ✅ Reset everything
+            // ✅ Reset everything
             resetForm();
 
         } catch (err) {
@@ -290,18 +309,41 @@ function QuizGenerator() {
                         {/* Quiz Type */}
                         <div className="mb-3 p-3 shadow-sm rounded bg-white mt-3">
                             <label className="form-label fw-bold">Choose Quiz Type</label>
-                            {["Multiple Choice", "Nihongo"].map(type => (
+                            {["Multiple Choice", "Identification", "Nihongo"].map(type => (
+
                                 <div className="form-check" key={type}>
-                                    <input className="form-check-input" type="radio" checked={quizType === type} onChange={() => setQuizType(type)} disabled={!!quiz} />
+                                    <input className="form-check-input" type="radio" name="quizType"
+                                        checked={quizType === type} onChange={() => setQuizType(type)} disabled={!!quiz} />
                                     <label className="form-check-label">{type}</label>
                                 </div>
                             ))}
                         </div>
 
+                        {/* Assessment Type */}
+                        <div className="mb-3 p-3 shadow-sm rounded bg-white mt-3">
+                            <label className="form-label fw-bold">Assessment Type</label>
+                            <select
+                                className="form-select"
+                                value={assessmentType}
+                                onChange={e => setAssessmentType(e.target.value)}
+                                disabled={!!quiz} // disable only after quiz exists
+                            >
+                                <option value="">-- Select Assessment Type --</option>
+                                {assessmentTypes.map(type => (
+                                    <option key={type} value={type}>
+                                        {type}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+
+
+
                         {/* Question Quantity */}
                         <div className="mb-3 p-3 shadow-sm rounded bg-white">
                             <label className="form-label fw-bold">Set Question Quantity</label>
-                            <input type="number" className="form-control" value={questionQty} onChange={(e) => setQuestionQty(e.target.value)} disabled={!!quiz} />
+                            <input type="number" className="form-control" value={questionQty} min={1} onChange={(e) => setQuestionQty(e.target.value)} disabled={!!quiz} />
                         </div>
 
                         {/* Target Placement */}
