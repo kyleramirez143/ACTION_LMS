@@ -4,11 +4,52 @@ import { jwtDecode } from "jwt-decode";
 import { usePrompt } from "../hooks/usePrompt";
 import "./QuizGenerator.css";
 
+function useUnsavedQuizPrompt(quiz, isSaved) {
+    const navigate = useNavigate();
+
+    // --- Handle browser refresh/close ---
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (quiz && !isSaved) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    }, [quiz, isSaved]);
+
+    // Only trigger prompt for other pages, not review & publish
+    const handleNavigation = (e) => {
+        if (quiz && !isSaved) {
+            const target = e.target?.getAttribute("href") || "";
+            if (!target.includes("/quizzes/")) {
+                if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+                    e.preventDefault();
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        // Attach to all links in page
+        document.querySelectorAll("a").forEach(link =>
+            link.addEventListener("click", handleNavigation)
+        );
+        return () => {
+            document.querySelectorAll("a").forEach(link =>
+                link.removeEventListener("click", handleNavigation)
+            );
+        };
+    }, [quiz, isSaved]);
+}
+
 function QuizGenerator() {
     const [file, setFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
     const [quizType, setQuizType] = useState("Multiple Choice");
     const [questionQty, setQuestionQty] = useState(0);
 
@@ -22,6 +63,8 @@ function QuizGenerator() {
 
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
+
+    useUnsavedQuizPrompt(quiz, isSaved);
 
     // --- AUTH + FETCH COURSES ---
     useEffect(() => {
@@ -104,7 +147,7 @@ function QuizGenerator() {
     };
 
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
-    const handleDirectSave = async () => {
+    const handleReviewPublish = async () => {
         if (!quiz || !selectedLecture) return;
         setSaving(true);
         try {
@@ -119,13 +162,21 @@ function QuizGenerator() {
                 })
             });
             if (!res.ok) throw new Error("Failed to save");
-            alert("Quiz saved to lecture successfully!");
+            const { assessmentId } = await res.json();
+            setIsSaved(true); // mark quiz as saved
 
-            // ✅ Reset everything
+            // Navigate to Review & Publish page
+            navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
+
+             // ✅ Reset everything
             resetForm();
-        } catch {
-            alert("Error saving quiz.");
-        } finally { setSaving(false); }
+
+        } catch (err) {
+            console.error("Error saving and navigating:", err);
+            alert("Failed to go to Review & Publish page.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     // --- DISCARD QUIZ ---
@@ -156,8 +207,6 @@ function QuizGenerator() {
         setModules([]);
         setLectures([]);
     };
-
-    usePrompt("You have an unsaved quiz. Are you sure you want to leave?", quiz);
 
     // --- RENDER QUIZ BY SECTION ---
     const renderQuizSection = (section) => {
@@ -323,8 +372,8 @@ function QuizGenerator() {
                                 </div>
                             )}
                             <div className="d-flex justify-content-between mt-3 pb-5">
-                                <button className="btn btn-success px-5" onClick={handleDirectSave} disabled={saving}>
-                                    {saving ? "Saving..." : "Save to Lecture"}
+                                <button className="btn btn-success px-5" onClick={handleReviewPublish} disabled={!quiz || saving}>
+                                    {saving ? "Saving..." : "Review & Publish"}
                                 </button>
                                 <button className="btn btn-outline-danger" onClick={handleDiscardQuiz}>Discard</button>
                             </div>

@@ -19,6 +19,11 @@
   align-items: center;
 }
 
+/* Remove unwanted after elements */
+.navbar *::after {
+  content: none !important;
+} 
+
 .navbar-wrapper {
   display: flex;
   flex-direction: column;

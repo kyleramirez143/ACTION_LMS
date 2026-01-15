@@ -223,6 +223,9 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   Help & Support
                 </Dropdown.Item>
+                <Dropdown.Item as={Link} to="trainer/quizmanual">
+                  Quiz Manual
+                </Dropdown.Item>
 
                 <Dropdown.Item
                   as={Link}
@@ -274,17 +277,7 @@ const Navbar = () => {
       {menuOpen && <div className="side-overlay" onClick={() => setMenuOpen(false)} />}
 
       {/* ================= SEARCH BAR ================= */}
-      <div className="search-bar-section py-4 px-4">
-        {/* <input
-          type="text"
-          className="form-control search-input"
-          placeholder="Search your Available Courses"
-        />
-        <div className="d-flex gap-2">
-          <button className="search-button">Search</button>
-          <button className="search-button">Export</button>
-        </div>  */}
-      </div>
+      <div className="search-bar-section py-3 px-4"></div>
     </nav>
   );
 };

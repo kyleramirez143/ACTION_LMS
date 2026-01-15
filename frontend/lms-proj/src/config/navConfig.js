@@ -51,6 +51,15 @@ export const navLinks = [
     name: 'Quiz Generator',
     path: '/trainer/quiz-generator',
     requiredRoles: ['Trainer'],
+    children: [
+      {
+        name: 'AI Generated',
+        path: '/trainer/quiz-generator',
+      },
+      {
+        name: 'Manual Quiz',
+        path: '/trainer/quizmanual',
+      },]
   },
   {
     name: 'Action Calendar',
