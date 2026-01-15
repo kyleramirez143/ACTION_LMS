@@ -28,6 +28,15 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 
+// Notification
+import NotificationView from "./all/NotificationView.jsx";
+
+//Checkpoint View
+import CheckpointView from "./all/CheckpointView.jsx";
+
+//Help & Support
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
 // import AdminCreateCourse from './admin/AdminCoursePage';
@@ -106,6 +115,15 @@ function AppContent() {
           <Routes>
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
+
+            {/* Notification */}
+            <Route path="/all/notificationview" element={<NotificationView />} />
+
+            {/* Checkpoint View */}
+            <Route path="/all/checkpointview" element={<CheckpointView />} />
+
+            {/* Help & Support */}
+            <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
 
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />

@@ -176,7 +176,7 @@ export default function CourseManagementPage() {
     // -------------------------------
     // RENDER
     // -------------------------------
-    return (
+    return (    
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -214,7 +214,7 @@ export default function CourseManagementPage() {
             )}
 
 
-            {/* Empty */}
+            {/* Empty */}   
             {filteredCourses.length === 0 ? (
                 <div className="text-center text-muted py-5">
                     <img src={logo} alt="Logo" className="img-fluid mb-3"

@@ -223,10 +223,6 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   Help & Support
                 </Dropdown.Item>
-                <Dropdown.Item as={Link} to="trainer/quizmanual">
-                  Quiz Manual
-                </Dropdown.Item>
-
                 <Dropdown.Item
                   as={Link}
                   to="/"
