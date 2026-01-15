@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./TraineeAssessment.css";
 import { Search, ArrowLeft } from "lucide-react";
+import { jwtDecode } from 'jwt-decode';
 
 export default function AssessmentDashboard() {
   const { assessment_id, attempt_id } = useParams();
@@ -17,14 +18,29 @@ export default function AssessmentDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const token = localStorage.getItem("authToken");
+
+  // --- AUTH CHECK ---
+  useEffect(() => {
+    if (!token) return navigate('/login');
+    try {
+      const decoded = jwtDecode(token);
+      const roles = Array.isArray(decoded.role || decoded.roles)
+        ? decoded.role || decoded.roles
+        : [decoded.role || decoded.roles];
+      if (!roles.includes('Trainee')) navigate('/access-denied');
+    } catch {
+      localStorage.removeItem('authToken');
+      navigate('/login');
+    }
+  }, [token, navigate]);
+
   // =========================
   // FETCH DATA
   // =========================
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-
         const res = await fetch("/api/quizzes/trainee/results", {
           headers: {
             Authorization: `Bearer ${token}`,
