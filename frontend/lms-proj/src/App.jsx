@@ -159,6 +159,7 @@ function AppContent() {
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
 
           </Routes>
         </div>
