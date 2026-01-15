@@ -185,7 +185,7 @@ export async function deleteQuestion(req, res) {
 
 // Trainee answers per quiz
 export async function saveResponse(req, res) {
-    const { assessment_id, answers } = req.body;
+const { assessment_id, answers } = req.body;
     const user_id = req.user.id;
 
     const transaction = await sequelize.transaction();
