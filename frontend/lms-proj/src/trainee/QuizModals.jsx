@@ -130,3 +130,13 @@ export const QuizResultModal = ({ score, total, onReview, onExit }) => {
     </Modal>
   );
 };
+
+export const TimeUpModal = ({ countdown }) => (
+  <Modal className="confirmation-content">
+    <FileArchive size={50} className="confirmation-icon" />
+    <h2 className="modal-sub-title">Time's Up!</h2>
+    <p className="submit-prompt">
+      Your quiz time has expired. Auto-submitting in <strong>{countdown}</strong> seconds...
+    </p>
+  </Modal>
+);

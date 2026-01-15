@@ -192,12 +192,14 @@ export async function saveResponse(req, res) {
 
     try {
         // 1. Get attempt count
-        const previousAttempts = await AssessmentAttempt.count({
+        const lastAttempt = await AssessmentAttempt.findOne({
             where: { assessment_id, user_id },
-            transaction
+            order: [['attempt_number', 'DESC']],
+            transaction,
+            lock: transaction.LOCK.UPDATE
         });
 
-        const attempt_number = previousAttempts + 1;
+        const attempt_number = lastAttempt ? lastAttempt.attempt_number + 1 : 1;
 
         // 2. Calculate max score from questions
         const questions = await AssessmentQuestion.findAll({
@@ -209,6 +211,15 @@ export async function saveResponse(req, res) {
             (sum, q) => sum + Number(q.points || 0),
             0
         );
+
+        const existingAttempt = await AssessmentAttempt.findOne({
+            where: { assessment_id, user_id, attempt_number },
+            transaction
+        });
+
+        if (existingAttempt) {
+            throw new Error("Attempt already exists for this user.");
+        }
 
         // 3. Create new attempt (ALWAYS new row)
         const newAttempt = await AssessmentAttempt.create({
@@ -291,7 +302,6 @@ export async function saveResponse(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-
 
 export async function getTraineeResults(req, res) {
     const user_id = req.user.id;
