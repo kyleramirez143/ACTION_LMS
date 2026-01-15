@@ -111,6 +111,7 @@ function AppContent() {
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quizmanual" element={<QuizManual />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
