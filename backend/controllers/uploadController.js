@@ -122,7 +122,7 @@ export async function saveQuizToLecture(req, res) {
         const assessment = await Assessment.create({
             title,
             pdf_source_url: pdfFilename,
-            assessment_type_id: "548098e8-4323-40a4-a0ea-1eef5f4187e3",
+            assessment_type_id: "9e36d4a6-2330-4b8d-bc3d-65551a7cdd55",
             is_published: false,
             created_by: userId
         });
