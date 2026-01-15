@@ -62,7 +62,7 @@ const QuizScreenRecord = () => {
             const { session_id } = res.data;
 
             // Navigate to quiz page, passing only serializable data
-            navigate(`/quiz/${assessment_id}/start`, { state: { sessionId: session_id } });
+            navigate(`/quiz/${assessment_id}/start`, { state: { sessionId: session_id }, replace: true });
 
         } catch (err) {
             console.error(err);
@@ -76,7 +76,7 @@ const QuizScreenRecord = () => {
                 <div className="col-md-6">
                     <div className="card shadow-sm rounded-4 p-4 text-center">
                         <div className="d-flex align-items-center mb-3">
-                            <button onClick={() => navigate(-1)} className="btn btn-link text-dark p-0 me-2">
+                            <button onClick={() => navigate(`/quiz/${assessment_id}`)} className="btn btn-link text-dark p-0 me-2">
                                 <FaArrowLeft size={20} />
                             </button>
                             <h5 className="mb-0">Setup Proctoring</h5>
