@@ -214,7 +214,7 @@ function QuizManual() {
     if (!sectionQuestions.length) return null;
 
     return (
-      <div className="mb-4">
+      <div className="mb-4" key={section}>
         <h4 className="text-primary">{section}</h4>
         {sectionQuestions.map((q, i) => (
           <div className="card shadow-sm mb-3" key={q.question_id}>
