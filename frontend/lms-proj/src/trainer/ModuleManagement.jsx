@@ -172,7 +172,16 @@ export default function ModuleManagement() {
 
             {/* Empty */}
             {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">No modules found.</p>
+                <div className="text-center text-muted py-4">
+                    <img
+                        src={logo}
+                        alt="No modules"
+                        className="img-fluid mb-3"
+                        style={{ maxWidth: "200px" }}
+                    />
+                    <p>No modules found.</p>
+                </div>
+
             ) : (
                 <>
                     {/* Grid */}
