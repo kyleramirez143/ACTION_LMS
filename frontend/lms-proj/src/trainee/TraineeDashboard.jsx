@@ -118,19 +118,19 @@ const AttendanceCard = () => {
     const items = [
         {
             label: "Present",
-            count: 360,
+            count: 0,
             icon: "bi-clock",
             bgColor: "#21B148",
         },
         {
             label: "Late Arrival",
-            count: 360,
+            count: 0,
             icon: "bi-clock-history",
             bgColor: "#FF8383",
         },
         {
             label: "On Leave",
-            count: 360,
+            count: 0,
             icon: "bi-people-fill",
             bgColor: "#ffc107",
         },

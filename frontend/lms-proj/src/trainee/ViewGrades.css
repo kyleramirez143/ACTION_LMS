@@ -1,0 +1,170 @@
+/* Container */
+.gradeview-container {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Title */
+.gradeview-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Buttons */
+.btn {
+  min-width: 130px;
+  padding: 10px 16px;
+  font-weight: 500;
+  border-radius: 50px;
+}
+
+.btn-primary {
+  background-color: #0047AB !important;
+  border-color: #0047AB !important;
+  color: #ffffff !important;
+}
+
+.btn-outline-primary {
+  background-color: #ffffff !important;
+  color: #0047AB !important;
+  border: 1px solid #0047AB !important;
+}
+
+.btn-primary:hover {
+  background-color: #003b94 !important;
+  border-color: #003b94 !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0047AB !important;
+  color: #ffffff !important;
+}
+
+/* Tabs */
+.gradeview-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 10px;
+}
+
+.gradeview-tab {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+.gradeview-tab.active {
+  color: #0047AB;
+  border-bottom: 2px solid #0047AB;
+  font-weight: 500;
+}
+
+/* Table floating / card style */
+.gradeview-table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.gradeview-table {
+  margin-bottom: 0;
+}
+
+.gradeview-table th {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.due-col { width: 240px; }
+.score-col { width: 120px; }
+
+/* Total Row */
+.gradeview-total-row {
+  background-color: #f8f9fa;
+  border-top: 2px solid #dee2e6;
+}
+
+.gradeview-total-row td {
+  font-weight: 600;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.gradeview-total-value.text-success { color: #28a745; }
+.gradeview-total-value.text-danger { color: #dc3545; }
+
+/* Pagination */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.custom-pagination .page-link {
+  background-color: #fff;
+  color: black;
+  border: none;
+  margin: 0 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+  color: white;
+  font-weight: 600;
+  border: 2px solid #0047AB;
+  background-color: #0047AB;
+}
+
+.custom-pagination .nav-btn {
+  background-color: #f0f0f0;
+}
+/* ========================
+   PRINT SETTINGS
+======================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .gradeview-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .gradeview-table th,
+  .gradeview-table td {
+    border: 1px solid #000;
+    padding: 8px;
+  }
+
+  .gradeview-total-row td {
+    font-weight: bold;
+    background-color: #f2f2f2;
+  }
+
+  .shadow-sm {
+    box-shadow: none !important;
+  }
+
+  .print-area {
+    margin-top: 20px;
+  }
+}

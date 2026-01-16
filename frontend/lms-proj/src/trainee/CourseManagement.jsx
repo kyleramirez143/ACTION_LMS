@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import logo from "../image/courses.svg"; // <-- imported SVG
 
 function Course() {
     const navigate = useNavigate();
@@ -50,7 +51,18 @@ function Course() {
                 </div>
 
                 {courses.length === 0 ? (
-                    <p className="text-center text-muted py-4">No courses found.</p>
+                    <div className="text-center text-muted py-5">
+                        <img
+                            src={logo} // <-- use imported SVG variable
+                            alt="No courses"
+                            className="img-fluid mb-3"
+                            style={{ maxWidth: "200px" }}
+                        />
+                        <h3 className="mb-0">No courses yet</h3>
+                        <p className="text-muted mb-0">
+                            Courses will appear here once they are assigned.
+                        </p>
+                    </div>
                 ) : (
                     <>
                         <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">

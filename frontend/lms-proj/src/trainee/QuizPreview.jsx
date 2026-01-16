@@ -34,6 +34,7 @@ const QuizPreview = () => {
                 }
 
                 setQuiz(data.quiz);
+                console.log(data.quiz);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -129,8 +130,18 @@ const QuizPreview = () => {
                     <button
                         className="btn btn-primary mt-4 w-100"
                         disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
-                        onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
+                        onClick={() => {
+                            if (quiz.screen_monitoring) {
+                                navigate(`/quiz/${quiz.assessment_id}/permission`);
+                                console.log("Permission: ", quiz.screen_monitoring);
+                            } else {
+                                navigate(`/quiz/${quiz.assessment_id}/start`, {
+                                    state: { screenMonitoring: false }
+                                });
+                            }
+                        }}
                     >
+                        {console.log(quiz.screen_monitoring)}
                         {isExpired
                             ? "Quiz Expired"
                             : quiz.attempts_taken >= quiz.attempts_allowed
