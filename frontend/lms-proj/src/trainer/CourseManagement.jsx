@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import { useTranslation } from "react-i18next"; // <-- import i18n
 
 function Course() {
+    const { t } = useTranslation(); // <-- translation hook
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const token = localStorage.getItem("authToken");
@@ -46,11 +48,11 @@ function Course() {
         <>
             <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">Assigned Courses</h3>
+                    <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
                 </div>
 
                 {courses.length === 0 ? (
-                    <p className="text-center text-muted py-4">No courses found.</p>
+                    <p className="text-center text-muted py-4">{t("course_management.no_courses_found")}</p>
                 ) : (
                     <>
                         <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
@@ -90,7 +92,8 @@ function Course() {
                                                 .join(", ")
                                             : "No trainers assigned"}
                                     </p> */}
-                                            <p className="card-text text-muted mb-0">{course.description}</p>
+                                            <p className="card-text text-muted mb-0">{course.description || t("course_management.no_description")}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

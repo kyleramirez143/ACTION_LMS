@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 
 import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
 
 export default function TrainerModuleScreen() {
+  const { t } = useTranslation();
   const { course_id, module_id } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
@@ -99,7 +101,7 @@ export default function TrainerModuleScreen() {
           <div className="module-title">{moduleTitle}</div>
           {userRole === "Trainer" && (
             <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
-              Add Lecture
+              {t("lecture.add")}
             </button>
           )}
         </div>
@@ -107,14 +109,14 @@ export default function TrainerModuleScreen() {
         <p className="text-secondary">{moduleDescription}</p>
 
         {loading ? (
-          <p>Loading lectures...</p>
+          <p>{t("lecture.loading")}</p>
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : lectures.length === 0 ? (
           <p>
             {userRole === "Trainer"
-              ? 'No lectures yet. Click "Add Lecture" to create one.'
-              : "No lectures available yet."}
+              ? t("lecture.empty_trainer")
+              : t("lecture.empty_trainee")}
           </p>
         ) : (
           <ModuleAccordion isTrainerView={userRole === "Trainer"} userRole={userRole} lectures={lectures} />
@@ -122,7 +124,7 @@ export default function TrainerModuleScreen() {
       </div>
 
       <div className="module-right">
-        <div className="upcoming-title">Upcoming</div>
+        <div className="upcoming-title">{t("module.upcoming")}</div>
         <UpcomingPanel />
       </div>
     </div>

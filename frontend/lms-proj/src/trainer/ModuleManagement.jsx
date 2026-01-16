@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import { useTranslation } from "react-i18next"; // <-- import i18n
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map(module => ({
@@ -11,6 +12,7 @@ const getInitialModules = (modulesFromApi) => {
 };
 
 export default function ModuleManagement() {
+    const { t } = useTranslation(); // <-- translation hook
     const navigate = useNavigate();
     const { course_id } = useParams();
     const token = localStorage.getItem("authToken");
@@ -56,7 +58,7 @@ export default function ModuleManagement() {
                 let fetchedModules = Array.isArray(data) ? data : data.modules || [];
                 setModulesData(getInitialModules(fetchedModules));
             } catch (err) {
-                console.error("Failed to fetch modules:", err);
+                console.error(t("module_management.fetch_failed"), err); // ← TRANSLATED
                 setModulesData([]);
             } finally {
                 setLoading(false);
@@ -119,7 +121,7 @@ export default function ModuleManagement() {
             });
             if (!res.ok) {
                 const error = await res.json();
-                alert(`Failed to update module: ${error.error || "Server error"}`);
+                alert(`${t("module_management.update_failed")}: ${error.error || t("module_management.server_error")}`); // ← TRANSLATED
                 // Rollback
                 setModulesData(prev =>
                     prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
@@ -127,7 +129,7 @@ export default function ModuleManagement() {
             }
         } catch (err) {
             console.error(err);
-            alert("Network error. Visibility change failed.");
+            alert(t("module_management.network_error")); // ← TRANSLATED
             // Rollback
             setModulesData(prev =>
                 prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
@@ -153,7 +155,7 @@ export default function ModuleManagement() {
     // -------------------------------
     // RENDER
     // -------------------------------
-    if (loading) return <p className="text-center py-5">Loading modules...</p>;
+    if (loading) return <p className="text-center py-5">{t("module_management.loading_modules")}</p>; // ← TRANSLATED
 
     return (
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
@@ -165,14 +167,14 @@ export default function ModuleManagement() {
                         className="btn btn-primary"
                         onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
                     >
-                        Add New Module
+                        {t("module_management.add_new_module")} {/* ← TRANSLATED */}
                     </button>
                 )}
             </div>
 
             {/* Empty */}
             {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">No modules found.</p>
+                <p className="text-center text-muted py-4">{t("module_management.no_modules_found")}</p> // ← TRANSLATED
             ) : (
                 <>
                     {/* Grid */}
@@ -189,7 +191,7 @@ export default function ModuleManagement() {
                                             style={{ fontSize: '0.75rem', zIndex: 10 }}
                                             onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >
-                                            {module.is_visible ? 'Visible' : 'Hidden'}
+                                            {module.is_visible ? t("module_management.visible") : t("module_management.hidden")} {/* ← TRANSLATED */}
                                         </span>
                                     )}
 
@@ -210,19 +212,19 @@ export default function ModuleManagement() {
                                             >
                                                 <li>
                                                     <button className="dropdown-item" onClick={(e) => handleEditClick(e, module.module_id)}>
-                                                        <i className="bi bi-pencil me-2"></i> Edit Module
+                                                        <i className="bi bi-pencil me-2"></i> {t("module_management.edit_module")} {/* ← TRANSLATED */}
                                                     </button>
                                                 </li>
                                                 {module.is_visible ? (
                                                     <li>
                                                         <button className="dropdown-item text-danger" onClick={(e) => handleToggleVisibility(e, module.module_id, false)}>
-                                                            <i className="bi bi-eye-slash me-2"></i> Make Hidden
+                                                            <i className="bi bi-eye-slash me-2"></i> {t("module_management.make_hidden")} {/* ← TRANSLATED */}
                                                         </button>
                                                     </li>
                                                 ) : (
                                                     <li>
                                                         <button className="dropdown-item text-success" onClick={(e) => handleToggleVisibility(e, module.module_id, true)}>
-                                                            <i className="bi bi-eye me-2"></i> Make Visible
+                                                            <i className="bi bi-eye me-2"></i> {t("module_management.make_visible")} {/* ← TRANSLATED */}
                                                         </button>
                                                     </li>
                                                 )}
@@ -241,7 +243,7 @@ export default function ModuleManagement() {
                                             <div>
                                                 <h6 className="card-title mb-2">{module.title}</h6>
                                                 <p className="card-text text-muted mb-0" style={{ fontSize: "0.9rem" }}>
-                                                    {module.description ? module.description.substring(0, 100) + (module.description.length > 100 ? "..." : "") : "No description available."}
+                                                    {module.description ? module.description.substring(0, 100) + (module.description.length > 100 ? "..." : "") : t("module_management.no_description")} {/* ← TRANSLATED */}
                                                 </p>
                                             </div>
                                         </div>

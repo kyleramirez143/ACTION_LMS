@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next"; // 🔹 translated
 
 // NOTE: Renamed to ModuleForm to reflect its dual purpose (Add/Edit)
 export default function ModuleForm() {
+    const { t } = useTranslation(); // 🔹 translated
     const navigate = useNavigate();
     // module_id is now retrieved from params, making it an optional prop for "Add" mode
     const { course_id, module_id } = useParams();
@@ -58,12 +60,12 @@ export default function ModuleForm() {
                             setCurrentImageUrl(`/uploads/images/${data.image}`);
                         }
                     } else {
-                        alert("Module not found or an error occurred.");
+                        alert(t("module.not_found")); // 🔹 translated
                         navigate(`/${course_id}/modules`); // Redirect on error
                     }
                 } catch (err) {
                     console.error("Failed to fetch module data:", err);
-                    alert("Failed to load module data.");
+                    alert(t("module.load_error")); // 🔹 translated
                 } finally {
                     setLoading(false);
                 }
@@ -108,14 +110,14 @@ export default function ModuleForm() {
             const data = await res.json();
 
             if (res.ok) {
-                alert(`Module ${isEditMode ? "updated" : "created"} successfully!`);
+                alert(isEditMode ? t("module.updated") : t("module.created")); // 🔹 translated
                 navigate(`/${course_id}/modules`);
             } else {
-                alert(data.error || `Failed to ${isEditMode ? "update" : "create"} module`);
+                alert(data.error || (isEditMode ? t("module.update_failed") : t("module.create_failed"))); // 🔹 translated
             }
         } catch (err) {
             console.error(err);
-            alert("Something went wrong with the API call.");
+            alert(t("module.api_error")); // 🔹 translated
         } finally {
             setIsSubmitting(false);
         }
@@ -125,181 +127,176 @@ export default function ModuleForm() {
     // HANDLE DELETE (EDIT MODE ONLY)
     // ================================
     const handleDelete = async () => {
-        if (!window.confirm(`Are you sure you want to delete the module: ${title}?`)) {
-            return;
+        if (!window.confirm(t("module.confirm_delete", { title }))) return; // 🔹 translated
+    
+    setIsSubmitting(true);
+    try {
+        const res = await fetch(`/api/modules/${module_id}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (res.ok) {
+            alert(t("module.deleted")); // 🔹 translated
+            navigate(`/${course_id}/modules`);
+        } else {
+            const data = await res.json();
+            alert(data.error || t("module.delete_failed")); // 🔹 translated
         }
-
-        setIsSubmitting(true);
-        try {
-            const res = await fetch(`/api/modules/${module_id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (res.ok) {
-                alert("Module deleted successfully!");
-                navigate(`/${course_id}/modules`);
-            } else {
-                const data = await res.json();
-                alert(data.error || "Failed to delete module.");
-            }
-        } catch (err) {
-            console.error("Delete failed:", err);
-            alert("Something went wrong during deletion.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // ================================
-    // HANDLE CANCEL
-    // ================================
-    const handleCancel = () => {
-        navigate(`/${course_id}/modules`);
-    };
-
-    if (loading) {
-        return <p className="text-center py-5">Loading module data...</p>;
+    } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Something went wrong during deletion.");
+    } finally {
+        setIsSubmitting(false);
     }
+};
+
+// ================================
+// HANDLE CANCEL
+// ================================
+const handleCancel = () => {
+    navigate(`/${course_id}/modules`);
+};
+
+if (loading) return <p className="text-center py-5">{t("module.loading")}</p>; // 🔹 translated
 
 
-    // ================================
-    // RENDER
-    // ================================
-    return (
-        <div style={styles.page}>
-            <div style={styles.card}>
-                <h3 style={styles.title}>
-                    {isEditMode ? "Edit Module" : "Add New Module"}
-                </h3>
 
-                <form onSubmit={handleSubmit}>
+// ================================
+// RENDER
+// ================================
+return (
+    <div style={styles.page}>
+        <div style={styles.card}>
+            <h3 style={styles.title}>
+                {isEditMode ? t("module.edit") : t("module.add")}
+            </h3>
 
-                    {/* Current Image Preview (Edit Mode Only) */}
-                    {isEditMode && currentImageUrl && !imageFile && (
-                        <div className="mb-3">
-                            <label className="form-label">Current Cover Photo</label>
-                            <img src={currentImageUrl} alt="Current Module Cover" style={styles.previewImage} className="mb-2" />
-                        </div>
-                    )}
+            <form onSubmit={handleSubmit}>
 
-                    {/* Image Upload */}
+                {/* Current Image Preview (Edit Mode Only) */}
+                {isEditMode && currentImageUrl && !imageFile && (
                     <div className="mb-3">
-                        <label className="form-label">{isEditMode ? "Change Cover Photo (Optional)" : "Module Cover Photo"}</label>
-                        <input
-                            type="file"
-                            className="form-control"
-                            accept="image/*"
-                            onChange={(e) => setImageFile(e.target.files[0])}
-                        />
+                        <label className="form-label">{t("module.current_cover")}</label>
+                        <img src={currentImageUrl} alt="Current Module Cover" style={styles.previewImage} className="mb-2" />
                     </div>
+                )}
 
-                    {/* Module Title */}
-                    <div className="mb-3">
-                        <label className="form-label">Module Title</label>
+                {/* Image Upload */}
+                <div className="mb-3">
+                    <label className="form-label">
+                        {isEditMode ? t("module.change_cover") : t("module.cover_photo")}
+                    </label>
+                    <input
+                        type="file"
+                        className="form-control"
+                        accept="image/*"
+                        onChange={(e) => setImageFile(e.target.files[0])}
+                    />
+                </div>
+
+                {/* Module Title */}
+                <div className="mb-3">
+                    <label className="form-label">{t("module.title")}</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+
+                {/* Module Description */}
+                <div className="mb-3">
+                    <label className="form-label">{t("module.description")}</label>
+                    <textarea
+                        className="form-control"
+                        rows="3"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        disabled={isSubmitting}
+                    ></textarea>
+                </div>
+
+                {/* Module Dates */}
+                <div className="row mb-3">
+                    <div className="col">
+                        <label htmlFor="start_date" className="form-label">{t("module.start_date")}</label>
                         <input
-                            type="text"
-                            className="form-control"
+                            id="start_date"
+                            type="date"
+                            className="form-control date-input"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            onClick={(e) => e.target.showPicker()}
                             required
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
                             disabled={isSubmitting}
                         />
                     </div>
 
-                    {/* Module Description */}
-                    <div className="mb-3">
-                        <label className="form-label">Module Description</label>
-                        <textarea
-                            className="form-control"
-                            rows="3"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                    <div className="col">
+                        <label htmlFor="end_date" className="form-label">{t("module.end_date")}</label>
+                        <input
+                            id="end_date"
+                            type="date"
+                            className="form-control date-input"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            onClick={(e) => e.target.showPicker()}
+                            required
                             disabled={isSubmitting}
-                        ></textarea>
+                        />
                     </div>
-
-                    {/* Module Dates */}
-                    <div className="row mb-3">
-                        <div className="col">
-                            <label htmlFor="start_date" className="form-label">
-                                Start Date
-                            </label>
-                            <input
-                                id="start_date"
-                                type="date"
-                                className="form-control date-input"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                onClick={(e) => e.target.showPicker()}
-                                required
-                                disabled={isSubmitting}
-                            />
-                        </div>
-
-                        <div className="col">
-                            <label htmlFor="end_date" className="form-label">
-                                End Date
-                            </label>
-                            <input
-                                id="end_date"
-                                type="date"
-                                className="form-control date-input"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                onClick={(e) => e.target.showPicker()}
-                                required
-                                disabled={isSubmitting}
-                            />
-                        </div>
-                    </div>
+                </div>
 
 
-                    {/* Buttons */}
-                    <div className="d-flex justify-content-end">
-                        {isEditMode && (
-                            <button
-                                type="button"
-                                className="btn btn-danger rounded-pill me-auto"
-                                style={styles.btn}
-                                onClick={handleDelete}
-                                disabled={isSubmitting}
-                            >
-                                Delete
-                            </button>
-                        )}
-
+                {/* Buttons */}
+                <div className="d-flex justify-content-end">
+                    {isEditMode && (
                         <button
                             type="button"
-                            className="btn btn-outline-secondary rounded-pill me-2"
+                            className="btn btn-danger rounded-pill me-auto"
                             style={styles.btn}
-                            onClick={handleCancel}
+                            onClick={handleDelete}
                             disabled={isSubmitting}
                         >
-                            Cancel
+                              {t("module.delete")}
                         </button>
+                    )}
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary rounded-pill"
-                            style={styles.btn}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting
-                                ? "Processing..."
-                                : isEditMode
-                                    ? "Update"
-                                    : "Save"
-                            }
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-outline-secondary rounded-pill me-2"
+                        style={styles.btn}
+                        onClick={handleCancel}
+                        disabled={isSubmitting}
+                    >
+                        {t("module.cancel")}
+                    </button>
 
-                </form>
-            </div>
+                    <button
+                        type="submit"
+                        className="btn btn-primary rounded-pill"
+                        style={styles.btn}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting
+                            ? t("module.processing")
+                            : isEditMode
+                                ? t("module.update")
+                                : t("module.save")
+                        }
+                    </button>
+                </div>
+
+            </form>
         </div>
-    );
+    </div>
+);
 }
 
 const styles = {
