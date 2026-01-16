@@ -1,4 +1,4 @@
-import { where } from 'sequelize';
+import { where, Op } from 'sequelize';
 import pkg from '../models/index.cjs';
 const {
     Course,
@@ -9,12 +9,14 @@ const {
     AssessmentResponse,
     AssessmentAttempt,
     Grade,
+    LectureAssessment,
     sequelize
 } = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
     const { assessment_id } = req.params;
+
     const userRole = req.user?.roles?.[0];
     const user_id = req.user.id;
 
@@ -421,5 +423,73 @@ export async function getQuizReview(req, res) {
     } catch (err) {
         console.error("getQuizReview error:", err);
         res.status(500).json({ error: err.message });
+    }
+}
+
+export async function getUpcoming(req, res) {
+    try {
+        const { module_id } = req.params; // module page
+        if (!module_id) {
+            return res.status(400).json({ error: "module_id is required" });
+        }
+
+        const today = new Date();
+
+        // Get upcoming assessments for this module
+        const upcomingQuizzes = await Assessment.findAll({
+            where: {
+                due_date: { [Op.gt]: today },
+            },
+            attributes: ["assessment_id", "title", "due_date"],
+            include: [
+                {
+                    model: LectureAssessment,
+                    as: "lectureAssessments",
+                    required: true,
+                    attributes: [],
+                    include: [
+                        {
+                            model: Lecture,
+                            as: "lecture",
+                            required: true,
+                            attributes: ["lecture_id", "title"],
+                            include: [
+                                {
+                                    model: Module,
+                                    as: "module",
+                                    required: true,
+                                    attributes: ["module_id", "title"],
+                                    where: { module_id } // filter by module page
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            order: [["due_date", "ASC"]],
+            distinct: true
+        });
+
+        // Flatten results: 1 row per lecture-assessment
+        const flattened = upcomingQuizzes.flatMap((quiz) => {
+            return quiz.lectureAssessments.map((la) => {
+                const lecture = la.lecture;
+                const module = lecture?.module;
+
+                return {
+                    assessment_id: quiz.assessment_id,
+                    assessment_title: quiz.title,
+                    lecture_title: lecture?.title || null,
+                    module_title: module?.title || null,
+                    due_date: quiz.due_date
+                };
+            });
+        });
+
+        return res.json(flattened);
+    } catch (err) {
+        console.error("getUpcoming error:", err);
+        console.log(err);
+        return res.status(500).json({ error: "Failed to fetch upcoming assessments" });
     }
 }
