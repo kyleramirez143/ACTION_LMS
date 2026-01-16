@@ -77,6 +77,7 @@ import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
+import ViewGrades from "./trainee/ViewGrades.jsx";
 
 
 function AppContent() {
@@ -147,6 +148,7 @@ function AppContent() {
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+            
 
 
             {/* Admin Side Routes */}
@@ -179,6 +181,7 @@ function AppContent() {
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
+            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
 
           </Routes>
         </div>
