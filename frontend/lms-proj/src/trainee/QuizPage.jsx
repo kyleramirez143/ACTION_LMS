@@ -191,15 +191,18 @@ const QuizPage = () => {
             <div className="d-grid gap-2">
               {/* --- MULTIPLE CHOICE --- */}
               {question.options && Object.keys(question.options).length > 0 ? (
-                Object.entries(question.options).map(([key, option]) => (
-                  <button
-                    key={key}
-                    className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => handleAnswer(currentQuestion, key)}
-                  >
-                    {option}
-                  </button>
-                ))
+                Object.entries(question.options).map(([key, option], idx) => {
+                  const letter = String.fromCharCode(65 + idx); // 65 = 'A'
+                  return (
+                    <button
+                      key={key}
+                      className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => handleAnswer(currentQuestion, key)}
+                    >
+                      <strong>{letter}.</strong> {option}
+                    </button>
+                  );
+                })
               ) : (
                 /* Free-text input for Nihongo questions */
                 <input

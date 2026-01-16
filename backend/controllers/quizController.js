@@ -33,7 +33,8 @@ export async function getQuiz(req, res) {
                         "correct_answer",
                         "points",
                         "section"
-                    ]
+                    ],
+                    order: [['question_id', 'ASC']]
                 }
             ]
         });
@@ -392,15 +393,17 @@ export async function getQuizReview(req, res) {
                     model: AssessmentQuestion,
                     as: 'question',
                     attributes: [
+                        'question_id',
                         'question_text',
                         'options',
                         'correct_answer',
                         'explanations',
                         'points'
-                    ]
+                    ],
+                    // order: [['question_id', 'ASC']]
                 }
             ],
-            order: [['created_at', 'ASC']]
+            order: [['response_id', 'ASC']]
         });
 
         const formatted = responses.map(r => ({

@@ -59,7 +59,7 @@ export default function ReviewPage() {
     <div className="container-fluid py-3">
       {/* Header */}
       <div className="d-flex align-items-center mb-3">
-        <button className="btn btn-light border me-2" onClick={() => navigate(-1)}>
+        <button className="btn btn-light border me-2" onClick={() => navigate(`/trainee/assessment`)}>
           <ArrowLeft size={20} />
         </button>
         <h2 className="m-0 h4">{readableTitle} Review</h2>
