@@ -62,7 +62,7 @@ const QuizScreenRecord = () => {
             const { session_id } = res.data;
 
             // Navigate to quiz page, passing only serializable data
-            navigate(`/quiz/${assessment_id}/start`, { state: { sessionId: session_id } });
+            navigate(`/quiz/${assessment_id}/start`, { state: { sessionId: session_id, screenMonitoring: true } });
 
         } catch (err) {
             console.error(err);

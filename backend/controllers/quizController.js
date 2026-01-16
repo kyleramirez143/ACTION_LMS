@@ -25,7 +25,15 @@ export async function getQuiz(req, res) {
                 {
                     model: AssessmentQuestion,
                     as: "questions",
-                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "points", "section"]
+                    attributes: [
+                        "question_id",
+                        "question_text",
+                        "explanations",
+                        "options",
+                        "correct_answer",
+                        "points",
+                        "section"
+                    ]
                 }
             ]
         });
@@ -185,7 +193,7 @@ export async function deleteQuestion(req, res) {
 
 // Trainee answers per quiz
 export async function saveResponse(req, res) {
-const { assessment_id, answers } = req.body;
+    const { assessment_id, answers } = req.body;
     const user_id = req.user.id;
 
     const transaction = await sequelize.transaction();

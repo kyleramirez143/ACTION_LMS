@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios';
@@ -12,6 +12,7 @@ const QuizPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('authToken');
   const sessionId = state?.sessionId;
+  const screenMonitoring = state?.screenMonitoring ?? false;
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -24,6 +25,8 @@ const QuizPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20 * 60);
   const [submissionResult, setSubmissionResult] = useState(null);
+
+  const submissionLock = useRef(false);
 
   // --- AUTH CHECK ---
   useEffect(() => {
@@ -42,7 +45,9 @@ const QuizPage = () => {
 
   // --- SESSION CHECK ---
   useEffect(() => {
-    if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
+    if (screenMonitoring && !sessionId) {
+      navigate(`/quiz/${assessment_id}/permission`);
+    }
   }, [sessionId, assessment_id, navigate]);
 
   // --- FETCH QUESTIONS ---
@@ -122,72 +127,28 @@ const QuizPage = () => {
 
   if (isUploading) return <p>Submitting quiz...</p>;
 
-
-  // --- SUBMIT QUIZ ---
-
-  // const onConfirmSubmit = async () => {
-  //   if (hasSubmitted) return;
-  //   setHasSubmitted(true);
-
-  //   setShowSubmitModal(false);
-  //   setShowTimeUpModal(false);
-  //   setAutoSubmitCountdown(0);
-  //   setIsUploading(true);
-
-  //   try {
-  //     RecorderState.stop();
-
-  //     const chunks = RecorderState.getChunks();
-  //     if (chunks.length > 0) {
-  //       const blob = new Blob(chunks, { type: 'video/webm' });
-  //       const formData = new FormData();
-  //       formData.append('recording', blob, `session_${sessionId}.webm`);
-
-  //       await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-  //         headers: { 'Content-Type': 'multipart/form-data' }
-  //       });
-  //     }
-
-  //     const response = await API.post(`/quizzes/responses`, {
-  //       assessment_id,
-  //       answers,
-  //       start_time: state?.startTime
-  //     }, { headers: { Authorization: `Bearer ${token}` } });
-
-  //     setSubmissionResult(response.data);
-  //     setShowResultModal(true);
-  //   } catch (err) {
-  //     console.error('Submission error:', err);
-  //     alert('Failed to submit quiz.');
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
-
-  let submissionInProgress = false; // outside component, or useRef
-
   const onConfirmSubmit = async () => {
-    if (submissionInProgress) return; // block double submission
-    submissionInProgress = true;
+    if (submissionLock.current) return; // prevent double submission
+    submissionLock.current = true;       // lock
 
     setHasSubmitted(true);
+    setIsUploading(true);
+    setShowSubmitModal(false);
+    setShowTimeUpModal(false);
 
     try {
-      setIsUploading(true);
-      setShowSubmitModal(false);
-      setShowTimeUpModal(false);
+      if (screenMonitoring) {
+        RecorderState.stop();
 
-      // Upload recording
-      RecorderState.stop();
-
-      const chunks = RecorderState.getChunks();
-      if (chunks.length > 0) {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const formData = new FormData();
-        formData.append('recording', blob, `session_${sessionId}.webm`);
-        await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const chunks = RecorderState.getChunks();
+        if (chunks.length > 0) {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const formData = new FormData();
+          formData.append('recording', blob, `session_${sessionId}.webm`);
+          await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        }
       }
 
       // Submit answers
@@ -204,10 +165,9 @@ const QuizPage = () => {
       alert('Failed to submit quiz.');
     } finally {
       setIsUploading(false);
-      submissionInProgress = false; // reset lock if needed
+      submissionLock.current = false; // unlock only if you want to allow retry on failure
     }
   };
-
 
   if (!questions.length) return <p>Loading quiz...</p>;
 
@@ -283,8 +243,8 @@ const QuizPage = () => {
         <div className="col-md-3">
           <div className="card p-3 shadow-sm">
             <h6 className="text-center">Question Navigator</h6>
-            {sessionId && (
-              <div className="alert alert-warning mt-3 d-flex align-items-center">
+            {screenMonitoring && sessionId && (
+              <div className="alert alert-warning mt-3">
                 Recording in Progress
               </div>
             )}
