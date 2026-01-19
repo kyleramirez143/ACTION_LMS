@@ -428,14 +428,14 @@ export async function getQuizReview(req, res) {
 
 export async function getUpcoming(req, res) {
     try {
-        const { module_id } = req.params; // module page
+        const { module_id } = req.params;
+
         if (!module_id) {
             return res.status(400).json({ error: "module_id is required" });
         }
 
         const today = new Date();
 
-        // Get upcoming assessments for this module
         const upcomingQuizzes = await Assessment.findAll({
             where: {
                 due_date: { [Op.gt]: today },
@@ -443,25 +443,18 @@ export async function getUpcoming(req, res) {
             attributes: ["assessment_id", "title", "due_date"],
             include: [
                 {
-                    model: LectureAssessment,
-                    as: "lectureAssessments",
+                    model: Lecture,
+                    as: "lectures", // 🔥 belongsToMany alias
                     required: true,
-                    attributes: [],
+                    attributes: ["lecture_id", "title"],
+                    through: { attributes: [] },
                     include: [
                         {
-                            model: Lecture,
-                            as: "lecture",
+                            model: Module,
+                            as: "module",
                             required: true,
-                            attributes: ["lecture_id", "title"],
-                            include: [
-                                {
-                                    model: Module,
-                                    as: "module",
-                                    required: true,
-                                    attributes: ["module_id", "title"],
-                                    where: { module_id } // filter by module page
-                                }
-                            ]
+                            attributes: ["module_id", "title"],
+                            where: { module_id }
                         }
                     ]
                 }
@@ -470,26 +463,24 @@ export async function getUpcoming(req, res) {
             distinct: true
         });
 
-        // Flatten results: 1 row per lecture-assessment
-        const flattened = upcomingQuizzes.flatMap((quiz) => {
-            return quiz.lectureAssessments.map((la) => {
-                const lecture = la.lecture;
-                const module = lecture?.module;
+        const flattened = upcomingQuizzes.flatMap(q =>
+            q.lectures.map(l => ({
+                assessment_id: q.assessment_id,
+                assessment_title: q.title,
+                lecture_title: l.title,
+                module_title: l.module.title,
+                due_date: q.due_date
+            }))
+        );
 
-                return {
-                    assessment_id: quiz.assessment_id,
-                    assessment_title: quiz.title,
-                    lecture_title: lecture?.title || null,
-                    module_title: module?.title || null,
-                    due_date: quiz.due_date
-                };
-            });
-        });
+        console.log(flattened);
 
         return res.json(flattened);
+
     } catch (err) {
+        console.log(err);   
         console.error("getUpcoming error:", err);
-        console.log(err);
         return res.status(500).json({ error: "Failed to fetch upcoming assessments" });
     }
 }
+

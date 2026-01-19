@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function UpcomingPanel({ moduleId }) {
-    const { course_id, module_id } = useParams();
+    // const { course_id, module_id } = useParams();
     const token = localStorage.getItem("authToken");
 
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchUpcoming();
-    }, [course_id]);
+        if (moduleId) fetchUpcoming();
+    }, [moduleId]);
 
     const fetchUpcoming = async () => {
         try {
@@ -22,6 +22,7 @@ export default function UpcomingPanel({ moduleId }) {
 
             const data = await res.json();
             setEvents(Array.isArray(data) ? data : []);
+            console.log(data);
         } catch (err) {
             console.error(err);
             setEvents([]);
@@ -51,7 +52,7 @@ export default function UpcomingPanel({ moduleId }) {
             ) : (
                 events.map((e, i) => (
                     <div key={i} className="upcoming-card green">
-                        <strong>{e.title}</strong>
+                        <strong>{e.assessment_title}</strong>
                         {e.lecture_title && <p>Lecture: {e.lecture_title}</p>}
                         <p>Due: {formatDateTime(e.due_date)}</p>
                     </div>
