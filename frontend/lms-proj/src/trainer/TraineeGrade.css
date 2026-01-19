@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+.trainee-grade-page {
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+  background-color: #f8f9fd;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.table-filters {
+  display: flex;
+  align-items: center; /* vertically align items */
+  gap: 15px;           /* space between filter and search */
+  margin-bottom: 15px;
+}
+
+
+.table-filters input,
+.table-filters select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* Table Card */
+.table-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #dee2e6; /* horizontal only */
+}
+
+.table-wrapper th {
+  background-color: #ffffff;
+  font-weight: 600;
+}
+
+.edit-col {
+  width: 40px;
+}
+
+.edit-icon {
+  cursor: pointer;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.custom-pagination .page-link {
+  background-color: #fff;
+  color: black;
+  border: none;
+  margin: 0 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.custom-pagination .page-item.active .page-link {
+  color: white;
+  font-weight: 600;
+  border: 2px solid #0047AB;
+  background-color: #0047AB;
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #e0e0e0;
+}
+
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  width: 500px;
+}
+
+.criteria-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.criteria-table th,
+.criteria-table td {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.criteria-table input {
+  width: 70px;
+  padding: 6px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ================= MODAL FIX ================= */
+
+/* Overlay must cover entire viewport */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999; /* ABOVE navbar */
+}
+
+/* Modal box */
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+
+  max-height: 90vh; /* prevents overflow */
+  overflow-y: auto; /* scroll if needed */
+
+  padding: 24px;
+  border-radius: 12px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Modal title */
+.modal-content h3 {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* Criteria table inside modal */
+.criteria-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.criteria-table th,
+.criteria-table td {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+  text-align: left;
+}
+
+/* Inputs inside modal */
+.criteria-table input {
+  width: 80px;
+  padding: 6px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  min-width: 130px;
+  padding: 10px 16px;
+  font-weight: 500;
+  border-radius: 50px; /* rounded-pill effect */
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+}
+
+/* Filled button (Save) */
+.btn-primary {
+  background-color: #0047AB !important;
+  border-color: #0047AB !important;
+  color: #ffffff !important;
+}
+
+/* Outline button (Cancel) */
+.btn-outline-primary {
+  background-color: #ffffff !important;
+  color: #0047AB !important;
+  border: 1px solid #0047AB !important;
+}
+
+/* Hover states */
+.btn-primary:hover {
+  background-color: #003b94 !important;
+  border-color: #003b94 !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0047AB !important;
+  color: #ffffff !important;
+}
+.print-button {
+  background-color: #0047AB;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.print-button:hover {
+  background-color: #003b94;
+}

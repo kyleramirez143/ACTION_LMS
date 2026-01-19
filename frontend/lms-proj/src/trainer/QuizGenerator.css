@@ -290,7 +290,7 @@
     cursor: pointer;
     background: #ffffff;
     /* same as container-box */
-    min-height: 300px;
+    min-height: 150px;
     width: 100%;
     border-radius: 12px;
     /* match card radius */
