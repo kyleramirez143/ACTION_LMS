@@ -27,15 +27,12 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 // Navbar & Shared
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
-import NotificationView from "./all/NotificationView.jsx";
-import HelpAndSupport from "./all/HelpSupport.jsx";
-
 
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
-import AdminCreateCourse from './admin/AdminCoursePage';
+// import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
-import AdminCourseEditPage from './admin/AdminCourseEditPage';
+// import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
@@ -44,25 +41,25 @@ import ModuleTable from "./admin/ModuleTable.jsx";
 import SetPeriodModule from "./admin/SetPeriodModule.jsx";
 import CalendarView from "./admin/CalendarView.jsx";
 import NewSchedule from "./admin/NewSchedule.jsx";
-import CheckpointView from "./admin/CheckpointView.jsx";
-import AddBatch from "./admin/AddBatch.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
+import QuizManual from "./trainer/QuizManual.jsx";
 import CoursePage from './trainer/CourseManagement';
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
 import ModuleManagement from "./trainer/ModuleManagement.jsx";
 import AddModule from "./trainer/AddModule.jsx";
-import QuizManual from "./trainer/QuizManual.jsx";
-import TraineeGrade from "./trainer/TraineeGrade.jsx";
 
 //Trainer Imports
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
+import TrainerCalendarView from "./trainer/TrainerCalendarView.jsx";
+import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
+import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 // Trainee imports
 import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
@@ -70,8 +67,8 @@ import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
-import ViewGrades from "./trainee/ViewGrades.jsx";
-import ProfileInfo from "./trainee/ProfileInfo";
+import AddBatch from "./admin/AddBatch.jsx";
+import AdminCoursePage from "./admin/AdminCoursePage";
 
 
 function AppContent() {
@@ -92,7 +89,7 @@ function AppContent() {
             element={
               <ProtectedRoute roles={["Admin", "Trainer", "Trainee"]}>
                 <ObjectOfWebPage ex.ModuleScreen/>
-              </ProtectedRoute>
+              </ProtectedRoute>c
             }
           />
 
@@ -111,19 +108,11 @@ function AppContent() {
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
 
-            {/* Notifications */}
-            <Route path="all/notificationview" element={<NotificationView />} />
-
-            {/* Help & Support */}
-            <Route path="all/helpandsupport" element={<HelpAndSupport />} />
-
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
-            <Route path="trainer/quizmanual" element={<QuizManual />} />
-
-            
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quizmanual" element={<QuizManual />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
@@ -139,41 +128,42 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
-            <Route path="/trainer/quiz-manual" element={<QuizManual />} />
-            <Route path="/trainer/trainee-grades" element={<TraineeGrade />} />
+            <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
+            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
             <Route path="/admin/course-management" element={<AdminCourseManagement />} />
-            <Route path="/admin/course-management/create" element={<AdminCreateCourse />} />
-            <Route path="/admin/course-management/edit/:course_id" element={<AdminCourseEditPage />} />
+            <Route path="/admin/course-management/create" element={<AdminCoursePage />} />
+            <Route path="/admin/course-management/edit/:course_id" element={<AdminCoursePage />} />
             <Route path="/admin/user-management" element={<UserRoleTable />} />
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
-            <Route path="/admin/batch-management" element={<BatchesTable/>} />
-            <Route path="/admin/add-batch" element={<AddBatch/>} />
+            <Route path="/admin/batch-management" element={<BatchesTable />} />
+            <Route path="/admin/add-batch" element={<AddBatch />} />
             <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
-            <Route path="/admin/module-management" element={<ModuleTable/>} />
-            <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
-            <Route path="/admin/calendar" element={<CalendarView/>} />
-            <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
-            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
+            <Route path="/admin/module-management" element={<ModuleTable />} />
+            <Route path="/admin/set-module-date" element={<SetPeriodModule />} />
+            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule />} />
+            <Route path="/admin/calendar" element={<CalendarView />} />
+            <Route path="/admin/add-new-schedule" element={<NewSchedule />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
-            <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
-            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
-            <Route path="/trainee/profileinfo" element={<ProfileInfo />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
 
-            {/* Trainee Side Routes */}
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
+            
 
           </Routes>
         </div>
