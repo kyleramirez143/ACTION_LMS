@@ -98,4 +98,20 @@ router.delete(
     deleteResource
 );
 
+// Rename resource
+router.patch(
+    "/resource/rename/:resource_id",
+    protect,
+    checkRole(["Trainer"]),
+    renameResource
+);
+
+// Delete single resource
+router.delete(
+    "/resource/:resource_id",
+    protect,
+    checkRole(["Trainer"]),
+    deleteResource
+);
+
 export default router;

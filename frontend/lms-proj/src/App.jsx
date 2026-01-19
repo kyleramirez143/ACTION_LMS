@@ -28,6 +28,15 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 
+// Notification
+import NotificationView from "./all/NotificationView.jsx";
+
+//Checkpoint View
+import CheckpointView from "./admin/CheckpointView.jsx";
+
+//Help & Support
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCourseManagement from './admin/CourseManagementPage';
@@ -45,6 +54,7 @@ import AdminNewSchedule from "./admin/AdminNewSchedule.jsx";
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
+import QuizManual from "./trainer/QuizManual.jsx";
 import CoursePage from './trainer/CourseManagement';
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
@@ -104,10 +114,20 @@ function AppContent() {
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
 
+            {/* Notification */}
+            <Route path="/all/notificationview" element={<NotificationView />} />
+
+            {/* Checkpoint View */}
+            <Route path="/all/checkpointview" element={<CheckpointView />} />
+
+            {/* Help & Support */}
+            <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
+
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quizmanual" element={<QuizManual />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
@@ -151,11 +171,15 @@ function AppContent() {
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
-            <Route path="/trainee/assessment/:slug" element={<ReviewPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
+            {/* <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} /> */}
+
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
+            {/* <Route path="/trainee/viewgrades" element={<ViewGrades />} /> */}
 
           </Routes>
         </div>

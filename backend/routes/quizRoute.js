@@ -8,7 +8,11 @@ const router = express.Router();
 
 // Quiz settings
 router.put('/:assessment_id', protect, checkRole(['Trainer']), quizController.saveQuizConfig);
-router.get('/:assessment_id', protect, checkRole(['Trainer', 'Trainee']), quizController.getQuiz);
+router.get('/:assessment_id',
+    protect,
+    checkRole(['Trainer', 'Trainee']),
+    quizController.getQuiz
+);
 
 // Questions
 router.post('/questions', protect, checkRole(['Trainer']), quizController.addQuestion);
@@ -41,4 +45,29 @@ router.get(
     quizController.getTraineeResults
 );
 
+// Trainer: assessment results
+router.get(
+    '/:assessment_id/results',
+    protect,
+    checkRole(['Trainer']),
+    proctorController.getAssessmentResults
+);
+
+// Trainee: Review quiz after taking
+router.get('/:assessment_id/review', protect, checkRole(['Trainee']), quizController.getQuizReview)
+
 export default router;
+
+router.get(
+    '/:assessment_id/user/:user_id/attempts',
+    protect,
+    checkRole(['Trainer']),
+    proctorController.getUserAttemptHistory
+);
+
+router.get(
+    '/upcoming/:module_id',
+    protect,
+    checkRole(['Trainer', 'Trainee']),
+    quizController.getUpcoming
+);

@@ -44,7 +44,12 @@ module.exports = (sequelize, DataTypes) => {
         passing_score: {
             type: DataTypes.INTEGER,
             defaultValue: 70,
-            allowNull: false
+            allowNull: false,
+        },
+        due_date: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+            allowNull: true
         },
         screen_monitoring: {
             type: DataTypes.BOOLEAN,
@@ -105,6 +110,12 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "assessment_id",
             as: "questions",
         });
+
+        Assessment.hasMany(models.Grade, {
+            foreignKey: 'assessment_id',
+            as: 'grades'
+        });
+
     };
 
     return Assessment;

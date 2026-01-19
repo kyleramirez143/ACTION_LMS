@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./TraineeAssessment.css";
 import { Search, ArrowLeft } from "lucide-react";
+import { jwtDecode } from 'jwt-decode';
 
 export default function AssessmentDashboard() {
+  const { assessment_id, attempt_id } = useParams();
   const navigate = useNavigate();
 
   // =========================
@@ -16,14 +18,29 @@ export default function AssessmentDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const token = localStorage.getItem("authToken");
+
+  // --- AUTH CHECK ---
+  useEffect(() => {
+    if (!token) return navigate('/login');
+    try {
+      const decoded = jwtDecode(token);
+      const roles = Array.isArray(decoded.role || decoded.roles)
+        ? decoded.role || decoded.roles
+        : [decoded.role || decoded.roles];
+      if (!roles.includes('Trainee')) navigate('/access-denied');
+    } catch {
+      localStorage.removeItem('authToken');
+      navigate('/login');
+    }
+  }, [token, navigate]);
+
   // =========================
   // FETCH DATA
   // =========================
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-
         const res = await fetch("/api/quizzes/trainee/results", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -76,8 +93,8 @@ export default function AssessmentDashboard() {
   // =========================
   // NAVIGATION
   // =========================
-  const openAssessment = (assessment_id) => {
-    navigate(`/trainee/assessment/${assessment_id}`);
+  const openAssessment = (assessment_id, attempt_id) => {
+    navigate(`/trainee/assessment/${assessment_id}/review?attempt=${attempt_id}`);
   };
 
   const statusClass = {
@@ -125,6 +142,8 @@ export default function AssessmentDashboard() {
             <table className="results-table">
               <thead>
                 <tr>
+                  <th>Course</th>
+                  <th>Module</th>
                   <th>Quiz Title</th>
                   <th>Score</th>
                   <th>Status</th>
@@ -148,13 +167,18 @@ export default function AssessmentDashboard() {
                   </tr>
                 ) : (
                   displayedResults.map((r, i) => (
-                    <tr key={r.assessment_id}>
-
+                    <tr key={r.attempt_id}>
+                      <td>
+                        {r.course}
+                      </td>
+                      <td>
+                        {r.module}
+                      </td>
                       <td>
                         <button
-                          className="title-link"
+                          className="title-link text-primary text-decoration-underline"
                           type="button"
-                          onClick={() => openAssessment(r.assessment_id)}
+                          onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
                         >
                           {r.title}
                         </button>

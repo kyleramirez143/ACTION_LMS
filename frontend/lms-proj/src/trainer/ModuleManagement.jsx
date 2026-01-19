@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import { ArrowLeft } from "lucide-react";
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map(module => ({
@@ -156,7 +157,7 @@ export default function ModuleManagement() {
     if (loading) return <p className="text-center py-5">Loading modules...</p>;
 
     return (
-        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+        <div className="container px-4 py-0">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">{courseTitle}</h3>
@@ -192,14 +193,16 @@ export default function ModuleManagement() {
                                 <div className="card h-100 shadow-sm d-flex flex-column position-relative">
 
                                     {/* STATUS BADGE */}
-                                    <span
-                                        className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
-                                            }`}
-                                        style={{ fontSize: '0.75rem', zIndex: 10 }}
-                                        onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
-                                    >
-                                        {module.is_visible ? 'Visible' : 'Hidden'}
-                                    </span>
+                                    {userRole === "Trainer" && (
+                                        <span
+                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
+                                                }`}
+                                            style={{ fontSize: '0.75rem', zIndex: 10 }}
+                                            onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
+                                        >
+                                            {module.is_visible ? 'Visible' : 'Hidden'}
+                                        </span>
+                                    )}
 
                                     {/* Dropdown (Trainer only) */}
                                     {userRole === "Trainer" && (

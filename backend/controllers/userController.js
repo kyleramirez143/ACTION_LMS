@@ -128,8 +128,9 @@ export const addUser = async (req, res) => {
             );
 
             // 2️⃣ Assign role
-            const roleRecord = await db.Role.findOne({ 
-                where: { name: role } });
+            const roleRecord = await db.Role.findOne({
+                where: { name: role }
+            });
             if (!roleRecord) throw new Error("Invalid role");
 
             await db.UserRole.create(
@@ -196,7 +197,7 @@ export const updateUser = async (req, res) => {
 
             // 1. Update basic info
             await user.update({ first_name, last_name, email, is_active }, { transaction: t });
-            
+
             // 2. Sync Role
             await syncUserRole(userId, role, t);
 
@@ -215,7 +216,7 @@ export const updateUser = async (req, res) => {
                     batch_id: batchRecord.batch_id // Standardized to your schema
                 }, { transaction: t });
             }
-            
+
             // ❌ REMOVED: The duplicate create call that was outside the IF block.
             // This was causing the "batchRecord is not defined" error for Admins/Trainers.
         });
@@ -717,16 +718,16 @@ export const importUsers = async (req, res) => {
 
                         let batchNameInput = batch ? batch.trim() : "";
                         console.log("BATCH NAME FETCHED: ", batchNameInput);
-
                         if (role === "Trainee") {
                             if (!batchNameInput) throw new Error("Batch name is required for Trainees");
-                            
-                            const batchRec = await db.Batch.findOne({ 
-                                where: { 
+
+                            const batchRec = await db.Batch.findOne({
+                                where: {
                                     name: batch.trim(),
                                     location: location ? location.trim() : ""
-                                }, 
-                                transaction: t });
+                                },
+                                transaction: t
+                            });
 
                             if (!batchRec) throw new Error(`Batch '${batch}' in '${location}' not found`);
 
@@ -742,6 +743,7 @@ export const importUsers = async (req, res) => {
                         addedUsers.push({ email });
                     });
                 } catch (err) {
+                    console.log(err);
                     errors.push({ email: email || "Unknown", error: err.message });
                 }
             }

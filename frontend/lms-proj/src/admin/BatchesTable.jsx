@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./UserRoleTable.css";
-import logo from "../image/courses.svg";
 
 function BatchesTable() {
     const navigate = useNavigate();
@@ -147,15 +146,13 @@ function BatchesTable() {
                         </button>
                     </Link>
 
-                    {batches.length > 0 && (
-                        <button
-                            className="btn btn-danger rounded-pill"
-                            onClick={handleBulkDelete}
-                            disabled={selectedBatches.length === 0}
-                        >
-                            <i className="bi bi-trash3-fill"></i> Delete ({selectedBatches.length})
-                        </button>
-                    )}
+                    <button
+                        className="btn btn-danger rounded-pill"
+                        onClick={handleBulkDelete}
+                        disabled={selectedBatches.length === 0}
+                    >
+                        <i className="bi bi-trash3-fill"></i> Delete ({selectedBatches.length})
+                    </button>
                 </div>
             </div>
 
@@ -222,26 +219,8 @@ function BatchesTable() {
                                 <tbody>
                                     {batches.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="text-center py-5 text-muted">
-                                                {filter === "All" ? (
-                                                    <>
-                                                        <img src={logo} alt="Logo" className="img-fluid mb-3"
-                                                            style={{ maxWidth: "200px" }} />
-                                                        <p className="mb-3">No batches found. Start by creating your first batch.</p>
-                                                        <Link to="/admin/add-batch">
-                                                            <button className="btn btn-primary">
-                                                                <i className="bi bi-plus-circle-fill me-2"></i>Add New Batch
-                                                            </button>
-                                                        </Link>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <img src={logo} alt="Logo" className="img-fluid mb-3"
-                                                            style={{ maxWidth: "200px" }} />
-                                                        <h3 className="mb-2">No Batch yet.</h3>
-                                                        <p className="mb-0">No batches match your criteria for the selected filter.</p>
-                                                    </>
-                                                )}
+                                            <td colSpan="6" className="text-center py-5 text-muted">
+                                                No batches match your criteria.
                                             </td>
                                         </tr>
                                     ) : (

@@ -16,6 +16,7 @@
     "@schedule-x/theme-default": "^3.7.2",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
+    "bootstrap-datepicker": "^1.10.1",
     "bootstrap-icons": "^1.13.1",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
