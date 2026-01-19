@@ -131,7 +131,7 @@ const CheckpointView = () => {
                 <th className="header-orange">UAF <br /> (IMS)</th>
                 <th className="header-orange">Telework <br /> (Office PC)</th>
                 <th className="header-orange">Telework <br /> (Personal PC)</th>
-                <th className="header-yellow">Passport</th>
+                <th className="header-orange">Passport</th>
                 <th className="header-orange">IMS & <br /> UAF</th>
                 <th>Action</th>
               </tr>
