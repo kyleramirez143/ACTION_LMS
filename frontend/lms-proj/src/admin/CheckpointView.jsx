@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
-import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaEdit, FaCheckCircle, FaTimesCircle, FaArrowLeft } from "react-icons/fa"; // Added FaArrowLeft
 import "./CheckpointView.css";
 
 
@@ -8,6 +8,7 @@ const backendURL = "http://localhost:5000";
 
 
 const CheckpointView = () => {
+  const navigate = useNavigate();
   const { state } = useLocation();
   const batchId = state?.batchId;
 
@@ -112,9 +113,16 @@ const CheckpointView = () => {
     <div className="checkpoint-container">
       <div className="checkpoint-card">
         <div className="checkpoint-header">
-          <h2 className="checkpoint-title">
-            {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : "Loading Batch Info..."}
-          </h2>
+          <nav className="breadcrumb-nav">
+            <span className="breadcrumb-link" onClick={() => navigate("/admin/batch-management")}>
+              Batches
+            </span>
+            <span className="breadcrumb-separator">/</span>
+            <span className="breadcrumb-current">
+              {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : "Loading..."}
+            </span>
+          </nav>
+          <h2 className="checkpoint-title">Trainee List</h2>
         </div>
 
 
