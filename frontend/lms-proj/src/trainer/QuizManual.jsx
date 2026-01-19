@@ -1,87 +1,326 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import "./QuizManual.css";
+
+function useUnsavedQuizPrompt(quiz, isSaved) {
+  const navigate = useNavigate();
+
+  // --- Handle browser refresh/close ---
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (quiz && !isSaved) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [quiz, isSaved]);
+
+  // Only trigger prompt for other pages, not review & publish
+  const handleNavigation = (e) => {
+    if (quiz && !isSaved) {
+      const target = e.target?.getAttribute("href") || "";
+      if (!target.includes("/quizzes/")) {
+        if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Attach to all links in page
+    document.querySelectorAll("a").forEach(link =>
+      link.addEventListener("click", handleNavigation)
+    );
+    return () => {
+      document.querySelectorAll("a").forEach(link =>
+        link.removeEventListener("click", handleNavigation)
+      );
+    };
+  }, [quiz, isSaved]);
+}
 
 function QuizManual() {
   const navigate = useNavigate();
-  const [quizType, setQuizType] = useState("Multiple Choice");
-  const [questions, setQuestions] = useState([]);
+  const token = localStorage.getItem("authToken");
+
+  // --- STATES ---
+  const [quiz, setQuiz] = useState({ title: "", quizType: "Multiple Choice", questions: [] });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const [courses, setCourses] = useState([]);
+  const [modules, setModules] = useState([]);
+  const [lectures, setLectures] = useState([]);
+  const [assessmentTypes, setAssessmentTypes] = useState([
+    "Skill Check",
+    "Course-End Exam",
+    "Mock Exam",
+    "Practice Exam",
+    "Oral Exam",
+    "Daily Quiz",
+    "Homework",
+    "Exercises",
+    "Activity"
+  ]);
+
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedModule, setSelectedModule] = useState("");
+  const [selectedLecture, setSelectedLecture] = useState("");
+  const [assessmentType, setAssessmentType] = useState("");
+
+
   const [newQuestion, setNewQuestion] = useState({
-    question: "",
+    question_text: "",
     options: { a: "", b: "", c: "", d: "" },
-    correctAnswer: "a",
+    correct_answer: "a",
     explanation: "",
+    section: "General",
+    points: 1,
   });
 
+  // --- UNSAVED QUIZ PROMPT ---
+  useUnsavedQuizPrompt(quiz, isSaved);
+
+  // --- AUTH & FETCH COURSES ---
+  useEffect(() => {
+    if (!token) return navigate("/login");
+    try {
+      const decoded = jwtDecode(token);
+      if (!decoded.roles?.includes("Trainer")) navigate("/access-denied");
+
+      fetch("/api/courses/trainer", { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => res.json())
+        .then(setCourses)
+        .catch(console.error);
+    } catch {
+      navigate("/login");
+    }
+  }, [token, navigate]);
+
+  // --- FETCH MODULES ---
+  useEffect(() => {
+    if (!selectedCourse) {
+      setModules([]); setSelectedModule(""); setLectures([]);
+      return;
+    }
+    fetch(`/api/modules/${selectedCourse}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => { setModules(data); setSelectedModule(""); setLectures([]); });
+  }, [selectedCourse, token]);
+
+  // --- FETCH LECTURES ---
+  useEffect(() => {
+    if (!selectedModule) { setLectures([]); setSelectedLecture(""); return; }
+    fetch(`/api/lectures/modules/${selectedModule}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => { setLectures(data); setSelectedLecture(""); });
+  }, [selectedModule, token]);
+
+  // --- ADD QUESTION ---
   const handleAddQuestion = () => {
-    if (!newQuestion.question) {
+    if (!newQuestion.question_text.trim()) {
       alert("Please enter a question.");
       return;
     }
 
-    setQuestions([...questions, newQuestion]);
+    const questionWithId = { ...newQuestion, question_id: crypto.randomUUID() };
+
+    setQuiz(prev => ({
+      ...prev,
+      questions: [...prev.questions, questionWithId]
+    }));
+
+    // Reset new question
     setNewQuestion({
-      question: "",
+      question_text: "",
       options: { a: "", b: "", c: "", d: "" },
-      correctAnswer: "a",
+      correct_answer: "a",
       explanation: "",
+      section: "General",
+      points: 1,
     });
   };
 
   const handleOptionChange = (key, value) => {
-    setNewQuestion({
-      ...newQuestion,
-      options: { ...newQuestion.options, [key]: value },
-    });
+    setNewQuestion(prev => ({
+      ...prev,
+      options: { ...prev.options, [key]: value },
+    }));
   };
 
-  const handleSaveQuiz = () => {
-    if (questions.length === 0) {
-      alert("Add at least one question before saving!");
+  // --- SAVE QUIZ ---
+  const handleSaveQuiz = async () => {
+    if (!selectedLecture || !quiz.title.trim() || quiz.questions.length === 0) {
+      alert("Please fill Quiz Title, Lecture, and add at least one question.");
       return;
     }
 
-    // TODO: Replace with your API call to save the quiz
-    console.log("Quiz saved:", { quizType, questions });
+    setSaving(true);
+    try {
+      const res = await fetch("/api/upload/save-to-lecture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          lectureId: selectedLecture,
+          title: quiz.title,
+          quizType: quiz.quizType,
+          assessmentTypeName: assessmentType,
+          pdfFilename: null,
+          questions: quiz.questions.map(q => ({
+            question: q.question_text,
+            options: quiz.quizType === "Multiple Choice" ? q.options : null,
+            correct_answer: q.correct_answer.toLowerCase(),
+            explanation: q.explanation,
+            section: q.section,
+            points: q.points,
+          })),
+        }),
+      });
 
-    alert("Quiz saved successfully!");
-    navigate("/trainer/dashboard"); // Redirect to Trainer Dashboard
+      if (!res.ok) throw new Error(await res.text() || "Failed to save quiz");
+
+      const { assessmentId } = await res.json();
+      setIsSaved(true);
+
+      // Navigate to Review & Publish
+      navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
+      resetForm();
+    } catch (err) {
+      console.error("Error saving manual quiz:", err);
+      alert("Failed to save quiz. Check console.");
+    } finally {
+      setSaving(false);
+    }
   };
 
+  // --- DISCARD QUIZ ---
   const handleDiscardQuiz = () => {
     if (window.confirm("Are you sure you want to discard this quiz?")) {
-      setQuestions([]);
-      setNewQuestion({
-        question: "",
-        options: { a: "", b: "", c: "", d: "" },
-        correctAnswer: "a",
-        explanation: "",
-      });
+      resetForm();
     }
+  };
+
+  const resetForm = () => {
+    setQuiz({ title: "", quizType: "Multiple Choice", questions: [] });
+    setSelectedCourse(""); setSelectedModule(""); setSelectedLecture("");
+    setModules([]); setLectures([]);
+    setNewQuestion({
+      question_text: "",
+      options: { a: "", b: "", c: "", d: "" },
+      correct_answer: "a",
+      explanation: "",
+      section: "General",
+      points: 1,
+    });
+    setIsSaved(false);
+  };
+
+  // --- RENDER QUIZ SECTION ---
+  const renderQuizSection = (section) => {
+    const sectionQuestions = quiz.questions.filter(q => q.section === section);
+    if (!sectionQuestions.length) return null;
+
+    return (
+      <div className="mb-4" key={section}>
+        <h4 className="text-primary">{section}</h4>
+        {sectionQuestions.map((q, i) => (
+          <div className="card shadow-sm mb-3" key={q.question_id}>
+            <div className="card-body">
+              <h5 className="card-title">Q{i + 1}: {q.question_text}</h5>
+              {quiz.quizType === "Multiple Choice" && (
+                <ul className="list-group list-group-flush mb-2">
+                  {Object.entries(q.options).map(([k, v]) => (
+                    <li key={k} className="list-group-item"><strong>{k.toUpperCase()}.</strong> {v}</li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-success mb-1"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
+              {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
+                <small className="fw-bold d-block">Explanation:</small>
+                <small>{q.explanation}</small>
+              </div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
     <div className="manual-container-full">
-      {/* Left Panel: Manual Input */}
+      {/* LEFT PANEL */}
       <div className="manual-left p-4 shadow-sm rounded">
         <h3 className="mb-4">Manual Quiz Input</h3>
+
+        {/* Quiz Title */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">Quiz Title</label>
+          <input
+            type="text"
+            className="form-control"
+            value={quiz.title}
+            onChange={(e) => setQuiz(prev => ({ ...prev, title: e.target.value }))}
+          />
+        </div>
 
         {/* Quiz Type */}
         <div className="mb-3">
           <label className="form-label fw-bold">Quiz Type</label>
-          {["Multiple Choice", "Identification", "Enumeration"].map((type) => (
+          {["Multiple Choice", "Identification"].map(type => (
             <div className="form-check" key={type}>
               <input
                 className="form-check-input"
                 type="radio"
-                name="quizType"
                 value={type}
-                checked={quizType === type}
-                onChange={(e) => setQuizType(e.target.value)}
+                checked={quiz.quizType === type}
+                onChange={e => setQuiz(prev => ({ ...prev, quizType: e.target.value }))}
               />
               <label className="form-check-label">{type}</label>
             </div>
           ))}
+        </div>
+
+        {/* Assessment Type */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">Assessment Type</label>
+          <select
+            className="form-select"
+            value={assessmentType}
+            onChange={e => setAssessmentType(e.target.value)}
+          >
+            <option value="">-- Select Assessment Type --</option>
+            {assessmentTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+
+        {/* Course / Module / Lecture */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">Target Placement</label>
+          <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
+            <option value="">-- Select Course --</option>
+            {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
+          </select>
+          <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse}>
+            <option value="">-- Select Module --</option>
+            {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
+          </select>
+          <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule}>
+            <option value="">-- Select Lecture --</option>
+            {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
+          </select>
         </div>
 
         {/* Question Input */}
@@ -90,25 +329,22 @@ function QuizManual() {
           <textarea
             className="form-control mb-2"
             rows={4}
-            value={newQuestion.question}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, question: e.target.value })
-            }
-            placeholder="Type your question here..."
+            value={newQuestion.question_text}
+            onChange={(e) => setNewQuestion(prev => ({ ...prev, question_text: e.target.value }))}
           />
         </div>
 
-        {/* Options for Multiple Choice */}
-        {quizType === "Multiple Choice" && (
+        {/* Options */}
+        {quiz.quizType === "Multiple Choice" && (
           <div className="mb-3">
-            {["a", "b", "c", "d"].map((key) => (
+            {["a", "b", "c", "d"].map(key => (
               <input
                 key={key}
                 type="text"
                 className="form-control mb-2"
                 placeholder={`Option ${key.toUpperCase()}`}
                 value={newQuestion.options[key]}
-                onChange={(e) => handleOptionChange(key, e.target.value)}
+                onChange={e => handleOptionChange(key, e.target.value)}
               />
             ))}
           </div>
@@ -120,10 +356,8 @@ function QuizManual() {
           <input
             type="text"
             className="form-control"
-            value={newQuestion.correctAnswer}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })
-            }
+            value={newQuestion.correct_answer}
+            onChange={e => setNewQuestion(prev => ({ ...prev, correct_answer: e.target.value }))}
           />
         </div>
 
@@ -134,61 +368,27 @@ function QuizManual() {
             className="form-control"
             rows={3}
             value={newQuestion.explanation}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, explanation: e.target.value })
-            }
-            placeholder="Add explanation if needed..."
+            onChange={e => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
           />
         </div>
 
-        <button className="btn btn-primary mb-4 w-100" onClick={handleAddQuestion}>
+        <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
           + Add Question
         </button>
       </div>
 
-      {/* Right Panel: Quiz Preview */}
+      {/* RIGHT PANEL */}
       <div className="manual-right p-4 shadow-sm rounded">
         <h3 className="mb-3">Quiz Preview</h3>
+        {quiz.questions.length === 0 && <p className="text-muted">No questions added yet.</p>}
+        {["General"].map(section => renderQuizSection(section))}
 
-        {questions.length === 0 && <p className="text-muted">No questions added yet.</p>}
-
-        {questions.map((q, index) => (
-          <div className="card mb-3 shadow-sm" key={index}>
-            <div className="card-body">
-              <h5>Q{index + 1}: {q.question}</h5>
-
-              {quizType === "Multiple Choice" && (
-                <ul className="list-group list-group-flush mb-2">
-                  {Object.entries(q.options).map(([k, v]) => (
-                    <li className="list-group-item" key={k}>
-                      <strong>{k.toUpperCase()}.</strong> {v}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <p className="text-success mb-1">
-                <strong>Answer:</strong>{" "}
-                {quizType === "Multiple Choice" ? q.correctAnswer.toUpperCase() : q.options.a}
-              </p>
-
-              {q.explanation && (
-                <p className="text-muted mb-0">
-                  <strong>Explanation:</strong> {q.explanation}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {questions.length > 0 && (
+        {quiz.questions.length > 0 && (
           <div className="d-flex justify-content-between mt-4">
-            <button className="btn btn-success" onClick={handleSaveQuiz}>
-              Save Quiz
+            <button className="btn btn-success" onClick={handleSaveQuiz} disabled={saving}>
+              {saving ? "Saving..." : "Save & Review"}
             </button>
-            <button className="btn btn-danger" onClick={handleDiscardQuiz}>
-              Discard Quiz
-            </button>
+            <button className="btn btn-danger" onClick={handleDiscardQuiz}>Discard Quiz</button>
           </div>
         )}
       </div>
