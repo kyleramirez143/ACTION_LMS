@@ -47,4 +47,8 @@
     .sx-react-calendar-wrapper {
         height: 500px; /* Shorter height for mobile screens */
     }
+
+    .section-title {
+        line-height: 1.2;
+    }
 }

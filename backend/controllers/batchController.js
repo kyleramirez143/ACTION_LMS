@@ -1,58 +1,77 @@
 import { Op, fn, col, where } from "sequelize";
 import db from "../models/index.cjs";
 
+const getBatchCode = (name) => {
+    if (!name) return "";
+    const match = name.match(/\d+/);
+    return match ? `B${match[0]}` : name.replace(/\s+/g, "");
+};
+
+const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${mm}${dd}${yy}`;
+};
+
 // CREATE
 export const addBatch = async (req, res) => {
-    try {
-        const {
-            name,
-            location,
-            start_date,
-            end_date,
-        } = req.body;
+    const transaction = await db.sequelize.transaction();
 
-        console.log("Received batch data:", req.body);
+    try {
+        const { name, location, start_date, end_date } = req.body;
 
         // --- Validation ---
         const errors = [];
-        if (!name || name.trim() === "") errors.push("Batch name is required");
-        if (!location || location.trim() === "") errors.push("Location is required");
+        if (!name?.trim()) errors.push("Batch name is required");
+        if (!location?.trim()) errors.push("Location is required");
         if (!start_date) errors.push("Start date is required");
         if (!end_date) errors.push("End date is required");
 
-        // Validate date formats
-        if (start_date && isNaN(new Date(start_date))) errors.push("Start date is invalid");
-        if (end_date && isNaN(new Date(end_date))) errors.push("End date is invalid");
-
-        if (errors.length > 0) {
+        if (errors.length) {
             return res.status(400).json({ error: errors.join(", ") });
         }
 
-        // --- Create batch ---
-        const newBatch = await db.Batch.create({
-            name: name.trim(),
-            location: location.trim(),
-            start_date,
-            end_date,
+        // --- Create Batch ---
+        const batch = await db.Batch.create(
+            {
+                name: name.trim(),
+                location: location.trim(),
+                start_date,
+                end_date,
+            },
+            { transaction }
+        );
+
+        // --- Build Curriculum Name ---
+        const curriculumName = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
+
+        // --- Create Curriculum ---
+        await db.Curriculum.create(
+            {
+                batch_id: batch.batch_id,
+                name: curriculumName,
+                start_date: batch.start_date,
+                end_date: batch.end_date,
+            },
+            { transaction }
+        );
+
+        await transaction.commit();
+
+        return res.status(201).json({
+            message: "Batch and Curriculum created successfully",
+            batch,
         });
 
-        res.status(201).json(newBatch);
-
     } catch (err) {
+        await transaction.rollback();
         console.error("Add Batch Error:", err);
 
-        // Sequelize-specific errors
-        if (err.name === "SequelizeUniqueConstraintError") {
-            return res.status(400).json({ error: "Batch name already exists" });
-        }
-        if (err.name === "SequelizeValidationError") {
-            return res.status(400).json({ error: err.errors.map(e => e.message).join(", ") });
-        }
-
-        // Fallback for other errors
         return res.status(500).json({
-            error: "Failed to add batch",
-            details: err.message || "Unknown error"
+            error: "Failed to create batch and curriculum",
+            details: err.message,
         });
     }
 };
@@ -73,19 +92,62 @@ export const getBatchById = async (req, res) => {
 
 // UPDATE
 export const updateBatch = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
+
     try {
         const { id } = req.params;
         const { name, location, start_date, end_date } = req.body;
 
-        const [updated] = await db.Batch.update(
-            { name, location, start_date, end_date },
-            { where: { batch_id: id } }
+        // 1️⃣ Fetch existing batch
+        const batch = await db.Batch.findOne({
+            where: { batch_id: id },
+            transaction,
+        });
+
+        if (!batch) {
+            await transaction.rollback();
+            return res.status(404).json({ error: "Batch not found" });
+        }
+
+        // 2️⃣ Update batch
+        await batch.update(
+            {
+                name,
+                location,
+                start_date,
+                end_date,
+            },
+            { transaction }
         );
 
-        if (!updated) return res.status(404).json({ error: "Batch not found" });
-        res.json({ message: "Batch updated successfully" });
+        // 3️⃣ Recompute curriculum name
+        const newCurriculumName = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
+
+        // 4️⃣ Update linked curriculum
+        await db.Curriculum.update(
+            {
+                name: newCurriculumName,
+                start_date: batch.start_date,
+                end_date: batch.end_date,
+            },
+            {
+                where: { batch_id: batch.batch_id },
+                transaction,
+            }
+        );
+
+        await transaction.commit();
+
+        return res.json({ message: "Batch and curriculum updated successfully" });
+
     } catch (err) {
-        res.status(500).json({ error: "Update failed" });
+        await transaction.rollback();
+        console.error("Update Batch Error:", err);
+
+        return res.status(500).json({
+            error: "Failed to update batch and curriculum",
+            details: err.message,
+        });
     }
 };
 
@@ -168,5 +230,45 @@ export const getAllBatches = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Failed to fetch batches" });
+    }
+};
+
+export const getAllBatchesForDropdown = async (req, res) => {
+    try {
+        const batches = await db.Batch.findAll({
+            attributes: ["batch_id", "name", "location", "start_date", "end_date"],
+            include: [{
+                model: db.Curriculum,
+                as: 'curriculum', // Ensure this matches your association alias
+                attributes: ["curriculum_id"],
+                include: [{
+                    model: db.Quarter,
+                    as: 'quarters',
+                    attributes: ["quarter_id"]
+                }]
+            }]
+        });
+
+        const formatted = batches.map(b => {
+            // Check if curriculum exists safely
+            const curr = b.curriculum || null;
+            // Count quarters safely
+            const qCount = curr && curr.quarters ? curr.quarters.length : 0;
+
+            return {
+                batch_id: b.batch_id,
+                name: b.name,
+                location: b.location,
+                start_date: b.start_date, // MUST BE PASSED TO FRONTEND
+                end_date: b.end_date,
+                curriculum_id: curr ? curr.curriculum_id : null,
+                isFull: qCount >= 4
+            };
+        });
+
+        res.json(formatted);
+    } catch (err) {
+        console.error("SQL Error:", err.message);
+        res.status(500).json({ error: "Check terminal for SQL error" });
     }
 };

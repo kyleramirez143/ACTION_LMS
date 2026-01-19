@@ -18,7 +18,8 @@
   border: none;
   cursor: pointer;
   padding: 6px;
-  margin-left: -55px; /* move more to the left */
+  margin-left: -55px;
+  /* move more to the left */
 }
 
 .page-title {
@@ -48,7 +49,7 @@
   background: white;
   border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .question-info {
@@ -105,7 +106,7 @@
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .nav-grid {
@@ -147,8 +148,10 @@
 .explanation-card {
   margin-top: 15px;
   padding: 15px;
-  background-color: #fff3cd; /* light yellow */
-  border-left: 5px solid #ffc107; /* yellow border */
+  background-color: #fff3cd;
+  /* light yellow */
+  border-left: 5px solid #ffc107;
+  /* yellow border */
   border-radius: 6px;
 }
 
@@ -161,4 +164,27 @@
 .explanation-card p {
   margin: 0;
   font-size: 0.95rem;
+}
+
+.reviewpage-option.correct {
+  border: 2px solid #28a745;
+  background: #eafff1;
+}
+
+.reviewpage-option.user-wrong {
+  border: 2px solid #dc3545;
+  background: #ffecec;
+}
+
+.reviewpage-option.user-correct {
+  border: 2px solid #28a745;
+  background: #d9fbe6;
+}
+
+.no-options-answer p {
+  margin-bottom: 6px;
+}
+
+.explanation-toggle button {
+  font-weight: 500;
 }

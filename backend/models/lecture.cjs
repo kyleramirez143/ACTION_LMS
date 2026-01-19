@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         Lecture.belongsToMany(models.Resource, {
             through: models.LectureResource,
             foreignKey: 'lecture_id',
-            otherKey: 'resources_id',
+            otherKey: 'resource_id',
             as: 'resources'
         });
 

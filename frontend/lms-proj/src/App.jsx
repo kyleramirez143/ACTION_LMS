@@ -149,7 +149,6 @@ function AppContent() {
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
-            
 
 
             {/* Admin Side Routes */}

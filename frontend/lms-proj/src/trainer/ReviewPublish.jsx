@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./ReviewPublish.css";
@@ -26,6 +26,21 @@ const ReviewPublish = () => {
     }
   }, [token, navigate]);
 
+  // Helper: normalize options object keys -> a, b, c...
+  const normalizeOptions = (options = {}) => {
+    const values = Object.keys(options)
+      .sort() // keep stable ordering by key
+      .map((k) => options[k]);
+    const newOptions = {};
+    values.forEach((val, idx) => {
+      newOptions[String.fromCharCode(97 + idx)] = val;
+    });
+    return newOptions;
+  };
+
+  // Prepare options for saving (same as normalize)
+  const reletterOptionsForSave = (options = {}) => normalizeOptions(options);
+
   // LOAD QUIZ
   useEffect(() => {
     async function loadQuiz() {
@@ -36,20 +51,44 @@ const ReviewPublish = () => {
         if (!res.ok) throw new Error("Failed to fetch quiz");
         const data = await res.json();
 
-        const questions = (data.questions || []).map(q => ({
-          ...q,
-          options: typeof q.options === "object" ? q.options : {},
-          section: q.section || "General", // Ensure section always exists
+        // Ensure questions have consistent shapes:
+        const questions = (data.questions || []).map((q) => ({
+          // keep whatever the backend returned; normalize client-side
+          question_id: q.question_id,
+          question_text: q.question_text || "",
+          options:
+            q.options && typeof q.options === "object"
+              ? normalizeOptions(q.options)
+              : {}, // ensure object
+          correct_answer: q.correct_answer || "",
+          explanation: q.explanations || q.explanation || "",
+          section: q.section || "General",
+          // Nihongo-specific: answers should be array of strings
+          answers: Array.isArray(q.answers) ? q.answers : q.answers ? [...q.answers] : [],
+          points: q.points ?? 0,
         }));
 
-        setQuiz({ ...data, questions });
+        setQuiz({
+          quiz: data.quiz || {},
+          questions,
+          quizType: data.quiz?.quizType || data.quiz?.type || data.quiz?.quiz_type || "", // keep compatibility
+        });
+
         setOriginalQuestions(JSON.parse(JSON.stringify(questions)));
+
+        const formatForDatetimeLocal = (dateString) => {
+          const d = new Date(dateString);
+          const offset = d.getTimezoneOffset() * 60000;
+          const local = new Date(d.getTime() - offset);
+          return local.toISOString().slice(0, 16);
+        };
 
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
           timeLimit: data.quiz.time_limit ?? 30,
-          passingScore: data.quiz.passing_score ?? 70,
+          dueDate: data.quiz.due_date ? formatForDatetimeLocal(data.quiz.due_date) : "",
+          noDueDate: !data.quiz.due_date,
           description: data.quiz.description || "",
           screenMonitoring: data.quiz.screen_monitoring ?? true,
           randomization: data.quiz.randomize_questions ?? true,
@@ -65,44 +104,124 @@ const ReviewPublish = () => {
       }
     }
     loadQuiz();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assessment_id, token]);
 
   // SETTINGS HANDLER
-  const handleChange = (key, value) => setSettings(prev => ({ ...prev, [key]: value }));
+  const handleChange = (key, value) =>
+    setSettings((prev) => ({ ...prev, [key]: value }));
 
   // QUESTION HANDLERS
   const handleQuestionChange = (index, key, value) => {
-    const updated = [...quiz.questions];
-    updated[index][key] = value;
-    setQuiz(prev => ({ ...prev, questions: updated }));
-  };
-
-  const reletterOptionsForSave = (options) => {
-    const keys = Object.keys(options).sort();
-    const newOptions = {};
-    keys.forEach((_, idx) => {
-      newOptions[String.fromCharCode(97 + idx)] = options[keys[idx]];
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      updated.questions[index] = { ...updated.questions[index], [key]: value };
+      return updated;
     });
-    return newOptions;
   };
 
+  // Option-specific change (keeps key)
+  const handleOptionChange = (qIndex, key, value) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      q.options = { ...q.options, [key]: value };
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  const handleAddChoice = (qIndex) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      const keys = Object.keys(q.options || {});
+      const nextKey = String.fromCharCode(97 + keys.length);
+      q.options = { ...q.options, [nextKey]: "" };
+      // normalize to keep tidy keys
+      q.options = normalizeOptions(q.options);
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  const handleRemoveChoice = (qIndex, keyToRemove) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      const newOpts = { ...q.options };
+      delete newOpts[keyToRemove];
+      q.options = normalizeOptions(newOpts);
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  // Nihongo answer fields
+  const handleAddAnswer = (qIndex) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      q.answers = Array.isArray(q.answers) ? [...q.answers, ""] : [""];
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  const handleRemoveAnswer = (qIndex, aIndex) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      if (!Array.isArray(q.answers)) q.answers = [];
+      q.answers = q.answers.filter((_, i) => i !== aIndex);
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  const handleAnswerChange = (qIndex, aIndex, value) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      const q = { ...updated.questions[qIndex] };
+      q.answers = Array.isArray(q.answers) ? [...q.answers] : [];
+      q.answers[aIndex] = value;
+      updated.questions[qIndex] = q;
+      return updated;
+    });
+  };
+
+  // Save a single question (PUT)
   const handleSaveQuestion = async (index) => {
     const q = quiz.questions[index];
     try {
       const res = await fetch(`/api/quizzes/questions/${q.question_id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           question_text: q.question_text,
           options: reletterOptionsForSave(q.options),
-          correct_answer: q.correct_answer?.toLowerCase(),
+          correct_answer: q.correct_answer?.toLowerCase?.() || q.correct_answer || "",
           explanations: q.explanation,
           section: q.section || "General",
+          answers: Array.isArray(q.answers) ? q.answers : [],
+          points: q.points ?? 0,
         }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save question");
 
+      // update originalQuestions snapshot
       const updatedOriginal = [...originalQuestions];
       updatedOriginal[index] = JSON.parse(JSON.stringify(q));
       setOriginalQuestions(updatedOriginal);
@@ -116,7 +235,7 @@ const ReviewPublish = () => {
   const handleCancelEdit = (index) => {
     const updated = [...quiz.questions];
     updated[index] = JSON.parse(JSON.stringify(originalQuestions[index]));
-    setQuiz(prev => ({ ...prev, questions: updated }));
+    setQuiz((prev) => ({ ...prev, questions: updated }));
     setEditingQuestionIndex(null);
   };
 
@@ -124,7 +243,10 @@ const ReviewPublish = () => {
     try {
       const res = await fetch(`/api/quizzes/questions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           assessment_id,
           question_text: "New Question",
@@ -132,14 +254,34 @@ const ReviewPublish = () => {
           correct_answer: "",
           explanations: "",
           section: quiz.quizType === "Nihongo" ? "Grammar" : "General",
+          answers: quiz.quizType === "Nihongo" ? [] : undefined,
+          points: 1,
         }),
       });
+
       const newQuestion = await res.json();
-      setQuiz(prev => ({ ...prev, questions: [...prev.questions, newQuestion] }));
-      setOriginalQuestions(prev => [...prev, JSON.parse(JSON.stringify(newQuestion))]);
-      setEditingQuestionIndex(quiz.questions.length);
+      if (!res.ok) {
+        throw new Error(newQuestion.error || "Failed to create question");
+      }
+
+      setQuiz((prev) => ({
+        ...prev, questions: [...prev.questions, {
+          question_id: newQuestion.question_id,
+          question_text: newQuestion.question_text || "New Question",
+          options: normalizeOptions(newQuestion.options || { a: "", b: "" }),
+          correct_answer: newQuestion.correct_answer || "",
+          explanation: newQuestion.explanations || "",
+          section: newQuestion.section || (quiz.quizType === "Nihongo" ? "Grammar" : "General"),
+          answers: Array.isArray(newQuestion.answers) ? newQuestion.answers : (quiz.quizType === "Nihongo" ? [] : []),
+          points: newQuestion.points ?? 1,
+        }]
+      }));
+
+      setOriginalQuestions((prev) => [...prev, JSON.parse(JSON.stringify(newQuestion))]);
+      setEditingQuestionIndex((prevQuestions) => (quiz.questions ? quiz.questions.length : 0));
     } catch (err) {
       console.error("Add question error:", err);
+      alert("Failed to add question.");
     }
   };
 
@@ -154,7 +296,7 @@ const ReviewPublish = () => {
 
       const updated = [...quiz.questions];
       updated.splice(index, 1);
-      setQuiz(prev => ({ ...prev, questions: updated }));
+      setQuiz((prev) => ({ ...prev, questions: updated }));
 
       const updatedOriginal = [...originalQuestions];
       updatedOriginal.splice(index, 1);
@@ -163,6 +305,7 @@ const ReviewPublish = () => {
       setEditingQuestionIndex(null);
     } catch (err) {
       console.error("Delete question error:", err);
+      alert("Failed to delete question.");
     }
   };
 
@@ -171,9 +314,27 @@ const ReviewPublish = () => {
     try {
       const res = await fetch(`/api/quizzes/${assessment_id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(settings),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...settings,
+          // send fields that backend expects
+          title: settings.title,
+          attempts: settings.attempts,
+          time_limit: settings.timeLimit,
+          passing_score: settings.passingScore,
+          description: settings.description,
+          screen_monitoring: settings.screenMonitoring,
+          randomize_questions: settings.randomization,
+          show_score: settings.scoreVisibility,
+          show_explanations: settings.includeExplanationIfWrong,
+          is_published: settings.isPublished,
+          due_date: settings.noDueDate ? null : settings.dueDate || null,
+        }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save quiz");
       alert("Quiz saved successfully!");
@@ -188,18 +349,30 @@ const ReviewPublish = () => {
 
   if (loading || !settings || !quiz) return <div>Loading...</div>;
 
-  // --- RENDER QUIZ QUESTIONS ---
+  // --- RENDER QUESTION ---
+  // Inside renderQuestion function
   const renderQuestion = (q, index) => {
     const isEditing = editingQuestionIndex === index;
+    const isNihongo = quiz.quizType === "Nihongo";
+    const hasOptions = q.options && Object.keys(q.options).length > 0;
+    const isMultipleChoice = q.options && Object.keys(q.options).length > 0;
+    const isFreeText = !isMultipleChoice && !isNihongo;
+
+
     return (
-      <div className="card mb-3 shadow-sm" key={q.question_id}>
+      <div className="card mb-3 shadow-sm" key={q.question_id || index}>
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start">
             <h5 className="card-title">
-              {q.section && quiz.quizType === "Nihongo" && <span className="badge bg-secondary me-2">{q.section}</span>}
+              {q.section && isNihongo && <span className="badge bg-secondary me-2">{q.section}</span>}
               Q{index + 1}:
               {isEditing ? (
-                <textarea className="form-control mt-2" rows={4} value={q.question_text} onChange={e => handleQuestionChange(index, "question_text", e.target.value)} />
+                <textarea
+                  className="form-control mt-2"
+                  rows={4}
+                  value={q.question_text}
+                  onChange={(e) => handleQuestionChange(index, "question_text", e.target.value)}
+                />
               ) : (
                 <span className="ms-2">{q.question_text}</span>
               )}
@@ -218,29 +391,39 @@ const ReviewPublish = () => {
             </div>
           </div>
 
-          {q.options && Object.keys(q.options).length > 0 && (
-            <ul className="list-group list-group-flush mb-2 mt-2">
-              {Object.entries(q.options).map(([k, v]) => (
-                <li key={k} className="list-group-item d-flex align-items-center">
-                  <strong>{k.toUpperCase()}.</strong>
-                  {isEditing ? (
-                    <input type="text" className="form-control ms-2" value={v} onChange={e => handleQuestionChange(index, "options", { ...q.options, [k]: e.target.value })} />
-                  ) : (
-                    <span className="ms-2">{v}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+          {/* --- MULTIPLE CHOICE --- */}
+          {isMultipleChoice && (
+            <>
+              <ul className="list-group list-group-flush mb-2 mt-2">
+                {Object.entries(q.options).map(([k, v]) => (
+                  <li key={k} className="list-group-item d-flex align-items-center">
+                    <strong>{k.toUpperCase()}.</strong>
+                    {isEditing ? (
+                      <>
+                        <input
+                          type="text"
+                          className="form-control ms-2"
+                          value={v}
+                          onChange={(e) => handleOptionChange(index, k, e.target.value)}
+                        />
+                        <button className="btn btn-danger btn-sm ms-2" onClick={() => handleRemoveChoice(index, k)}>Remove</button>
+                      </>
+                    ) : (
+                      <span className="ms-2">{v}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {isEditing && (
+                <button className="btn btn-outline-success btn-sm mb-2" onClick={() => handleAddChoice(index)}>
+                  + Add Choice
+                </button>
+              )}
+            </>
           )}
 
+          {/* --- EXPLANATION --- */}
           {q.correct_answer && !isEditing && <p className="text-success mb-1 mt-2"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>}
-
-          {isEditing && (
-            <div className="mb-2 mt-2">
-              <label>Correct Answer:</label>
-              <input type="text" className="form-control" value={q.correct_answer} onChange={e => handleQuestionChange(index, "correct_answer", e.target.value)} />
-            </div>
-          )}
 
           {q.explanation && !isEditing && (
             <div className="p-2 mt-2 bg-light border rounded">
@@ -248,11 +431,15 @@ const ReviewPublish = () => {
               <small className="text-dark">{q.explanation}</small>
             </div>
           )}
-
           {isEditing && (
             <div className="mb-2 mt-2">
               <label>Explanation:</label>
-              <textarea className="form-control" rows={2} value={q.explanation || ""} onChange={e => handleQuestionChange(index, "explanation", e.target.value)} />
+              <textarea
+                className="form-control"
+                rows={2}
+                value={q.explanation || ""}
+                onChange={(e) => handleQuestionChange(index, "explanation", e.target.value)}
+              />
             </div>
           )}
         </div>
@@ -268,7 +455,11 @@ const ReviewPublish = () => {
           <h2 className="mb-4 fw-bold">Review and Publish</h2>
           <button className="btn btn-outline-success mb-3" onClick={handleAddQuestion}>+ Add Question</button>
 
-          {quiz.questions.map((q, i) => renderQuestion(q, i))}
+          {quiz.questions.length === 0 ? (
+            <div className="alert alert-info">No questions yet. Use "Add Question" to begin.</div>
+          ) : (
+            quiz.questions.map((q, i) => renderQuestion(q, i))
+          )}
         </div>
 
         {/* RIGHT PANEL */}
@@ -278,27 +469,59 @@ const ReviewPublish = () => {
 
             <div className="mb-3">
               <label className="form-label">Quiz Title</label>
-              <input type="text" className="form-control" value={settings.title} onChange={e => handleChange("title", e.target.value)} />
+              <input type="text" className="form-control" value={settings.title} onChange={(e) => handleChange("title", e.target.value)} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Number of Attempts</label>
-              <input type="number" className="form-control" value={settings.attempts} min={1} onChange={e => handleChange("attempts", Number(e.target.value))} />
+              <input type="number" className="form-control" value={settings.attempts} min={1} onChange={(e) => handleChange("attempts", Number(e.target.value))} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Time Limit (minutes)</label>
-              <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={e => handleChange("timeLimit", Number(e.target.value))} />
+              <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={(e) => handleChange("timeLimit", Number(e.target.value))} />
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Passing Score (%)</label>
-              <input type="number" className="form-control" value={settings.passingScore} min={0} max={100} onChange={e => handleChange("passingScore", Number(e.target.value))} />
+              <label className="form-label fw-semibold">Due Date</label>
+              <div className="input-group">
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={settings.noDueDate ? "" : settings.dueDate || ""}
+                  disabled={settings.noDueDate}
+                  onChange={(e) => handleChange("dueDate", e.target.value || null)}
+                />
+                <span className="input-group-text">
+                  <i className="bi bi-calendar-event"></i>
+                </span>
+              </div>
+
+              <div className="form-check mt-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="noDueDateCheck"
+                  checked={settings.noDueDate}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    handleChange("noDueDate", checked);
+                    handleChange("dueDate", checked ? null : settings.dueDate);
+                  }}
+                />
+                <label className="form-check-label" htmlFor="noDueDateCheck">
+                  This quiz has no due date
+                </label>
+              </div>
+
+              <div className="form-text">
+                Leave unchecked to set a deadline. Check to allow unlimited time.
+              </div>
             </div>
 
             <div className="mb-3">
               <label className="form-label">Instructions</label>
-              <textarea className="form-control" placeholder="No need to include numbering. Just press enter per instruction." rows={5} value={settings.description} onChange={e => handleChange("description", e.target.value)} />
+              <textarea className="form-control" placeholder="No need to include numbering. Just press enter per instruction." rows={5} value={settings.description} onChange={(e) => handleChange("description", e.target.value)} />
             </div>
 
             {/* Checkboxes */}

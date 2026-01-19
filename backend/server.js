@@ -13,6 +13,9 @@ import moduleRoutes from "./routes/moduleRoute.js";
 import lectureRoutes from "./routes/lectureRoute.js";
 import userRoutes from "./routes/userRoute.js";
 import batchRoutes from "./routes/batchRoute.js";
+import periodRoute from "./routes/periodRoute.js";
+import quarterRoute from './routes/quarterRoute.js'
+import scheduleRoute from "./routes/scheduleRoute.js";
 
 const app = express();
 // app.use(cors());
@@ -40,6 +43,9 @@ app.use("/api/modules", moduleRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/batches", batchRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/periods", periodRoute);
+app.use("/api/quarters", quarterRoute);
+app.use("/api/schedules", scheduleRoute);
 
 app.use("/uploads", express.static("uploads"));
 
