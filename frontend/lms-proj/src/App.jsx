@@ -37,6 +37,15 @@ import CheckpointView from "./all/CheckpointView.jsx";
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
 
+// Notification
+import NotificationView from "./all/NotificationView.jsx";
+
+//Checkpoint View
+import CheckpointView from "./all/CheckpointView.jsx";
+
+//Help & Support
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
 // import AdminCreateCourse from './admin/AdminCoursePage';
@@ -77,8 +86,6 @@ import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
-import ViewGrades from "./trainee/ViewGrades.jsx";
-import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 
 function AppContent() {
@@ -149,6 +156,7 @@ function AppContent() {
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+            
 
 
             {/* Admin Side Routes */}

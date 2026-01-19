@@ -283,9 +283,7 @@ const QuizPage = () => {
 
           // 1. Handle Review: Navigate to the review page with the attempt UUID
           onReview={() =>
-            navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`, {
-              replace: true
-            })
+            navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`)
           }
 
           // 2. Handle Exit: Navigate to the TrainerModuleScreen route

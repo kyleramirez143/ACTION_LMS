@@ -256,56 +256,80 @@ function BatchesTable() {
                                         batch.start_date
                                     )}–${formatDate(batch.end_date)}`;
 
-                                    return (
-                                        <tr key={batch.batch_id}>
-                                            <td>
-                                                <Link
-                                                    to="/admin/checkpoint-view"
-                                                    state={{ batchId: batch.batch_id, batchName: batch.name }}
-                                                    className="batch-link"
-                                                    title="View checkpoint for this batch"
-                                                >
-                                                    {batch.name}
-                                                </Link>
-                                            </td>
+                                            return (
+                                                <tr key={batch.batch_id}>
+                                                    {/* BATCH NAME AS LINK */}
+                                                    <td className="text-center fw-bold">
+                                                        <span
+                                                            className="batch-link"
+                                                            title={`View ${batch.name}`} // tooltip
+                                                            style={{ cursor: "pointer", color: "#0d6efd", textDecoration: "underline" }}
+                                                            onClick={() => navigate(`/all/checkpointview?batchId=${batch.batch_id}`)}
+                                                        >
+                                                            {batch.name}
+                                                        </span>
+                                                    </td>
 
-                                            <td>{batch.location}</td>
-                                            <td>{batch.start_date}</td>
-                                            <td>{batch.end_date}</td>
-                                            <td>{curriculum}</td>
-                                            <td>{status}</td>
-                                            <td>
-                                                <button
-                                                    onClick={() =>
-                                                        navigate(`/admin/edit-batch/${batch.batch_id}`)
-                                                    }
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(batch.batch_id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedBatches.includes(batch.batch_id)}
-                                                    onChange={() =>
-                                                        handleCheckboxChange(batch.batch_id)
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
+                                                    <td className="text-center">{batch.location}</td>
+                                                    <td className="text-center">{batch.start_date}</td>
+                                                    <td className="text-center">{batch.end_date}</td>
+                                                    <td className="text-center small fw-bold">{curriculum}</td>
+                                                    <td className="text-center">
+                                                        <span
+                                                            className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"}`}
+                                                        >
+                                                            {status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="text-center">
+                                                        <div className="d-flex justify-content-center gap-2">
+                                                            <button className="icon-btn" onClick={() =>
+                                                                navigate(`/admin/edit-batch/${batch.batch_id}`)
+                                                            } title="Edit">
+                                                                <i className="bi bi-pencil-fill"></i>
+                                                            </button>
+                                                            <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
+                                                                <i className="bi bi-trash3-fill"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="text-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="form-check-input"
+                                                            checked={selectedBatches.includes(batch.batch_id)}
+                                                            onChange={() => handleCheckboxChange(batch.batch_id)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="pagination-wrapper">
+                            <ul className="pagination custom-pagination">
+                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={handlePrev}>‹</button>
+                                </li>
+                                {Array.from({ length: totalPages }, (_, i) => (
+                                    <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                                        <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={handleNext}>›</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </>
+                )
+            }
+        </div >
     );
 }
 

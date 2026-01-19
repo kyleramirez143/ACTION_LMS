@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
-import { ArrowLeft } from "lucide-react";
+import moduleImage from "../image/module.svg"; // <-- added
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map(module => ({
@@ -104,7 +104,6 @@ export default function ModuleManagement() {
 
     const handleToggleVisibility = async (e, moduleId, isVisible) => {
         e.stopPropagation();
-        // Optimistic UI update
         setModulesData(prev =>
             prev.map(m => m.module_id === moduleId ? { ...m, is_visible: isVisible } : m)
         );
@@ -121,7 +120,6 @@ export default function ModuleManagement() {
             if (!res.ok) {
                 const error = await res.json();
                 alert(`Failed to update module: ${error.error || "Server error"}`);
-                // Rollback
                 setModulesData(prev =>
                     prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
                 );
@@ -129,7 +127,6 @@ export default function ModuleManagement() {
         } catch (err) {
             console.error(err);
             alert("Network error. Visibility change failed.");
-            // Rollback
             setModulesData(prev =>
                 prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
             );
@@ -189,16 +186,25 @@ export default function ModuleManagement() {
 
             {/* Empty */}
             {modulesData.length === 0 ? (
-                <div className="text-center text-muted py-4">
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
                     <img
-                        src={logo}
+                        src={moduleImage}
                         alt="No modules"
-                        className="img-fluid mb-3"
-                        style={{ maxWidth: "200px" }}
+                        style={{ maxWidth: "220px", opacity: 0.9 }}
+                        className="mb-3"
                     />
-                    <p>No modules found.</p>
+                    <p className="text-center text-muted mb-0">
+                        No modules found.
+                    </p>
+                    {/* {userRole === "Trainer" && (
+                        <button
+                            className="btn btn-outline-primary mt-3"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add your first module
+                        </button>
+                    )} */}
                 </div>
-
             ) : (
                 <>
                     {/* Grid */}
@@ -210,8 +216,7 @@ export default function ModuleManagement() {
                                     {/* STATUS BADGE */}
                                     {userRole === "Trainer" && (
                                         <span
-                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
-                                                }`}
+                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'}`}
                                             style={{ fontSize: '0.75rem', zIndex: 10 }}
                                             onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >
