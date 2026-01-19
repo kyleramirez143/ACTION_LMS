@@ -97,14 +97,7 @@ export default function TrainerModuleScreen() {
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="title-back-row p-0 m-0">
-            <button
-              type="button"
-              className="back-btn"
-              onClick={() => navigate(`/${course_id}/modules`)}
-              aria-label="Go back"
-            >
-              <ArrowLeft size={20} strokeWidth={2.2} />
-            </button>
+            
             <h3 className="mb-0">{moduleTitle}</h3>
           </div>
           {userRole === "Trainer" && (
