@@ -273,28 +273,32 @@ function BatchesTable() {
                                             <td>{batch.start_date}</td>
                                             <td>{batch.end_date}</td>
                                             <td>{curriculum}</td>
-                                            <td>{status}</td>
-                                            <td>
-                                                <button
-                                                    onClick={() =>
-                                                        navigate(`/admin/edit-batch/${batch.batch_id}`)
-                                                    }
+                                            <td >
+                                                <span
+                                                    className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
+                                                        }`}
                                                 >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(batch.batch_id)}
-                                                >
-                                                    Delete
-                                                </button>
+                                                    {status}
+                                                </span>
                                             </td>
-                                            <td>
+                                            <td >
+                                                <div className="d-flex justify-content-start gap-2">
+                                                    <button className="icon-btn" onClick={() =>
+                                                        navigate(`/admin/edit-batch/${batch.batch_id}`)
+                                                    } title="Edit">
+                                                        <i className="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
+                                                        <i className="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td >
                                                 <input
                                                     type="checkbox"
+                                                    className="form-check-input"
                                                     checked={selectedBatches.includes(batch.batch_id)}
-                                                    onChange={() =>
-                                                        handleCheckboxChange(batch.batch_id)
-                                                    }
+                                                    onChange={() => handleCheckboxChange(batch.batch_id)}
                                                 />
                                             </td>
                                         </tr>

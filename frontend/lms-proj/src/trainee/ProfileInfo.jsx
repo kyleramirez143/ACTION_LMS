@@ -7,7 +7,7 @@ import { Pencil, Check, X } from 'lucide-react';
 
 const backendURL = "http://localhost:5000";
 
-function ProfileInfo() {
+export default function ProfileInfo() {
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken"); // The correct key name
 
@@ -79,7 +79,7 @@ function ProfileInfo() {
   const handleSave = async () => {
     if (!token) return alert("Session expired.");
     setSaving(true);
-    
+
     try {
       const decoded = jwtDecode(token);
       const userId = decoded.id;
@@ -135,57 +135,57 @@ function ProfileInfo() {
   return (
     <div className="checkpoint-container">
       {/* SECTION 1: User Information Card */}
-        {/* SECTION 1: User Information Card */}
-<div className="checkpoint-card user-info-card">
-  <div className="user-info-header">
-    <div className="profile-picture">
-      {userProfile.profile_picture ? (
-        <img
-          src={`${backendURL}/${userProfile.profile_picture}`}
-          alt="Profile"
-          className="profile-img"
-        />
-      ) : (
-        <div className="profile-placeholder">👤</div>
-      )}
-    </div>
+      {/* SECTION 1: User Information Card */}
+      <div className="checkpoint-card user-info-card">
+        <div className="user-info-header">
+          <div className="profile-picture">
+            {userProfile.profile_picture ? (
+              <img
+                src={`${backendURL}/${userProfile.profile_picture}`}
+                alt="Profile"
+                className="profile-img"
+              />
+            ) : (
+              <div className="profile-placeholder">👤</div>
+            )}
+          </div>
 
-    <h2 className="user-name">
-      {userProfile.first_name} {userProfile.last_name}
-    </h2>
+          <h2 className="user-name">
+            {userProfile.first_name} {userProfile.last_name}
+          </h2>
 
-    {/* Status Badge under the name */}
-    <div className={`status-badge ${userProfile.is_active ? "active" : "inactive"}`}>
-      {userProfile.is_active ? "● Active" : "● Inactive"}
-    </div>
-  </div>
+          {/* Status Badge under the name */}
+          <div className={`status-badge ${userProfile.is_active ? "active" : "inactive"}`}>
+            {userProfile.is_active ? "● Active" : "● Inactive"}
+          </div>
+        </div>
 
-  <div className="user-info-box">
-    <h4 className="user-info-title">User Information</h4>
+        <div className="user-info-box">
+          <h4 className="user-info-title">User Information</h4>
 
-    <div className="user-info-grid">
-      <div>
-        <label>First Name:</label>
-        <p>{userProfile.first_name}</p>
+          <div className="user-info-grid">
+            <div>
+              <label>First Name:</label>
+              <p>{userProfile.first_name}</p>
+            </div>
+
+            <div>
+              <label>Email:</label>
+              <p>{userProfile.email}</p>
+            </div>
+
+            <div>
+              <label>Last Name:</label>
+              <p>{userProfile.last_name}</p>
+            </div>
+
+            <div>
+              <label>Role:</label>
+              <p className="role-text">{userProfile.role}</p>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div>
-        <label>Email:</label>
-        <p>{userProfile.email}</p>
-      </div>
-
-      <div>
-        <label>Last Name:</label>
-        <p>{userProfile.last_name}</p>
-      </div>
-
-      <div>
-        <label>Role:</label>
-        <p className="role-text">{userProfile.role}</p>
-      </div>
-    </div>
-  </div>
-</div>
 
       {/* SECTION 2: Onboarding Requirements */}
       {userProfile.role === "Trainee" && (
@@ -265,5 +265,3 @@ function ProfileInfo() {
     </div>
   );
 }
-
-export default ProfileInfo;
