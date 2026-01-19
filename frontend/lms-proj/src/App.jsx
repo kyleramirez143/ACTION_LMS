@@ -30,9 +30,7 @@ import LoginPage from "./all/LoginPage";
 
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
-import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
-import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
@@ -40,7 +38,9 @@ import BatchesTable from "./admin/BatchesTable.jsx";
 import ModuleTable from "./admin/ModuleTable.jsx";
 import SetPeriodModule from "./admin/SetPeriodModule.jsx";
 import CalendarView from "./admin/CalendarView.jsx";
-import NewSchedule from "./admin/NewSchedule.jsx";
+import AddBatch from "./admin/AddBatch.jsx";
+import AdminCoursePage from "./admin/AdminCoursePage";
+import AdminNewSchedule from "./admin/AdminNewSchedule.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
@@ -65,8 +65,6 @@ import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
-import AddBatch from "./admin/AddBatch.jsx";
-import AdminCoursePage from "./admin/AdminCoursePage";
 
 
 function AppContent() {
@@ -126,8 +124,8 @@ function AppContent() {
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
-            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule/>} />
-            
+            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -139,14 +137,15 @@ function AppContent() {
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
-            <Route path="/admin/batch-management" element={<BatchesTable/>} />
-            <Route path="/admin/add-batch" element={<AddBatch/>} />
+            <Route path="/admin/batch-management" element={<BatchesTable />} />
+            <Route path="/admin/add-batch" element={<AddBatch />} />
             <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
-            <Route path="/admin/module-management" element={<ModuleTable/>} />
-            <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
-            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule/>} />
-            <Route path="/admin/calendar" element={<CalendarView/>} />
-            <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
+            <Route path="/admin/module-management" element={<ModuleTable />} />
+            <Route path="/admin/set-module-date" element={<SetPeriodModule />} />
+            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule />} />
+            <Route path="/admin/calendar" element={<CalendarView />} />
+            <Route path="/admin/add-new-schedule" element={<AdminNewSchedule />} />
+            <Route path="/admin/edit-schedule/:event_id" element={<AdminNewSchedule />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />

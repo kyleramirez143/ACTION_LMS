@@ -247,7 +247,7 @@ function UserRoleTable() {
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                         >
-                            <i className="bi bi-person-plus-fill"></i> Import Users
+                            <i className="bi bi-person-fill-up"></i> Import Users
                         </button>
 
                         <ul className="dropdown-menu">

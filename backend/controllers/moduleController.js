@@ -5,7 +5,7 @@ const { Module, Course, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
     try {
-        const { title, description, course_id } = req.body;
+        const { title, description, course_id, start_date, end_date } = req.body;
         const trainerId = req.user?.id;
 
         if (!title) return res.status(400).json({ error: "Module title is required" });
@@ -18,6 +18,8 @@ export const createModule = async (req, res) => {
             course_id,
             title,
             description,
+            start_date: start_date || null,
+            end_date: end_date || null,
             image: imageFilename,
             created_by: trainerId,
             is_visible: false,
@@ -71,6 +73,8 @@ export const updateModule = async (req, res) => {
         const updates = {
             title: req.body.title,
             description: req.body.description,
+            start_date: req.body.start_date || null,
+            end_date: req.body.end_date || null,
             updated_at: new Date()
         };
 
@@ -137,7 +141,7 @@ export const updateModuleVisibility = async (req, res) => {
             return res.status(404).json({ error: "Module not found" });
         }
 
-        res.json({ 
+        res.json({
             message: `Module visibility set to ${is_visible ? 'visible' : 'hidden'} successfully`,
             is_visible: is_visible // Return the new state
         });

@@ -181,7 +181,7 @@ export default function CourseManagementPage() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">Courses</h3>
-                {userRole === "Admin" && courses.length > 0 &&  (
+                {userRole === "Admin" && courses.length > 0 && (
                     <button
                         className="btn btn-primary"
                         onClick={() => navigate("/admin/course-management/create")}
@@ -227,8 +227,8 @@ export default function CourseManagementPage() {
                     ) : (
                         <p className="text-muted mb-3">Start by creating your first course.</p>
                     )}
-                    
-                    {userRole === "Admin" && !selectedBatch &&  (
+
+                    {userRole === "Admin" && !selectedBatch && (
                         <button
                             className="btn btn-primary"
                             onClick={() => navigate("/admin/course-management/create")}
@@ -349,7 +349,7 @@ export default function CourseManagementPage() {
                                                     (course.description.length > 100 ? "..." : "")
                                                     : "No description available."}
                                             </p>
-                                            <p className="card-text mt-1">
+                                            <p className="card-text mb-1">
                                                 <strong>Trainers:</strong>{" "}
                                                 {course.course_instructors?.length
                                                     ? course.course_instructors
@@ -357,9 +357,12 @@ export default function CourseManagementPage() {
                                                         .join(", ")
                                                     : "No trainers assigned"}
                                             </p>
+                                            <p className="card-text mb-0">
+                                                <strong>Location:</strong>{" "}
+                                                {batches.find(b => String(b.batch_id) === String(course.batch_id))?.location || "No location"}
+                                            </p>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         ))}

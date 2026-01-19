@@ -30,6 +30,9 @@ export default function ModuleForm() {
     const [currentImageUrl, setCurrentImageUrl] = useState(""); // To display current image in edit mode
     const [loading, setLoading] = useState(isEditMode);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
 
 
     // ================================
@@ -47,6 +50,9 @@ export default function ModuleForm() {
                     if (res.ok) {
                         setTitle(data.title);
                         setDescription(data.description || "");
+                        setStartDate(data.start_date?.slice(0, 10) || "");
+                        setEndDate(data.end_date?.slice(0, 10) || "");
+
                         // Assuming your API returns the filename/path for the current image
                         if (data.image) {
                             setCurrentImageUrl(`/uploads/images/${data.image}`);
@@ -80,6 +86,9 @@ export default function ModuleForm() {
         formData.append("title", title);
         formData.append("description", description);
         formData.append("course_id", course_id); // Important for creation
+        formData.append("start_date", startDate);
+        formData.append("end_date", endDate);
+
         if (imageFile) formData.append("image", imageFile);
         // Note: For Update, you might also need to handle deleting old image on backend
 
@@ -212,8 +221,44 @@ export default function ModuleForm() {
                         ></textarea>
                     </div>
 
+                    {/* Module Dates */}
+                    <div className="row mb-3">
+                        <div className="col">
+                            <label htmlFor="start_date" className="form-label">
+                                Start Date
+                            </label>
+                            <input
+                                id="start_date"
+                                type="date"
+                                className="form-control date-input"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                onClick={(e) => e.target.showPicker()}
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+
+                        <div className="col">
+                            <label htmlFor="end_date" className="form-label">
+                                End Date
+                            </label>
+                            <input
+                                id="end_date"
+                                type="date"
+                                className="form-control date-input"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                onClick={(e) => e.target.showPicker()}
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                    </div>
+
+
                     {/* Buttons */}
-                    <div className="d-flex justify-content-end">
+                    <div className="d-flex justify-content-end mt-2">
                         {isEditMode && (
                             <button
                                 type="button"

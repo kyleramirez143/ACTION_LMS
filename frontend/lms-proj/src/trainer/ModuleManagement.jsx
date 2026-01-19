@@ -160,13 +160,23 @@ export default function ModuleManagement() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">{courseTitle}</h3>
+                {/* RIGHT */}
                 {userRole === "Trainer" && (
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
-                    >
-                        Add New Module
-                    </button>
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={() => navigate("/trainer/add-new-schedule")}
+                        >
+                            Add Schedule
+                        </button>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add New Module
+                        </button>
+                    </div>
                 )}
             </div>
 
