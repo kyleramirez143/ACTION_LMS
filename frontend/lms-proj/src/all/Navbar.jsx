@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
-import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   // ================= HOOKS (top level) =================
@@ -207,7 +207,7 @@ const Navbar = () => {
                 style={{ width: "40px", height: "40px", cursor: "pointer" }}
               />
               <Dropdown.Menu className="mt-2 shadow">
-                <Dropdown.Item as={Link} to={profilePath}>
+                <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   Profile
                 </Dropdown.Item>
 
@@ -253,7 +253,7 @@ const Navbar = () => {
 
         <hr />
 
-        <Link to={profilePath} onClick={() => setMenuOpen(false)}>
+        <Link to="/trainee/ProfileInfo" onClick={() => setMenuOpen(false)}>
           Profile
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
