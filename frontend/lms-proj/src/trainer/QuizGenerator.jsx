@@ -193,6 +193,7 @@ function QuizGenerator() {
         } catch (err) {
             console.error("Error saving and navigating:", err);
             alert("Failed to go to Review & Publish page.");
+            console.log(err);
         } finally {
             setSaving(false);
         }

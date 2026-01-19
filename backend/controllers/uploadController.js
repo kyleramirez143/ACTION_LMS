@@ -159,6 +159,8 @@ export async function saveQuizToLecture(req, res) {
             created_by: userId
         });
 
+        console.log(assessment);
+
         // Save questions
         for (const q of questions) {
             await AssessmentQuestion.create({
@@ -181,6 +183,7 @@ export async function saveQuizToLecture(req, res) {
 
         res.json({ success: true, message: "Quiz saved successfully!", assessmentId: assessment.assessment_id });
     } catch (err) {
+        console.log(err);
         console.error(err);
         res.status(500).json({ error: err.message });
     }
