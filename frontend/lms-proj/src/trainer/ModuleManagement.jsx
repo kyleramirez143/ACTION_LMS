@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import { ArrowLeft } from "lucide-react";
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map(module => ({
@@ -156,10 +157,26 @@ export default function ModuleManagement() {
     if (loading) return <p className="text-center py-5">Loading modules...</p>;
 
     return (
-        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+        <div className="container px-4 py-0">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">{courseTitle}</h3>
+                <div className="title-back-row p-0 m-0">
+                    <button
+                        type="button"
+                        className="back-btn"
+                        onClick={() => {
+                            if (userRole === "Trainee") {
+                                navigate(`/trainee/courses`);
+                            } else {
+                                navigate(`/trainer/course-management`);
+                            }
+                        }}
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft size={20} strokeWidth={2.2} />
+                    </button>
+                    <h3 className="mb-0">{courseTitle}</h3>
+                </div>
                 {userRole === "Trainer" && (
                     <button
                         className="btn btn-primary"
