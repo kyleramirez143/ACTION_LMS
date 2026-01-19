@@ -3,12 +3,14 @@ module.exports = (sequelize, DataTypes) => {
         lecture_id: {
             type: DataTypes.UUID,
             primaryKey: true,
-            allowNull: false
+            allowNull: false,
+            references: { model: 'lectures', key: 'lecture_id' }
         },
-        resource_id: {
+        resources_id: {
             type: DataTypes.UUID,
             primaryKey: true,
-            allowNull: false
+            allowNull: false,
+            references: { model: 'resources', key: 'resource_id' }
         },
         created_at: {
             type: DataTypes.DATE,
@@ -22,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 
     LectureResource.associate = (models) => {
         LectureResource.belongsTo(models.Lecture, { foreignKey: 'lecture_id', as: 'lecture' });
-        LectureResource.belongsTo(models.Resource, { foreignKey: 'resource_id', as: 'resource' });
+        LectureResource.belongsTo(models.Resource, { foreignKey: 'resources_id', as: 'resource' });
     };
 
     return LectureResource;

@@ -7,7 +7,7 @@ import { Pencil, Check, X } from 'lucide-react';
 
 const backendURL = "http://localhost:5000";
 
-function ProfileInfo() {
+export default function ProfileInfo() {
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken"); // The correct key name
 
@@ -265,5 +265,3 @@ function ProfileInfo() {
     </div>
   );
 }
-
-export default ProfileInfo;

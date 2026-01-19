@@ -32,7 +32,6 @@ import LoginPage from "./all/LoginPage";
 import NotificationView from "./all/NotificationView.jsx";
 
 //Checkpoint View
-import CheckpointView from "./admin/CheckpointView.jsx";
 
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
@@ -50,6 +49,7 @@ import CalendarView from "./admin/CalendarView.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
 import AdminNewSchedule from "./admin/AdminNewSchedule.jsx";
+import CheckpointView from "./admin/CheckpointView.jsx";
 
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
@@ -75,6 +75,7 @@ import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
+import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 
 function AppContent() {
@@ -118,7 +119,6 @@ function AppContent() {
             <Route path="/all/notificationview" element={<NotificationView />} />
 
             {/* Checkpoint View */}
-            <Route path="/all/checkpointview" element={<CheckpointView />} />
 
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
@@ -166,13 +166,14 @@ function AppContent() {
             <Route path="/admin/calendar" element={<CalendarView />} />
             <Route path="/admin/add-new-schedule" element={<AdminNewSchedule />} />
             <Route path="/admin/edit-schedule/:event_id" element={<AdminNewSchedule />} />
+            <Route path="/admin/checkpointview" element={<CheckpointView />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
-            {/* <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} /> */}
+            <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
 
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />

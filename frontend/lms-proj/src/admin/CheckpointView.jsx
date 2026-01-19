@@ -77,64 +77,62 @@ const CheckpointView = () => {
   };
 
   return (
-    <div className="checkpoint-container">
+    <div className="user-role-card">
       {/* Table */}
-      <div className="checkpoint-card">
-        <div className="checkpoint-header">
-          <h2 className="checkpoint-title">
-            {batchName ? `Checkpoint for ${batchName}` : "Trainee Onboarding Checkpoint"}
-          </h2>
-          <button className="add-employee-btn" onClick={openAddModal}>+ Trainee</button>
-        </div>
-        <table className="checkpoint-table">
-          <thead>
+      <div className="checkpoint-header">
+        <h3 className="section-title">
+          {batchName ? `${batchName} : Checkpoint` : "Trainee Onboarding Checkpoint"}
+        </h3>
+        <button className="add-employee-btn" onClick={openAddModal}>+ Trainee</button>
+      </div>
+      <table className="checkpoint-table">
+        <thead>
+          <tr>
+            <th className="name-col">NAME</th>
+            <th className="header-green">BPI</th>
+            <th className="header-purple">SSS #</th>
+            <th className="header-purple">TIN #</th>
+            <th className="header-purple">PAGIBIG #</th>
+            <th className="header-purple">PHILHEALTH #</th>
+            <th className="header-orange">UAF (IMS)</th>
+            <th className="header-orange">Office PC</th>
+            <th className="header-orange">Personal PC</th>
+            <th className="header-yellow">Passport</th>
+            <th className="header-green">IMS Awareness</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
             <tr>
-              <th className="name-col">NAME</th>
-              <th className="header-green">BPI</th>
-              <th className="header-purple">SSS #</th>
-              <th className="header-purple">TIN #</th>
-              <th className="header-purple">PAGIBIG #</th>
-              <th className="header-purple">PHILHEALTH #</th>
-              <th className="header-orange">UAF (IMS)</th>
-              <th className="header-orange">Office PC</th>
-              <th className="header-orange">Personal PC</th>
-              <th className="header-yellow">Passport</th>
-              <th className="header-green">IMS Awareness</th>
-              <th>Edit</th>
+              <td colSpan="12" className="text-center py-5 text-muted">
+                No trainees found for this batch.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan="12" className="text-center py-5 text-muted">
-                  No trainees found for this batch.
+          ) : (
+            rows.map((row, idx) => (
+              <tr key={idx}>
+                <td className="name-col">{row.name}</td>
+                <td className="payroll-cell">{row.bpi}</td>
+                <td className="hr-cell">{row.sss}</td>
+                <td className="hr-cell">{row.tin}</td>
+                <td className="hr-cell">{row.pagibig}</td>
+                <td className="hr-cell">{row.philhealth}</td>
+                <td className="telework-cell">{row.uaf}</td>
+                <td className="telework-cell">{row.officePC}</td>
+                <td className="telework-cell">{row.personalPC}</td>
+                <td className="passport-cell">{row.passport}</td>
+                <td className="ims-cell status-ok">{row.imsAwareness}</td>
+                <td>
+                  <button className="edit-btn" onClick={() => openModal(idx)}>
+                    <FaEdit />
+                  </button>
                 </td>
               </tr>
-            ) : (
-              rows.map((row, idx) => (
-                <tr key={idx}>
-                  <td className="name-col">{row.name}</td>
-                  <td className="payroll-cell">{row.bpi}</td>
-                  <td className="hr-cell">{row.sss}</td>
-                  <td className="hr-cell">{row.tin}</td>
-                  <td className="hr-cell">{row.pagibig}</td>
-                  <td className="hr-cell">{row.philhealth}</td>
-                  <td className="telework-cell">{row.uaf}</td>
-                  <td className="telework-cell">{row.officePC}</td>
-                  <td className="telework-cell">{row.personalPC}</td>
-                  <td className="passport-cell">{row.passport}</td>
-                  <td className="ims-cell status-ok">{row.imsAwareness}</td>
-                  <td>
-                    <button className="edit-btn" onClick={() => openModal(idx)}>
-                      <FaEdit />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
 
       {/* Modal */}
       {showModal && (

@@ -230,7 +230,16 @@ function BatchesTable() {
 
                                             return (
                                                 <tr key={batch.batch_id}>
-                                                    <td className="text-center fw-bold">{batch.name}</td>
+                                                    <td className="text-center">
+                                                        <Link
+                                                            to="/admin/checkpointview"
+                                                            state={{ batchId: batch.batch_id, batchName: batch.name }}
+                                                            className="batch-link"
+                                                            title="View checkpoint for this batch"
+                                                        >
+                                                            {batch.name}
+                                                        </Link>
+                                                    </td>
                                                     <td className="text-center">
                                                         {batch.location}
                                                     </td>

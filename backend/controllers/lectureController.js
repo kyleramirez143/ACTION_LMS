@@ -20,11 +20,16 @@ const {
 // Create a new lecture
 export const createLecture = async (req, res) => {
     try {
-        const { title, description, module_id } = req.body;
+        const { title, description, module_id, start_date, end_date } = req.body;
         const trainerId = req.user?.id;
 
         if (!title || !module_id) {
             return res.status(400).json({ error: "Title, module_id, are required" });
+        }
+
+        // Validate dates
+        if (start_date && end_date && new Date(start_date) > new Date(end_date)) {
+            return res.status(400).json({ error: "Start date cannot be after end date" });
         }
 
         const lecture = await Lecture.create({
@@ -33,7 +38,9 @@ export const createLecture = async (req, res) => {
             description,
             module_id,
             created_by: trainerId,
-            content_url: null // initially empty
+            start_date: start_date || null,
+            end_date: end_date || null,
+            content_url: null,
         });
 
         res.status(201).json({
@@ -49,38 +56,49 @@ export const createLecture = async (req, res) => {
 // Upload a file/resource for a lecture
 export const uploadLectureFile = async (req, res) => {
     try {
-        const { lecture_id, links } = req.body; // links can be an array of URLs
+        const { lecture_id } = req.body;
+        let links = req.body.links || [];
 
         if (!lecture_id) {
             return res.status(400).json({ error: "lecture_id is required" });
         }
 
+        // Parse links if sent as JSON string
+        if (typeof links === "string") {
+            try {
+                links = JSON.parse(links);
+            } catch {
+                links = [links];
+            }
+        }
+
         const uploadedResources = [];
 
-        // --- Handle file uploads ---
-        if (req.files?.length) {
-            for (let file of req.files) {
+        // FILES
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
                 const resource = await Resource.create({
-                    file_url: file.filename, // store uploaded file name
-                    is_visible: true,
+                    file_url: file.filename,
+                    display_name: file.originalname,
+                    content_type: file.mimetype,
                 });
 
                 await LectureResource.create({
                     lecture_id,
-                    resource_id: resource.resource_id
+                    resources_id: resource.resource_id
                 });
 
                 uploadedResources.push(resource);
             }
         }
 
-        // --- Handle link resources ---
-        if (links && Array.isArray(links)) {
-            for (let link of links) {
+        // LINKS
+        if (Array.isArray(links)) {
+            for (const link of links) {
                 if (!link) continue;
+
                 const resource = await Resource.create({
-                    file_url: link, // store link as text
-                    is_visible: true,
+                    file_url: link,
                 });
 
                 await LectureResource.create({
@@ -99,10 +117,12 @@ export const uploadLectureFile = async (req, res) => {
 
     } catch (err) {
         console.error("Upload Lecture File Error:", err);
-        res.status(500).json({ error: "Failed to upload lecture resources", details: err.message });
+        res.status(500).json({
+            error: "Failed to upload lecture resources",
+            details: err.message
+        });
     }
 };
-
 
 // Get all lectures for a module, including resources
 export const getLecturesByModule = async (req, res) => {
@@ -223,11 +243,15 @@ export const updateLectureVisibility = async (req, res) => {
 
 export const updateLecture = async (req, res) => {
     const { lecture_id } = req.params;
-    const { title, description } = req.body; // module_id is already in the route/params if needed
+    const { title, description, start_date, end_date } = req.body; // module_id is already in the route/params if needed
 
     try {
         if (!title) {
             return res.status(400).json({ error: "Lecture title is required" });
+        }
+
+        if (start_date && end_date && new Date(start_date) > new Date(end_date)) {
+            return res.status(400).json({ error: "Start date cannot be after end date" });
         }
 
         const lecture = await Lecture.findByPk(lecture_id);
@@ -235,7 +259,12 @@ export const updateLecture = async (req, res) => {
             return res.status(404).json({ error: "Lecture not found" });
         }
 
-        await lecture.update({ title, description });
+        await lecture.update({
+            title,
+            description,
+            start_date: start_date || null,
+            end_date: end_date || null
+        });
 
         res.status(200).json({
             message: "Lecture metadata updated successfully",
