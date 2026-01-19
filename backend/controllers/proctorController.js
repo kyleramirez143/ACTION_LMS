@@ -123,10 +123,10 @@ export async function getAssessmentResults(req, res) {
 
         // 5. Format rows for table
         const rows = latestAttempts.map(attempt => {
-            const relatedSession = sessions.find(s =>
-                s.user_id === attempt.user_id &&
-                Math.abs(new Date(s.start_time) - new Date(attempt.created_at)) < 300000
-            );
+            const relatedSession = sessions
+                .filter(s => s.user_id === attempt.user_id && s.status === 'completed')
+                .sort((a, b) => new Date(b.end_time) - new Date(a.end_time))[0];
+
 
             const isPassed =
                 parseFloat(attempt.final_score) >= attempt.assessment.passing_score;

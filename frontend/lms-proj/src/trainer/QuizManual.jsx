@@ -4,43 +4,43 @@ import { jwtDecode } from "jwt-decode";
 import "./QuizManual.css";
 
 function useUnsavedQuizPrompt(quiz, isSaved) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    // --- Handle browser refresh/close ---
-    useEffect(() => {
-        const handleBeforeUnload = (e) => {
-            if (quiz && !isSaved) {
-                e.preventDefault();
-                e.returnValue = "";
-            }
-        };
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [quiz, isSaved]);
-
-    // Only trigger prompt for other pages, not review & publish
-    const handleNavigation = (e) => {
-        if (quiz && !isSaved) {
-            const target = e.target?.getAttribute("href") || "";
-            if (!target.includes("/quizzes/")) {
-                if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
-                    e.preventDefault();
-                }
-            }
-        }
+  // --- Handle browser refresh/close ---
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (quiz && !isSaved) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
     };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [quiz, isSaved]);
 
-    useEffect(() => {
-        // Attach to all links in page
-        document.querySelectorAll("a").forEach(link =>
-            link.addEventListener("click", handleNavigation)
-        );
-        return () => {
-            document.querySelectorAll("a").forEach(link =>
-                link.removeEventListener("click", handleNavigation)
-            );
-        };
-    }, [quiz, isSaved]);
+  // Only trigger prompt for other pages, not review & publish
+  const handleNavigation = (e) => {
+    if (quiz && !isSaved) {
+      const target = e.target?.getAttribute("href") || "";
+      if (!target.includes("/quizzes/")) {
+        if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Attach to all links in page
+    document.querySelectorAll("a").forEach(link =>
+      link.addEventListener("click", handleNavigation)
+    );
+    return () => {
+      document.querySelectorAll("a").forEach(link =>
+        link.removeEventListener("click", handleNavigation)
+      );
+    };
+  }, [quiz, isSaved]);
 }
 
 function QuizManual() {
@@ -56,9 +56,23 @@ function QuizManual() {
   const [courses, setCourses] = useState([]);
   const [modules, setModules] = useState([]);
   const [lectures, setLectures] = useState([]);
+  const [assessmentTypes, setAssessmentTypes] = useState([
+    "Skill Check",
+    "Course-End Exam",
+    "Mock Exam",
+    "Practice Exam",
+    "Oral Exam",
+    "Daily Quiz",
+    "Homework",
+    "Exercises",
+    "Activity"
+  ]);
+
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedModule, setSelectedModule] = useState("");
   const [selectedLecture, setSelectedLecture] = useState("");
+  const [assessmentType, setAssessmentType] = useState("");
+
 
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
@@ -158,10 +172,11 @@ function QuizManual() {
           lectureId: selectedLecture,
           title: quiz.title,
           quizType: quiz.quizType,
+          assessmentTypeName: assessmentType,
           pdfFilename: null,
           questions: quiz.questions.map(q => ({
             question: q.question_text,
-            options: quiz.quizType === "Multiple Choice" ? q.options : { a: q.options.a || "" },
+            options: quiz.quizType === "Multiple Choice" ? q.options : null,
             correct_answer: q.correct_answer.toLowerCase(),
             explanation: q.explanation,
             section: q.section,
@@ -259,7 +274,7 @@ function QuizManual() {
         {/* Quiz Type */}
         <div className="mb-3">
           <label className="form-label fw-bold">Quiz Type</label>
-          {["Multiple Choice", "Identification", "Enumeration"].map(type => (
+          {["Multiple Choice", "Identification"].map(type => (
             <div className="form-check" key={type}>
               <input
                 className="form-check-input"
@@ -272,6 +287,24 @@ function QuizManual() {
             </div>
           ))}
         </div>
+
+        {/* Assessment Type */}
+        <div className="mb-3">
+          <label className="form-label fw-bold">Assessment Type</label>
+          <select
+            className="form-select"
+            value={assessmentType}
+            onChange={e => setAssessmentType(e.target.value)}
+          >
+            <option value="">-- Select Assessment Type --</option>
+            {assessmentTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
 
         {/* Course / Module / Lecture */}
         <div className="mb-3">

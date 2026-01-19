@@ -121,90 +121,91 @@ module.exports = {
     await queryInterface.addIndex('assessment_response_attempts', ['assessment_id'], {
       name: 'idx_assessment_attempts_assessment'
     });
-  
 
-  // ASSESSMENT RESPONSES
-  await queryInterface.createTable('assessment_responses', {
-    response_id: uuidColumn,
-    attempt_id: foreignKey('assessment_response_attempts', 'attempt_id'),
-    user_id: foreignKey('users', 'id'),
-    question_id: foreignKey('assessment_questions', 'question_id'),
-    answer: { type: Sequelize.JSON },
-    score: { type: Sequelize.DECIMAL(5, 2) },
-    feedback: { type: Sequelize.TEXT },
-    submitted_at: standardTimestamp,
-    created_at: standardTimestamp,
-    updated_at: standardTimestamp,
-  });
-  await queryInterface.addIndex('assessment_responses', ['attempt_id', 'question_id']);
 
-  // GRADES
-  await queryInterface.createTable('grades', {
-    grade_id: uuidColumn,
-    user_id: foreignKey('users', 'id'),
-    assessment_id: foreignKey('assessments', 'assessment_id'),
-    score: { type: Sequelize.DECIMAL(5, 2) },
-    weight: { type: Sequelize.DECIMAL(5, 2) },
-    remarks: { type: Sequelize.TEXT },
-    overridden_by: foreignKey('users', 'id', true, 'SET NULL'),
-    created_at: standardTimestamp,
-    updated_at: standardTimestamp,
-  });
+    // ASSESSMENT RESPONSES
+    await queryInterface.createTable('assessment_responses', {
+      response_id: uuidColumn,
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      attempt_id: foreignKey('assessment_response_attempts', 'attempt_id'),
+      user_id: foreignKey('users', 'id'),
+      question_id: foreignKey('assessment_questions', 'question_id'),
+      answer: { type: Sequelize.JSON },
+      score: { type: Sequelize.DECIMAL(5, 2) },
+      feedback: { type: Sequelize.TEXT },
+      submitted_at: standardTimestamp,
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
+    await queryInterface.addIndex('assessment_responses', ['attempt_id', 'question_id']);
 
-  // AI INSIGHTS
-  await queryInterface.createTable('ai_insights', {
-    insight_id: uuidColumn,
-    user_id: foreignKey('users', 'id'),
-    generated_at: standardTimestamp,
-    weakness_summary: { type: Sequelize.TEXT },
-    improvement_areas_json: { type: Sequelize.JSON },
-    recommended_courses_json: { type: Sequelize.JSON },
-    confidence_score: { type: Sequelize.DECIMAL(5, 2) },
-    reviewed_by: foreignKey('users', 'id', true, 'SET NULL'),
-    created_at: standardTimestamp,
-    updated_at: standardTimestamp,
-  });
+    // GRADES
+    await queryInterface.createTable('grades', {
+      grade_id: uuidColumn,
+      user_id: foreignKey('users', 'id'),
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      score: { type: Sequelize.DECIMAL(5, 2) },
+      weight: { type: Sequelize.DECIMAL(5, 2) },
+      remarks: { type: Sequelize.TEXT },
+      overridden_by: foreignKey('users', 'id', true, 'SET NULL'),
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
 
-  // ASSESSMENT SCREEN SESSIONS
-  await queryInterface.createTable('assessment_screen_sessions', {
-    session_id: uuidColumn,
-    assessment_id: foreignKey('assessments', 'assessment_id'),
-    user_id: foreignKey('users', 'id'),
-    start_time: standardTimestamp,
-    end_time: { type: Sequelize.DATE },
-    recording_url: { type: Sequelize.TEXT },
-    status: { type: Sequelize.STRING(20), allowNull: false, defaultValue: 'active' },
-    created_at: standardTimestamp,
-    updated_at: standardTimestamp,
-  });
+    // AI INSIGHTS
+    await queryInterface.createTable('ai_insights', {
+      insight_id: uuidColumn,
+      user_id: foreignKey('users', 'id'),
+      generated_at: standardTimestamp,
+      weakness_summary: { type: Sequelize.TEXT },
+      improvement_areas_json: { type: Sequelize.JSON },
+      recommended_courses_json: { type: Sequelize.JSON },
+      confidence_score: { type: Sequelize.DECIMAL(5, 2) },
+      reviewed_by: foreignKey('users', 'id', true, 'SET NULL'),
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
 
-  // USER_BATCHES (Junction Table)
-  await queryInterface.createTable('user_batches', {
-    user_id: { ...foreignKey('users', 'id'), primaryKey: true },
-    batch_id: { ...foreignKey('batches', 'batch_id'), primaryKey: true },
-    assigned_at: standardTimestamp,
-  });
+    // ASSESSMENT SCREEN SESSIONS
+    await queryInterface.createTable('assessment_screen_sessions', {
+      session_id: uuidColumn,
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      user_id: foreignKey('users', 'id'),
+      start_time: standardTimestamp,
+      end_time: { type: Sequelize.DATE },
+      recording_url: { type: Sequelize.TEXT },
+      status: { type: Sequelize.STRING(20), allowNull: false, defaultValue: 'active' },
+      created_at: standardTimestamp,
+      updated_at: standardTimestamp,
+    });
 
-  // ASSESSMENT WEIGHT CHANGES
-  await queryInterface.createTable('assessment_weight_changes', {
-    change_id: uuidColumn,
-    assessment_id: foreignKey('assessments', 'assessment_id'),
-    new_weight: { type: Sequelize.DECIMAL(5, 2), allowNull: false },
-    changed_by: foreignKey('users', 'id', true, 'SET NULL'),
-    change_timestamp: standardTimestamp,
-  });
-},
+    // USER_BATCHES (Junction Table)
+    await queryInterface.createTable('user_batches', {
+      user_id: { ...foreignKey('users', 'id'), primaryKey: true },
+      batch_id: { ...foreignKey('batches', 'batch_id'), primaryKey: true },
+      assigned_at: standardTimestamp,
+    });
+
+    // ASSESSMENT WEIGHT CHANGES
+    await queryInterface.createTable('assessment_weight_changes', {
+      change_id: uuidColumn,
+      assessment_id: foreignKey('assessments', 'assessment_id'),
+      new_weight: { type: Sequelize.DECIMAL(5, 2), allowNull: false },
+      changed_by: foreignKey('users', 'id', true, 'SET NULL'),
+      change_timestamp: standardTimestamp,
+    });
+  },
 
   async down(queryInterface, Sequelize) {
-  await queryInterface.dropTable('assessment_weight_changes');
-  await queryInterface.dropTable('user_batches');
-  await queryInterface.dropTable('assessment_screen_sessions');
-  await queryInterface.dropTable('ai_insights');
-  await queryInterface.dropTable('grades');
-  await queryInterface.dropTable('assessment_responses');
-  await queryInterface.dropTable('assessment_response_attempts');
-  await queryInterface.dropTable('assessment_questions');
-  await queryInterface.dropTable('assessments');
-  await queryInterface.dropTable('assessment_types');
-},
+    await queryInterface.dropTable('assessment_weight_changes');
+    await queryInterface.dropTable('user_batches');
+    await queryInterface.dropTable('assessment_screen_sessions');
+    await queryInterface.dropTable('ai_insights');
+    await queryInterface.dropTable('grades');
+    await queryInterface.dropTable('assessment_responses');
+    await queryInterface.dropTable('assessment_response_attempts');
+    await queryInterface.dropTable('assessment_questions');
+    await queryInterface.dropTable('assessments');
+    await queryInterface.dropTable('assessment_types');
+  },
 };
