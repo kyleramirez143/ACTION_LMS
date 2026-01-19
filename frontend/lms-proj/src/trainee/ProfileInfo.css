@@ -1,0 +1,302 @@
+/* ============================= */
+/* 1. CONTAINER & GLOBAL         */
+/* ============================= */
+.checkpoint-container {
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.checkpoint-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden; /* Ensures background colors don't bleed out of corners */
+}
+
+/* ============================= */
+/* 2. USER PROFILE SECTION       */
+/* ============================= */
+.user-info-card {
+  padding: 30px;
+}
+
+.user-info-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Fixed Centering for Profile Picture */
+.profile-picture {
+  margin: 0 auto 15px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  overflow: hidden;
+  border: 3px solid #0047AB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-placeholder {
+  font-size: 40px;
+}
+
+.user-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 5px 0;
+  color: #1a1a1a;
+}
+
+.user-role {
+  font-size: 15px;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #22c55e;
+  color: white;
+  font-size: 12px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Inner Info Box */
+.user-info-box {
+  background-color: #fbfcfd;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.user-info-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.user-info-grid label {
+  font-size: 12px;
+  color: #777;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.user-info-grid p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.status-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 5px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.status-badge.active {
+  color: #2e7d32; /* Green */
+  background-color: #e8f5e9;
+}
+
+.status-badge.inactive {
+  color: #d32f2f; /* Red */
+  background-color: #ffebee;
+}
+
+.role-text {
+  font-weight: 600;
+  color: #555;
+}
+
+/* ============================= */
+/* 3. ONBOARDING TABLE           */
+/* ============================= */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px 30px;
+  background: transparent; /* Changed from #fcfcfc to transparent */
+  border-bottom: 1px solid #eee; /* Keeps the separation line */
+}
+
+.onboarding-table-wrapper {
+  padding: 0 30px 30px;
+}
+
+.onboarding-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.onboarding-table th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #eee;
+}
+
+.onboarding-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* High Contrast Inputs */
+.table-input, 
+.table-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid #b0b0b0; /* Stronger border visibility */
+  border-radius: 6px;
+  font-size: 14px;
+  color: #000 !important; 
+  font-weight: 500;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+.table-input:focus, 
+.table-select:focus {
+  outline: none;
+  border-color: #0047AB;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
+}
+
+/* Targeted width for the Requirement column */
+.onboarding-table th:first-child,
+.onboarding-table td:first-child {
+  width: 50%; /* Adjust this percentage or use px (e.g., 250px) to make it even narrower */
+  white-space: nowrap; /* Prevents the label from wrapping to two lines */
+}
+
+/* Ensure the Value/Status column takes up the remaining space */
+.onboarding-table th:last-child,
+.onboarding-table td:last-child {
+  width: auto;
+}
+/* ============================= */
+/* 4. BUTTONS & ACTIONS          */
+/* ============================= */
+.table-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  text-align: right;
+  border-top: 1px solid #eee;
+}
+
+.btn-edit {
+  background: #fff;
+  color: #0047AB;
+  border: 1.5px solid #0047AB;
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-edit:hover { background: #f0f4f8; }
+
+.btn-save {
+  background: #0047AB;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 100px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* Empty State Styling - High Visibility Green */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  /* Force the green background to override the card gray */
+  background-color: #f8f9fa !important; 
+  border: 2px dashed #a2a2a2; 
+  border-radius: 12px;
+  margin: 20px 30px; /* Aligns with the table padding */
+}
+
+.empty-state p {
+  color: #858585;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+/* Ensure the button is distinct from the green box */
+.empty-state .btn-add {
+  background-color: #27b052;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.empty-state .btn-add:hover {
+  background-color: #047857;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .user-info-grid { grid-template-columns: 1fr; gap: 15px; }
+  .card-header-flex { flex-direction: column; gap: 10px; text-align: center; }
+  .onboarding-table th { display: none; } /* Hide headers on small mobile */
+  .onboarding-table td { display: block; width: 100%; box-sizing: border-box; }
+}

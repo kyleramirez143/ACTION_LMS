@@ -28,6 +28,15 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 
+// Notification
+import NotificationView from "./all/NotificationView.jsx";
+
+//Checkpoint View
+import CheckpointView from "./all/CheckpointView.jsx";
+
+//Help & Support
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
 // import AdminCreateCourse from './admin/AdminCoursePage';
@@ -68,6 +77,8 @@ import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
+import ViewGrades from "./trainee/ViewGrades.jsx";
+import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 
 function AppContent() {
@@ -106,6 +117,15 @@ function AppContent() {
           <Routes>
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
+
+            {/* Notification */}
+            <Route path="/all/notificationview" element={<NotificationView />} />
+
+            {/* Checkpoint View */}
+            <Route path="/all/checkpointview" element={<CheckpointView />} />
+
+            {/* Help & Support */}
+            <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
 
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
@@ -155,12 +175,14 @@ function AppContent() {
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
+            <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
 
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
+            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
 
           </Routes>
         </div>
