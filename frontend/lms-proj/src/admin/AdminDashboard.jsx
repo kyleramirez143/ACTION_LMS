@@ -65,11 +65,32 @@ function AdminDashboard() {
   // ============================
   // HEADER COMPONENT
   // ============================
-  const DashboardHeader = () => (
-    <div className="row mb-4">
-      <h2 className="fw-bold">Admin LMS Dashboard</h2>
-    </div>
-  );
+ const DashboardHeader = () => {
+    const now = new Date();
+
+    const formattedTime = now.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        timeZone: 'Asia/Singapore',
+    });
+
+    return (
+        <div className="row mb-4 align-items-center">
+            <div className="col-md-8">
+                <h2 className="fw-bold mb-0">Admin LMS Dashboard</h2>
+                <div className="text-muted" style={{ fontSize: '14px' }}>
+                    {formattedTime} (GMT+8)
+                </div>
+            </div>
+        </div>
+    );
+};
 
   // ============================
   // USERS CARD

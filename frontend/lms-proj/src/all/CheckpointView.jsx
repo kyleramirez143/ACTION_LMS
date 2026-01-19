@@ -104,16 +104,11 @@ const CheckpointView = () => {
 
   return (
     <div className="checkpoint-container">
-      <div className="checkpoint-header">
+
+      <div className="checkpoint-card">
         <h2 className="checkpoint-title">
           Trainee Onboarding Checkpoint {rows[0]?.name && `- Batch Users`}
         </h2>
-        <button className="add-employee-btn" onClick={openAddModal}>
-          + Trainee
-        </button>
-      </div>
-
-      <div className="checkpoint-card">
         <table className="checkpoint-table">
           <thead>
             <tr>
