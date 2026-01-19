@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios'; // Your Axios instance
 import { FaPlay, FaUser, FaClock } from 'react-icons/fa';
+import { Modal } from 'bootstrap';
+
 
 const ProctorReview = () => {
     const { assessment_id, user_id } = useParams();
@@ -57,6 +59,21 @@ const ProctorReview = () => {
         const data = await res.json();
         setAttemptHistory(data);
         setHistoryUser(name);
+    };
+
+    // Open Attempt History Modal
+    const showAttemptHistoryModal = () => {
+        const modalEl = document.getElementById('attemptHistoryModal');
+        const modal = new Modal(modalEl);
+        modal.show();
+    };
+
+    // Open Recording Modal
+    const showRecordingModal = (videoUrl) => {
+        setSelectedVideo(videoUrl);
+        const modalEl = document.getElementById('recordingModal');
+        const modal = new Modal(modalEl);
+        modal.show();
     };
 
     return (
@@ -203,7 +220,7 @@ const ProctorReview = () => {
                                                 {item.recording_url ? (
                                                     <button
                                                         className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => setSelectedVideo(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
+                                                        onClick={() => showRecordingModal(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
                                                     >
                                                         <FaPlay className="me-1" /> View
                                                     </button>
@@ -214,12 +231,15 @@ const ProctorReview = () => {
                                             </td>
                                             <td>
                                                 {/* {item.user?.id && ( */}
-                                                    <button
-                                                        className="btn btn-sm btn-outline-secondary me-2"
-                                                        onClick={() => openHistory(item.user.id, item.user.first_name)}
-                                                    >
-                                                        Attempts
-                                                    </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary me-2"
+                                                    onClick={async () => {
+                                                        await openHistory(item.user.id, item.user.first_name);
+                                                        showAttemptHistoryModal();
+                                                    }}
+                                                >
+                                                    Attempts
+                                                </button>
                                                 {/* )}  */}
                                             </td>
                                         </tr>
@@ -228,7 +248,6 @@ const ProctorReview = () => {
                             </table>
                         </div>
                     </div>
-
 
                     {/* Summary part */}
                     <div className="col-4">
@@ -240,16 +259,17 @@ const ProctorReview = () => {
 
             </div>
 
-            {attemptHistory.length > 0 && (
-                <div className="modal d-block" style={{ background: "rgba(0,0,0,.6)" }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5>{historyUser}'s Attempt History</h5>
-                                <button className="btn-close" onClick={() => setAttemptHistory([])} />
-                            </div>
-                            <div className="modal-body">
-                                <table className="table">
+            {/* Attempt History Modal */}
+            <div className="modal fade" id="attemptHistoryModal" tabIndex="-1" aria-labelledby="attemptHistoryModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="attemptHistoryModalLabel">{historyUser}'s Attempt History</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="table-responsive">
+                                <table className="table table-striped">
                                     <thead>
                                         <tr>
                                             <th>Attempt</th>
@@ -276,33 +296,33 @@ const ProctorReview = () => {
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Video Player Modal */}
-            {selectedVideo && (
-                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content border-0">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Screen Recording Playback</h5>
-                                <button className="btn-close" onClick={() => setSelectedVideo(null)}></button>
-                            </div>
-                            <div className="modal-body p-0 bg-dark text-center">
-                                <video
-                                    src={selectedVideo}
-                                    controls
-                                    className="w-100"
-                                    autoPlay
-                                    style={{ maxHeight: '70vh' }}
-                                />
-                            </div>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
+
+            {/* Recording Playback Modal */}
+            <div className="modal fade" id="recordingModal" tabIndex="-1" aria-labelledby="recordingModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg modal-dialog-centered">
+                    <div className="modal-content border-0">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="recordingModalLabel">Screen Recording Playback</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body p-0 bg-dark text-center">
+                            <video
+                                src={selectedVideo}
+                                controls
+                                className="w-100"
+                                autoPlay
+                                style={{ maxHeight: '70vh' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
