@@ -84,7 +84,7 @@ const CheckpointView = () => {
           <h2 className="checkpoint-title">
             {batchName ? `Checkpoint for ${batchName}` : "Trainee Onboarding Checkpoint"}
           </h2>
-          <button className="add-employee-btn" onClick={openAddModal}>+ Trainee</button>
+          
         </div>
         <table className="checkpoint-table">
           <thead>

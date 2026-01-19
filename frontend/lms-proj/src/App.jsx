@@ -32,16 +32,7 @@ import LoginPage from "./all/LoginPage";
 import NotificationView from "./all/NotificationView.jsx";
 
 //Checkpoint View
-import CheckpointView from "./all/CheckpointView.jsx";
-
-//Help & Support
-import HelpAndSupport from "./all/HelpSupport.jsx";
-
-// Notification
-import NotificationView from "./all/NotificationView.jsx";
-
-//Checkpoint View
-import CheckpointView from "./all/CheckpointView.jsx";
+import CheckpointView from "./admin/CheckpointView.jsx";
 
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
@@ -86,6 +77,8 @@ import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
+import ViewGrades from "./trainee/ViewGrades.jsx";
+import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 
 function AppContent() {
