@@ -5,8 +5,10 @@ import API from '../api/axios'; // Your Axios instance
 import { FaPlay, FaUser, FaClock } from 'react-icons/fa';
 import { Modal } from 'bootstrap';
 
+import { useTranslation } from 'react-i18next';
 
 const ProctorReview = () => {
+    const { t } = useTranslation();
     const { assessment_id, user_id } = useParams();
     const [sessions, setSessions] = useState([]);
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -78,31 +80,31 @@ const ProctorReview = () => {
 
     return (
         <div className="container mt-1">
-            <h2 className="mb-4">Quiz Result</h2>
+            <h2 className="mb-4">{t("proctor.quiz_result")}</h2>
             {/* Details part */}
             <div className="mt-3">
                 <div className="row g-4">
                     {/* Trainee Details */}
                     <div className="col-6">
                         <div className="card shadow-sm border-0 p-4 h-100">
-                            <h6 className="fw-semibold mb-4">Trainee Overview</h6>
+                            <h6 className="fw-semibold mb-4">{t("proctor.trainee_overview")}</h6>
 
                             <div className="row text-center">
                                 <div className="col-4">
                                     <i className="bi bi-people-fill fs-2 text-primary"></i>
-                                    <div className="mt-2 fw-semibold">Total Trainees</div>
+                                    <div className="mt-2 fw-semibold">{t("proctor.total_trainees")}</div>
                                     <div className="fs-4 fw-bold">{totalTrainees}</div>
                                 </div>
 
                                 <div className="col-4">
                                     <i className="bi bi-check-circle-fill fs-2 text-success"></i>
-                                    <div className="mt-2 fw-semibold">Took Quiz</div>
+                                    <div className="mt-2 fw-semibold">{t("proctor.took_quiz")}</div>
                                     <div className="fs-4 fw-bold">{tookQuiz}</div>
                                 </div>
 
                                 <div className="col-4">
                                     <i className="bi bi-x-circle-fill fs-2 text-danger"></i>
-                                    <div className="mt-2 fw-semibold">Did Not Take</div>
+                                    <div className="mt-2 fw-semibold">{t("proctor.did_not_take")}</div>
                                     <div className="fs-4 fw-bold">{didNotTake}</div>
                                 </div>
                             </div>
@@ -112,7 +114,7 @@ const ProctorReview = () => {
                     {/* Passing Rate */}
                     <div className="col-6">
                         <div className="card shadow-sm border-0 p-4 d-flex align-items-center justify-content-center">
-                            <h6 className="fw-semibold mb-4">Passing Rate</h6>
+                            <h6 className="fw-semibold mb-4">{t("proctor.passing_rate")}</h6>
 
                             <div
                                 className="position-relative d-flex align-items-center justify-content-center"
@@ -132,13 +134,13 @@ const ProctorReview = () => {
                                 >
                                     <div className="text-center">
                                         <div className="fs-3 fw-bold text-success">{passingRate}%</div>
-                                        <div className="small text-muted">Passed</div>
+                                        <div className="small text-muted">{t("proctor.passed")}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-4 text-center small text-muted">
-                                {passedCount} out of {tookQuiz} trainees passed
+                                {passedCount} {t("proctor.out_of")} {tookQuiz} {t("proctor.trainees")}
                             </div>
                         </div>
                     </div>
@@ -154,12 +156,12 @@ const ProctorReview = () => {
                             <table className="table table-hover align-middle mb-0">
                                 <thead className="bg-light">
                                     <tr>
-                                        <th>Student</th>
-                                        <th>Date Started</th>
-                                        <th>Time Finished</th>
-                                        <th>Score</th>
-                                        <th>Status</th>
-                                        <th className="text-end">Action</th>
+                                        <th>{t("proctor.student")}</th>
+                                        <th>{t("proctor.date_started")}</th>
+                                        <th>{t("proctor.time_finished")}</th>
+                                        <th>{t("proctor.score")}</th>
+                                        <th>{t("proctor.status")}</th>
+                                        <th>{t("proctor.action")}</th>
                                     </tr>
                                 </thead>
 
@@ -174,7 +176,7 @@ const ProctorReview = () => {
                                                     </div>
                                                     <div>
                                                         <div className="fw-bold">{item.user.first_name} {item.user.last_name}</div>
-                                                        <div className="small text-muted">Attempt #{item.attempt_number}</div>
+                                                        <div className="small text-muted">{t("proctor.attempt")} #{item.attempt_number} </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -197,7 +199,7 @@ const ProctorReview = () => {
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <span className="text-muted small">Incomplete</span>
+                                                    <span className="text-muted small">{t("proctor.incomplete")}</span>
                                                 )}
                                             </td>
 
@@ -211,7 +213,7 @@ const ProctorReview = () => {
                                             {/* Status */}
                                             <td>
                                                 <span className={`badge ${item.status === 'Pass' ? "bg-success" : "bg-danger"}`}>
-                                                    {item.status}
+                                                    {t(`proctor.status.${item.status.toLowerCase()}`)}
                                                 </span>
                                             </td>
 
@@ -222,24 +224,21 @@ const ProctorReview = () => {
                                                         className="btn btn-sm btn-outline-primary"
                                                         onClick={() => showRecordingModal(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
                                                     >
-                                                        <FaPlay className="me-1" /> View
+                                                        <FaPlay className="me-1" /> {t("proctor.view")}
                                                     </button>
 
                                                 ) : (
-                                                    <span className="text-muted small">No Recording</span>
+                                                    <span className="text-muted small">{t("proctor.no_recording")}</span>
                                                 )}
                                             </td>
                                             <td>
                                                 {/* {item.user?.id && ( */}
-                                                <button
-                                                    className="btn btn-sm btn-outline-secondary me-2"
-                                                    onClick={async () => {
-                                                        await openHistory(item.user.id, item.user.first_name);
-                                                        showAttemptHistoryModal();
-                                                    }}
-                                                >
-                                                    Attempts
-                                                </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-secondary me-2"
+                                                        onClick={() => openHistory(item.user.id, item.user.first_name)}
+                                                    >
+                                                        Attempts
+                                                    </button>
                                                 {/* )}  */}
                                             </td>
                                         </tr>
@@ -252,31 +251,30 @@ const ProctorReview = () => {
                     {/* Summary part */}
                     <div className="col-4">
                         <div className="card shadow-sm border-0">
-                            Test Summary
+                            {t("proctor.test_summary")}
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            {/* Attempt History Modal */}
-            <div className="modal fade" id="attemptHistoryModal" tabIndex="-1" aria-labelledby="attemptHistoryModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-lg modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="attemptHistoryModalLabel">{historyUser}'s Attempt History</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="table-responsive">
-                                <table className="table table-striped">
+            {attemptHistory.length > 0 && (
+                <div className="modal d-block" style={{ background: "rgba(0,0,0,.6)" }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5>{historyUser}'s Attempt History</h5>
+                                <button className="btn-close" onClick={() => setAttemptHistory([])} />
+                            </div>
+                            <div className="modal-body">
+                                <table className="table">
                                     <thead>
                                         <tr>
-                                            <th>Attempt</th>
-                                            <th>Score</th>
-                                            <th>Percentage</th>
-                                            <th>Status</th>
-                                            <th>Date</th>
+                                            <th>{t("proctor.attempt")}</th> 
+                                            <th>{t("proctor.score")}</th> 
+                                            <th>{t("proctor.percentage")}</th> 
+                                            <th>{t("proctor.status")}</th> 
+                                            <th>{t("proctor.date")}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -287,7 +285,7 @@ const ProctorReview = () => {
                                                 <td>{a.final_score}%</td>
                                                 <td>
                                                     <span className={`badge ${a.status === 'Pass' ? 'bg-success' : 'bg-danger'}`}>
-                                                        {a.status}
+                                                        {t(`proctor.status.${a.status.toLowerCase()}`)}
                                                     </span>
                                                 </td>
                                                 <td>{new Date(a.created_at).toLocaleString()}</td>
@@ -302,27 +300,28 @@ const ProctorReview = () => {
                 </div>
             </div>
 
-            {/* Recording Playback Modal */}
-            <div className="modal fade" id="recordingModal" tabIndex="-1" aria-labelledby="recordingModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-lg modal-dialog-centered">
-                    <div className="modal-content border-0">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="recordingModalLabel">Screen Recording Playback</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body p-0 bg-dark text-center">
-                            <video
-                                src={selectedVideo}
-                                controls
-                                className="w-100"
-                                autoPlay
-                                style={{ maxHeight: '70vh' }}
-                            />
+            {/* Video Player Modal */}
+            {selectedVideo && (
+                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content border-0">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Screen Recording Playback</h5>
+                                <button className="btn-close" onClick={() => setSelectedVideo(null)}></button>
+                            </div>
+                            <div className="modal-body p-0 bg-dark text-center">
+                                <video
+                                    src={selectedVideo}
+                                    controls
+                                    className="w-100"
+                                    autoPlay
+                                    style={{ maxHeight: '70vh' }}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
+            )}
         </div>
     );
 };

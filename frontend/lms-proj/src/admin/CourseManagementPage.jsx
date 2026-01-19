@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import logo from "../image/courses.svg";
+import { useTranslation } from "react-i18next";
+
 
 const ITEMS_PER_PAGE = 8;
 
 export default function CourseManagementPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
     const [courses, setCourses] = useState([]);
@@ -180,20 +183,20 @@ export default function CourseManagementPage() {
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">Courses</h3>
+                <h3 className="mb-0">{t("course_management.courses")}</h3>
                 {userRole === "Admin" && courses.length > 0 &&  (
                     <button
                         className="btn btn-primary"
                         onClick={() => navigate("/admin/course-management/create")}
                     >
-                        <i class="bi bi-file-earmark-plus-fill"></i> Add New Course
+                        <i class="bi bi-file-earmark-plus-fill"></i> {t("course_management.add_course")}
                     </button>
                 )}
             </div>
 
             {courses.length > 0 && (
                 <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                    <label className="mb-0 fw-semibold">Filter by Batch:</label>
+                    <label className="mb-0 fw-semibold">{t("course_management.filter_by_batch")}</label>
 
                     <select
                         className="form-select w-auto"
@@ -203,7 +206,7 @@ export default function CourseManagementPage() {
                             setPage(1);
                         }}
                     >
-                        <option value="">All Batches</option>
+                        <option value="">{t("course_management.all_batches")}</option>
                         {batches.map(batch => (
                             <option key={batch.batch_id} value={batch.batch_id}>
                                 {batch.name} {batch.location}
@@ -220,12 +223,12 @@ export default function CourseManagementPage() {
                     <img src={logo} alt="Logo" className="img-fluid mb-3"
                         style={{ maxWidth: "200px" }} />
                     <h3 className="mb-0">
-                        {selectedBatch ? "No courses in this batch" : "No courses yet"}
+                        {selectedBatch ? t("course_management.no_courses_in_batch") : t("course_management.no_courses_yet")}
                     </h3>
                     {selectedBatch ? (
-                        <p className="text-muted mb-3">This batch does not have any assigned courses yet.</p>
+                        <p className="text-muted mb-3">{t("course_management.no_courses_batch_desc")}</p>
                     ) : (
-                        <p className="text-muted mb-3">Start by creating your first course.</p>
+                        <p className="text-muted mb-3">{t("course_management.no_courses_desc")}</p>
                     )}
                     
                     {userRole === "Admin" && !selectedBatch &&  (
@@ -233,7 +236,7 @@ export default function CourseManagementPage() {
                             className="btn btn-primary"
                             onClick={() => navigate("/admin/course-management/create")}
                         >
-                            <i class="bi bi-file-earmark-plus-fill"></i> Add New Course
+                            <i class="bi bi-file-earmark-plus-fill"></i> {t("course_management.add_course")}
                         </button>
                     )}
                 </div>
@@ -262,9 +265,9 @@ export default function CourseManagementPage() {
                                             !updatingVisibility.includes(course.course_id) &&
                                             handleToggleVisibility(e, course.course_id, !course.is_published)
                                         }
-                                        title={userRole === "Admin" ? "Click to toggle visibility" : ""}
+                                        title={userRole === "Admin" ? t("course_management.click_toggle_visibility") : ""}
                                     >
-                                        {course.is_published ? "Visible" : "Hidden"}
+                                        {course.is_published ? t("course_management.visible") : t("course_management.hidden")}
                                     </span>
 
                                     {/* Dropdown */}
@@ -291,7 +294,7 @@ export default function CourseManagementPage() {
                                                         className="dropdown-item"
                                                         onClick={() => navigate(`/admin/course-management/edit/${course.course_id}`)}
                                                     >
-                                                        <i class="bi bi-pencil-fill"></i>  Edit Course
+                                                        <i class="bi bi-pencil-fill"></i>  {t("course_management.edit_course")}
                                                     </button>
                                                 </li>
                                                 <li>
@@ -299,7 +302,7 @@ export default function CourseManagementPage() {
                                                         className="dropdown-item text-danger"
                                                         onClick={() => handleDeleteCourse(course.course_id)}
                                                     >
-                                                        <i class="bi bi-trash3-fill"></i> Delete Course
+                                                        <i class="bi bi-trash3-fill"></i> {t("course_management.delete_course")}
                                                     </button>
                                                 </li>
                                                 {course.is_published ? (
@@ -308,7 +311,7 @@ export default function CourseManagementPage() {
                                                             className="dropdown-item text-danger"
                                                             onClick={(e) => handleToggleVisibility(e, course.course_id, false)}
                                                         >
-                                                            <i class="bi bi-eye-slash"></i> Make Hidden
+                                                            <i class="bi bi-eye-slash"></i> {t("course_management.make_hidden")}
                                                         </button>
                                                     </li>
                                                 ) : (
@@ -317,7 +320,7 @@ export default function CourseManagementPage() {
                                                             className="dropdown-item text-success"
                                                             onClick={(e) => handleToggleVisibility(e, course.course_id, true)}
                                                         >
-                                                            <i class="bi bi-eye"></i> Make Visible
+                                                            <i class="bi bi-eye"></i> {t("course_management.make_visible")}
                                                         </button>
                                                     </li>
                                                 )}
@@ -347,15 +350,15 @@ export default function CourseManagementPage() {
                                                 {course.description
                                                     ? course.description.substring(0, 100) +
                                                     (course.description.length > 100 ? "..." : "")
-                                                    : "No description available."}
+                                                    : t("course_management.no_description")}
                                             </p>
                                             <p className="card-text mt-1">
-                                                <strong>Trainers:</strong>{" "}
+                                                <strong>{t("course_management.trainers")}</strong>{" "}
                                                 {course.course_instructors?.length
                                                     ? course.course_instructors
                                                         .map(ci => `${ci.instructor.first_name} ${ci.instructor.last_name}`)
                                                         .join(", ")
-                                                    : "No trainers assigned"}
+                                                    : t("course_management.no_trainers")}
                                             </p>
                                         </div>
                                     </div>
