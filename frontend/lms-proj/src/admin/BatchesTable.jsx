@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./UserRoleTable.css";
 
 function BatchesTable() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [batches, setBatches] = useState([]);
     const [filter, setFilter] = useState("All");
@@ -27,7 +29,7 @@ function BatchesTable() {
         if (!endDate) return "Pending";
         const today = new Date();
         const end = new Date(endDate);
-        return today > end ? "Inactive" : "Active";
+        return today > end ? t("batches.inactive") : t("batches.active");
     };
 
     // Helper to format date as MMDDYY
@@ -75,7 +77,7 @@ function BatchesTable() {
     const handlePageClick = (page) => setCurrentPage(page);
 
     const handleDelete = async (batchId) => {
-        if (!window.confirm("Are you sure you want to delete this batch?")) return;
+        if (!window.confirm(t("batches.confirm_delete_single"))) return;
 
         const token = localStorage.getItem("authToken");
         try {
@@ -83,9 +85,9 @@ function BatchesTable() {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!res.ok) throw new Error("Failed to delete batch");
+            if (!res.ok) throw new Errort("batches.delete_failed")
 
-            alert("Batch deleted successfully!");
+            alertt("batches.deleted_success")
             fetchBatches();
         } catch (err) {
             alert("Error: " + err.message);
@@ -111,11 +113,11 @@ function BatchesTable() {
 
             if (!res.ok) throw new Error(await res.text());
 
-            alert("Batches deleted successfully");
+            alert(t("batches.bulk_deleted"));
             setSelectedBatches([]);
             fetchBatches();
         } catch (err) {
-            alert("Error deleting batches: " + err.message);
+            alert(t("batches.bulk_delete_failed") + err.message);
         }
     };
 
@@ -138,11 +140,11 @@ function BatchesTable() {
     return (
         <div className="user-role-card">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">All Batches</h3>
+                <h3 className="section-title">{t("batches.all_batches")}</h3>
                 <div className="d-flex gap-2">
                     <Link to="/admin/add-batch">
                         <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-plus-circle-fill me-2"></i>Add New Batch
+                            <i className="bi bi-plus-circle-fill me-2"></i>{t("batches.add_new_batch")}
                         </button>
                     </Link>
 
@@ -151,14 +153,14 @@ function BatchesTable() {
                         onClick={handleBulkDelete}
                         disabled={selectedBatches.length === 0}
                     >
-                        <i className="bi bi-trash3-fill"></i> Delete ({selectedBatches.length})
+                        <i className="bi bi-trash3-fill"></i> {t("batches.delete")} ({selectedBatches.length})
                     </button>
                 </div>
             </div>
 
             <div className="d-flex gap-3 mb-4 flex-wrap">
                 <div className="d-flex align-items-center">
-                    <label className="me-2 fw-bold">Filter by Location:</label>
+                    <label className="me-2 fw-bold">{t("batches.filter_by_location")}</label>
                     <select
                         value={filter}
                         onChange={(e) => {
@@ -167,7 +169,7 @@ function BatchesTable() {
                         }}
                         className="form-select w-auto"
                     >
-                        <option value="All">All Locations</option>
+                        <option value="All">{t("batches.all_locations")}</option>
                         <option value="Manila">Manila</option>
                         <option value="Cebu">Cebu</option>
                     </select>
@@ -191,7 +193,7 @@ function BatchesTable() {
                 loading ? (
                     <div className="text-center p-5">
                         <div className="spinner-border text-primary" role="status"></div>
-                        <p className="mt-2">Loading batches...</p>
+                        <p className="mt-2">{t("batches.loading")}</p>
                     </div>
                 ) : (
                     <>
@@ -199,13 +201,13 @@ function BatchesTable() {
                             <table className="table align-middle">
                                 <thead className="table-light">
                                     <tr>
-                                        <th className="text-center">Batch Name</th>
-                                        <th className="text-center">Location</th>
-                                        <th className="text-center">Start Date</th>
-                                        <th className="text-center">End Date</th>
-                                        <th className="text-center">Curriculum</th>
-                                        <th className="text-center">Status</th>
-                                        <th className="text-center">Action</th>
+                                        <th className="text-center">{t("batches.batch_name")}</th>
+                                        <th className="text-center">{t("batches.location")}</th>
+                                        <th className="text-center">{t("batches.start_date")}</th>
+                                        <th className="text-center">{t("batches.end_date")}</th>
+                                        <th className="text-center">{t("batches.curriculum")}</th>
+                                        <th className="text-center">{t("batches.status")}</th>
+                                        <th className="text-center">{t("batches.action")}</th>
                                         <th className="text-center">
                                             <input
                                                 type="checkbox"
@@ -220,7 +222,7 @@ function BatchesTable() {
                                     {batches.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="text-center py-5 text-muted">
-                                                No batches match your criteria.
+                                                {t("batches.no_match")}
                                             </td>
                                         </tr>
                                     ) : (
