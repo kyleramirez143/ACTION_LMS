@@ -121,7 +121,7 @@ function AppContent() {
             <Route path="/all/notificationview" element={<NotificationView />} />
 
             {/* Checkpoint View */}
-            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
+            <Route path="/admin/checkpointview" element={<CheckpointView />} />
 
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
