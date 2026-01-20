@@ -42,6 +42,20 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
   content: none !important;
 }
 
+
+.dropdown {
+  background-color: none;
+}
+
+.nav-item .dropdown-toggle {
+  cursor: pointer;
+}
+
+.nav-item .dropdown-toggle::after {
+  display: none;
+  /* remove caret */
+}
+
 .navbar-wrapper {
   display: flex;
   flex-direction: column;
@@ -140,7 +154,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
   background-color: var(--light-gray);
 }
 
-.search-bar-section > div {
+.search-bar-section>div {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -153,6 +167,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 
 .nav-item .dropdown-toggle::after {
   display: none;
+  /* remove caret */
 }
 
 .nav-item .dropdown-menu {
@@ -281,6 +296,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 }
 
 @media (min-width: 992px) {
+
   .side-panel,
   .side-overlay { display: none; }
 }
@@ -306,7 +322,6 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
   color: var(--primary-blue);
 }
 
-
-.lang-btn:focus {
-  outline: none;      /* remove focus outline */
+.nav-item .dropdown-menu {
+  min-width: 200px;
 }

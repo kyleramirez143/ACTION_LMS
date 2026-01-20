@@ -151,7 +151,7 @@ function AdminProfileManagement() {
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-                <h3 style={styles.title}>Profile</h3>
+                <h3 style={styles.title}>Account Settings</h3>
                 <div style={styles.profileLayout}>
                     {/* Image */}
                     <div className="profile-image-card">

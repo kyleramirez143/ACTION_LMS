@@ -183,8 +183,8 @@ export default function CourseManagementPage() {
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">{t("course_management.courses")}</h3>
-                {userRole === "Admin" && courses.length > 0 &&  (
+                <h3 className="mb-0">Courses</h3>
+                {userRole === "Admin" && courses.length > 0 && (
                     <button
                         className="btn btn-primary"
                         onClick={() => navigate("/admin/course-management/create")}
@@ -230,8 +230,8 @@ export default function CourseManagementPage() {
                     ) : (
                         <p className="text-muted mb-3">{t("course_management.no_courses_desc")}</p>
                     )}
-                    
-                    {userRole === "Admin" && !selectedBatch &&  (
+
+                    {userRole === "Admin" && !selectedBatch && (
                         <button
                             className="btn btn-primary"
                             onClick={() => navigate("/admin/course-management/create")}
@@ -352,17 +352,20 @@ export default function CourseManagementPage() {
                                                     (course.description.length > 100 ? "..." : "")
                                                     : t("course_management.no_description")}
                                             </p>
-                                            <p className="card-text mt-1">
-                                                <strong>{t("course_management.trainers")}</strong>{" "}
+                                            <p className="card-text mb-1">
+                                                <strong>Trainers:</strong>{" "}
                                                 {course.course_instructors?.length
                                                     ? course.course_instructors
                                                         .map(ci => `${ci.instructor.first_name} ${ci.instructor.last_name}`)
                                                         .join(", ")
                                                     : t("course_management.no_trainers")}
                                             </p>
+                                            <p className="card-text mb-0">
+                                                <strong>Location:</strong>{" "}
+                                                {batches.find(b => String(b.batch_id) === String(course.batch_id))?.location || "No location"}
+                                            </p>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         ))}

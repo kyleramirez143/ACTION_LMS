@@ -128,135 +128,146 @@ export default function ModuleForm() {
     // ================================
     const handleDelete = async () => {
         if (!window.confirm(t("module.confirm_delete", { title }))) return; // 🔹 translated
-    
-    setIsSubmitting(true);
-    try {
-        const res = await fetch(`/api/modules/${module_id}`, {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
 
-        if (res.ok) {
-            alert(t("module.deleted")); // 🔹 translated
-            navigate(`/${course_id}/modules`);
-        } else {
-            const data = await res.json();
-            alert(data.error || t("module.delete_failed")); // 🔹 translated
+        setIsSubmitting(true);
+        try {
+            const res = await fetch(`/api/modules/${module_id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (res.ok) {
+                alert(t("module.deleted")); // 🔹 translated
+                navigate(`/${course_id}/modules`);
+            } else {
+                const data = await res.json();
+                alert(data.error || t("module.delete_failed")); // 🔹 translated
+            }
+        } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Something went wrong during deletion.");
+        } finally {
+            setIsSubmitting(false);
         }
-    } catch (err) {
-        console.error("Delete failed:", err);
-        alert("Something went wrong during deletion.");
-    } finally {
-        setIsSubmitting(false);
-    }
-};
+    };
 
-// ================================
-// HANDLE CANCEL
-// ================================
-const handleCancel = () => {
-    navigate(`/${course_id}/modules`);
-};
+    // ================================
+    // HANDLE CANCEL
+    // ================================
+    const handleCancel = () => {
+        navigate(`/${course_id}/modules`);
+    };
 
-if (loading) return <p className="text-center py-5">{t("module.loading")}</p>; // 🔹 translated
+    if (loading) return <p className="text-center py-5">{t("module.loading")}</p>; // 🔹 translated
 
 
 
-// ================================
-// RENDER
-// ================================
-return (
-    <div style={styles.page}>
-        <div style={styles.card}>
-            <h3 style={styles.title}>
-                {isEditMode ? t("module.edit") : t("module.add")}
-            </h3>
+    // ================================
+    // RENDER
+    // ================================
+    return (
+        <div style={styles.page}>
+            <div style={styles.card}>
+                <h3 style={styles.title}>
+                    {isEditMode ? t("module.edit") : t("module.add")}
+                </h3>
 
-            <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}>
 
-                {/* Current Image Preview (Edit Mode Only) */}
-                {isEditMode && currentImageUrl && !imageFile && (
+                    {/* Current Image Preview (Edit Mode Only) */}
+                    {isEditMode && currentImageUrl && !imageFile && (
+                        <div className="mb-3">
+                            <label className="form-label">{t("module.current_cover")}</label>
+                            <img src={currentImageUrl} alt="Current Module Cover" style={styles.previewImage} className="mb-2" />
+                        </div>
+                    )}
+
+                    {/* Image Upload */}
                     <div className="mb-3">
-                        <label className="form-label">{t("module.current_cover")}</label>
-                        <img src={currentImageUrl} alt="Current Module Cover" style={styles.previewImage} className="mb-2" />
-                    </div>
-                )}
-
-                {/* Image Upload */}
-                <div className="mb-3">
-                    <label className="form-label">
-                        {isEditMode ? t("module.change_cover") : t("module.cover_photo")}
-                    </label>
-                    <input
-                        type="file"
-                        className="form-control"
-                        accept="image/*"
-                        onChange={(e) => setImageFile(e.target.files[0])}
-                    />
-                </div>
-
-                {/* Module Title */}
-                <div className="mb-3">
-                    <label className="form-label">{t("module.title")}</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        required
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        disabled={isSubmitting}
-                    />
-                </div>
-
-                {/* Module Description */}
-                <div className="mb-3">
-                    <label className="form-label">{t("module.description")}</label>
-                    <textarea
-                        className="form-control"
-                        rows="3"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        disabled={isSubmitting}
-                    ></textarea>
-                </div>
-
-                {/* Module Dates */}
-                <div className="row mb-3">
-                    <div className="col">
-                        <label htmlFor="start_date" className="form-label">{t("module.start_date")}</label>
+                        <label className="form-label">
+                            {isEditMode ? t("module.change_cover") : t("module.cover_photo")}
+                        </label>
                         <input
-                            id="start_date"
-                            type="date"
-                            className="form-control date-input"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            onClick={(e) => e.target.showPicker()}
+                            type="file"
+                            className="form-control"
+                            accept="image/*"
+                            onChange={(e) => setImageFile(e.target.files[0])}
+                        />
+                    </div>
+
+                    {/* Module Title */}
+                    <div className="mb-3">
+                        <label className="form-label">{t("module.title")}</label>
+                        <input
+                            type="text"
+                            className="form-control"
                             required
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                             disabled={isSubmitting}
                         />
                     </div>
 
-                    <div className="col">
-                        <label htmlFor="end_date" className="form-label">{t("module.end_date")}</label>
-                        <input
-                            id="end_date"
-                            type="date"
-                            className="form-control date-input"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            onClick={(e) => e.target.showPicker()}
-                            required
+                    {/* Module Description */}
+                    <div className="mb-3">
+                        <label className="form-label">{t("module.description")}</label>
+                        <textarea
+                            className="form-control"
+                            rows="3"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             disabled={isSubmitting}
-                        />
+                        ></textarea>
                     </div>
-                </div>
+
+                    {/* Module Dates */}
+                    <div className="row mb-3">
+                        <div className="col">
+                            <label htmlFor="start_date" className="form-label">{t("module.start_date")}</label>
+                            <input
+                                id="start_date"
+                                type="date"
+                                className="form-control date-input"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                onClick={(e) => e.target.showPicker()}
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+
+                        <div className="col">
+                            <label htmlFor="end_date" className="form-label">{t("module.end_date")}</label>
+                            <input
+                                id="end_date"
+                                type="date"
+                                className="form-control date-input"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                onClick={(e) => e.target.showPicker()}
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                    </div>
 
 
-                {/* Buttons */}
-                <div className="d-flex justify-content-end">
-                    {isEditMode && (
+                    {/* Buttons */}
+                    <div className="d-flex justify-content-end mt-2">
+                        {isEditMode && (
+                            <button
+                                type="button"
+                                className="btn btn-danger rounded-pill me-auto"
+                                style={styles.btn}
+                                onClick={handleDelete}
+                                disabled={isSubmitting}
+                            >
+                                Delete
+                            </button>
+                        )}
+
                         <button
                             type="button"
                             className="btn btn-danger rounded-pill me-auto"
@@ -264,39 +275,38 @@ return (
                             onClick={handleDelete}
                             disabled={isSubmitting}
                         >
-                              {t("module.delete")}
+                            {t("module.delete")}
                         </button>
-                    )}
 
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary rounded-pill me-2"
-                        style={styles.btn}
-                        onClick={handleCancel}
-                        disabled={isSubmitting}
-                    >
-                        {t("module.cancel")}
-                    </button>
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary rounded-pill me-2"
+                            style={styles.btn}
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                        >
+                            {t("module.cancel")}
+                        </button>
 
-                    <button
-                        type="submit"
-                        className="btn btn-primary rounded-pill"
-                        style={styles.btn}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting
-                            ? t("module.processing")
-                            : isEditMode
-                                ? t("module.update")
-                                : t("module.save")
-                        }
-                    </button>
-                </div>
+                        <button
+                            type="submit"
+                            className="btn btn-primary rounded-pill"
+                            style={styles.btn}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting
+                                ? t("module.processing")
+                                : isEditMode
+                                    ? t("module.update")
+                                    : t("module.save")
+                            }
+                        </button>
+                    </div>
 
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-);
+    );
 }
 
 const styles = {

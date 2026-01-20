@@ -163,31 +163,24 @@ export default function ModuleManagement() {
         <div className="container px-4 py-0">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <div className="title-back-row p-0 m-0">
-                    <button
-                        type="button"
-                        className="back-btn"
-                        onClick={() => {
-                            if (userRole === "Trainee") {
-                                navigate(`/trainee/courses`);
-                            } else {
-                                navigate(`/trainer/course-management`);
-                            }
-                        }}
-                        aria-label="Go back"
-                    >
-                        <ArrowLeft size={20} strokeWidth={2.2} />
-                    </button>
-
-                    <h3 className="mb-0">{courseTitle}</h3>
-                </div>
+                <h3 className="mb-0">{courseTitle}</h3>
+                {/* RIGHT */}
                 {userRole === "Trainer" && (
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
-                    >
-                        {t("module_management.add_new_module")} {/* ← TRANSLATED */}
-                    </button>
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={() => navigate(`/trainer/${course_id}/add-new-schedule`)}
+                        >
+                            Add Schedule
+                        </button>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add New Module
+                        </button>
+                    </div>
                 )}
             </div>
 

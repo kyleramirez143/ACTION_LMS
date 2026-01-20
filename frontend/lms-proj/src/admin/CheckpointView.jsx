@@ -109,66 +109,62 @@ const CheckpointView = () => {
 
 
   return (
-    <div className="checkpoint-container">
-      <div className="checkpoint-card">
-        <div className="checkpoint-header">
-          <h2 className="checkpoint-title">
-            {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : "Loading Batch Info..."}
-          </h2>
-        </div>
-
-
-        <div className="table-wrapper">
-          <table className="checkpoint-table">
-            <thead>
-              <tr>
-                <th>Trainee Name</th>
-                <th className="header-purple">BPI</th>
-                <th className="header-purple">SSS</th>
-                <th className="header-purple">TIN</th>
-                <th className="header-purple">Pag-IBIG</th>
-                <th className="header-purple">PhilHealth</th>
-                <th className="header-orange">UAF <br /> (IMS)</th>
-                <th className="header-orange">Telework <br /> (Office PC)</th>
-                <th className="header-orange">Telework <br /> (Personal PC)</th>
-                <th className="header-orange">Passport</th>
-                <th className="header-orange">IMS & <br /> UAF</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="11" className="text-center py-5">Loading...</td></tr>
-              ) : rows.length === 0 ? (
-                <tr><td colSpan="11" className="text-center py-5 text-muted">No trainees assigned to this batch.</td></tr>
-              ) : (
-                rows.map((user) => (
-                  <tr key={user.user_id}>
-                    <td className="name-col">
-                      {user.first_name} {user.last_name}
-                    </td>
-                    <td>{user.bpi_account_no || <span className="null-val">---</span>}</td>
-                    <td>{user.sss_no || <span className="null-val">---</span>}</td>
-                    <td>{user.tin_no || <span className="null-val">---</span>}</td>
-                    <td>{user.pagibig_no || <span className="null-val">---</span>}</td>
-                    <td>{user.philhealth_no || <span className="null-val">---</span>}</td>
-                    <td className="status-cell"><StatusIcon value={user.uaf_ims} /></td>
-                    <td className="status-cell"><StatusIcon value={user.office_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.personal_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.passport_ok} /></td>
-                    <td className="status-cell"><StatusIcon value={user.imf_awareness_ok} /></td>
-                    <td>
-                      <button className="edit-btn-action" onClick={() => openEditModal(user)}>
-                        <FaEdit />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+    <div className="user-role-card">
+      {/* Table */}
+      <div className="checkpoint-header">
+        <h3 className="section-title">
+          {batchName ? `${batchName} : Checkpoint` : "Trainee Onboarding Checkpoint"}
+        </h3>
+        <button className="add-employee-btn" onClick={openAddModal}>+ Trainee</button>
       </div>
+      <table className="checkpoint-table">
+        <thead>
+          <tr>
+            <th className="name-col">NAME</th>
+            <th className="header-green">BPI</th>
+            <th className="header-purple">SSS #</th>
+            <th className="header-purple">TIN #</th>
+            <th className="header-purple">PAGIBIG #</th>
+            <th className="header-purple">PHILHEALTH #</th>
+            <th className="header-orange">UAF (IMS)</th>
+            <th className="header-orange">Office PC</th>
+            <th className="header-orange">Personal PC</th>
+            <th className="header-yellow">Passport</th>
+            <th className="header-green">IMS Awareness</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan="12" className="text-center py-5 text-muted">
+                No trainees found for this batch.
+              </td>
+            </tr>
+          ) : (
+            rows.map((row, idx) => (
+              <tr key={idx}>
+                <td className="name-col">{row.name}</td>
+                <td className="payroll-cell">{row.bpi}</td>
+                <td className="hr-cell">{row.sss}</td>
+                <td className="hr-cell">{row.tin}</td>
+                <td className="hr-cell">{row.pagibig}</td>
+                <td className="hr-cell">{row.philhealth}</td>
+                <td className="telework-cell">{row.uaf}</td>
+                <td className="telework-cell">{row.officePC}</td>
+                <td className="telework-cell">{row.personalPC}</td>
+                <td className="passport-cell">{row.passport}</td>
+                <td className="ims-cell status-ok">{row.imsAwareness}</td>
+                <td>
+                  <button className="edit-btn" onClick={() => openModal(idx)}>
+                    <FaEdit />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
 
 
 {showModal && (

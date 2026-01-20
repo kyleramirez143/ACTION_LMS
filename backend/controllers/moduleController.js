@@ -1,12 +1,12 @@
 // /backend/controllers/moduleController.js
 
+import { Op } from "sequelize";
 import db from "../models/index.cjs";
-const { Module, Course, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
     try {
         const { title, description, course_id, start_date, end_date } = req.body;
-        const trainerId = req.user?.id;
+        const trainerIdc = req.user?.id;
 
         if (!title) return res.status(400).json({ error: "Module title is required" });
         if (!course_id) return res.status(400).json({ error: "Course ID is required" });
@@ -141,7 +141,7 @@ export const updateModuleVisibility = async (req, res) => {
             return res.status(404).json({ error: "Module not found" });
         }
 
-        res.json({ 
+        res.json({
             message: `Module visibility set to ${is_visible ? 'visible' : 'hidden'} successfully`,
             is_visible: is_visible // Return the new state
         });
@@ -150,3 +150,42 @@ export const updateModuleVisibility = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// GET /api/modules/batch/:batch_id
+export const getModulesByBatch = async (req, res) => {
+    try {
+        const { batch_id } = req.params;
+        const userRole = req.user?.roles?.[0];
+
+        // 1️⃣ Find courses under this batch
+        const courses = await db.Course.findAll({
+            where: { batch_id },
+            attributes: ["course_id"],
+            raw: true
+        });
+
+        const courseIds = courses.map(c => c.course_id);
+        if (courseIds.length === 0) return res.json([]);
+
+        // 2️⃣ Find modules under those courses
+        const whereClause = {
+            course_id: { [Op.in]: courseIds } // ✅ use Op.in here
+        };
+        if (userRole === "Trainee") whereClause.is_visible = true;
+
+        const modules = await db.Module.findAll({
+            where: whereClause,
+            include: [
+                { model: db.Lecture, as: "lectures" } // include lectures
+            ],
+            order: [["created_at", "ASC"]],
+        });
+
+        res.json(modules);
+    } catch (err) {
+        console.error("Get Modules By Batch Error:", err);
+        res.status(500).json({ error: "Failed to fetch modules", details: err.message });
+    }
+};
+
+

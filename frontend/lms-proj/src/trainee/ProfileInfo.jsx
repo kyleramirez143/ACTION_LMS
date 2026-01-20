@@ -133,10 +133,13 @@ export default function ProfileInfo() {
   if (!userProfile || !onboarding) return <div className="loading">Loading profile...</div>;
 
   return (
-    <div className="checkpoint-container">
-      {/* SECTION 1: User Information Card */}
-      {/* SECTION 1: User Information Card */}
-      <div className="checkpoint-card user-info-card">
+    <>
+      <div className="user-role-card" style={{
+        marginBottom: "0.5px",  // small space below the card
+        backgroundColor: "#fff" // optional: white background
+      }}>
+        {/* SECTION 1: User Information Card */}
+        {/* SECTION 1: User Information Card */}
         <div className="user-info-header">
           <div className="profile-picture">
             {userProfile.profile_picture ? (
@@ -150,9 +153,9 @@ export default function ProfileInfo() {
             )}
           </div>
 
-          <h2 className="user-name">
+          <h3 className="section-title">
             {userProfile.first_name} {userProfile.last_name}
-          </h2>
+          </h3>
 
           {/* Status Badge under the name */}
           <div className={`status-badge ${userProfile.is_active ? "active" : "inactive"}`}>
@@ -161,7 +164,13 @@ export default function ProfileInfo() {
         </div>
 
         <div className="user-info-box">
-          <h4 className="user-info-title">User Information</h4>
+          <h5
+            className="section-title"
+            style={{ borderBottom: "1px solid #eee", paddingBottom: "0.25rem" }}
+          >
+            USER INFORMATION
+          </h5>
+
 
           <div className="user-info-grid">
             <div>
@@ -188,80 +197,82 @@ export default function ProfileInfo() {
       </div>
 
       {/* SECTION 2: Onboarding Requirements */}
-      {userProfile.role === "Trainee" && (
-        <div className="checkpoint-card">
-          <div className="card-header-flex">
-            <h3 className="card-title">Onboarding Requirements</h3>
-            {!isEditing && hasData && (
-              <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit</button>
-            )}
-          </div>
-
-          {!hasData && !isEditing ? (
-            <div className="empty-state">
-              <p>No onboarding details found.</p>
-              <button className="btn-add" onClick={() => setIsEditing(true)}>+ Add Details</button>
-            </div>
-          ) : (
-            <div className="onboarding-table-wrapper">
-              <table className="onboarding-table">
-                <thead>
-                  <tr><th>Requirement</th><th>Details</th></tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: "BPI Account", field: "bpi_account_no" },
-                    { label: "SSS Number", field: "sss_no" },
-                    { label: "TIN Number", field: "tin_no" },
-                    { label: "Pag-IBIG Number", field: "pagibig_no" },
-                    { label: "PhilHealth Number", field: "philhealth_no" },
-                  ].map((item) => (
-                    <tr key={item.field}>
-                      <td>{item.label}</td>
-                      <td>
-                        {isEditing ? (
-                          <input type="text" className="table-input" value={onboarding[item.field] || ""} onChange={(e) => handleChange(item.field, e.target.value)} />
-                        ) : (
-                          onboarding[item.field] || "---"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-
-                  {[
-                    { label: "UAF (IMS) Status", field: "uaf_ims", yes: "Completed", no: "Not Completed" },
-                    { label: "Office PC Telework", field: "office_pc_telework", yes: "Approved", no: "Pending" },
-                    { label: "Personal PC Telework", field: "personal_pc_telework", yes: "Approved", no: "Pending" },
-                    { label: "Passport Status", field: "passport_ok", yes: "Ok", no: "None" },
-                    { label: "IMF Awareness Status", field: "imf_awareness_ok", yes: "Completed", no: "Not Completed" },
-                  ].map((item) => (
-                    <tr key={item.field}>
-                      <td>{item.label}</td>
-                      <td>
-                        {isEditing ? (
-                          <select className="table-select" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
-                            <option value="false">{item.no}</option>
-                            <option value="true">{item.yes}</option>
-                          </select>
-                        ) : (
-                          onboarding[item.field] ? "✔" : "X"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {isEditing && (
-                <div className="table-actions">
-                  <button className="btn-save" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</button>
-                  <button className="btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
-                </div>
+      {
+        userProfile.role === "Trainee" && (
+          <div className="user-role-card">
+            <div className="card-header-flex">
+              <h3 className="section-title">Onboarding Requirements</h3>
+              {!isEditing && hasData && (
+                <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit</button>
               )}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+
+            {!hasData && !isEditing ? (
+              <div className="empty-state">
+                <p>No onboarding details found.</p>
+                <button className="btn-add" onClick={() => setIsEditing(true)}>+ Add Details</button>
+              </div>
+            ) : (
+              <div className="onboarding-table-wrapper">
+                <table className="onboarding-table">
+                  <thead>
+                    <tr><th>Requirement</th><th>Details</th></tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { label: "BPI Account", field: "bpi_account_no" },
+                      { label: "SSS Number", field: "sss_no" },
+                      { label: "TIN Number", field: "tin_no" },
+                      { label: "Pag-IBIG Number", field: "pagibig_no" },
+                      { label: "PhilHealth Number", field: "philhealth_no" },
+                    ].map((item) => (
+                      <tr key={item.field}>
+                        <td>{item.label}</td>
+                        <td>
+                          {isEditing ? (
+                            <input type="text" className="table-input" value={onboarding[item.field] || ""} onChange={(e) => handleChange(item.field, e.target.value)} />
+                          ) : (
+                            onboarding[item.field] || "---"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {[
+                      { label: "UAF (IMS) Status", field: "uaf_ims", yes: "Completed", no: "Not Completed" },
+                      { label: "Office PC Telework", field: "office_pc_telework", yes: "Approved", no: "Pending" },
+                      { label: "Personal PC Telework", field: "personal_pc_telework", yes: "Approved", no: "Pending" },
+                      { label: "Passport Status", field: "passport_ok", yes: "Ok", no: "None" },
+                      { label: "IMF Awareness Status", field: "imf_awareness_ok", yes: "Completed", no: "Not Completed" },
+                    ].map((item) => (
+                      <tr key={item.field}>
+                        <td>{item.label}</td>
+                        <td>
+                          {isEditing ? (
+                            <select className="table-select" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
+                              <option value="false">{item.no}</option>
+                              <option value="true">{item.yes}</option>
+                            </select>
+                          ) : (
+                            onboarding[item.field] ? "✔" : "X"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {isEditing && (
+                  <div className="table-actions">
+                    <button className="btn-save" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</button>
+                    <button className="btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+    </>
   );
 }
+
