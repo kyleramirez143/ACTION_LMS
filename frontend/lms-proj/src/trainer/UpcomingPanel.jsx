@@ -46,7 +46,7 @@ export default function UpcomingPanel({ moduleId }) {
     return (
         <div className="upcoming-wrapper">
             {loading ? (
-                <p>Loading upcoming quizzes...</p>
+                <p>No upcoming quizzes</p>
             ) : events.length === 0 ? (
                 <p className="text-secondary">No upcoming quizzes.</p>
             ) : (

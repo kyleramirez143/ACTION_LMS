@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./QuizPreview.css";
 
 const QuizPreview = () => {
+    const { t } = useTranslation();
     const { assessment_id } = useParams();
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -16,7 +18,6 @@ const QuizPreview = () => {
         ? new Date(quiz.due_date) < new Date()
         : false;
 
-    // Fetch Quiz Details
     useEffect(() => {
         const fetchQuiz = async () => {
             try {
@@ -30,11 +31,10 @@ const QuizPreview = () => {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.error || "Failed to load quiz");
+                    throw new Error(data.error || t("quiz.fetch_failed"));
                 }
 
                 setQuiz(data.quiz);
-                console.log(data.quiz);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -43,15 +43,14 @@ const QuizPreview = () => {
         };
 
         if (assessment_id) fetchQuiz();
-    }, [assessment_id, token]);
+    }, [assessment_id, token, t]);
 
-    if (loading) return <p className="quiz-loading">Loading quiz...</p>;
+    if (loading) return <p className="quiz-loading">{t("quiz.loading")}</p>;
     if (error) return <p className="quiz-error">{error}</p>;
-    if (!quiz) return <p className="quiz-error">Quiz not found.</p>;
+    if (!quiz) return <p className="quiz-error">{t("quiz.not_found")}</p>;
 
     return (
         <div className="quiz-preview-page">
-            {/* Header */}
             <div className="card shadow-sm p-4">
                 <div className="quiz-preview-header d-flex align-items-center mb-4">
                     <FaArrowLeft
@@ -64,51 +63,52 @@ const QuizPreview = () => {
 
                 <hr />
 
-                {/* Quiz details */}
                 <div className="quiz-details mb-2">
                     <div className="row">
                         <div className="col-6">
-                            <strong>Due Date:</strong>
-                            <p className="text-danger">{quiz.due_date ? new Date(quiz.due_date).toLocaleString() : "No due date set"}</p>
+                            <strong>{t("quiz.due_date")}:</strong>
+                            <p className="text-danger">
+                                {quiz.due_date ? new Date(quiz.due_date).toLocaleString() : t("quiz.no_due_date")}
+                            </p>
                         </div>
                         <div className="col-6">
-                            <strong>Points:</strong>
-                            <p className="text-danger">{quiz.totalPoints || "Not specified"}</p>
+                            <strong>{t("quiz.points")}:</strong>
+                            <p className="text-danger">{quiz.totalPoints || t("quiz.points_not_specified")}</p>
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-6">
-                            <strong>Questions:</strong>
-                            <p className="text-danger">{(quiz.questions || []).length} Questions</p>
+                            <strong>{t("Questions")}:</strong>
+                            <p className="text-danger">{(quiz.questions || []).length} {t("Questions")}</p>
                         </div>
                         <div className="col-6">
-                            <strong>Time Limit:</strong>
-                            <p className="text-danger">{quiz.time_limit ? `${quiz.time_limit} minutes` : "No time limit"}</p>
+                            <strong>{t("quiz.time_limit")}:</strong>
+                            <p className="text-danger">
+                                {quiz.time_limit ? `${quiz.time_limit} ${t("Minutes")}` : t("quiz.no_time_limit")}
+                            </p>
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-12">
-                            <strong>Attempts: </strong>
+                            <strong>{t("Attempts")}:</strong>
                             <p className={
                                 quiz.attempts_taken >= quiz.attempts_allowed || isExpired
                                     ? "text-danger fw-bold"
                                     : "text-success"
                             }>
-                                {quiz.attempts_taken} / {quiz.attempts_allowed} attempts used
+                                {quiz.attempts_taken} / {quiz.attempts_allowed} {t("Attempts used")}
                             </p>
                         </div>
                     </div>
-
                 </div>
 
                 <hr />
 
-                {/* Quiz Instructions */}
                 <div className="quiz-preview-center">
-                    <h3>Instructions</h3>
+                    <h3>{t("quiz.instructions")}</h3>
                     {isExpired && (
                         <div className="alert alert-danger mt-3">
-                            This quiz is already past its due date and can no longer be taken.
+                            {t("quiz.expired_alert")}
                         </div>
                     )}
                     {quiz.description ? (
@@ -118,37 +118,32 @@ const QuizPreview = () => {
                             ))}
                         </ol>
                     ) : (
-                        <p>No instructions provided.</p>
+                        <p>{t("Instructions")}</p>
                     )}
 
-                    {quiz.attempts_taken >= quiz.attempts_allowed ? (
+                    {quiz.attempts_taken >= quiz.attempts_allowed && (
                         <div className="alert alert-danger mt-4">
-                            You have reached the maximum number of attempts allowed for this quiz.
+                            {t("quiz.max_attempts_reached")}
                         </div>
-                    ) : null}
+                    )}
 
                     <button
                         className="btn btn-primary mt-4 w-100"
                         disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
                         onClick={() => {
                             if (quiz.screen_monitoring) {
-                                navigate(`/quiz/${quiz.assessment_id}/permission`);
-                                console.log("Permission: ", quiz.screen_monitoring);
+                                navigate(`/quiz/${quiz.assessment_id}/permission`, { state: { screenMonitoring: true } });
                             } else {
-                                navigate(`/quiz/${quiz.assessment_id}/start`, {
-                                    state: { screenMonitoring: false }
-                                });
+                                navigate(`/quiz/${quiz.assessment_id}/start`, { state: { screenMonitoring: false } });
                             }
                         }}
                     >
-                        {console.log(quiz.screen_monitoring)}
                         {isExpired
-                            ? "Quiz Expired"
+                            ? t("quiz.expired")
                             : quiz.attempts_taken >= quiz.attempts_allowed
-                                ? "Limit Reached"
-                                : "Take Quiz"}
+                                ? t("Quiz Limit Reached")
+                                : t("Take quiz")}
                     </button>
-
                 </div>
             </div>
         </div>
