@@ -408,7 +408,7 @@ const ReviewPublish = () => {
                           value={v}
                           onChange={(e) => handleOptionChange(index, k, e.target.value)}
                         />
-                        <button className="btn btn-danger btn-sm ms-2" onClick={() => handleRemoveChoice(index, k)}>Remove</button>
+                        <button className="btn btn-danger btn-sm ms-2" onClick={() => handleRemoveChoice(index, k)}>{t("common.remove")}</button>
                       </>
                     ) : (
                       <span className="ms-2">{v}</span>
@@ -418,7 +418,7 @@ const ReviewPublish = () => {
               </ul>
               {isEditing && (
                 <button className="btn btn-outline-success btn-sm mb-2" onClick={() => handleAddChoice(index)}>
-                  + Add Choice
+                  + {t("quiz.add_choice")}
                 </button>
               )}
             </>

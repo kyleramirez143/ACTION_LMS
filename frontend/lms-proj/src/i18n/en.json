@@ -345,7 +345,8 @@
 		"attempt_limit_reached": "You have reached the maximum number of attempts allowed for this quiz.",
 		"take_quiz": "Take Quiz",
 		"expired": "Quiz Expired",
-		"limit_reached": "Limit Reached"
+		"limit_reached": "Limit Reached",
+        "add_choice" : "Add Choice"
     },
     "proctor": {
         "quiz_result": "Quiz Result",
@@ -420,6 +421,9 @@
         "Friday": "Fri"
     },
     "upcoming": {
+        "upcoming": "Upcoming",
+        "loading": "Loading upcoming quizzes...",
+        "no_upcoming": "No upcoming quizzes",   
         "sample_date": "Tuesday, 29 June 2021",
         "events": {
             "vocab_quiz": "L49 Vocabulary Quiz",

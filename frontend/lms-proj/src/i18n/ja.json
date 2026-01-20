@@ -345,7 +345,8 @@
         "attempt_limit_reached": "受験回数の上限に達しました。",
         "take_quiz": "テストを受ける",
         "expired": "期限切れ",
-        "limit_reached": "上限到達"
+        "limit_reached": "上限到達",
+        "add_choice": "選択肢を追加"
     },
     "proctor": {
         "quiz_result": "クイズ結果",
@@ -420,6 +421,9 @@
         "Friday": "金"
     },
     "upcoming": {
+        "upcoming": "今後",
+        "loading": "次のクイズを読み込み中...",
+        "no_upcoming": "今後の小テストはありません",
         "sample_date": "2021年6月29日（火）",
         "events": {
             "vocab_quiz": "L49 単語クイズ",

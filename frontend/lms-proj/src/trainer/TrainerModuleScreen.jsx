@@ -136,7 +136,7 @@ export default function TrainerModuleScreen() {
       </div>
 
       <div className="module-right">
-        <div className="upcoming-title">Upcoming</div>
+        <div className="upcoming-title">{t("upcoming.upcoming")}</div>
         <UpcomingPanel />
       </div>
     </div>
