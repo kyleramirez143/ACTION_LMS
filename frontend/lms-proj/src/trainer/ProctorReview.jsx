@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios'; // Your Axios instance
 import { FaPlay, FaUser, FaClock } from 'react-icons/fa';
-import { Modal } from 'bootstrap';
-
 import { useTranslation } from 'react-i18next';
 
 const ProctorReview = () => {
@@ -61,21 +59,6 @@ const ProctorReview = () => {
         const data = await res.json();
         setAttemptHistory(data);
         setHistoryUser(name);
-    };
-
-    // Open Attempt History Modal
-    const showAttemptHistoryModal = () => {
-        const modalEl = document.getElementById('attemptHistoryModal');
-        const modal = new Modal(modalEl);
-        modal.show();
-    };
-
-    // Open Recording Modal
-    const showRecordingModal = (videoUrl) => {
-        setSelectedVideo(videoUrl);
-        const modalEl = document.getElementById('recordingModal');
-        const modal = new Modal(modalEl);
-        modal.show();
     };
 
     return (
@@ -222,7 +205,7 @@ const ProctorReview = () => {
                                                 {item.recording_url ? (
                                                     <button
                                                         className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => showRecordingModal(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
+                                                        onClick={() => setSelectedVideo(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
                                                     >
                                                         <FaPlay className="me-1" /> {t("proctor.view")}
                                                     </button>
@@ -233,12 +216,12 @@ const ProctorReview = () => {
                                             </td>
                                             <td>
                                                 {/* {item.user?.id && ( */}
-                                                    <button
-                                                        className="btn btn-sm btn-outline-secondary me-2"
-                                                        onClick={() => openHistory(item.user.id, item.user.first_name)}
-                                                    >
-                                                        Attempts
-                                                    </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary me-2"
+                                                    onClick={() => openHistory(item.user.id, item.user.first_name)}
+                                                >
+                                                    {t("proctor.attempts")}
+                                                </button>
                                                 {/* )}  */}
                                             </td>
                                         </tr>
@@ -247,6 +230,7 @@ const ProctorReview = () => {
                             </table>
                         </div>
                     </div>
+
 
                     {/* Summary part */}
                     <div className="col-4">
@@ -263,7 +247,7 @@ const ProctorReview = () => {
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5>{historyUser}'s Attempt History</h5>
+                                <h5>{historyUser}{t("proctor.attempt_history")}</h5>
                                 <button className="btn-close" onClick={() => setAttemptHistory([])} />
                             </div>
                             <div className="modal-body">
@@ -294,11 +278,10 @@ const ProctorReview = () => {
                                     </tbody>
                                 </table>
                             </div>
-
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Video Player Modal */}
             {selectedVideo && (
@@ -306,7 +289,7 @@ const ProctorReview = () => {
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content border-0">
                             <div className="modal-header">
-                                <h5 className="modal-title">Screen Recording Playback</h5>
+                                <h5 className="modal-title">{t("proctor.screen_recording_playback")}</h5>
                                 <button className="btn-close" onClick={() => setSelectedVideo(null)}></button>
                             </div>
                             <div className="modal-body p-0 bg-dark text-center">

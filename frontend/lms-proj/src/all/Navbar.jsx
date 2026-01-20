@@ -13,9 +13,8 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef(null);
-  const { t, i18n } = useTranslation(); // i18n hook
+  const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
-
 
   const [notifications] = useState([
     { id: 1, titleKey: "notif.1_title", typeKey: "notif.1_type", date: "Dec 19, 2025 · 3:00 PM", icon: "bi-exclamation-circle-fill text-warning" },
@@ -25,6 +24,23 @@ const Navbar = () => {
 
   const { hasRole, logout, loading } = useAuth();
   const navigate = useNavigate();
+
+  // ================= LANGUAGE BUTTON =================
+
+  const isJapanese = lang === "ja";
+
+  const toggleLanguage = () => {
+    const newLang = isJapanese ? "en" : "ja";
+    i18n.changeLanguage(newLang);
+    setLang(newLang); // updates button text immediately
+    localStorage.setItem("lang", newLang);
+  };
+
+  // Ensure language updates if user reloads
+  useEffect(() => {
+    setLang(i18n.language);
+  }, [i18n.language]);
+
 
   // ================= LOGIC =================
   const logoutUser = () => {
@@ -52,10 +68,6 @@ const Navbar = () => {
     if (!link.requiredRoles || link.requiredRoles.length === 0) return true;
     return hasRole(link.requiredRoles);
   });
-
-  useEffect(() => {
-    setLang(i18n.language); // triggers Navbar re-render when language changes
-  }, [i18n.language]);
 
   // Close notifications if clicked outside
   useEffect(() => {
@@ -99,16 +111,10 @@ const Navbar = () => {
     </div>
   );
 
-  if (loading) return null; // early return after hooks
+  if (loading) return null;
 
-  // Profile image placeholder (replace with userProfile?.profile_picture)
   const profileImageUrl = null;
 
-  // Helper to translate navConfig names
-  // const translateKey = (key, fallback) => {
-  //   if (!key) return fallback;
-  //   return t(key, { defaultValue: fallback });
-  // }; 
   return (
     <nav className="navbar-wrapper">
       {/* ================= TOP NAVBAR ================= */}
@@ -117,6 +123,14 @@ const Navbar = () => {
 
         {/* MOBILE ICONS */}
         <div className="d-lg-none d-flex align-items-center gap-3">
+          {/* 🌐 LANGUAGE BUTTON (MOBILE) */}
+          <button
+            className="lang-btn"
+            onClick={toggleLanguage}
+          >
+            {isJapanese ? "日本語" : "English"}
+          </button>
+
           <div className="position-relative" ref={notifRef}>
             <i
               className="bi bi-bell bell-icon"
@@ -142,20 +156,15 @@ const Navbar = () => {
                   className="nav-link fw-semibold text-dark"
                 >
                   {t(link.translationKey)}
-
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="shadow">
                   {link.children.map((child) => (
                     <Dropdown.Item
                       as={Link}
-                      key={child.path} // optional, forces re-render
+                      key={child.path}
                       to={child.path}
-                      className={({ isActive }) =>
-                        isActive ? "text-primary fw-semibold" : ""
-                      }
                     >
                       {t(child.translationKey)}
-
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
@@ -173,6 +182,15 @@ const Navbar = () => {
             )
           )}
 
+          {/* 🌐 LANGUAGE BUTTON (DESKTOP) */}
+          <button
+            className={`lang-btn ${isJapanese ? "active" : ""}`}
+            onClick={toggleLanguage}
+          >
+            {isJapanese ? "日本語" : "English"}
+          </button>
+
+
           {/* NOTIFICATIONS */}
           <div className="position-relative" ref={notifRef}>
             <i
@@ -184,19 +202,14 @@ const Navbar = () => {
 
           {/* PROFILE DROPDOWN */}
           <div className="d-flex align-items-center gap-2">
-            <div className="trainee-circle">
-              {profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <div className="bg-secondary text-white d-flex align-items-center justify-content-center w-100 h-100">
-                  <i className="bi bi-person"></i>
-                </div>
-              )}
-            </div>
+            {profileImageUrl && (
+              <img
+                src={profileImageUrl}
+                alt="Profile"
+                className="trainee-image"
+              />
+            )}
+
 
             <Dropdown align="end">
               <Dropdown.Toggle
@@ -210,6 +223,7 @@ const Navbar = () => {
                 </Dropdown.Item>
 
                 <Dropdown.Divider />
+
                 <Dropdown.Item as={Link} to="/admin/profile">
                   {t("navbar.account_settings")}
                 </Dropdown.Item>
@@ -218,10 +232,10 @@ const Navbar = () => {
                 </Dropdown.Item>
 
                 <Dropdown.Divider />
+
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   {t("navbar.help_support")}
                 </Dropdown.Item>
-
 
                 <Dropdown.Item
                   as={Link}
@@ -239,6 +253,16 @@ const Navbar = () => {
 
       {/* ================= MOBILE SIDE PANEL ================= */}
       <div className={`side-panel ${menuOpen ? "open" : ""}`}>
+        {/* 🌐 LANGUAGE BUTTON (SIDE PANEL) */}
+        <button
+          className={`lang-btn ${isJapanese ? "active" : ""}`}
+          onClick={toggleLanguage}
+        >
+          {isJapanese ? "日本語" : "English"}
+        </button>
+
+
+
         {visibleLinks.map((link) => (
           <NavLink
             key={link.path}
@@ -253,7 +277,7 @@ const Navbar = () => {
         <hr />
 
         <Link to={profilePath} onClick={() => setMenuOpen(false)}>
-          Profile
+          {t("navbar.profile")}
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
           {t("navbar.account_settings")}
