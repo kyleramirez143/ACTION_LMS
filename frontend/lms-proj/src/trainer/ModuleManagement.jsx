@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { ArrowLeft } from "lucide-react";
+
 import defaultImage from "../image/logo.png";
 import { useTranslation } from "react-i18next"; // <-- import i18n
+import moduleImage from "../image/module.svg"; // <-- added
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map(module => ({
@@ -105,7 +108,6 @@ export default function ModuleManagement() {
 
     const handleToggleVisibility = async (e, moduleId, isVisible) => {
         e.stopPropagation();
-        // Optimistic UI update
         setModulesData(prev =>
             prev.map(m => m.module_id === moduleId ? { ...m, is_visible: isVisible } : m)
         );
@@ -121,7 +123,7 @@ export default function ModuleManagement() {
             });
             if (!res.ok) {
                 const error = await res.json();
-                alert(`${t("module_management.update_failed")}: ${error.error || t("module_management.server_error")}`); // ← TRANSLATED
+                alert(`Failed to update module: ${error.error || "Server error"}`);
                 // Rollback
                 setModulesData(prev =>
                     prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
@@ -129,7 +131,7 @@ export default function ModuleManagement() {
             }
         } catch (err) {
             console.error(err);
-            alert(t("module_management.network_error")); // ← TRANSLATED
+            alert("Network error. Visibility change failed.");
             // Rollback
             setModulesData(prev =>
                 prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
@@ -158,10 +160,13 @@ export default function ModuleManagement() {
     if (loading) return <p className="text-center py-5">{t("module_management.loading_modules")}</p>; // ← TRANSLATED
 
     return (
-        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+        <div className="container px-4 py-0">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">{courseTitle}</h3>
+                <div className="title-back-row p-0 m-0">
+                    
+                    <h3 className="mb-0">{courseTitle}</h3>
+                </div>
                 {userRole === "Trainer" && (
                     <button
                         className="btn btn-primary"
@@ -174,7 +179,7 @@ export default function ModuleManagement() {
 
             {/* Empty */}
             {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">{t("module_management.no_modules_found")}</p> // ← TRANSLATED
+                <p className="text-center text-muted py-4">No modules found.</p>
             ) : (
                 <>
                     {/* Grid */}
@@ -186,8 +191,7 @@ export default function ModuleManagement() {
                                     {/* STATUS BADGE */}
                                     {userRole === "Trainer" && (
                                         <span
-                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'
-                                                }`}
+                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'}`}
                                             style={{ fontSize: '0.75rem', zIndex: 10 }}
                                             onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >

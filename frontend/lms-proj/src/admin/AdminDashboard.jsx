@@ -69,11 +69,29 @@ function AdminDashboard() {
   // ============================
   // HEADER COMPONENT
   // ============================
-  const DashboardHeader = () => (
+const DashboardHeader = () => {
+  // Get current date & time in GMT+8
+  const now = new Date();
+  const timezoneOptions = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: 'numeric', 
+    minute: 'numeric', 
+    second: 'numeric', 
+    hour12: true, 
+    timeZone: 'Asia/Singapore' // GMT+8
+  };
+  const formattedTime = now.toLocaleString('en-US', timezoneOptions);
+
+  return (
     <div className="row mb-4">
       <h2 className="fw-bold">{t("dashboard.admin_lms_dashboard")}</h2>
     </div>
   );
+};
+
 
   // ============================
   // USERS CARD

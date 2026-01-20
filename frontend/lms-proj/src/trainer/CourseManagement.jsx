@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import { useTranslation } from "react-i18next"; // <-- import i18n
+import logo from "../image/courses.svg"; // <-- imported SVG
 
 function Course() {
     const { t } = useTranslation(); // <-- translation hook
@@ -12,37 +13,52 @@ function Course() {
     const [courses, setCourses] = useState([]);
     const token = localStorage.getItem("authToken");
 
+    // =========================
     // AUTH CHECK
+    // =========================
     useEffect(() => {
-        if (!token) return navigate("/login");
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         try {
             const decoded = jwtDecode(token);
             const userRoles = decoded.roles || [];
-            if (!userRoles.includes("Trainer")) navigate("/access-denied");
+
+            if (!userRoles.includes("Trainer")) {
+                navigate("/access-denied");
+            }
         } catch (err) {
             localStorage.removeItem("authToken");
             navigate("/login");
         }
     }, [token, navigate]);
 
+    // =========================
+    // FETCH COURSES
+    // =========================
     useEffect(() => {
+        if (!token) return;
+
         const fetchCourses = async () => {
             try {
                 const res = await fetch("/api/courses/trainer", {
                     headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
+
                 const data = await res.json();
                 setCourses(data);
             } catch (err) {
-                console.error(err);
+                console.error("Failed to fetch courses:", err);
             }
         };
+
         fetchCourses();
-    }, []);
+    }, [token]);
 
     return (
         <>
@@ -52,7 +68,7 @@ function Course() {
                 </div>
 
                 {courses.length === 0 ? (
-                    <p className="text-center text-muted py-4">{t("course_management.no_courses_found")}</p>
+                    <p className="text-center text-muted py-4">No courses found.</p>
                 ) : (
                     <>
                         <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
@@ -92,8 +108,7 @@ function Course() {
                                                 .join(", ")
                                             : "No trainers assigned"}
                                     </p> */}
-                                            <p className="card-text text-muted mb-0">{course.description || t("course_management.no_description")}
-                                            </p>
+                                            <p className="card-text text-muted mb-0">{course.description}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -101,7 +116,7 @@ function Course() {
                         </div>
                     </>
                 )}
-            </div >
+            </div>
         </>
     );
 }

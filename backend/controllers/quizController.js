@@ -1,4 +1,4 @@
-import { where } from 'sequelize';
+import { where, Op } from 'sequelize';
 import pkg from '../models/index.cjs';
 const {
     Course,
@@ -9,12 +9,14 @@ const {
     AssessmentResponse,
     AssessmentAttempt,
     Grade,
+    LectureAssessment,
     sequelize
 } = pkg;
 
 // Fetch quiz + questions
 export async function getQuiz(req, res) {
     const { assessment_id } = req.params;
+
     const userRole = req.user?.roles?.[0];
     const user_id = req.user.id;
 
@@ -25,7 +27,16 @@ export async function getQuiz(req, res) {
                 {
                     model: AssessmentQuestion,
                     as: "questions",
-                    attributes: ["question_id", "question_text", "explanations", "options", "correct_answer", "points", "section"]
+                    attributes: [
+                        "question_id",
+                        "question_text",
+                        "explanations",
+                        "options",
+                        "correct_answer",
+                        "points",
+                        "section"
+                    ],
+                    order: [['question_id', 'ASC']]
                 }
             ]
         });
@@ -384,15 +395,17 @@ export async function getQuizReview(req, res) {
                     model: AssessmentQuestion,
                     as: 'question',
                     attributes: [
+                        'question_id',
                         'question_text',
                         'options',
                         'correct_answer',
                         'explanations',
                         'points'
-                    ]
+                    ],
+                    // order: [['question_id', 'ASC']]
                 }
             ],
-            order: [['created_at', 'ASC']]
+            order: [['response_id', 'ASC']]
         });
 
         const formatted = responses.map(r => ({
@@ -412,3 +425,62 @@ export async function getQuizReview(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
+export async function getUpcoming(req, res) {
+    try {
+        const { module_id } = req.params;
+
+        if (!module_id) {
+            return res.status(400).json({ error: "module_id is required" });
+        }
+
+        const today = new Date();
+
+        const upcomingQuizzes = await Assessment.findAll({
+            where: {
+                due_date: { [Op.gt]: today },
+            },
+            attributes: ["assessment_id", "title", "due_date"],
+            include: [
+                {
+                    model: Lecture,
+                    as: "lectures", // 🔥 belongsToMany alias
+                    required: true,
+                    attributes: ["lecture_id", "title"],
+                    through: { attributes: [] },
+                    include: [
+                        {
+                            model: Module,
+                            as: "module",
+                            required: true,
+                            attributes: ["module_id", "title"],
+                            where: { module_id }
+                        }
+                    ]
+                }
+            ],
+            order: [["due_date", "ASC"]],
+            distinct: true
+        });
+
+        const flattened = upcomingQuizzes.flatMap(q =>
+            q.lectures.map(l => ({
+                assessment_id: q.assessment_id,
+                assessment_title: q.title,
+                lecture_title: l.title,
+                module_title: l.module.title,
+                due_date: q.due_date
+            }))
+        );
+
+        console.log(flattened);
+
+        return res.json(flattened);
+
+    } catch (err) {
+        console.log(err);   
+        console.error("getUpcoming error:", err);
+        return res.status(500).json({ error: "Failed to fetch upcoming assessments" });
+    }
+}
+

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import { useTranslation } from "react-i18next"; // <-- import i18n
+import logo from "../image/courses.svg"; // <-- imported SVG
 
 function TraineeCourseManagement() {
     const { t } = useTranslation(); // <-- translation hook
@@ -46,13 +47,24 @@ function TraineeCourseManagement() {
 
     return (
         <>
-            <div className="container py-4" style={{ maxWidth: "1400px" }}>
+            <div className="container px-4 py-0">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
                 </div>
 
                 {courses.length === 0 ? (
-                    <p className="text-center text-muted py-4">{t("course_management.no_courses_found")}</p>
+                    <div className="text-center text-muted py-5">
+                        <img
+                            src={logo} // <-- use imported SVG variable
+                            alt="No courses"
+                            className="img-fluid mb-3"
+                            style={{ maxWidth: "200px" }}
+                        />
+                        <h3 className="mb-0">{t("course_management.no_courses_yet")}</h3>
+                        <p className="text-muted mb-0">
+                            {t("course_management.appear")}
+                        </p>
+                    </div>
                 ) : (
                     <>
                         <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
+import { ArrowLeft } from "lucide-react";
 
 export default function TrainerModuleScreen() {
   const { t } = useTranslation();
@@ -95,10 +96,13 @@ export default function TrainerModuleScreen() {
   };
 
   return (
-    <div className="module-container">
+    <div className="module-container px-4 py-0">
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="module-title">{moduleTitle}</div>
+          <div className="title-back-row p-0 m-0">
+            
+            <h3 className="mb-0">{moduleTitle}</h3>
+          </div>
           {userRole === "Trainer" && (
             <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
               {t("lecture.add")}
@@ -124,7 +128,7 @@ export default function TrainerModuleScreen() {
       </div>
 
       <div className="module-right">
-        <div className="upcoming-title">{t("module.upcoming")}</div>
+        <div className="upcoming-title">Upcoming</div>
         <UpcomingPanel />
       </div>
     </div>

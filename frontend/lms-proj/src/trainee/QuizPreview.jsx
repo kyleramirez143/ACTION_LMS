@@ -35,13 +35,14 @@ const QuizPreview = () => {
 					throw new Error(data.error || "Failed to load quiz");
 				}
 
-				setQuiz(data.quiz);
-			} catch (err) {
-				setError(err.message);
-			} finally {
-				setLoading(false);
-			}
-		};
+                setQuiz(data.quiz);
+                console.log(data.quiz);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
 		if (assessment_id) fetchQuiz();
 	}, [assessment_id, token]);
@@ -141,21 +142,32 @@ const QuizPreview = () => {
 						</div>
 					) : null}
 
-					<button
-						className="btn btn-primary mt-4 w-100"
-						disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
-						onClick={() => navigate(`/quiz/${quiz.assessment_id}/permission`)}
-					>
-						{isExpired
-							? t("quiz.expired")
-							: quiz.attempts_taken >= quiz.attempts_allowed
-							? t("quiz.limit_reached")
-							: t("quiz.take_quiz")}
-					</button>
-				</div>
-			</div>
-		</div>
-	);
+                    <button
+                        className="btn btn-primary mt-4 w-100"
+                        disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
+                        onClick={() => {
+                            if (quiz.screen_monitoring) {
+                                navigate(`/quiz/${quiz.assessment_id}/permission`);
+                                console.log("Permission: ", quiz.screen_monitoring);
+                            } else {
+                                navigate(`/quiz/${quiz.assessment_id}/start`, {
+                                    state: { screenMonitoring: false }
+                                });
+                            }
+                        }}
+                    >
+                        {console.log(quiz.screen_monitoring)}
+                        {isExpired
+                            ?t("quiz.expired")
+                            : quiz.attempts_taken >= quiz.attempts_allowed
+                                ? t("quiz.limit_reached")
+                                : t("quiz.take_quiz")}
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default QuizPreview;

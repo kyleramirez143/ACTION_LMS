@@ -1,23 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import API from "../api/axios";
-import {
-	SubmitConfirmationModal,
-	QuizResultModal,
-	TimeUpModal,
-} from "./QuizModals";
-import { RecorderState } from "./recorder";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { useTranslation } from "react-i18next"; // <-- import i18n
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import API from '../api/axios';
+import { SubmitConfirmationModal, QuizResultModal, TimeUpModal } from './QuizModals';
+import { RecorderState } from './recorder';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const QuizPage = () => {
-	const { t } = useTranslation(); // <-- translation hook
 	const { assessment_id } = useParams();
 	const { state } = useLocation();
 	const navigate = useNavigate();
-	const token = localStorage.getItem("authToken");
+	const token = localStorage.getItem('authToken');
 	const sessionId = state?.sessionId;
+	const screenMonitoring = state?.screenMonitoring ?? false;
+
 
 	const [questions, setQuestions] = useState([]);
 	const [answers, setAnswers] = useState({});
@@ -130,7 +126,8 @@ const QuizPage = () => {
 	const courseId = state?.course_id;
 	const moduleId = state?.module_id;
 
-	if (isUploading) return <p>{t("quiz.submitting")}</p>;
+	if (isUploading) return <p>Submitting quiz...</p>;
+
 
 	// --- SUBMIT QUIZ ---
 
@@ -191,11 +188,11 @@ const QuizPage = () => {
 
 			const chunks = RecorderState.getChunks();
 			if (chunks.length > 0) {
-				const blob = new Blob(chunks, { type: "video/webm" });
+				const blob = new Blob(chunks, { type: 'video/webm' });
 				const formData = new FormData();
-				formData.append("recording", blob, `session_${sessionId}.webm`);
+				formData.append('recording', blob, `session_${sessionId}.webm`);
 				await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-					headers: { "Content-Type": "multipart/form-data" },
+					headers: { 'Content-Type': 'multipart/form-data' }
 				});
 			}
 
@@ -213,36 +210,32 @@ const QuizPage = () => {
 			setSubmissionResult(response.data);
 			setShowResultModal(true);
 		} catch (err) {
-			console.error("Submission error:", err);
-			alert(t("quiz.failed_submit"));
+			console.error('Submission error:', err);
+			alert('Failed to submit quiz.');
 		} finally {
 			setIsUploading(false);
 			submissionInProgress = false; // reset lock if needed
 		}
 	};
 
-	if (!questions.length) return <p>{t("quiz.loading")}</p>;
+
+	if (!questions.length) return <p>Loading quiz...</p>;
 
 	const question = questions[currentQuestion];
 	const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
 
 	return (
 		<div className="container py-4">
-			<h2 className="mb-3">{state?.quizTitle || t("quiz.assessment")}</h2>
+			<h2 className="mb-3">{state?.quizTitle || 'Assessment'}</h2>
 			<div className="row">
 				<div className="col-md-9">
 					<div className="mb-3">
 						<div className="d-flex justify-content-between mb-1">
-							<strong>{t("quiz.question")} {currentQuestion + 1}</strong>
-							<small>
-								{currentQuestion + 1} {t("quiz.of")} {questions.length}
-							</small>
+							<strong>Question {currentQuestion + 1}</strong>
+							<small>{currentQuestion + 1} of {questions.length}</small>
 						</div>
-						<div className="progress mb-3" style={{ height: "10px" }}>
-							<div
-								className="progress-bar"
-								style={{ width: `${progressPercent}%` }}
-							></div>
+						<div className="progress mb-3" style={{ height: '10px' }}>
+							<div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
 						</div>
 						<p className="fw-bold">{question.question_text}</p>
 						<div className="d-grid gap-2">
@@ -251,11 +244,7 @@ const QuizPage = () => {
 								Object.entries(question.options).map(([key, option]) => (
 									<button
 										key={key}
-										className={`btn ${
-											answers[question.question_id] === key
-												? "btn-primary"
-												: "btn-outline-primary"
-										}`}
+										className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
 										onClick={() => handleAnswer(currentQuestion, key)}
 									>
 										{option}
@@ -266,14 +255,14 @@ const QuizPage = () => {
 								<input
 									type="text"
 									className="form-control"
-									value={answers[question.question_id] || ""}
+									value={answers[question.question_id] || ''}
 									onChange={(e) =>
 										setAnswers((prev) => ({
 											...prev,
-											[question.question_id]: e.target.value.toLowerCase(), // lowercase before sending
+											[question.question_id]: e.target.value.toLowerCase() // lowercase before sending
 										}))
 									}
-									placeholder={t("quiz.type_answer")}
+									placeholder="Type your answer here"
 								/>
 							)}
 						</div>
@@ -312,21 +301,17 @@ const QuizPage = () => {
 
 				<div className="col-md-3">
 					<div className="card p-3 shadow-sm">
-						<h6 className="text-center">{t("quiz.navigator")}</h6>
+						<h6 className="text-center">Question Navigator</h6>
 						{sessionId && (
 							<div className="alert alert-warning mt-3 d-flex align-items-center">
-								{t("quiz.recording")}
+								Recording in Progress
 							</div>
 						)}
 						<div className="d-flex flex-wrap justify-content-center gap-2 mt-2">
 							{questions.map((_, idx) => (
 								<button
 									key={idx}
-									className={`btn btn-sm ${
-										currentQuestion === idx
-											? "btn-primary"
-											: "btn-outline-secondary"
-									}`}
+									className={`btn btn-sm ${currentQuestion === idx ? 'btn-primary' : 'btn-outline-secondary'}`}
 									onClick={() => goToQuestion(idx)}
 								>
 									{idx + 1}
@@ -334,7 +319,7 @@ const QuizPage = () => {
 							))}
 						</div>
 						<div className="mt-3 text-center text-muted">
-							{t("quiz.time_left")}: <span className="fw-bold">{formatTime(timeLeft)}</span>
+							Time Left: <span className="fw-bold">{formatTime(timeLeft)}</span>
 						</div>
 					</div>
 				</div>
@@ -351,22 +336,21 @@ const QuizPage = () => {
 				<QuizResultModal
 					score={submissionResult?.totalScore || 0}
 					total={questions.reduce((acc, q) => acc + (q.points || 0), 0)}
+
 					// 1. Handle Review: Navigate to the review page with the attempt UUID
 					onReview={() =>
-						navigate(
-							`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`,
-							{
-								replace: true,
-							}
-						)
+						navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`, {
+							replace: true
+						})
 					}
+
 					// 2. Handle Exit: Navigate to the TrainerModuleScreen route
 					onExit={() => {
 						if (courseId && moduleId) {
 							navigate(`/${courseId}/modules/${moduleId}/lectures`);
 						} else {
 							// Fallback if IDs aren't available
-							navigate("/trainee/dashboard");
+							navigate('/trainee/dashboard');
 						}
 					}}
 				/>

@@ -1,0 +1,312 @@
+/* ============================= */
+/* 1. CONTAINER & GLOBAL         */
+/* ============================= */
+.checkpoint-container {
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.5;
+}
+
+.checkpoint-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+/* ============================= */
+/* 2. USER PROFILE SECTION       */
+/* ============================= */
+.user-info-card {
+  display: flex;           /* Horizontal layout */
+  flex-direction: row;
+  gap: 40px;               /* space between left and right */
+  padding: 30px;
+  align-items: flex-start; /* top aligned */
+}
+
+.user-info-header {
+  text-align: center;      
+  margin-bottom: 0;        /* remove old vertical margin */
+  flex: 1;                 /* left section width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-picture {
+  margin: 0 0 15px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  overflow: hidden;
+  border: 3px solid #0047AB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-placeholder {
+  font-size: 40px;
+}
+
+.user-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 5px 0;
+  color: #1a1a1a;
+}
+
+.user-role {
+  font-size: 15px;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 5px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.status-badge.active {
+  color: #2e7d32; 
+  background-color: #e8f5e9;
+}
+
+.status-badge.inactive {
+  color: #d32f2f; 
+  background-color: #ffebee;
+}
+
+.role-text {
+  font-weight: 600;
+  color: #555;
+}
+
+.user-info-box {
+  flex: 2;                 /* right section width */
+  margin-top: 0;           /* remove old vertical margin */
+  background-color: #fbfcfd;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.user-info-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.user-info-grid label {
+  font-size: 12px;
+  color: #777;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.user-info-grid p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+/* ============================= */
+/* 3. ONBOARDING TABLE           */
+/* ============================= */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px 30px;
+  background: transparent;
+  border-bottom: 1px solid #eee;
+}
+
+.onboarding-table-wrapper {
+  padding: 0 30px 30px;
+}
+
+.onboarding-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.onboarding-table th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #eee;
+}
+
+.onboarding-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* ============================= */
+/* 4. INPUTS & SELECTS           */
+/* ============================= */
+.table-input, 
+.table-select {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1.5px solid #5B5B5B;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  background-color: #fff;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.table-input:focus, 
+.table-select:focus {
+  border-color: #0047AB;
+  box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.15);
+}
+
+/* ============================= */
+/* 5. BUTTONS & ACTIONS          */
+/* ============================= */
+.table-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  text-align: right;
+  border-top: 1px solid #eee;
+}
+
+.btn-edit,
+.btn-cancel,
+.btn-save,
+.empty-state .btn-add {
+  min-width: 130px;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 50px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #fff;
+  color: #0047AB;
+  border: 1px solid #0047AB;
+}
+
+.btn-edit:hover {
+  background: #f0f4f8;
+}
+
+.btn-save {
+  background: #0047AB;
+  color: #fff;
+  border: none;
+}
+
+.btn-save:hover {
+  background-color: #003b94;
+}
+
+.btn-cancel {
+  background: #fff;
+  color: #0047AB;
+  border: 1px solid #0047AB;
+  margin-left: 10px;
+}
+
+.btn-cancel:hover {
+  background-color: #0047AB;
+  color: #fff;
+}
+
+.empty-state .btn-add {
+  background-color: #0047AB;
+  color: #fff;
+  border: none;
+}
+
+.empty-state .btn-add:hover {
+  background-color: #047857;
+}
+
+/* ============================= */
+/* 6. EMPTY STATE                */
+/* ============================= */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  border: 2px dashed #a2a2a2;
+  border-radius: 12px;
+  margin: 20px 30px;
+}
+
+.empty-state p {
+  color: #858585;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+/* ============================= */
+/* 7. RESPONSIVE                  */
+/* ============================= */
+@media (max-width: 768px) {
+  .user-info-card {
+    flex-direction: column; /* stack vertically on small screens */
+  }
+
+  .user-info-box {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .user-info-grid { grid-template-columns: 1fr; gap: 15px; }
+  .card-header-flex { flex-direction: column; gap: 10px; text-align: center; }
+  .onboarding-table th { display: none; }
+  .onboarding-table td { display: block; width: 100%; box-sizing: border-box; }
+  .btn-edit, .btn-save, .btn-cancel, .empty-state .btn-add {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
