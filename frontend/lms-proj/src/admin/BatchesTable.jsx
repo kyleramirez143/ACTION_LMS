@@ -230,25 +230,30 @@ function BatchesTable() {
 
                                             return (
                                                 <tr key={batch.batch_id}>
-                                                    {/* BATCH NAME AS LINK */}
-                                                    <td className="text-center fw-bold">
-                                                        <span
+                                                    <td className="text-center">
+                                                        <Link
+                                                            to="/admin/checkpointview"
+                                                            state={{ batchId: batch.batch_id, batchName: batch.name }}
                                                             className="batch-link"
-                                                            title={`View ${batch.name}`} // tooltip
-                                                            style={{ cursor: "pointer", color: "#0d6efd", textDecoration: "underline" }}
-                                                            onClick={() => navigate(`/all/checkpointview?batchId=${batch.batch_id}`)}
+                                                            title="View checkpoint for this batch"
                                                         >
                                                             {batch.name}
-                                                        </span>
+                                                        </Link>
                                                     </td>
-
-                                                    <td className="text-center">{batch.location}</td>
-                                                    <td className="text-center">{batch.start_date}</td>
-                                                    <td className="text-center">{batch.end_date}</td>
+                                                    <td className="text-center">
+                                                        {batch.location}
+                                                    </td>
+                                                    <td className="text-center">
+                                                        {batch.start_date}
+                                                    </td>
+                                                    <td className="text-center">
+                                                        {batch.end_date}
+                                                    </td>
                                                     <td className="text-center small fw-bold">{curriculum}</td>
                                                     <td className="text-center">
                                                         <span
-                                                            className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"}`}
+                                                            className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
+                                                                }`}
                                                         >
                                                             {status}
                                                         </span>
@@ -278,7 +283,6 @@ function BatchesTable() {
                                         })
                                     )}
                                 </tbody>
-
                             </table>
                         </div>
 

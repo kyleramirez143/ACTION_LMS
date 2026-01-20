@@ -80,7 +80,6 @@ import AdminCoursePage from "./admin/AdminCoursePage";
 import ViewGrades from "./trainee/ViewGrades.jsx";
 import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
-
 function AppContent() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/"; // hide navbar only on login page
@@ -122,7 +121,7 @@ function AppContent() {
             <Route path="/all/notificationview" element={<NotificationView />} />
 
             {/* Checkpoint View */}
-            <Route path="/all/checkpointview" element={<CheckpointView />} />
+            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
 
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />

@@ -478,9 +478,28 @@ export async function getUpcoming(req, res) {
         return res.json(flattened);
 
     } catch (err) {
-        console.log(err);   
+        console.log(err);
         console.error("getUpcoming error:", err);
         return res.status(500).json({ error: "Failed to fetch upcoming assessments" });
     }
 }
 
+// DELETE /api/quizzes/:assessment_id
+export const deleteQuiz = async (req, res) => {
+    const { assessment_id } = req.params;
+
+    try {
+        const deletedCount = await Assessment.destroy({
+            where: { assessment_id },
+        });
+
+        if (deletedCount === 0) {
+            return res.status(404).json({ error: "Quiz not found" });
+        }
+
+        res.json({ message: "Quiz deleted successfully" });
+    } catch (err) {
+        console.error("Delete Quiz Error:", err);
+        res.status(500).json({ error: "Failed to delete quiz", details: err.message });
+    }
+};

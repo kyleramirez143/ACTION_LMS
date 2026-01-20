@@ -265,7 +265,7 @@ const Navbar = () => {
 
         {visibleLinks.map((link) => (
           <NavLink
-            key={link.path}
+            key={`${link.name}-${link.path}`}
             to={link.path}
             className="nav-link mb-3"
             onClick={() => setMenuOpen(false)}

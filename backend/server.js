@@ -16,6 +16,7 @@ import batchRoutes from "./routes/batchRoute.js";
 import periodRoute from "./routes/periodRoute.js";
 import quarterRoute from './routes/quarterRoute.js'
 import scheduleRoute from "./routes/scheduleRoute.js";
+import checkpointRoutes from './routes/checkpointRoute.js';
 
 const app = express();
 // app.use(cors());
@@ -46,6 +47,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/periods", periodRoute);
 app.use("/api/quarters", quarterRoute);
 app.use("/api/schedules", scheduleRoute);
+app.use("/api/checkpoints", checkpointRoutes);
 
 app.use("/uploads", express.static("uploads"));
 

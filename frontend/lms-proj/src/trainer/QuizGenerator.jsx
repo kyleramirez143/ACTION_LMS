@@ -187,6 +187,8 @@ function QuizGenerator() {
             const { assessmentId } = await res.json();
             setIsSaved(true); // mark quiz as saved
 
+            console.log(selectedCourse);
+            console.log(selectedModule);
             // Navigate to Review & Publish page
             navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
 
@@ -195,6 +197,8 @@ function QuizGenerator() {
 
         } catch (err) {
             console.error("Error saving and navigating:", err);
+            console.log(selectedCourse);
+            console.log(selectedModule);
             alert(t("quiz.review_publish_failed"));
         } finally {
             setSaving(false);
