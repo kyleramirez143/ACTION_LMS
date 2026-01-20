@@ -205,15 +205,9 @@ const Navbar = () => {
                 style={{ width: "40px", height: "40px", cursor: "pointer" }}
               />
               <Dropdown.Menu className="mt-2 shadow">
-<<<<<<< HEAD
                 <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
-                  Profile
-=======
-                <Dropdown.Item as={Link} to={profilePath}>
                   {t("navbar.profile")}
->>>>>>> origin/sys/nihongo
                 </Dropdown.Item>
-
                 <Dropdown.Divider />
                 <Dropdown.Item as={Link} to="/admin/profile">
                   {t("navbar.account_settings")}
@@ -257,13 +251,8 @@ const Navbar = () => {
 
         <hr />
 
-<<<<<<< HEAD
         <Link to="/trainee/ProfileInfo" onClick={() => setMenuOpen(false)}>
           Profile
-=======
-        <Link to={profilePath} onClick={() => setMenuOpen(false)}>
-          {t("navbar.profile")}
->>>>>>> origin/sys/nihongo
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
           {t("navbar.account_settings")}
