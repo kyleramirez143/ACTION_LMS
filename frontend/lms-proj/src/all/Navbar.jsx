@@ -128,7 +128,7 @@ const Navbar = () => {
             className="lang-btn"
             onClick={toggleLanguage}
           >
-            {isJapanese ? "日本語" : "English"}
+            {isJapanese ? "日本語" : "Eng"}
           </button>
 
           <div className="position-relative" ref={notifRef}>
@@ -187,7 +187,7 @@ const Navbar = () => {
             className={`lang-btn ${isJapanese ? "active" : ""}`}
             onClick={toggleLanguage}
           >
-            {isJapanese ? "日本語" : "English"}
+            {isJapanese ? "日本語" : "ENG"}
           </button>
 
 
@@ -218,9 +218,10 @@ const Navbar = () => {
                 style={{ width: "40px", height: "40px", cursor: "pointer" }}
               />
               <Dropdown.Menu className="mt-2 shadow">
-                <Dropdown.Item as={Link} to={profilePath}>
+                <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   {t("navbar.profile")}
                 </Dropdown.Item>
+
 
                 <Dropdown.Divider />
 
@@ -258,7 +259,7 @@ const Navbar = () => {
           className={`lang-btn ${isJapanese ? "active" : ""}`}
           onClick={toggleLanguage}
         >
-          {isJapanese ? "日本語" : "English"}
+          {isJapanese ? "日本語" : "ENG"}
         </button>
 
 
