@@ -85,7 +85,7 @@ export const uploadLectureFile = async (req, res) => {
 
                 await LectureResource.create({
                     lecture_id,
-                    resources_id: resource.resource_id
+                    resource_id: resource.resource_id
                 });
 
                 uploadedResources.push(resource);
