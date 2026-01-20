@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff, Link, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
+    const { t } = useTranslation();
     const [openIndex, setOpenIndex] = useState(-1);
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
     const [showQuizMenuId, setShowQuizMenuId] = useState(null);
@@ -139,8 +141,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
     };
 
     const handleDeleteResource = async (resourceId) => {
-        if (!window.confirm("Are you sure you want to remove this resource?")) return;
-
+        if (!window.confirm(t("resource.confirm_delete"))) return;
         try {
             const token = localStorage.getItem("authToken");
             const res = await fetch(`/api/lectures/resource/${resourceId}`, {
@@ -196,7 +197,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
     return (
         <div className="accordion-wrapper">
             {localLectures.length === 0 ? (
-                <p className="no-res">No lectures available.</p>
+                <p className="no-res">{t("lecture.none")}</p>
             ) : (
                 localLectures.map((lec, i) => (
                     <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
@@ -210,7 +211,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                             className={`badge ms-2 me-2 p-1 ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
                                             onClick={(e) => { e.stopPropagation(); handleMakeHiddenClick(i); }}
                                         >
-                                            {lec.is_visible ? 'Visible' : 'Hidden'}
+                                            {lec.is_visible ? t("common.visible") : t("common.hidden")}
                                         </span>
                                     )}
                                     {lec.title}
@@ -229,11 +230,11 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                         {showLectureMenuIndex === i && (
                                             <ul className="dropdown-menu show position-absolute end-0 shadow-sm">
                                                 <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/lectures/${lec.lecture_id}/edit`)}>
-                                                    <Edit size={14} className="me-2" /> Edit Lecture
+                                                    <Edit size={14} className="me-2" /> {t("lecture.edit")}
                                                 </li>
                                                 <li className={`dropdown-item cursor-pointer ${!lec.is_visible ? 'text-success' : 'text-danger'}`} onClick={() => handleMakeHiddenClick(i)}>
                                                     {!lec.is_visible ? <Eye size={14} className="me-2" /> : <EyeOff size={14} className="me-2" />}
-                                                    {!lec.is_visible ? "Make Visible" : "Make Hidden"}
+                                                    {!lec.is_visible ? t("lecture.make_visible") : t("lecture.make_hidden")}
                                                 </li>
                                             </ul>
                                         )}
@@ -252,7 +253,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                 {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
 
                                 {/* Resources Section */}
-                                <h6 className="fw-bold mb-2">Resources</h6>
+                                <h6 className="fw-bold mb-2">{t("resource.title")}</h6>
 
                                 <div className="resources-container">
                                     {lec.resources?.length > 0 ? (
@@ -292,7 +293,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                     await handleRenameResource(res.resource_id, tempDisplayName);
                                                                 }}
                                                             >
-                                                                Save
+                                                                {t("common.save")}
                                                             </button>
                                                         </div>
                                                     ) : (
@@ -305,7 +306,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         >
                                                             {userRole === "Trainer" && (
                                                                 <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
-                                                                    {res.is_visible ? "Visible" : "Hidden"}
+                                                                    {res.is_visible ? t("resource.hide") : t("resource.make_visible")}
                                                                 </span>
                                                             )}
                                                             {isLink ? (
@@ -359,7 +360,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                         }}
                                                                     >
                                                                         <Eye size={14} className="me-2" />
-                                                                        {res.is_visible ? "Hide" : "Make visible"}
+                                                                        {res.is_visible ? t("resource.hide") : t("resource.make_visible")}
                                                                     </li>
 
                                                                     {/* Edit filename */}
@@ -372,7 +373,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                         }}
                                                                     >
                                                                         <Edit size={14} className="me-2" />
-                                                                        Edit filename
+                                                                        {t("resource.edit_name")}
                                                                     </li>
 
                                                                     {/* Remove */}
@@ -384,7 +385,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                         }}
                                                                     >
                                                                         <Trash2 size={14} className="me-2" />
-                                                                        Remove
+                                                                        {t("common.remove")}
                                                                     </li>
                                                                 </ul>
                                                             )}
@@ -394,13 +395,13 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                             );
                                         })
                                     ) : (
-                                        <p className="small text-muted">No resources available.</p>
+                                        <p className="small text-muted">{t("resource.none")}</p>
                                     )}
                                 </div>
 
 
                                 {/* Quizzes Section */}
-                                <h6 className="fw-bold mb-2">Quizzes</h6>
+                                <h6 className="fw-bold mb-2">{t("quiz.title")}</h6>
                                 <div className="quizzes-container">
                                     {lec.assessments?.length > 0 ? (
                                         lec.assessments.map((quiz) => (
@@ -419,7 +420,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                 >
                                                     {isTrainerView && (
                                                         <span className={`badge ms-2 me-2 p-1 ${quiz.is_published ? "bg-success" : "bg-danger"}`}>
-                                                            {quiz.is_published ? "Published" : "Hidden"}
+                                                            {quiz.is_published ? t("quiz.published") : t("common.hidden")}
                                                         </span>
                                                     )}
                                                     <FileArchive size={25} className="me-2 text-primary" />
@@ -439,10 +440,10 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         {showQuizMenuId === quiz.assessment_id && (
                                                             <ul className="dropdown-menu show position-absolute end-0 shadow-sm" style={{ minWidth: '180px', zIndex: 1000 }}>
                                                                 <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`)}>
-                                                                    <Edit size={14} className="me-2" /> Edit Content
+                                                                    <Edit size={14} className="me-2" /> {t("quiz.edit")} 
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
-                                                                    <ShieldAlert size={14} className="me-2 text-danger" /> Quiz Results
+                                                                    <ShieldAlert size={14} className="me-2 text-danger" /> {t("quiz.results")}
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-danger" onClick={() => handleDeleteQuiz(quiz.assessment_id)}>
                                                                     <Trash2 size={14} className="me-2" /> Delete Quiz
@@ -453,7 +454,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                 )}
                                             </div>
                                         ))
-                                    ) : <p className="small text-muted">No quizzes available yet.</p>}
+                                    ) : <p className="small text-muted">{t("quiz.none")}</p>}
                                 </div>
                             </div>
                         )}

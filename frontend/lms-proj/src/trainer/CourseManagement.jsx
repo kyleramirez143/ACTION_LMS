@@ -4,49 +4,67 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
+import { useTranslation } from "react-i18next"; // <-- import i18n
+import logo from "../image/courses.svg"; // <-- imported SVG
 
 function Course() {
+    const { t } = useTranslation(); // <-- translation hook
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const token = localStorage.getItem("authToken");
 
+    // =========================
     // AUTH CHECK
+    // =========================
     useEffect(() => {
-        if (!token) return navigate("/login");
+        if (!token) {
+            navigate("/login");
+            return;
+        }
 
         try {
             const decoded = jwtDecode(token);
             const userRoles = decoded.roles || [];
-            if (!userRoles.includes("Trainer")) navigate("/access-denied");
+
+            if (!userRoles.includes("Trainer")) {
+                navigate("/access-denied");
+            }
         } catch (err) {
             localStorage.removeItem("authToken");
             navigate("/login");
         }
     }, [token, navigate]);
 
+    // =========================
+    // FETCH COURSES
+    // =========================
     useEffect(() => {
+        if (!token) return;
+
         const fetchCourses = async () => {
             try {
                 const res = await fetch("/api/courses/trainer", {
                     headers: {
-                        "Content-type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
+
                 const data = await res.json();
                 setCourses(data);
             } catch (err) {
-                console.error(err);
+                console.error("Failed to fetch courses:", err);
             }
         };
+
         fetchCourses();
-    }, []);
+    }, [token]);
 
     return (
         <>
             <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">Assigned Courses</h3>
+                    <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
                 </div>
 
                 {courses.length === 0 ? (
@@ -98,7 +116,7 @@ function Course() {
                         </div>
                     </>
                 )}
-            </div >
+            </div>
         </>
     );
 }

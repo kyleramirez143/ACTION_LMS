@@ -11,6 +11,7 @@ import { createEventsServicePlugin } from '@schedule-x/events-service'
 import 'temporal-polyfill/global'
 import '@schedule-x/theme-default/dist/index.css'
 import "./CalendarView.css"
+import { useTranslation } from "react-i18next";
 
 // FIXED: Dates must be wrapped in Temporal.PlainDate.from()
 const RAW_EVENTS = [
@@ -70,6 +71,7 @@ const RAW_EVENTS = [
 ];
 
 function TrainerCalendarView() {
+    const { t } = useTranslation();
     const [eventsService] = useState(() => createEventsServicePlugin())
     const [visibleSubjects, setVisibleSubjects] = useState(['Nihongo', 'PhilNits', 'Orientation']);
 
@@ -101,20 +103,20 @@ function TrainerCalendarView() {
             <div className="d-flex justify-content-between align-items-center mb-4 flex-nowrap">
                 {/* LEFT (stacked title + date) */}
                 <div>
-                    <h3 className="section-title mb-1">Batch 40 - Everything About Action</h3>
-                    <p className="text-muted mb-0">Jul 21 - Dec 12, 2025</p>
+                    <h3 className="section-title mb-1">{t("calendar.batch_title")}</h3>
+                    <p className="text-muted mb-0">{t("calendar.batch_title")}</p>
                 </div>
                 {/* RIGHT (horizontal controls) */}
                 <div className="d-flex align-items-center gap-3">
                     <Link to="/trainer/add-new-schedule" className="text-decoration-none">
                         <button type="button" className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
                             style={{ height: "45px" }}>
-                            <i className="bi bi-plus-lg"></i> Add Schedule
+                            <i className="bi bi-plus-lg"></i> {t("calendar.add_schedule")}
                         </button>
                     </Link>
                     <select className="form-select" style={{ width: "300px", height: "45px" }}>
-                        <option>Batch 40 Manila</option>
-                        <option>Batch 39 Cebu</option>
+                        <option>{t("calendar.batch_40_manila")}</option>
+                        <option>{t("calendar.batch_39_cebu")}</option>
                     </select>
                 </div>
             </div>
@@ -126,7 +128,7 @@ function TrainerCalendarView() {
                 </div>
                 <div className="col-sm-3">
                     <div className="mb-4">
-                        <h5 className="section-title fs-6">Filter Subjects</h5>
+                        <h5 className="section-title fs-6">{t("calendar.filter_subjects")}</h5>
                         <div className="d-flex flex-column gap-2">
                             {['Nihongo', 'PhilNits', 'Orientation', 'Java'].map(sub => (
                                 <div
@@ -153,62 +155,60 @@ function TrainerCalendarView() {
                                             : 'bi-square'
                                             } me-2`}
                                     ></i>
-                                    <span>{sub}</span>
+                                    <span>{t(`subjects.${sub}`)}</span>
                                 </div>
                             ))}
                             <div className="flex-column mt-3">
-                                <h5 className="section-title fs-6">Total Hours</h5>
+                                <h5 className="section-title fs-6">{t("calendar.total_hours")}</h5>
                                 <div className="d-flex align-items-center gap-2">
                                     <div className="rounded-circle" style={{ width: 16, height: 16, backgroundColor: "purple" }}></div>
-                                    <span className="fw-semibold">66 Hours</span>
+                                    <span className="fw-semibold">88 {t("calendar.hours")}</span>
                                 </div>
                                 <div className="d-flex align-items-center gap-2">
                                     <div className="rounded-circle" style={{ width: 16, height: 16, backgroundColor: "orange" }}></div>
-                                    <span className="fw-semibold">88 Hours</span>
+                                    <span className="fw-semibold">88 {t("calendar.hours")}</span>
                                 </div>
                                 <div className="d-flex align-items-center gap-2">
                                     <div className="rounded-circle" style={{ width: 16, height: 16, backgroundColor: "blue" }}></div>
-                                    <span className="fw-semibold">22 Hours</span>
-                                </div>
+                                    <span className="fw-semibold">22 {t("calendar.hours")}</span>                                </div>
                                 <div className="d-flex align-items-center gap-2">
                                     <div className="rounded-circle" style={{ width: 16, height: 16, backgroundColor: "#ADD8E6" }}></div>
-                                    <span className="fw-semibold">10 Hour</span>
-                                </div>
+                                    <span className="fw-semibold">10 {t("calendar.hours")}</span>                                </div>
                             </div>
                             <div className="flex-column mt-3">
-                                <h5 className="section-title fs-6">Overall Schedule</h5>
+                                <h5 className="section-title fs-6">{t("calendar.overall_schedule")}</h5>
                                 <div className="d-flex align-items-center gap-2">
                                     <div className="rounded-circle" style={{ width: 10, height: 10, backgroundColor: "#21B148" }}></div>
                                     <div className="d-flex flex-column">
-                                        <span className="fw-semibold">Opening - ACTION Batch 40</span>
+                                        <span className="fw-semibold">{t("calendar.events.opening")}</span>
                                         <span className="text-muted fs-7">July 21, 2025</span>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-2 pt-2">
                                     <div className="rounded-circle" style={{ width: 10, height: 10, backgroundColor: "#21B148" }}></div>
                                     <div className="d-flex flex-column">
-                                        <span className="fw-semibold">Business/Softskill Courses</span>
+                                        <span className="fw-semibold">{t("calendar.events.opening")}</span>
                                         <span className="text-muted fs-7">July 24 & 31, 2025</span>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-2 pt-2">
                                     <div className="rounded-circle" style={{ width: 10, height: 10, backgroundColor: "#21B148" }}></div>
                                     <div className="d-flex flex-column">
-                                        <span className="fw-semibold">PhilNITS FE Official Exam</span>
+                                        <span className="fw-semibold">{t("calendar.events.philnits_exam")}</span>
                                         <span className="text-muted fs-7">October 26, 2025</span>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-2 pt-2">
                                     <div className="rounded-circle" style={{ width: 10, height: 10, backgroundColor: "#21B148" }}></div>
                                     <div className="d-flex flex-column">
-                                        <span className="fw-semibold">JPLT N4 Official Exam</span>
+                                        <span className="fw-semibold">{t("calendar.events.philnits_exam")}</span>
                                         <span className="text-muted fs-7">December 7, 2025</span>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-2 pt-2">
                                     <div className="rounded-circle" style={{ width: 10, height: 10, backgroundColor: "#21B148" }}></div>
                                     <div className="d-flex flex-column">
-                                        <span className="fw-semibold">Closing - Action Batch 40</span>
+                                        <span className="fw-semibold">{t("calendar.events.closing")}</span>
                                         <span className="text-muted fs-7">December 12, 2025</span>
                                     </div>
                                 </div>

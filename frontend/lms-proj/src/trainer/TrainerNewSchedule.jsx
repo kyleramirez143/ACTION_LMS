@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 
 function TrainerNewSchedule() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { id: userId } = useParams();
     const isEditMode = !!userId;
@@ -99,41 +101,42 @@ function TrainerNewSchedule() {
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-                <h3 style={styles.title}>{isEditMode ? "Edit Schedule" : "Add New Schedule"}</h3>
+                <h3 style={styles.title}>{isEditMode ? t("schedule.edit_title") : t("schedule.add_title")}</h3>
 
                 <h5 className="mb-4 text-center" style={{ fontWeight: 1000, color: "#555" }}>
-                    Schedule Information
+                    {t("schedule.info")}
                 </h5>
 
                 <form onSubmit={handleSubmit}>
                     {/* Schedule Name */}
                     <div className="row mb-3">
-                        <label className="col-sm-3 col-form-label">Schedule Title </label>
+                        <label className="col-sm-3 col-form-label">{t("schedule.title")}
+                        </label>
                         <div className="col-sm-9">
-                            <input name="title" type="text" className="form-control" onChange={handleChange} required placeholder="Enter Schedule Title" />
+                            <input name="title" type="text" className="form-control" onChange={handleChange} required placeholder={t("schedule.title_placeholder")} />
                         </div>
                     </div>
 
                     {/* Description */}
                     <div className="row mb-3">
-                        <label className="col-sm-3 col-form-label">Description </label>
+                        <label className="col-sm-3 col-form-label">{t("schedule.title_placeholder")} </label>
                         <div className="col-sm-9">
-                            <textarea type="text" class="form-control" placeholder="Enter Description" aria-label="Description">
+                            <textarea type="text" class="form-control" placeholder={t("schedule.description")} aria-label="Description">
                             </textarea>
                         </div>
                     </div>
 
                     {/* Batch */}
                     <div className="row mb-3">
-                        <label className="col-sm-3 col-form-label">Batch </label>
+                        <label className="col-sm-3 col-form-label">{t("schedule.batch")} </label>
                         <div className="col-sm-9">
                             <select name="batch_id"
                                 className="form-select"
-                                onChange={handleChange} 
+                                onChange={handleChange}
                                 value={formData.batch_id}
                                 required>
 
-                                <option value="">Select Batch</option>
+                                <option value="">{t("schedule.select_batch")}</option>
 
                                 {batches.map((b) => {
                                     // LOGIC: Disable if there are no quarters assigned
@@ -151,7 +154,7 @@ function TrainerNewSchedule() {
                                             disabled={isDisabled}
                                             style={isDisabled ? { color: '#a0a0a0', backgroundColor: '#f8f9fa' } : {}}
                                         >
-                                            {b.name} {b.location} {isDisabled ? " — No Quarters Assigned" : ""}
+                                            {b.name} {b.location} {isDisabled ? ` — ${t("schedule.no_quarters")}` : ""}
                                         </option>
                                     );
                                 })}
@@ -161,7 +164,7 @@ function TrainerNewSchedule() {
 
                     {/* Type */}
                     <div className="row mb-3">
-                        <label className="col-sm-3 col-form-label">Schedule Type </label>
+                        <label className="col-sm-3 col-form-label">{t("schedule.type")}</label>
                         <div className="col-sm-9">
                             <select
                                 name="event_type"
@@ -170,12 +173,12 @@ function TrainerNewSchedule() {
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="">Select Type</option>
-                                <option value="lecture">Lecture</option>
-                                <option value="module_session">Module</option>
-                                <option value="assessments">Assessment</option>
-                                <option value="holiday">Holiday</option>
-                                <option value="events">Events</option>
+                                <option value="">{t("schedule.select_type")}</option>
+                                <option value="lecture">{t("schedule.lecture")}</option>
+                                <option value="module_session">{t("schedule.module")}</option>
+                                <option value="assessments">{t("schedule.assessment")}</option>
+                                <option value="holiday">{t("schedule.holiday")}</option>
+                                <option value="events">{t("schedule.events")}</option>
                             </select>
                         </div>
                     </div>
@@ -183,10 +186,10 @@ function TrainerNewSchedule() {
                     {/* Conditional Dropdown: Module */}
                     {formData.event_type === "module_session" && (
                         <div className="row mb-3 animate-fade">
-                            <label className="col-sm-3 col-form-label">Select Module</label>
+                            <label className="col-sm-3 col-form-label">{t("schedule.select_module")}</label>
                             <div className="col-sm-9">
                                 <select name="module_id" className="form-select" onChange={handleChange} required>
-                                    <option value="">-- Choose Module --</option>
+                                    <option value="">{t("schedule.choose_module")}</option>
                                     {/* Map modules here */}
                                 </select>
                             </div>
@@ -196,14 +199,14 @@ function TrainerNewSchedule() {
                     {/* Conditional Dropdown: Lecture */}
                     {formData.event_type === "lecture" && (
                         <div className="row mb-3 animate-fade">
-                            <label className="col-sm-3 col-form-label">Select Lecture</label>
+                            <label className="col-sm-3 col-form-label">{t("schedule.select_lecture")}</label>
                             <div className="col-sm-9">
                                 <select name="lecture_id" className="form-select" onChange={handleChange} required>
-                                    <option value="">-- Choose Lecture --</option>
+                                    <option value="">{t("schedule.choose_lecture")}</option>
                                     {/* Map lectures here */}
                                 </select>
                             </div>
-                        x</div>
+                            x</div>
                     )}
 
                     <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
@@ -211,7 +214,7 @@ function TrainerNewSchedule() {
                     {/* Start Date & End Date */}
                     <div className="row mb-3 mt-3">
                         <label htmlFor="date" className="col-sm-3 col-form-label" style={styles.label}>
-                            Date
+                            {t("schedule.date")}
                         </label>
                         <div className="col-sm-9">
                             <input
@@ -229,7 +232,7 @@ function TrainerNewSchedule() {
 
                     <div className="row mb-3">
                         <label htmlFor="start_time" className="col-sm-3 col-form-label" style={styles.label}>
-                            Start Time
+                            {t("schedule.start_time")}
                         </label>
                         <div className="col-sm-9 position-relative">
                             <input
@@ -261,7 +264,7 @@ function TrainerNewSchedule() {
 
                     <div className="row mb-3">
                         <label htmlFor="end_time" className="col-sm-3 col-form-label" style={styles.label}>
-                            End Time
+                            {t("schedule.end_time")}
                         </label>
                         <div className="col-sm-9 position-relative">
                             <input
@@ -316,7 +319,7 @@ function TrainerNewSchedule() {
                                 onChange={() => { }}
                             />
                             <label className="form-check-label" htmlFor="recurringRadio">
-                                Recurring Event
+                                {t("schedule.recurring")}
                             </label>
                         </div>
                     </div>
@@ -324,13 +327,13 @@ function TrainerNewSchedule() {
                     {/* Recurrence Logics */}
                     {formData.is_recurring && (
                         <div className="row mb-3">
-                            <label className="col-sm-3 col-form-label">Repeat</label>
+                            <label className="col-sm-3 col-form-label">{t("schedule.repeat")}</label>
                             <div className="col-sm-9">
                                 <select name="repetition" className="form-select" onChange={handleChange} required>
-                                    <option value="">Select Repetition</option>
-                                    <option value="Daily">Daily</option>
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="Monthly">Monthly</option>
+                                    <option value="">{t("schedule.select_repetition")}</option>
+                                    <option value="Daily">{t("schedule.daily")}</option>
+                                    <option value="Weekly">{t("schedule.weekly")}</option>
+                                    <option value="Monthly">{t("schedule.monthly")}</option>
                                 </select>
                             </div>
                         </div>
@@ -339,7 +342,7 @@ function TrainerNewSchedule() {
                     {/* Weekly Logic: Mon-Fri Checkboxes */}
                     {formData.repetition === "Weekly" && (
                         <div className="row mb-3">
-                            <label className="col-sm-3 col-form-label">Select Days</label>
+                            <label className="col-sm-3 col-form-label">  {t("schedule.day_of_month")}</label>
                             <div className="col-sm-9 d-flex flex-wrap gap-2">
                                 {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(day => (
                                     <div key={day} className="form-check form-check-inline">
@@ -366,7 +369,7 @@ function TrainerNewSchedule() {
                                     type="number"
                                     min="1" max="31"
                                     className="form-control"
-                                    placeholder="e.g. 15"
+                                    placeholder={t("schedule.day_example")}
                                     onChange={handleChange}
                                     required
                                 />
@@ -376,10 +379,10 @@ function TrainerNewSchedule() {
 
                     <div className="d-flex justify-content-center gap-2 mt-4">
                         <button type="submit" className="btn btn-primary rounded-pill px-5">
-                            {isEditMode ? "Save Changes" : "Add Schedule"}
+                            {isEditMode ? t("common.save_changes") : t("schedule.add")}
                         </button>
                         <button type="button" className="btn btn-outline-primary rounded-pill" onClick={() => navigate(-1)}>
-                            Cancel
+                              {t("common.cancel")}
                         </button>
                     </div>
                 </form>

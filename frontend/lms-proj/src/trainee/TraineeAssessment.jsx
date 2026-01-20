@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./TraineeAssessment.css";
 import { Search, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next"; // <-- import i18n
 import { jwtDecode } from 'jwt-decode';
 
 export default function AssessmentDashboard() {
+  const { t } = useTranslation(); // <-- translation hook
+
   const { assessment_id, attempt_id } = useParams();
   const navigate = useNavigate();
 
@@ -65,11 +68,12 @@ export default function AssessmentDashboard() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
   const filteredResults = normalizedSearch
-    ? assessmentData.filter((r) =>
-      r.title.toLowerCase().includes(normalizedSearch) ||
-      r.status.toLowerCase().includes(normalizedSearch) ||
-      r.feedback.toLowerCase().includes(normalizedSearch)
-    )
+    ? assessmentData.filter(
+        (r) =>
+          r.title.toLowerCase().includes(normalizedSearch) ||
+          r.status.toLowerCase().includes(normalizedSearch) ||
+          r.feedback.toLowerCase().includes(normalizedSearch)
+      )
     : assessmentData;
 
   const totalPages = Math.max(
@@ -94,7 +98,9 @@ export default function AssessmentDashboard() {
   // NAVIGATION
   // =========================
   const openAssessment = (assessment_id, attempt_id) => {
-    navigate(`/trainee/assessment/${assessment_id}/review?attempt=${attempt_id}`);
+    navigate(
+      `/trainee/assessment/${assessment_id}/review?attempt=${attempt_id}`
+    );
   };
 
   const statusClass = {
@@ -108,29 +114,27 @@ export default function AssessmentDashboard() {
   return (
     <div className="assessment-wrapper">
       <div className="assessment-content">
-
         {/* HEADER */}
         <div className="title-back-row">
           <button
             type="button"
             className="back-btn"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
+            aria-label={t("assessment.back")}
           >
             <ArrowLeft size={20} strokeWidth={2.2} />
           </button>
-          <h2 className="page-title">Assessment</h2>
+          <h2 className="page-title">{t("assessment.title")}</h2>
         </div>
 
         <div className="white-card">
-
           {/* SEARCH */}
           <div className="filter-controls">
             <div className="search-box">
               <Search size={20} className="search-icon" />
               <input
                 type="text"
-                placeholder="Search assessments"
+                placeholder={t("assessment.search_placeholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -142,13 +146,13 @@ export default function AssessmentDashboard() {
             <table className="results-table">
               <thead>
                 <tr>
-                  <th>Course</th>
-                  <th>Module</th>
-                  <th>Quiz Title</th>
-                  <th>Score</th>
-                  <th>Status</th>
-                  <th>Feedback</th>
-                  <th>Date</th>
+                  <th>{t("assessment.course")}</th>
+                  <th>{t("assessment.module")}</th>
+                  <th>{t("assessment.quiz_title")}</th>
+                  <th>{t("assessment.score")}</th>
+                  <th>{t("assessment.status")}</th>
+                  <th>{t("assessment.feedback")}</th>
+                  <th>{t("assessment.date")}</th>
                 </tr>
               </thead>
 
@@ -156,29 +160,27 @@ export default function AssessmentDashboard() {
                 {loading ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: "center" }}>
-                      Loading results...
+                      {t("assessment.loading")}
                     </td>
                   </tr>
                 ) : displayedResults.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: "center" }}>
-                      No assessment records found
+                       {t("assessment.no_records")}
                     </td>
                   </tr>
                 ) : (
-                  displayedResults.map((r, i) => (
+                  displayedResults.map((r) => (
                     <tr key={r.attempt_id}>
-                      <td>
-                        {r.course}
-                      </td>
-                      <td>
-                        {r.module}
-                      </td>
+                      <td>{r.course}</td>
+                      <td>{r.module}</td>
                       <td>
                         <button
                           className="title-link text-primary text-decoration-underline"
                           type="button"
-                          onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
+                          onClick={() =>
+                            openAssessment(r.assessment_id, r.attempt_id)
+                          }
                         >
                           {r.title}
                         </button>
@@ -187,19 +189,14 @@ export default function AssessmentDashboard() {
                       <td>{r.score}</td>
 
                       <td>
-                        <span
-                          className={`status-pill ${statusClass[r.status] || ""
-                            }`}
-                        >
-                          {r.status}
+                        <span className={`status-pill ${statusClass[r.status] || ""}`}>
+                          {t(`assessment.status_${r.status.toLowerCase()}`)}
                         </span>
                       </td>
 
                       <td>{r.feedback}</td>
 
-                      <td>
-                        {new Date(r.date).toLocaleDateString()}
-                      </td>
+                      <td>{new Date(r.date).toLocaleDateString()}</td>
                     </tr>
                   ))
                 )}
@@ -211,7 +208,6 @@ export default function AssessmentDashboard() {
           <div className="pagination-wrapper">
             <nav>
               <ul className="pagination custom-pagination">
-
                 {/* PREV */}
                 <li className="page-item">
                   <button
@@ -226,8 +222,9 @@ export default function AssessmentDashboard() {
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li
                     key={i}
-                    className={`page-item ${currentPage === i + 1 ? "active" : ""
-                      }`}
+                    className={`page-item ${
+                      currentPage === i + 1 ? "active" : ""
+                    }`}
                   >
                     <button
                       className="page-link"
@@ -248,11 +245,9 @@ export default function AssessmentDashboard() {
                     ›
                   </button>
                 </li>
-
               </ul>
             </nav>
           </div>
-
         </div>
       </div>
     </div>
