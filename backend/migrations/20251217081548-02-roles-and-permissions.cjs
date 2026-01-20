@@ -62,8 +62,8 @@ module.exports = {
       description: { type: Sequelize.TEXT },
       start_date: { type: Sequelize.DATEONLY, allowNull: false },
       end_date: { type: Sequelize.DATEONLY, allowNull: false },
-      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
-      image: { type: Sequelize.STRING(255), allowNull: true }, 
+      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false },
+      image: { type: Sequelize.STRING(255), allowNull: true },
       created_by: foreignKey('users', 'id', true, 'SET NULL'),
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
@@ -83,7 +83,7 @@ module.exports = {
       description: { type: Sequelize.STRING(255), allowNull: true },
       start_date: { type: Sequelize.DATEONLY },
       end_date: { type: Sequelize.DATEONLY },
-      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false }, 
+      is_visible: { type: Sequelize.BOOLEAN, defaultValue: false },
       created_at: standardTimestamp,
       updated_at: standardTimestamp,
     });
@@ -110,12 +110,12 @@ module.exports = {
     });
 
     // LECTURE SCHEDULES
-    await queryInterface.createTable('lecture_schedules', {
-      lecture_schedule_id: uuidColumn,
-      lecture_id: foreignKey('lectures', 'lecture_id'),
-      start_datetime: { type: Sequelize.DATE, allowNull: false },
-      end_datetime: { type: Sequelize.DATE, allowNull: false },
-    });
+    // await queryInterface.createTable('lecture_schedules', {
+    //   lecture_schedule_id: uuidColumn,
+    //   lecture_id: foreignKey('lectures', 'lecture_id'),
+    //   start_datetime: { type: Sequelize.DATE, allowNull: false },
+    //   end_datetime: { type: Sequelize.DATE, allowNull: false },
+    // });
   },
 
   async down(queryInterface, Sequelize) {
