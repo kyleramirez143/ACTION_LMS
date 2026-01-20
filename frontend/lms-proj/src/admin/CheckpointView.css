@@ -1,0 +1,257 @@
+updated checkpoint.css
+/* ============================================================
+   1. CONTAINER & TABLE STYLING
+   ============================================================ */
+.checkpoint-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 20px auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+
+.checkpoint-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #000000 !important;
+}
+
+
+.checkpoint-card {
+  border-radius: 12px;
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+
+.checkpoint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+
+.checkpoint-table th {
+  padding: 12px 10px;
+  text-align: center;
+  vertical-align: middle;
+  background-color: #f8fafc;
+  color: #000000 !important;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+
+/* CATEGORY COLORS FOR TABLE HEADERS */
+.header-purple { background-color: #f3e8ff !important; color: #7e22ce !important;; }
+.header-orange { background-color: #ffedd5 !important; color: #c2410c !important;}
+
+.checkpoint-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  background-color: #ffffff;
+  color: #000000 !important; /* This forces black text on data */
+}
+
+
+/* ============================================================
+   2. ACTION BUTTONS (FIXING THE BLACK BG/TEXT ISSUE)
+   ============================================================ */
+/* ============================================================
+   6. ACTION BUTTONS (SPECIFICALLY FOR ICONS)
+   ============================================================ */
+.edit-btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2563eb;
+}
+
+
+.edit-btn-action:hover {
+  background-color: #0047AB !important; /* Blue background */
+  color: #ffffff !important;           /* White icon */
+  border-color: #0047AB !important;
+  transform: scale(1.1);               /* Subtle grow effect */
+  box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);
+}
+
+
+/* Ensure the icon itself doesn't inherit table text color */
+.edit-btn-action i,
+.edit-btn-action svg {
+  color: inherit !important;
+  display: block;
+}
+
+
+/* ============================================================
+   3. MODAL OVERLAY & CONTENT
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 999999 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  overflow: hidden;
+}
+
+
+.modal-content.admin-modal {
+  width: 100%;
+  max-width: 750px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  height: 88vh;
+  max-height: 900px;
+  position: relative;
+  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+
+/* ============================================================
+   4. MODAL INTERNAL STRUCTURE
+   ============================================================ */
+.modal-header-section {
+  background: transparent !important;
+  padding: 15px 32px 20px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+
+.modal-title { margin: 0; font-size: 1.25rem; font-weight: 800; color: #000000 !important; }
+.modal-subtitle { margin: 4px 0 0; font-size: 0.9rem; color: #475569; }
+
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px 32px 20px 32px;
+}
+
+
+.modal-two-column-layout {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+
+.modal-left-side, .modal-right-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+
+.modal-divider { width: 1px; background-color: #e2e8f0; }
+
+
+.modal-section-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #0047AB;
+  font-weight: 800;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;             /* Reduced from 4px */
+  margin-bottom: 10px;  /* Reduced from 16px to bring rows closer */
+}
+
+
+.form-group label {
+  font-size: 0.75rem;   /* Slightly smaller label */
+  font-weight: 700;
+  color: #000000 !important;
+}
+
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  height: 32px;         /* Decreased from 38px/40px */
+  padding: 0 10px;      /* Slightly tighter horizontal padding */
+  font-size: 0.85rem;   /* Smaller font to fit the smaller height */
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;   /* Sharper corners for a compact look */
+  color: #000000 !important;
+  background: #ffffff !important;
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   5. MODAL FOOTER
+   ============================================================ */
+.modal-footer {
+  background: transparent !important;
+  padding: 20px 32px 32px 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-shrink: 0;
+  margin-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+
+.btn-save-modern {
+  background-color: #0047AB !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+.btn-cancel-modern {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   6. RESPONSIVE
+   ============================================================ */
+@media (max-width: 650px) {
+  .modal-overlay { padding: 80px 10px 40px 10px; }
+  .modal-two-column-layout { flex-direction: column; gap: 24px; }
+  .modal-divider { display: none; }
+  .modal-content.admin-modal { height: 95vh; }
+}

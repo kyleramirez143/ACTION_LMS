@@ -19,6 +19,11 @@
   align-items: center;
 }
 
+/* Remove unwanted after elements */
+.navbar *::after {
+  content: none !important;
+} 
+
 .navbar-wrapper {
   display: flex;
   flex-direction: column;
@@ -29,7 +34,7 @@
 }
 
 .navbar-wrapper + * {
-  padding-top: 140px; /* navbar + search bar */
+  padding-top: 100px; /* navbar + search bar */
 }
 
 /* ================= LOGO ================= */

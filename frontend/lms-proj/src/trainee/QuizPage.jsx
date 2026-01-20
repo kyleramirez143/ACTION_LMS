@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios';
-import { SubmitConfirmationModal, QuizResultModal } from './QuizModals';
+import { SubmitConfirmationModal, QuizResultModal, TimeUpModal } from './QuizModals';
 import { RecorderState } from './recorder';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,15 +12,21 @@ const QuizPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('authToken');
   const sessionId = state?.sessionId;
+  const screenMonitoring = state?.screenMonitoring ?? false;
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [autoSubmitCountdown, setAutoSubmitCountdown] = useState(0);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20 * 60);
   const [submissionResult, setSubmissionResult] = useState(null);
+
+  const submissionLock = useRef(false);
 
   // --- AUTH CHECK ---
   useEffect(() => {
@@ -39,7 +45,9 @@ const QuizPage = () => {
 
   // --- SESSION CHECK ---
   useEffect(() => {
-    if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
+    if (screenMonitoring && !sessionId) {
+      navigate(`/quiz/${assessment_id}/permission`);
+    }
   }, [sessionId, assessment_id, navigate]);
 
   // --- FETCH QUESTIONS ---
@@ -61,18 +69,42 @@ const QuizPage = () => {
 
   // --- TIMER ---
   useEffect(() => {
+    if (showTimeUpModal || hasSubmitted || timeLeft <= 0) return;
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          setShowSubmitModal(true);
+          setShowTimeUpModal(true);
+          setAutoSubmitCountdown(5);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [showTimeUpModal, hasSubmitted, timeLeft]);
+
+  // --- COUNTDOWN EFFECT ---
+  useEffect(() => {
+    if (!showTimeUpModal || hasSubmitted) return;
+
+    const countdownTimer = setInterval(() => {
+      setAutoSubmitCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownTimer);
+          setShowTimeUpModal(false);
+          onConfirmSubmit();   // unified submit
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownTimer);
+  }, [showTimeUpModal, hasSubmitted]);
+
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -93,27 +125,33 @@ const QuizPage = () => {
   const courseId = state?.course_id;
   const moduleId = state?.module_id;
 
-  // --- SUBMIT QUIZ ---
+  if (isUploading) return <p>Submitting quiz...</p>;
+
   const onConfirmSubmit = async () => {
-    setShowSubmitModal(false);
+    if (submissionLock.current) return; // prevent double submission
+    submissionLock.current = true;       // lock
+
+    setHasSubmitted(true);
     setIsUploading(true);
+    setShowSubmitModal(false);
+    setShowTimeUpModal(false);
 
     try {
-      // Stop recording first
-      RecorderState.stop();
+      if (screenMonitoring) {
+        RecorderState.stop();
 
-      // Upload recording
-      const chunks = RecorderState.getChunks();
-      if (chunks.length > 0) {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const formData = new FormData();
-        formData.append('recording', blob, `session_${sessionId}.webm`);
-        await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const chunks = RecorderState.getChunks();
+        if (chunks.length > 0) {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const formData = new FormData();
+          formData.append('recording', blob, `session_${sessionId}.webm`);
+          await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        }
       }
 
-      // Upload all answers at once
+      // Submit answers
       const response = await API.post(`/quizzes/responses`, {
         assessment_id,
         answers,
@@ -121,17 +159,15 @@ const QuizPage = () => {
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       setSubmissionResult(response.data);
-
-      setIsUploading(false);
       setShowResultModal(true);
-
     } catch (err) {
       console.error('Submission error:', err);
-      alert('Failed to submit quiz. Please try again.');
+      alert('Failed to submit quiz.');
+    } finally {
       setIsUploading(false);
+      submissionLock.current = false; // unlock only if you want to allow retry on failure
     }
   };
-
 
   if (!questions.length) return <p>Loading quiz...</p>;
 
@@ -155,15 +191,18 @@ const QuizPage = () => {
             <div className="d-grid gap-2">
               {/* --- MULTIPLE CHOICE --- */}
               {question.options && Object.keys(question.options).length > 0 ? (
-                Object.entries(question.options).map(([key, option]) => (
-                  <button
-                    key={key}
-                    className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => handleAnswer(currentQuestion, key)}
-                  >
-                    {option}
-                  </button>
-                ))
+                Object.entries(question.options).map(([key, option], idx) => {
+                  const letter = String.fromCharCode(65 + idx); // 65 = 'A'
+                  return (
+                    <button
+                      key={key}
+                      className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => handleAnswer(currentQuestion, key)}
+                    >
+                      <strong>{letter}.</strong> {option}
+                    </button>
+                  );
+                })
               ) : (
                 /* Free-text input for Nihongo questions */
                 <input
@@ -196,7 +235,7 @@ const QuizPage = () => {
               )}
             </div>
 
-            {allAnswered && (
+            {allAnswered && !hasSubmitted && (
               <button className="btn btn-success" onClick={() => setShowSubmitModal(true)}>
                 Submit Quiz
               </button>
@@ -207,8 +246,8 @@ const QuizPage = () => {
         <div className="col-md-3">
           <div className="card p-3 shadow-sm">
             <h6 className="text-center">Question Navigator</h6>
-            {sessionId && (
-              <div className="alert alert-warning mt-3 d-flex align-items-center">
+            {screenMonitoring && sessionId && (
+              <div className="alert alert-warning mt-3">
                 Recording in Progress
               </div>
             )}
@@ -244,7 +283,9 @@ const QuizPage = () => {
 
           // 1. Handle Review: Navigate to the review page with the attempt UUID
           onReview={() =>
-            navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`)
+            navigate(`/trainee/assessment/${assessment_id}/review?attempt=${submissionResult?.attempt_id}`, {
+              replace: true
+            })
           }
 
           // 2. Handle Exit: Navigate to the TrainerModuleScreen route
@@ -258,6 +299,8 @@ const QuizPage = () => {
           }}
         />
       )}
+
+      {showTimeUpModal && <TimeUpModal countdown={autoSubmitCountdown} />}
 
       {isUploading && <div className="alert alert-info mt-3">Submitting quiz...</div>}
     </div>

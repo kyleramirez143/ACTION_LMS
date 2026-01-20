@@ -126,7 +126,7 @@ module.exports = {
     // --------------------------
     // LECTURES ↔ ASSESSMENTS
     // --------------------------
-    await queryInterface.createTable('lectures_assessments', {
+    await queryInterface.createTable('lecture_assessments', {
       lecture_id: { ...foreignKey('lectures', 'lecture_id'), primaryKey: true },
       assessment_id: { ...foreignKey('assessments', 'assessment_id'), primaryKey: true },
       created_at: standardTimestamp,

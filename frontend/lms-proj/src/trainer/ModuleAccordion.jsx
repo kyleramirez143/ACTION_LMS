@@ -165,6 +165,34 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
         }
     };
 
+    const handleDeleteQuiz = async (assessmentId) => {
+        if (!window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) return;
+
+        try {
+            const token = localStorage.getItem("authToken");
+            const res = await fetch(`/api/quizzes/${assessmentId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (res.ok) {
+                // Remove the deleted quiz from local state
+                const updatedLectures = localLectures.map((lec) => ({
+                    ...lec,
+                    assessments: lec.assessments.filter((q) => q.assessment_id !== assessmentId),
+                }));
+                setLectures(updatedLectures);
+            } else {
+                console.error("Failed to delete quiz");
+            }
+        } catch (err) {
+            console.error("Error deleting quiz:", err);
+        }
+    };
+
     return (
         <div className="accordion-wrapper">
             {localLectures.length === 0 ? (
@@ -415,6 +443,9 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
                                                                     <ShieldAlert size={14} className="me-2 text-danger" /> Quiz Results
+                                                                </li>
+                                                                <li className="dropdown-item cursor-pointer text-danger" onClick={() => handleDeleteQuiz(quiz.assessment_id)}>
+                                                                    <Trash2 size={14} className="me-2" /> Delete Quiz
                                                                 </li>
                                                             </ul>
                                                         )}

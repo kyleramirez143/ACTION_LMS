@@ -28,6 +28,15 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 
+// Notification
+import NotificationView from "./all/NotificationView.jsx";
+
+//Checkpoint View
+import CheckpointView from "./admin/CheckpointView.jsx";
+
+//Help & Support
+import HelpAndSupport from "./all/HelpSupport.jsx";
+
 // Admin Imports
 import AdminDashboard from './admin/AdminDashboard';
 // import AdminCreateCourse from './admin/AdminCoursePage';
@@ -45,6 +54,7 @@ import NewSchedule from "./admin/NewSchedule.jsx";
 // Trainer Imports
 import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
+import QuizManual from "./trainer/QuizManual.jsx";
 import CoursePage from './trainer/CourseManagement';
 import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
@@ -67,7 +77,8 @@ import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import AddBatch from "./admin/AddBatch.jsx";
 import AdminCoursePage from "./admin/AdminCoursePage";
-
+import ViewGrades from "./trainee/ViewGrades.jsx";
+import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -106,10 +117,20 @@ function AppContent() {
             {/* Public / Login */}
             <Route path="/" element={<LoginPage />} />
 
+            {/* Notification */}
+            <Route path="/all/notificationview" element={<NotificationView />} />
+
+            {/* Checkpoint View */}
+            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
+
+            {/* Help & Support */}
+            <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
+
             {/* Trainer Side Routes */}
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
 
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
+            <Route path="/trainer/quizmanual" element={<QuizManual />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
 
             <Route path="/trainer/course-management" element={<CoursePage />} />
@@ -126,8 +147,8 @@ function AppContent() {
 
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
-            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule/>} />
-            
+            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+
 
             {/* Admin Side Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -139,25 +160,28 @@ function AppContent() {
             <Route path="/admin/adduser" element={<AddUser />} />
             <Route path="/admin/edituser/:id" element={<AddUser />} />
             <Route path="/admin/profile" element={<AdminProfileManagement />} />
-            <Route path="/admin/batch-management" element={<BatchesTable/>} />
-            <Route path="/admin/add-batch" element={<AddBatch/>} />
+            <Route path="/admin/batch-management" element={<BatchesTable />} />
+            <Route path="/admin/add-batch" element={<AddBatch />} />
             <Route path="/admin/edit-batch/:id" element={<AddBatch />} />
-            <Route path="/admin/module-management" element={<ModuleTable/>} />
-            <Route path="/admin/set-module-date" element={<SetPeriodModule/>} />
-            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule/>} />
-            <Route path="/admin/calendar" element={<CalendarView/>} />
-            <Route path="/admin/add-new-schedule" element={<NewSchedule/>} />
+            <Route path="/admin/module-management" element={<ModuleTable />} />
+            <Route path="/admin/set-module-date" element={<SetPeriodModule />} />
+            <Route path="/admin/set-module-date/:id" element={<SetPeriodModule />} />
+            <Route path="/admin/calendar" element={<CalendarView />} />
+            <Route path="/admin/add-new-schedule" element={<NewSchedule />} />
 
             {/* Trainee Side Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
+            <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
 
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
+            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
+            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
 
           </Routes>
         </div>

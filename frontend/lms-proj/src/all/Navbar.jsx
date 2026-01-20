@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
-import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = () => {
   // ================= HOOKS (top level) =================
@@ -207,7 +207,7 @@ const Navbar = () => {
                 style={{ width: "40px", height: "40px", cursor: "pointer" }}
               />
               <Dropdown.Menu className="mt-2 shadow">
-                <Dropdown.Item as={Link} to={profilePath}>
+                <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   Profile
                 </Dropdown.Item>
 
@@ -223,6 +223,7 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   Help & Support
                 </Dropdown.Item>
+                
 
                 <Dropdown.Item
                   as={Link}
@@ -242,7 +243,7 @@ const Navbar = () => {
       <div className={`side-panel ${menuOpen ? "open" : ""}`}>
         {visibleLinks.map((link) => (
           <NavLink
-            key={link.path}
+            key={`${link.name}-${link.path}`}
             to={link.path}
             className="nav-link mb-3"
             onClick={() => setMenuOpen(false)}
@@ -253,7 +254,7 @@ const Navbar = () => {
 
         <hr />
 
-        <Link to={profilePath} onClick={() => setMenuOpen(false)}>
+        <Link to="/trainee/ProfileInfo" onClick={() => setMenuOpen(false)}>
           Profile
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
@@ -274,17 +275,7 @@ const Navbar = () => {
       {menuOpen && <div className="side-overlay" onClick={() => setMenuOpen(false)} />}
 
       {/* ================= SEARCH BAR ================= */}
-      <div className="search-bar-section py-3 px-4">
-        <input
-          type="text"
-          className="form-control search-input"
-          placeholder="Search your Available Courses"
-        />
-        <div className="d-flex gap-2">
-          <button className="search-button">Search</button>
-          <button className="search-button">Export</button>
-        </div> 
-      </div>
+      <div className="search-bar-section py-3 px-4"></div>
     </nav>
   );
 };

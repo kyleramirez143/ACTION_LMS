@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
 import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
+import { ArrowLeft } from "lucide-react";
 
 export default function TrainerModuleScreen() {
   const { course_id, module_id } = useParams();
@@ -93,10 +93,20 @@ export default function TrainerModuleScreen() {
   };
 
   return (
-    <div className="module-container">
+    <div className="module-container px-4 py-0">
       <div className="module-left">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="module-title">{moduleTitle}</div>
+          <div className="title-back-row p-0 m-0">
+            <button
+              type="button"
+              className="back-btn"
+              onClick={() => navigate(`/${course_id}/modules`)}
+              aria-label="Go back"
+            >
+              <ArrowLeft size={20} strokeWidth={2.2} />
+            </button>
+            <h3 className="mb-0">{moduleTitle}</h3>
+          </div>
           {userRole === "Trainer" && (
             <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
               Add Lecture
@@ -121,10 +131,11 @@ export default function TrainerModuleScreen() {
         )}
       </div>
 
-      <div className="module-right">
-        <div className="upcoming-title">Upcoming</div>
-        <UpcomingPanel />
-      </div>
+        <div className="module-right">
+          <div className="upcoming-title">Upcoming</div>
+          <UpcomingPanel moduleId={module_id} />
+        </div>
+
     </div>
   );
 }

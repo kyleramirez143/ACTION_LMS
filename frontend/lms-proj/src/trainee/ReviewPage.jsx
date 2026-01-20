@@ -45,28 +45,6 @@ export default function ReviewPage() {
     fetchReview();
   }, [assessment_id, location.search]);
 
-  // In ReviewPage.jsx
-  // useEffect(() => {
-  //   const fetchReview = async () => {
-  //     const queryParams = new URLSearchParams(window.location.search);
-  //     const attemptId = queryParams.get('attempt');
-
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       // Send attemptId to the backend
-  //       const res = await fetch(`/api/quizzes/${assessment_id}/review?attempt_id=${attemptId}`, {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       });
-  //       const data = await res.json();
-  //       setQuizData(data);
-  //       // ...
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchReview();
-  // }, [assessment_id]);
-
   if (loading) return <div className="p-4">Loading review...</div>;
   if (!quizData.length) return <div className="p-4">No review data found.</div>;
 
@@ -81,7 +59,7 @@ export default function ReviewPage() {
     <div className="container-fluid py-3">
       {/* Header */}
       <div className="d-flex align-items-center mb-3">
-        <button className="btn btn-light border me-2" onClick={() => navigate(-1)}>
+        <button className="btn btn-light border me-2" onClick={() => navigate(`/trainee/assessment`)}>
           <ArrowLeft size={20} />
         </button>
         <h2 className="m-0 h4">{readableTitle} Review</h2>
@@ -101,7 +79,11 @@ export default function ReviewPage() {
               </div>
 
               <p className="fw-bold fs-5 mb-4">{currentQ.question}</p>
-
+              {!currentQ.userAnswer && (
+                <div className="alert alert-warning mt-2 p-2">
+                  ⚠️ You did not answer this question.
+                </div>
+              )}
               {/* Options Logic */}
               <div className="mb-4">
                 {currentQ.options && Object.values(currentQ.options).length > 0 ? (
@@ -117,7 +99,8 @@ export default function ReviewPage() {
 
                       // 3. COMPARE THE LETTER, NOT THE TEXT
                       const isCorrectAnswer = letter === correctVal;
-                      const isUserChoice = letter === userVal;
+                      // const isUserChoice = letter === userVal;
+                      const isUserChoice = userVal ? letter === userVal : false;
 
                       let itemClass = "list-group-item mb-2 rounded border-2 d-flex align-items-center ";
 

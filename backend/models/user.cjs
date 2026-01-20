@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
   });
 
+
   User.associate = function (models) {
     // 1. One-to-One/Many relationship with Password
     // Used by login logic to find the hashed password
@@ -46,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'user_id',
       as: 'currentPassword' // Alias used in the authController query
     });
+
 
     // 2. Many-to-Many relationship with Role (via user_roles)
     User.belongsToMany(models.Role, {
@@ -55,15 +57,30 @@ module.exports = (sequelize, DataTypes) => {
       as: 'roles'
     });
 
+
     User.hasMany(models.UserRole, { foreignKey: "user_id", as: "user_roles" });
 
-    User.belongsToMany(models.Batch, {
-      through: models.UserBatch,
-      foreignKey: "user_id",
-      otherKey: "batch_id",
-      as: "batches"
-    });
+
+    // 3. Batches Relationship (Many-to-Many) - THE FIX FOR YOUR TABLE
+    if (models.Batch && models.UserBatch) {
+      User.belongsToMany(models.Batch, {
+        through: models.UserBatch,
+        foreignKey: 'user_id',
+        otherKey: 'batch_id',
+        as: 'batches' // This must be unique and match your Controller include
+      });
+    }
+
+
+    // 4. Onboarding Relationship (One-to-One) - THE FIX FOR YOUR DATA
+    if (models.Onboarding) {
+      User.hasOne(models.Onboarding, {
+        foreignKey: 'user_id',
+        as: 'onboardingDetails' // This alias is used in your controller map
+      });
+    }
   };
+
 
   return User;
 };
