@@ -78,7 +78,7 @@ module.exports = {
       id: uuidColumn,
       first_name: { type: Sequelize.STRING(100) },
       last_name: { type: Sequelize.STRING(100) },
-      email: { type: Sequelize.STRING(150), allowNull: false, unique: true }, 
+      email: { type: Sequelize.STRING(150), allowNull: false, unique: true },
       is_active: { type: Sequelize.BOOLEAN, defaultValue: true, allowNull: false },
       profile_picture: { type: Sequelize.STRING(255) },
       location: { type: Sequelize.STRING(150) },
@@ -124,10 +124,10 @@ module.exports = {
       permission_id: foreignKey('permissions', 'id'),
       created_at: standardTimestamp,
     });
-    
+
     // ONBOARDING_CHECKPOINTS
     await queryInterface.createTable('onboarding_checkpoints', {
-
+      id: uuidColumn,
       user_id: foreignKey('users', 'id'),
 
       bpi_account_no: { type: Sequelize.STRING(50), allowNull: true },
@@ -149,7 +149,7 @@ module.exports = {
     await queryInterface.addIndex('onboarding_checkpoints', ['user_id']);
   },
 
-  
+
 
   async down(queryInterface, Sequelize) {
     // Drop in reverse order to respect foreign key constraints

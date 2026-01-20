@@ -83,7 +83,7 @@ module.exports = {
     });
 
     // ASSESSMENT RESPONSE ATTEMPTS
-    await queryInterface.createTable('assessment_response_attempts', {
+    await queryInterface.createTable('assessment_attempts', {
       attempt_id: uuidColumn,
 
       assessment_id: foreignKey('assessments', 'assessment_id'),
@@ -108,17 +108,17 @@ module.exports = {
     });
 
     // Unique constraint: one attempt number per user per assessment
-    await queryInterface.addConstraint('assessment_response_attempts', {
+    await queryInterface.addConstraint('assessment_attempts', {
       fields: ['assessment_id', 'user_id', 'attempt_number'],
       type: 'unique',
       name: 'unique_user_assessment_attempt'
     });
 
     // Indexes
-    await queryInterface.addIndex('assessment_response_attempts', ['user_id'], {
+    await queryInterface.addIndex('assessment_attempts', ['user_id'], {
       name: 'idx_assessment_attempts_user'
     });
-    await queryInterface.addIndex('assessment_response_attempts', ['assessment_id'], {
+    await queryInterface.addIndex('assessment_attempts', ['assessment_id'], {
       name: 'idx_assessment_attempts_assessment'
     });
   
@@ -126,7 +126,8 @@ module.exports = {
   // ASSESSMENT RESPONSES
   await queryInterface.createTable('assessment_responses', {
     response_id: uuidColumn,
-    attempt_id: foreignKey('assessment_response_attempts', 'attempt_id'),
+    assessment_id: foreignKey('assessments', 'assessment_id'),
+    attempt_id: foreignKey('assessment_attempts', 'attempt_id'),
     user_id: foreignKey('users', 'id'),
     question_id: foreignKey('assessment_questions', 'question_id'),
     answer: { type: Sequelize.JSON },
@@ -202,7 +203,7 @@ module.exports = {
   await queryInterface.dropTable('ai_insights');
   await queryInterface.dropTable('grades');
   await queryInterface.dropTable('assessment_responses');
-  await queryInterface.dropTable('assessment_response_attempts');
+  await queryInterface.dropTable('assessment_attempts');
   await queryInterface.dropTable('assessment_questions');
   await queryInterface.dropTable('assessments');
   await queryInterface.dropTable('assessment_types');

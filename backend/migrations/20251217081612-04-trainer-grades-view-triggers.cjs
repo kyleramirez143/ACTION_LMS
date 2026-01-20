@@ -60,6 +60,8 @@ module.exports = {
         allowNull: false,
       },
 
+      event_date: { type: Sequelize.DATE, allowNull: false },
+
       start_time: {
         type: Sequelize.DATE, // maps to TIMESTAMPTZ in Postgres
         allowNull: false,
