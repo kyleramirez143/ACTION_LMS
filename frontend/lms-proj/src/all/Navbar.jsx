@@ -128,7 +128,7 @@ const Navbar = () => {
             className="lang-btn"
             onClick={toggleLanguage}
           >
-            {isJapanese ? "日本語" : "English"}
+            {isJapanese ? "日本語" : "ENG"}
           </button>
 
           <div className="position-relative" ref={notifRef}>
@@ -187,7 +187,7 @@ const Navbar = () => {
             className={`lang-btn ${isJapanese ? "active" : ""}`}
             onClick={toggleLanguage}
           >
-            {isJapanese ? "日本語" : "English"}
+            {isJapanese ? "日本語" : "ENG"}
           </button>
 
 
@@ -258,7 +258,7 @@ const Navbar = () => {
           className={`lang-btn ${isJapanese ? "active" : ""}`}
           onClick={toggleLanguage}
         >
-          {isJapanese ? "日本語" : "English"}
+          {isJapanese ? "日本語" : "ENG"}
         </button>
 
 

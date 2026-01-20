@@ -126,7 +126,8 @@
         "prev": "‹",
         "next": "›",
         "assigned_courses": "Assigned Courses",
-        "no_courses_found": "No courses found."
+        "no_courses_found": "No courses found.",
+        "appear": "Courses will appear here once they are assigned."
     },
     "module_management": {
         "loading_modules": "Loading modules...",
