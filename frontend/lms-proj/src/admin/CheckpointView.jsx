@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { FaEdit, FaCheckCircle, FaTimesCircle, FaArrowLeft } from "react-icons/fa"; // Added FaArrowLeft
+import { useLocation } from "react-router-dom";
+import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import "./CheckpointView.css";
 
 
@@ -8,7 +9,7 @@ const backendURL = "http://localhost:5000";
 
 
 const CheckpointView = () => {
-  const navigate = useNavigate();
+  const { t } = useTranslation();
   const { state } = useLocation();
   const batchId = state?.batchId;
 
@@ -106,23 +107,16 @@ const CheckpointView = () => {
   );
 
 
-  if (!batchId) return <div className="p-5 text-center">No Batch selected.</div>;
+  if (!batchId) return <div className="p-5 text-center">{t("checkpoint.no_batch_selected")}</div>;
 
 
   return (
     <div className="checkpoint-container">
       <div className="checkpoint-card">
         <div className="checkpoint-header">
-          <nav className="breadcrumb-nav">
-            <span className="breadcrumb-link" onClick={() => navigate("/admin/batch-management")}>
-              Batches
-            </span>
-            <span className="breadcrumb-separator">/</span>
-            <span className="breadcrumb-current">
-              {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : "Loading..."}
-            </span>
-          </nav>
-          <h2 className="checkpoint-title">Trainee List</h2>
+          <h2 className="checkpoint-title">
+            {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : t("checkpoint.loading_batch_info")}
+          </h2>
         </div>
 
 
@@ -130,18 +124,18 @@ const CheckpointView = () => {
           <table className="checkpoint-table">
             <thead>
               <tr>
-                <th>Trainee Name</th>
-                <th className="header-purple">BPI</th>
-                <th className="header-purple">SSS</th>
-                <th className="header-purple">TIN</th>
-                <th className="header-purple">Pag-IBIG</th>
-                <th className="header-purple">PhilHealth</th>
-                <th className="header-orange">UAF <br /> (IMS)</th>
-                <th className="header-orange">Telework <br /> (Office PC)</th>
-                <th className="header-orange">Telework <br /> (Personal PC)</th>
-                <th className="header-orange">Passport</th>
-                <th className="header-orange">IMS & <br /> UAF</th>
-                <th>Action</th>
+                <th>{t("checkpoint.trainee_name")}</th>
+                <th className="header-purple">{t("checkpoint.bpi")}</th>
+                <th className="header-purple">{t("checkpoint.sss")}</th>
+                <th className="header-purple">{t("checkpoint.tin")}</th>
+                <th className="header-purple">{t("checkpoint.pagibig")}</th>
+                <th className="header-purple">{t("checkpoint.philhealth")}</th>
+                <th className="header-orange">{t("checkpoint.uaf_ims")}</th>
+                <th className="header-orange">{t("checkpoint.telework_office")}</th>
+                <th className="header-orange">{t("checkpoint.telework_personal")}</th>
+                <th className="header-orange">{t("checkpoint.passport")}</th>
+                <th className="header-orange">{t("checkpoint.imf_uaf")}</th>
+                <th>{t("checkpoint.action")}</th>
               </tr>
             </thead>
             <tbody>
