@@ -1,18 +1,7 @@
 // /backend/controllers/lectureController.js
 
-import pkg from "../models/index.cjs";
-import fs from "fs"; // Need filesystem access for file deletion
-import path from "path";
-const {
-    Course,
-    Module,
-    Lecture,
-    Resource,
-    Assessment,
-    LectureResource,
-    LectureAssessment,
-    sequelize // Assume you have access to sequelize for transactions/raw queries
-} = pkg;
+import { Op } from "sequelize";
+import db from "../models/index.cjs";
 
 // import { v4 as uuidv4 } from "uuid";
 
@@ -490,5 +479,52 @@ export const deleteResource = async (req, res) => {
     } catch (err) {
         console.error("Delete Resource Error:", err);
         res.status(500).json({ error: "Failed to delete resource" });
+    }
+};
+
+// GET /api/lectures/batch/:batch_id
+export const getLecturesByBatch = async (req, res) => {
+    try {
+        const { batch_id } = req.params;
+        const userRole = req.user?.roles?.[0];
+
+        // 1️⃣ Get course IDs
+        const courses = await db.Course.findAll({
+            where: { batch_id },
+            attributes: ["course_id"],
+            raw: true
+        });
+
+        const courseIds = courses.map(c => c.course_id);
+        if (courseIds.length === 0) return res.json([]);
+
+        // 2️⃣ Get module IDs
+        const modules = await db.Module.findAll({
+            where: { course_id: courseIds },
+            attributes: ["module_id"],
+            raw: true
+        });
+
+        const moduleIds = modules.map(m => m.module_id);
+        if (moduleIds.length === 0) return res.json([]);
+
+        // 3️⃣ Get lectures
+        const whereClause = { module_id: moduleIds };
+        if (userRole === "Trainee") whereClause.is_visible = true;
+
+        const lectures = await db.Lecture.findAll({
+            where: whereClause,
+            include: [{
+                model: db.Module,
+                as: "module",
+                attributes: ["module_id", "title"]
+            }],
+            order: [["created_at", "ASC"]],
+        });
+
+        res.json(lectures);
+    } catch (err) {
+        console.error("Get Lectures By Batch Error:", err);
+        res.status(500).json({ error: "Failed to fetch lectures" });
     }
 };

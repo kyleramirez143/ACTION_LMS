@@ -152,7 +152,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 20px 30px;
+  /* padding: 20px 30px; */
   background: transparent; /* Changed from #fcfcfc to transparent */
   border-bottom: 1px solid #eee; /* Keeps the separation line */
 }
@@ -266,7 +266,7 @@
   background-color: #f8f9fa !important; 
   border: 2px dashed #a2a2a2; 
   border-radius: 12px;
-  margin: 20px 30px; /* Aligns with the table padding */
+  /* margin: 20px 30px;  */
 }
 
 .empty-state p {

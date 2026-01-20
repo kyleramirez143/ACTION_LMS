@@ -11,6 +11,15 @@ import { createEventsServicePlugin } from '@schedule-x/events-service';
 import 'temporal-polyfill/global';
 import '@schedule-x/theme-default/dist/index.css';
 import "./CalendarView.css";
+import { jwtDecode }from "jwt-decode";
+
+// Helper for color
+const subjectColor = (subject) => {
+    return subject === "holiday" ? "#ef4444" :
+        subject === "exam" ? "#f59e0b" :
+            subject === "assessments" ? "#10b981" :
+                "#3b82f6";
+};
 
 const mapDbEventToCalendar = (events) => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -113,12 +122,16 @@ function EventModal({ event, onClose, onDelete, onEdit }) {
                 <div className="d-flex justify-content-between align-items-center mb-2">
                     <h4 className="fw-bold mb-0">Schedule Information</h4>
                     <div className="d-flex gap-2">
-                        <button className="icon-btn" onClick={() => onDelete(event)} title="Delete">
-                            <i className="bi bi-trash3-fill text-dark fw-bold"></i>
-                        </button>
-                        <button className="icon-btn" onClick={() => onEdit(event)} title="Edit">
-                            <i className="bi bi-pencil-fill text-dark fw-bold"></i>
-                        </button>
+                        {(userRole === "Admin" || userRole === "Trainer") && (
+                            <>
+                                <button className="icon-btn" onClick={() => onDelete(event)} title="Delete">
+                                    <i className="bi bi-trash3-fill text-dark fw-bold"></i>
+                                </button>
+                                <button className="icon-btn" onClick={() => onEdit(event)} title="Edit">
+                                    <i className="bi bi-pencil-fill text-dark fw-bold"></i>
+                                </button>
+                            </>
+                        )}
                         <button className="icon-btn" onClick={onClose} title="Close">
                             <i className="bi bi-x-lg text-dark fs-5 fw-bold"></i>
                         </button>
@@ -157,14 +170,6 @@ function EventModal({ event, onClose, onDelete, onEdit }) {
     );
 }
 
-// Helper for color
-const subjectColor = (subject) => {
-    return subject === "holiday" ? "#ef4444" :
-        subject === "exam" ? "#f59e0b" :
-            subject === "assessments" ? "#10b981" :
-                "#3b82f6";
-};
-
 // Calendar wrapper with hover tooltip
 const Calendar = ({ events, onEventClick }) => {
     const calendar = useCalendarApp({
@@ -192,7 +197,7 @@ const Calendar = ({ events, onEventClick }) => {
                 day: 'numeric',
             });
             const weekday = startDate.toLocaleDateString('en-US', { weekday: 'long' });
-            const timeRange = `${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} - ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            const timeRange = `${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}`;
 
             return (
                 <div
@@ -223,6 +228,9 @@ const Calendar = ({ events, onEventClick }) => {
 function CalendarView() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
+    const decoded = token ? jwtDecode(token) : {};
+    const userRole = decoded?.roles?.[0]?.toLowerCase(); // admin, trainer, trainee
+    const canEdit = userRole === "admin" || userRole === "trainer";
 
     const [batches, setBatches] = useState([]);
     const [selectedBatch, setSelectedBatch] = useState(null);
@@ -245,10 +253,25 @@ function CalendarView() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!token) {
-            navigate("/");
-        }
-    }, [navigate, token]);
+        if (!token) navigate("/");
+
+        const fetchEvents = async () => {
+            try {
+                const url = userRole === "admin"
+                    ? "/api/schedules/admin"
+                    : userRole === "trainer"
+                        ? "/api/schedules/trainer"
+                        : "/api/schedules/view"; // Trainee view-only
+                const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                setDbEvents(mapDbEventToCalendar(data.events || []));
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchEvents();
+    }, [token, userRole, navigate]);
 
     // Fetch batches
     useEffect(() => {
@@ -373,14 +396,19 @@ function CalendarView() {
 
     const handleEventClick = (event) => setModalEvent(event);
     const handleCloseModal = () => setModalEvent(null);
-    const handleEditEvent = (event) => navigate(`/admin/edit-schedule/${event.id.split('-')[0]}`);
-
+    const handleEditEvent = (event) => {
+        if (!canEdit) return;
+        const id = event.id.split("-")[0];
+        if (userRole === "admin") navigate(`/admin/edit-schedule/${id}`);
+        if (userRole === "trainer") navigate(`/trainer/${decoded.courseId || 0}/edit-schedule/${id}`);
+    };
     const handleDeleteEvent = async (event) => {
-        const idToDelete = event.id.split('-')[0];
+        if (!canEdit) return;
+        const id = event.id.split("-")[0];
         try {
-            const res = await fetch(`http://localhost:5000/api/schedules/${idToDelete}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-            if (!res.ok) throw new Error("Failed to delete");
-            setDbEvents(prev => prev.filter(e => !e.id.startsWith(idToDelete)));
+            const res = await fetch(`/api/schedules/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+            if (!res.ok) throw new Error("Delete failed");
+            setDbEvents(prev => prev.filter(e => !e.id.startsWith(id)));
             setModalEvent(null);
         } catch (err) { console.error(err); alert("Delete failed"); }
     };
@@ -416,22 +444,41 @@ function CalendarView() {
 
                 {/* RIGHT (horizontal controls) */}
                 <div className="d-flex align-items-center gap-3">
-                    <Link to="/admin/add-new-schedule" className="text-decoration-none">
-                        <button type="button" className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
-                            style={{ height: "45px" }}>
-                            <i className="bi bi-plus-lg"></i> Add Schedule
-                        </button>
-                    </Link>
-                    <select className="form-select"
+                    {canEdit && (
+                        <Link
+                            to={
+                                userRole === "admin"
+                                    ? "/admin/add-new-schedule"
+                                    : `/trainer/${decoded.courseId || 0}/add-new-schedule`
+                            }
+                            className="text-decoration-none"
+                        >
+                            <button
+                                type="button"
+                                className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
+                                style={{ height: "45px" }}
+                            >
+                                <i className="bi bi-plus-lg"></i> Add Schedule
+                            </button>
+                        </Link>
+                    )}
+
+                    <select
+                        className="form-select"
                         style={{ width: "300px", height: "45px" }}
                         value={selectedBatch?.batch_id || ""}
                         onChange={handleBatchChange}
                     >
-                        {batches.map(batch => (
-                            <option key={batch.batch_id} value={batch.batch_id}>
-                                {batch.name} {batch.location}
-                            </option>
-                        ))}
+                        {batches.map(batch => {
+                            // If Trainer, show only batches that match their course
+                            if (userRole === "trainer" && batch.course_id !== decoded.courseId) return null;
+
+                            return (
+                                <option key={batch.batch_id} value={batch.batch_id}>
+                                    {batch.name} {batch.location}
+                                </option>
+                            );
+                        })}
                     </select>
                 </div>
             </div>
@@ -448,6 +495,7 @@ function CalendarView() {
                             onClose={handleCloseModal}
                             onEdit={handleEditEvent}
                             onDelete={handleDeleteEvent}
+                            canEdit={canEdit}
                         />
                     }
                 </div>

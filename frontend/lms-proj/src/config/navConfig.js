@@ -1,13 +1,11 @@
 // ./src/config/navConfig.js
 
-// Change what is needed for each role.
-// Check what each role can access. Add something if it's not yet included.
 export const navLinks = [
+  // ------------------ Admin ------------------
   {
     name: 'Dashboard',
     path: '/admin/dashboard',
-    // icon: 'SettingsIcon',
-    requiredRoles: ['Admin'], // Only Admin can see this
+    requiredRoles: ['Admin'],
   },
   {
     name: 'Course Management',
@@ -32,11 +30,13 @@ export const navLinks = [
         path: '/admin/module-management',
       },
       {
-        name: 'Action Calendar',
+        name: 'Action Calendar',  // unified calendar link
         path: '/admin/calendar',
       },
     ],
   },
+
+  // ------------------ Trainer ------------------
   {
     name: 'Dashboard',
     path: '/trainer/dashboard',
@@ -59,13 +59,16 @@ export const navLinks = [
       {
         name: 'Manual Quiz',
         path: '/trainer/quizmanual',
-      },]
+      },
+    ],
   },
   {
-    name: 'Action Calendar',
+    name: 'Action Calendar', // unified calendar link
     path: '/trainer/calendar',
     requiredRoles: ['Trainer'],
   },
+
+  // ------------------ Trainee ------------------
   {
     name: 'Dashboard',
     path: '/trainee/dashboard',
@@ -74,18 +77,16 @@ export const navLinks = [
   {
     name: 'My Courses',
     path: '/trainee/courses',
-    // icon: 'SchoolIcon',
-    requiredRoles: ['Trainee'], // Only Students
+    requiredRoles: ['Trainee'],
   },
   {
     name: 'Assessment',
     path: '/trainee/assessment',
     requiredRoles: ['Trainee'],
   },
-  // {
-  //   name: 'Profile',
-  //   path: '/profile',
-  //   // icon: 'UserIcon',
-  //   requiredRoles: ['Admin', 'Trainer', 'Trainee'],
-  // },
+  {
+    name: 'Action Calendar', // unified calendar link
+    path: '/trainee/calendar',
+    requiredRoles: ['Trainee'],
+  },
 ];

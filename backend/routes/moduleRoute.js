@@ -9,7 +9,8 @@ import {
     updateModule,
     deleteModule,
     getModuleById,
-    updateModuleVisibility
+    updateModuleVisibility,
+    getModulesByBatch
 } from "../controllers/moduleController.js";
 
 const router = express.Router();
@@ -37,5 +38,6 @@ router.put("/:module_id", protect, checkRole(["Trainer"]), upload.single("image"
 router.get("/id/:module_id", protect, checkRole(["Trainer", "Trainee"]), getModuleById);
 router.delete("/:module_id", protect, checkRole(["Trainer"]), deleteModule);
 router.put("/:module_id/visibility", protect, checkRole(["Trainer"]), updateModuleVisibility);
+router.get("/batch/:batch_id", getModulesByBatch);
 
 export default router;

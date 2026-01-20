@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 function TrainerNewSchedule() {
     const navigate = useNavigate();
-    const { id: userId } = useParams();
-    const isEditMode = !!userId;
+    const { event_id } = useParams();
+    const isEditMode = !!event_id;
+
     const token = localStorage.getItem("authToken");
+    const decoded = token ? jwtDecode(token) : {};
+    const headers = { Authorization: `Bearer ${token}` };
 
     const [formData, setFormData] = useState({
         title: "",
@@ -29,81 +33,87 @@ function TrainerNewSchedule() {
 
     const [batches, setBatches] = useState([]);
     const [modules, setModules] = useState([]); // Fetch based on batch
+    const [selectedBatch, setSelectedBatch] = useState(null);
     const [lectures, setLectures] = useState([]); // Fetch based on module
     const [isLoadingModules, setIsLoadingModules] = useState(false);
 
-    //Logic to fetch modules when batch_id changes
+    /* -----------------------------
+       Fetch Batches for Course
+    ----------------------------- */
+    const fetchBatches = async () => {
+        try {
+            const res = await axios.get("/api/batches/dropdown", { headers });
+            setBatches(res.data); // ✅ ARRAY
+        } catch (err) {
+            console.error("Failed to fetch batches:", err);
+            setBatches([]);
+        }
+    };
+
+    /* -----------------------------
+       Fetch Modules for Selected Batch
+    ----------------------------- */
+    const fetchModulesByBatch = async (batchId) => {
+        if (!batchId) return setModules([]);
+        try {
+            const res = await axios.get(`/api/modules/batch/${batchId}`, { headers });
+            setModules(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch modules:", err);
+        }
+    };
+
+    /* -----------------------------
+       Fetch Lectures for Selected Batch
+    ----------------------------- */
+    const fetchLecturesByBatch = async (batchId) => {
+        if (!batchId) return setLectures([]);
+        try {
+            const res = await axios.get(`/api/lectures/batch/${batchId}`, { headers });
+            setLectures(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch lectures:", err);
+        }
+    };
+
+    /* -----------------------------
+       Fetch event data if editing
+    ----------------------------- */
     useEffect(() => {
-        const fetchModulesForBatch = async () => {
-            if (!formData.batch_id) {
-                setModules([]);
-                return;
-            }
+        if (!event_id) return;
 
-            setIsLoadingModules(true);
+        const fetchEvent = async () => {
             try {
-                // Adjust this URL to your actual API endpoint for modules by batch
-                const res = await fetch(`http://localhost:5000/api/modules/batch/${formData.batch_id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error("No modules found");
-                const data = await res.json();
-                setModules(data);
-            } catch (err) {
-                console.error("Module fetch error:", err);
-                setModules([]); // Reset if error or none found
-            } finally {
-                setIsLoadingModules(false);
-            }
-        };
-
-        fetchModulesForBatch();
-    }, [formData.batch_id, token]);
-
-    // --- FETCH BATCHES ---
-    useEffect(() => {
-        const fetchBatches = async () => {
-            try {
-                const res = await fetch("http://localhost:5000/api/batches/dropdown", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                setBatches(data);
-            } catch (err) { console.error(err); }
-        };
-        fetchBatches();
-    }, [token]);
-
-    useEffect(() => {
-        const fetchModuleDetails = async () => {
-            if (!formData.module_id) return;
-
-            try {
-                const res = await fetch(
-                    `http://localhost:5000/api/modules/${formData.module_id}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }
-                );
-
-                if (!res.ok) throw new Error("Failed to fetch module");
-
-                const module = await res.json();
+                const res = await axios.get(`/api/calendar/${event_id}`, { headers });
+                const data = res.data;
 
                 setFormData(prev => ({
                     ...prev,
-                    module_start_date: module.start_date,
-                    module_end_date: module.end_date,
-                    date: module.start_date // used internally for calendar payload
+                    ...data,
+                    batch_id: data.batch_id || "",
+                    module_id: data.module_id || "",
+                    lecture_id: data.lecture_id || "",
+                    date: data.date?.split("T")[0] || "",
+                    start_time: data.start_time?.split("T")[1]?.slice(0, 5) || "",
+                    end_time: data.end_time?.split("T")[1]?.slice(0, 5) || "",
                 }));
+
+                if (data.batch_id) {
+                    await fetchModulesByBatch(data.batch_id);
+                    await fetchLecturesByBatch(data.batch_id);
+                }
             } catch (err) {
-                console.error("Module fetch error:", err);
+                console.error("Failed to fetch event", err);
             }
         };
 
-        fetchModuleDetails();
-    }, [formData.module_id, token]);
+        fetchEvent();
+    }, [event_id]);
 
+    // Fetch batches on mount
+    useEffect(() => {
+        fetchBatches();
+    }, []);
 
     // --- HANDLERS ---
     const handleChange = (e) => {
@@ -121,6 +131,60 @@ function TrainerNewSchedule() {
         }));
     };
 
+    const handleBatchChange = async (e) => {
+        const batchId = e.target.value;
+
+        // Reset module & lecture selections
+        setFormData(prev => ({
+            ...prev,
+            batch_id: batchId,
+            module_id: "",
+            lecture_id: ""
+        }));
+
+        try {
+            // Fetch modules for this batch
+            const modulesRes = await axios.get(`/api/modules/batch/${batchId}`, { headers });
+            setModules(modulesRes.data);
+
+            // Fetch lectures for this batch
+            const lecturesRes = await axios.get(`/api/lectures/batch/${batchId}`, { headers });
+            setLectures(lecturesRes.data);
+
+        } catch (err) {
+            console.error("Failed to fetch modules or lectures for batch", err);
+            setModules([]);
+            setLectures([]);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchBatches();
+    }, []);
+
+    const handleModuleChange = (e) => {
+        const moduleId = e.target.value;
+
+        setFormData(prev => ({
+            ...prev,
+            module_id: moduleId,
+            lecture_id: "" // reset lecture
+        }));
+
+        // Optional: filter lectures of this module
+        const filteredLectures = lectures.filter(l => l.module.module_id === moduleId);
+        setLectures(filteredLectures);
+    };
+
+    const handleLectureChange = (e) => {
+        const lectureId = e.target.value;
+
+        setFormData(prev => ({
+            ...prev,
+            lecture_id: lectureId
+        }));
+    };
 
     const handleDayChange = (day) => {
         setFormData(prev => ({
@@ -133,8 +197,23 @@ function TrainerNewSchedule() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting Payload:", formData);
-        // Logic to combine date + time and send to backend
+        try {
+            const method = event_id ? "put" : "post";
+            const url = event_id ? `/api/calendar/${event_id}` : "/api/calendar";
+
+            const res = await axios({
+                method,
+                url,
+                data: formData,
+                headers
+            });
+
+            alert(res.data.message);
+            navigate("/trainer/calendar");
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.error || "Failed to save schedule");
+        }
     };
 
     const showTimeFields =
@@ -164,8 +243,13 @@ function TrainerNewSchedule() {
                     <div className="row mb-3">
                         <label className="col-sm-3 col-form-label">Description </label>
                         <div className="col-sm-9">
-                            <textarea type="text" class="form-control" placeholder="Enter Description" aria-label="Description">
-                            </textarea>
+                            <textarea
+                                name="description"
+                                className="form-control"
+                                placeholder="Enter Description"
+                                value={formData.description}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
 
@@ -173,34 +257,19 @@ function TrainerNewSchedule() {
                     <div className="row mb-3">
                         <label className="col-sm-3 col-form-label">Batch </label>
                         <div className="col-sm-9">
-                            <select name="batch_id"
+                            <select
+                                name="batch_id"
                                 className="form-select"
-                                onChange={handleChange}
                                 value={formData.batch_id}
-                                required>
-
+                                onChange={handleBatchChange}
+                                required
+                            >
                                 <option value="">Select Batch</option>
-
-                                {batches.map((b) => {
-                                    // LOGIC: Disable if there are no quarters assigned
-                                    // Based on your controller, we check if qCount is 0 or isDisabled is true
-                                    const hasNoQuarters = b.qCount === 0 || !b.curriculum_id;
-                                    const isCurrentlySelected = formData.batch_id === b.batch_id;
-
-                                    // Only disable if it's not the one already saved (for Edit Mode)
-                                    const isDisabled = hasNoQuarters && !isCurrentlySelected;
-
-                                    return (
-                                        <option
-                                            key={b.batch_id}
-                                            value={b.batch_id}
-                                            disabled={isDisabled}
-                                            style={isDisabled ? { color: '#a0a0a0', backgroundColor: '#f8f9fa' } : {}}
-                                        >
-                                            {b.name} {b.location} {isDisabled ? " — No Quarters Assigned" : ""}
-                                        </option>
-                                    );
-                                })}
+                                {batches.map(batch => (
+                                    <option key={batch.batch_id} value={batch.batch_id}>
+                                        {batch.name} ({batch.location})
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -226,7 +295,7 @@ function TrainerNewSchedule() {
                         </div>
                     </div>
 
-                    {/* Conditional Dropdown: Module */}
+                    {/* Module Dropdown */}
                     {formData.event_type === "module_session" && (
                         <div className="row mb-3">
                             <label className="col-sm-3 col-form-label">Select Module</label>
@@ -241,7 +310,7 @@ function TrainerNewSchedule() {
                                     <option value="">-- Choose Module --</option>
                                     {modules.map(m => (
                                         <option key={m.module_id} value={m.module_id}>
-                                            {m.name}
+                                            {m.title}
                                         </option>
                                     ))}
                                 </select>
@@ -249,19 +318,30 @@ function TrainerNewSchedule() {
                         </div>
                     )}
 
-                    {/* Conditional Dropdown: Lecture */}
+                    {/* Lecture Dropdown */}
                     {formData.event_type === "lecture" && (
-                        <div className="row mb-3 animate-fade">
+                        <div className="row mb-3">
                             <label className="col-sm-3 col-form-label">Select Lecture</label>
                             <div className="col-sm-9">
-                                <select name="lecture_id" className="form-select" onChange={handleChange} required>
+                                <select
+                                    name="lecture_id"
+                                    className="form-select"
+                                    value={formData.lecture_id}
+                                    onChange={handleLectureChange}
+                                    required
+                                >
                                     <option value="">-- Choose Lecture --</option>
-                                    {/* Map lectures here */}
+                                    {lectures
+                                        .filter(l => l.module?.module_id === formData.module_id)
+                                        .map(l => (
+                                            <option key={l.lecture_id} value={l.lecture_id}>
+                                                {l.title}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
                         </div>
                     )}
-
                     <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
                     {/* All Day Radio */}

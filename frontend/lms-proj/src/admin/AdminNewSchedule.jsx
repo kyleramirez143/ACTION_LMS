@@ -68,8 +68,8 @@ function AdminNewSchedule() {
                     batch_id: data.batch_id,
                     event_type: data.event_type,
                     event_date: data.event_date ? data.event_date.slice(0, 10) : "",
-                    start_time: data.start_time ? data.start_time.slice(11, 16) : "",
-                    end_time: data.end_time ? data.end_time.slice(11, 16) : "",
+                    start_time: startTime,
+                    end_time: endTime,
                     is_all_day: data.is_all_day,
                     is_recurring: data.is_recurring,
                     repetition: data.recurrence_rule?.repetition || "",
@@ -342,7 +342,7 @@ function AdminNewSchedule() {
                                         type="time"
                                         className="form-control pe-5" // padding-right for icon
                                         name="start_time"
-                                        value={formData.start_time}
+                                        value={formData.start_time?.slice(11, 16) || ""}
                                         onChange={e => handleTimeChange("start_time", e.target.value)}
                                         disabled={formData.is_all_day} // disable if all-day selected
                                         onClick={(e) => e.target.showPicker()}
@@ -375,7 +375,7 @@ function AdminNewSchedule() {
                                         type="time"
                                         className="form-control pe-5" // padding-right for icon
                                         name="end_time"
-                                        value={formData.end_time}
+                                        value={formData.end_time?.slice(11, 16) || ""}
                                         onChange={e => handleTimeChange("end_time", e.target.value)}
                                         disabled={formData.is_all_day} // disable if all-day selected
                                         onClick={(e) => e.target.showPicker()}

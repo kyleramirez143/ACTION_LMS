@@ -15,7 +15,8 @@ import {
     getLecturesByTrainer,
     updateResourceVisibility,
     renameResource,
-    deleteResource
+    deleteResource,
+    getLecturesByBatch
 } from "../controllers/lectureController.js";
 
 const router = express.Router();
@@ -43,6 +44,7 @@ router.get("/modules/:module_id", protect, checkRole(["Trainer", "Trainee"]), ge
 router.get("/id/:lecture_id", protect, checkRole(["Trainer", "Trainee"]), getLectureById);
 router.patch("/visibility/:lecture_id", protect, checkRole(["Trainer"]), updateLectureVisibility);
 router.get("/trainer", protect, checkRole(["Trainer", "Trainee"]), getLecturesByTrainer);
+router.get("/batch/:batch_id", getLecturesByBatch);
 
 // ---------- RESOURCES ----------
 router.post(

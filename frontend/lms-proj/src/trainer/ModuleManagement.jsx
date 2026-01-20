@@ -166,7 +166,7 @@ export default function ModuleManagement() {
                     <div className="d-flex gap-2">
                         <button
                             className="btn btn-outline-primary"
-                            onClick={() => navigate("/trainer/add-new-schedule")}
+                            onClick={() => navigate(`/trainer/${course_id}/add-new-schedule`)}
                         >
                             Add Schedule
                         </button>
