@@ -1,8 +1,24 @@
+import { useTranslation } from "react-i18next";
+
 export default function UpcomingPanel() {
+    const { t } = useTranslation();
+
     const events = [
-        { title: "L49 Vocabulary Quiz", date: "Tuesday, 29 June 2021", color: "green" },
-        { title: "[Java] Mock Exam", date: "Tuesday, 29 June 2021", color: "yellow" },
-        { title: "Quiz on Basic Theory", date: "Tuesday, 29 June 2021", color: "red" }
+        {
+            title: t("upcoming.events.vocab_quiz"),
+            date: t("upcoming.sample_date"),
+            color: "green"
+        },
+        {
+            title: t("upcoming.events.mock_exam"),
+            date: t("upcoming.sample_date"),
+            color: "yellow"
+        },
+        {
+            title: t("upcoming.events.basic_quiz"),
+            date: t("upcoming.sample_date"),
+            color: "red"
+        }
     ];
 
     return (
