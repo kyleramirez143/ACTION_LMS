@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./UserRoleTable.css";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 
 function UserRoleTable() {
     const navigate = useNavigate();
-
+    const { t } = useTranslation();
     const [users, setUsers] = useState([]);
     const [filter, setFilter] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
@@ -55,7 +56,7 @@ function UserRoleTable() {
             setTotalPages(data.totalPages || 1);
         } catch (err) {
             console.error("Fetch error:", err);
-            alert(`Error fetching users: ${err.message}`);
+            alert(t("user_management.error_fetch_users", { message: err.message }));
         }
         setLoading(false);
     };
@@ -79,9 +80,9 @@ function UserRoleTable() {
             });
             if (!res.ok) throw new Error(await res.text());
             fetchUsers();
-            alert("User deleted successfully!");
+            alert(t("user_management.user_deleted_successfully"));
         } catch (err) {
-            alert("Error deleting user: " + err.message);
+            alert(t("user_management.error_deleting_user", { error: err.message }));
         }
     };
 
@@ -96,7 +97,7 @@ function UserRoleTable() {
             if (!res.ok) throw new Error(data.error || "Toggle failed");
             fetchUsers();
         } catch (err) {
-            alert("Error: " + err.message);
+            alert(t("user_management.error_generic", { message: err.message }));
         }
     };
 
@@ -130,20 +131,20 @@ function UserRoleTable() {
 
             if (added.length > 0 && errors.length > 0) {
                 alert(
-                    `Import completed with warnings.\n\n` +
-                    `Imported: ${added.length}\n` +
-                    `Failed:\n` +
-                    errors.map(e => `• ${e.email}: ${e.error}`).join("\n")
+                    t("user_management.import_warning", {
+                        imported: added.length,
+                        failedList: errors.map(e => `• ${e.email}: ${e.error}`).join("\n")
+    })
                 );
             }
             else {
-                alert(`Successfully imported ${added.length} users!`);
+                alert(t("user_management.import_success", { count: added.length }));
             }
 
             setNewlyImportedIds(added.map(u => u.id));
             fetchUsers();
         } catch (err) {
-            alert("Error importing CSV: " + err.message);
+            alert(t("user_management.error_import_csv", { error: err.message }));
         }
         e.target.value = null;
     };
@@ -186,7 +187,7 @@ function UserRoleTable() {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error("Full Error Details:", err);
-            alert("Error downloading template: " + err.message);
+            alert(t("user_management.error_download_template", { message: err.message }));
         }
     };
 
@@ -221,22 +222,22 @@ function UserRoleTable() {
             });
 
             if (!res.ok) throw new Error(await res.text());
-            alert("Users deleted successfully!");
+            alert(t("user_management.users_deleted_successfully"));
             fetchUsers();
             setSelectedUsers([]);
         } catch (err) {
-            alert("Error deleting users: " + err.message);
+            alert(t("user_management.error_delete_users", { message: err.message }));
         }
     };
 
     return (
         <div className="user-role-card">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">User Role Management</h3>
+                <h3 className="section-title">{t("user_management.title")}</h3>
                 <div className="d-flex gap-2">
                     <Link to="/admin/adduser">
                         <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-person-plus-fill"></i> Add New User
+                            <i className="bi bi-person-plus-fill"></i> {t("user_management.add_new_user")}
                         </button>
                     </Link>
 
@@ -247,19 +248,19 @@ function UserRoleTable() {
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                         >
-                            <i className="bi bi-person-plus-fill"></i> Import Users
+                            <i className="bi bi-person-plus-fill"></i> {t("user_management.import_users")}
                         </button>
 
                         <ul className="dropdown-menu">
                             <li>
                                 <label className="dropdown-item" onClick={downloadTemplate}>
-                                    Click to Download Template
+                                    {t("user_management.download_template")}
                                 </label>
                             </li>
                             <li>
                                 {/* FIXED: Using label to trigger hidden input for better UI compatibility */}
                                 <label className="dropdown-item" style={{ cursor: "pointer", marginBottom: 0 }}>
-                                    Import Users
+                                   {t("user_management.import_users")}
                                     <input
                                         type="file"
                                         accept=".csv"
@@ -276,23 +277,23 @@ function UserRoleTable() {
                         onClick={handleBulkDelete}
                         disabled={selectedUsers.length === 0}
                     >
-                        <i className="bi bi-trash3-fill"></i> Delete ({selectedUsers.length})
+                        <i className="bi bi-trash3-fill"></i> {t("user_management.delete_users")} ({selectedUsers.length})
                     </button>
                 </div>
             </div>
 
             <div className="d-flex gap-3 mb-3 flex-wrap">
                 <div>
-                    <label className="me-2">Filter by Role:</label>
+                    <label className="me-2">{t("user_management.filter_by_role")}</label>
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                         className="form-select w-auto d-inline-block"
                     >
-                        <option value="All">All Roles</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Trainer">Trainer</option>
-                        <option value="Trainee">Trainee</option>
+                        <option value="All">{t("user_management.all_roles")}</option>
+                        <option value="Admin">{t("user_management.admin")}</option>
+                        <option value="Trainer">{t("user_management.trainer")}</option>
+                        <option value="Trainee">{t("user_management.trainee")}</option>
                     </select>
                 </div>
 
@@ -300,7 +301,7 @@ function UserRoleTable() {
                     type="text"
                     className="form-control"
                     style={{ maxWidth: "400px" }}
-                    placeholder="Search"
+                    placeholder={t("user_management.search_placeholder")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -314,13 +315,13 @@ function UserRoleTable() {
                         <table className="table">
                             <thead className="table-light">
                                 <tr>
-                                    <th className="text-center">Name</th>
-                                    <th className="text-center">Email</th>
-                                    <th className="text-center">User Level</th>
-                                    <th className="text-center">Batch</th>
-                                    <th className="text-center">Location</th>
-                                    <th className="text-center">Status</th>
-                                    <th className="text-center">Actions</th>
+                                    <td className="text-center">{t("user_management.name")}</td>
+                                    <td className="text-center">{t("user_management.email")}</td>
+                                    <td className="text-center">{t("user_management.level")}</td>
+                                    <td className="text-center">{t("user_management.batch")}</td>
+                                    <td className="text-center">{t("user_management.location")}</td>
+                                    <td className="text-center">{t("user_management.status")}</td>
+                                    <td className="text-center">{t("user_management.actions")}</td>
                                     <th className="text-center">
                                         <input
                                             className="form-check-input"
@@ -334,7 +335,7 @@ function UserRoleTable() {
                             <tbody>
                                 {users.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" className="text-center">No users found.</td>
+                                        <td colSpan="7" className="text-center">{t("user_management.no_users_found")}</td>
                                     </tr>
                                 ) : (
                                     users

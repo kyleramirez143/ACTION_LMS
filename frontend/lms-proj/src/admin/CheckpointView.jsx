@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
 import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./CheckpointView.css";
 
 
@@ -11,6 +11,7 @@ const backendURL = "http://localhost:5000";
 const CheckpointView = () => {
   const { t } = useTranslation();
   const { state } = useLocation();
+  const navigate = useNavigate();
   const batchId = state?.batchId;
 
 
@@ -112,10 +113,22 @@ const CheckpointView = () => {
 
   return (
     <div className="checkpoint-container">
+      <nav className="breadcrumb-nav">
+        <span 
+          className="breadcrumb-link" 
+          onClick={() => navigate("/admin/batch-management")}
+        >
+          {t("checkpoint.batches")}
+        </span>
+        <span className="breadcrumb-separator">&gt;</span> 
+        <span className="breadcrumb-current">
+          {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : t("checkpoint.loading")}
+        </span>
+      </nav>
       <div className="checkpoint-card">
         <div className="checkpoint-header">
           <h2 className="checkpoint-title">
-            {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : t("checkpoint.loading_batch_info")}
+            Trainee List
           </h2>
         </div>
 
@@ -140,9 +153,9 @@ const CheckpointView = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="11" className="text-center py-5">Loading...</td></tr>
+                <tr><td colSpan="11" className="text-center py-5">{t("checkpoint.loading")}</td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan="11" className="text-center py-5 text-muted">No trainees assigned to this batch.</td></tr>
+                <tr><td colSpan="11" className="text-center py-5 text-muted">{t("checkpoint.no_trainees")}</td></tr>
               ) : (
                 rows.map((user) => (
                   <tr key={user.user_id}>
@@ -177,7 +190,7 @@ const CheckpointView = () => {
   <div className="modal-overlay">
     <div className="modal-content admin-modal">
       <div className="modal-header-section">
-        <h3 className="modal-title">Edit Onboarding Details</h3>
+        <h3 className="modal-title">{t("checkpoint.edit_onboarding_details")}</h3>
         <p className="modal-subtitle">{editData.first_name} {editData.last_name}</p>
       </div>
      
@@ -186,25 +199,25 @@ const CheckpointView = () => {
    
     {/* LEFT SIDE: Government & Financials */}
     <div className="modal-left-side">
-      <div className="modal-section-title">Government & Financials</div>
+      <div className="modal-section-title">{t("checkpoint.government_financials")}</div>
       <div className="form-group">
-        <label>BPI Account No.</label>
+        <label>{t("checkpoint.bpi_account")}</label>
         <input type="text" placeholder="0000-0000-00" value={editData.bpi_account_no || ""} onChange={(e) => handleFieldChange("bpi_account_no", e.target.value)} />
       </div>
       <div className="form-group">
-        <label>SSS Number</label>
+        <label>{t("checkpoint.sss_number")}</label>
         <input type="text" placeholder="00-0000000-0" value={editData.sss_no || ""} onChange={(e) => handleFieldChange("sss_no", e.target.value)} />
       </div>
       <div className="form-group">
-        <label>TIN Number</label>
+        <label>{t("checkpoint.tin_number")}</label>
         <input type="text" placeholder="000-000-000" value={editData.tin_no || ""} onChange={(e) => handleFieldChange("tin_no", e.target.value)} />
       </div>
       <div className="form-group">
-        <label>PAGIBIG</label>
+        <label>{t("checkpoint.pagibig")}</label>
         <input type="text" placeholder="0000-0000-0000" value={editData.pagibig_no || ""} onChange={(e) => handleFieldChange("pagibig_no", e.target.value)} />
       </div>
       <div className="form-group">
-        <label>PhilHealth</label>
+        <label>{t("checkpoint.philhealth")}</label>
         <input type="text" placeholder="00-000000000-0" value={editData.philhealth_no || ""} onChange={(e) => handleFieldChange("philhealth_no", e.target.value)} />
       </div>
     </div>
@@ -216,40 +229,40 @@ const CheckpointView = () => {
 
     {/* RIGHT SIDE: Dropdown Checklist */}
     <div className="modal-right-side">
-      <div className="modal-section-title">Requirement Checklist</div>
+      <div className="modal-section-title">{t("checkpoint.requirement_checklist")}</div>
       <div className="form-group">
-        <label>UAF (IMS)</label>
+        <label>{t("checkpoint.uaf_ims")}</label>
         <select className={editData.uaf_ims ? "select-completed" : "select-pending"} value={String(editData.uaf_ims)} onChange={(e) => handleFieldChange("uaf_ims", e.target.value === "true")}>
-          <option value="false">Pending</option>
-          <option value="true">Completed</option>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.completed")}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Telework (Office PC)</label>
+        <label>{t("checkpoint.telework_office")}</label>
         <select className={editData.office_pc_telework ? "select-completed" : "select-pending"} value={String(editData.office_pc_telework)} onChange={(e) => handleFieldChange("office_pc_telework", e.target.value === "true")}>
-          <option value="false">Pending</option>
-          <option value="true">Approved</option>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.approved")}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Telework (Personal PC)</label>
+        <label>{t("checkpoint.telework_personal")}</label>
         <select className={editData.personal_pc_telework ? "select-completed" : "select-pending"} value={String(editData.personal_pc_telework)} onChange={(e) => handleFieldChange("personal_pc_telework", e.target.value === "true")}>
-          <option value="false">Pending</option>
-          <option value="true">Approved</option>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.approved")}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>Passport</label>
+        <label>{t("checkpoint.passport")}</label>
         <select className={editData.passport_ok ? "select-completed" : "select-pending"} value={String(editData.passport_ok)} onChange={(e) => handleFieldChange("passport_ok", e.target.value === "true")}>
-          <option value="false">None</option>
-          <option value="true">Ok</option>
+          <option value="false">{t("checkpoint.none")}</option>
+          <option value="true">{t("checkpoint.ok")}</option>
         </select>
       </div>
       <div className="form-group">
-        <label>IMF & UAF</label>
+        <label>{t("checkpoint.imf_uaf")}</label>
         <select className={editData.imf_awareness_ok ? "select-completed" : "select-pending"} value={String(editData.imf_awareness_ok)} onChange={(e) => handleFieldChange("imf_awareness_ok", e.target.value === "true")}>
-          <option value="false">Pending</option>
-          <option value="true">Done</option>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.done")}</option>
         </select>
       </div>
     </div>
@@ -261,9 +274,9 @@ const CheckpointView = () => {
 
       <div className="modal-footer">
         <button className="btn-save-modern" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving Changes..." : "Save"}
+          {saving ? t("checkpoint.saving_changes") : t("checkpoint.save")}
         </button>
-        <button className="btn-cancel-modern" onClick={() => setShowModal(false)}>Cancel</button>
+        <button className="btn-cancel-modern" onClick={() => setShowModal(false)}> {t("checkpoint.cancel")}</button>
       </div>
     </div>
   </div>
