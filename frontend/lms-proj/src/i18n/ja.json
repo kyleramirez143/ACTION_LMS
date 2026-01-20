@@ -47,7 +47,7 @@
     "dashboard": {
         "admin_lms_dashboard": "管理者LMSダッシュボード",
         "users": "ユーザー",
-        "batch_name": "バッチ {{name}}",
+        "batch_name": "バッチ 40",
         "batch_action_40": "バッチ Action 40",
         "total_users": "総ユーザー数",
         "trainee": "研修生",
@@ -92,7 +92,7 @@
         },
         "peak_label": "ピーク: {{value}}",
         "ai_coach": "AIコーチ",
-        "hello_trainee": "こんにちは {{name}} さん！",
+        "hello_trainee": "こんにちは！",
         "students_struggle": "{{module}}で{{count}}名の研修生がつまずいています",
         "trainee_name": "受講者名",
         "module_name": "日本語モジュール 1",

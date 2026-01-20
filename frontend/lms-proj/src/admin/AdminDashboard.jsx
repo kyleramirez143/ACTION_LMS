@@ -88,6 +88,9 @@ const DashboardHeader = () => {
   return (
     <div className="row mb-4">
       <h2 className="fw-bold">{t("dashboard.admin_lms_dashboard")}</h2>
+      <div className="text-muted" style={{ fontSize: '14px' }}>
+        {formattedTime} (GMT+8)
+      </div>
     </div>
   );
 };

@@ -164,7 +164,21 @@ export default function ModuleManagement() {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <div className="title-back-row p-0 m-0">
-                    
+                    <button
+                        type="button"
+                        className="back-btn"
+                        onClick={() => {
+                            if (userRole === "Trainee") {
+                                navigate(`/trainee/courses`);
+                            } else {
+                                navigate(`/trainer/course-management`);
+                            }
+                        }}
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft size={20} strokeWidth={2.2} />
+                    </button>
+
                     <h3 className="mb-0">{courseTitle}</h3>
                 </div>
                 {userRole === "Trainer" && (

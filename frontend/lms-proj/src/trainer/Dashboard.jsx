@@ -332,20 +332,40 @@ const AICoachCard = () => {
 };
 
 const DashboardHeader = () => {
-    const { t } = useTranslation(); // ✅ ADD
+    const { t } = useTranslation();
+
+    // Get current date & time in GMT+8
+    const now = new Date();
+    const timezoneOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        timeZone: 'Asia/Singapore' // GMT+8
+    };
+    const formattedTime = now.toLocaleString('en-US', timezoneOptions);
 
     return (
-        <div className="row">
-            <div className="col-md-8">
-                <h2 className="fw-bold">{t("dashboard.welcome_trainer")}</h2>
-            </div>
-            <div className="col-md-4">
-                <select className="form-select" aria-label="Default select example">
-                    <option selected>{t("dashboard.select_trainee")}</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
+        <div className="mb-4">
+            <div className="row align-items-center">
+                <div className="col-md-8">
+                    <h2 className="fw-bold">{t("dashboard.welcome_trainer")}</h2>
+                    <div className="text-muted" style={{ fontSize: '14px' }}>
+                        {formattedTime} (GMT+8)
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <select className="form-select" aria-label="Select trainee">
+                        <option selected>{t("dashboard.select_trainee")}</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                    </select>
+                </div>
             </div>
         </div>
     );

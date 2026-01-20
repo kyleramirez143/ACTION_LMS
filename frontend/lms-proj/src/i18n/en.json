@@ -47,7 +47,7 @@
     "dashboard": {
         "admin_lms_dashboard": "Admin LMS Dashboard",
         "users": "Users",
-        "batch_name": "Batch {{name}}",
+        "batch_name": "Batch 40",
         "batch_action_40": "Batch Action 40",
         "total_users": "Total Users",
         "trainee": "Trainee",
@@ -92,7 +92,7 @@
         },
         "peak_label": "Peak: {{value}}",
         "ai_coach": "AI Powered-Coach",
-        "hello_trainee": "Hello {{name}}!",
+        "hello_trainee": "Hello!",
         "students_struggle": "{{count}} Students Struggle with {{module}}",
         "trainee_name": "Trainee Name",
         "module_name": "Nihongo Module 1",
