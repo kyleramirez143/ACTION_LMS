@@ -29,7 +29,7 @@ function BatchesTable() {
         if (!endDate) return "Pending";
         const today = new Date();
         const end = new Date(endDate);
-        return today > end ? t("batches.inactive") : t("batches.active");
+        return today > end ? "Inactive" : "Active";
     };
 
     // Helper to format date as MMDDYY
@@ -170,8 +170,8 @@ function BatchesTable() {
                         className="form-select w-auto"
                     >
                         <option value="All">{t("batches.all_locations")}</option>
-                        <option value="Manila">Manila</option>
-                        <option value="Cebu">Cebu</option>
+                        <option value="Manila">{t("batches.manila")}</option>
+                        <option value="Cebu">{t("batches.cebu")}</option>
                     </select>
                 </div>
 
@@ -179,7 +179,7 @@ function BatchesTable() {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Search"
+                        placeholder={t("batches.search")}
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
