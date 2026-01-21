@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Monitor, FileArchive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import './QuizModals.css';
 
-// --- Base Modal Component ---
-const Modal = ({ children, title, className = '' }) => (
-  <div className="modal-overlay">
-    <div className={`modal-content ${className}`}>
-      {title && <h3 className="modal-title">{title}</h3>}
-      <div className="modal-body">{children}</div>
-    </div>
-  </div>
-);
+// --- Base Modal Component using Portal ---
+const Modal = ({ children, title, className = '' }) => {
+  return ReactDOM.createPortal(
+    <div className="modal-overlay">
+      <div className={`modal-content ${className}`}>
+        {title && <h3 className="modal-title">{title}</h3>}
+        <div className="modal-body">{children}</div>
+      </div>
+    </div>,
+    document.body
+  );
+};
 
 // --- 1. Screen Access Modal ---
 export const ScreenAccessModal = ({ onAllow, onDeny }) => {

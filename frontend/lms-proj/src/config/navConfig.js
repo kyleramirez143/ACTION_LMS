@@ -57,7 +57,7 @@ export const navLinks = [
     translationKey: "nav.courses",
   },
   {
-    name: 'Quiz',
+    name: 'Assessment',
     path: '/trainer/quiz-generator',
     requiredRoles: ['Trainer'],
     translationKey: "nav.quiz",

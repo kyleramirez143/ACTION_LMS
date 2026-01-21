@@ -26,14 +26,12 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 
 /* ================= NAVBAR ================= */
 .navbar {
-  background-color: var(--white);
-  height: var(--navbar-height);
-  padding: 0 1.25rem;
-  border-bottom: 1px solid var(--light-gray);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--light-gray);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   position: relative;
   z-index: 2000;
 }
@@ -305,7 +303,6 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 .lang-btn.active {
   color: var(--primary-blue);
 }
-
 
 .lang-btn:focus {
   outline: none;      /* remove focus outline */
