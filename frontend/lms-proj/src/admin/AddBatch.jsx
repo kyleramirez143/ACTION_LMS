@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import "./AddBatch.css";
 
 function AddBatch() {
@@ -8,6 +9,7 @@ function AddBatch() {
     const { id: batchId } = useParams();
     const isEditMode = !!batchId;
     const token = localStorage.getItem("authToken");
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -20,11 +22,11 @@ function AddBatch() {
 
     // --- Dynamic Status Calculation ---
     const getCalculatedStatus = (endDate) => {
-        if (!endDate) return "Active";
+        if (!endDate) return t("batch.active");
         const today = new Date();
         const end = new Date(endDate);
         // If today is past the end date, it's Inactive
-        return today > end ? "Inactive" : "Active";
+        return today > end ? t("batch.inactive") : t("batch.active");
     };
 
     useEffect(() => {
@@ -50,7 +52,7 @@ function AddBatch() {
                 const res = await fetch(`http://localhost:5000/api/batches/${batchId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error("Failed to fetch batch data.");
+                if (!res.ok) throw new Error(t("batch.fetchError"));
                 const data = await res.json();
 
                 // ✅ NEW SAFE CODE (PUT THIS HERE)
@@ -62,7 +64,7 @@ function AddBatch() {
                 });
             } catch (err) {
                 console.error("Edit fetch error:", err);
-                alert("Error loading batch data.");
+                alert(t("batch.errorLoadingData"));
                 navigate("/admin/batch-management");
             } finally {
                 setIsLoadingData(false);
@@ -81,7 +83,7 @@ function AddBatch() {
         e.preventDefault();
 
         if (isEditMode && !batchId) {
-            alert("Invalid batch ID");
+            alert(t("batch.invalidId"));
             return;
         }
 
@@ -110,15 +112,15 @@ function AddBatch() {
 
             if (!response.ok) {
                 // Use backend message if available
-                const errorMessage = data?.error || text || "Failed to add batch";
+                const errorMessage = data?.error || text || t("batch.submissionFailed");
                 throw new Error(errorMessage);
             }
 
-            alert(`Batch ${isEditMode ? "updated" : "added"} successfully!`);
+            alert(isEditMode ? t("batch.updated") : t("batch.added"));
             navigate("/admin/batch-management");
         } catch (err) {
             // Display backend error message
-            alert(`Submission error: ${err.message}`);
+            alert(`${t("batch.submissionError")}: ${err.message}`);
             console.error("Submission error:", err);
         }
     };
@@ -127,14 +129,14 @@ function AddBatch() {
         return (
             <div style={styles.page}>
                 <div style={styles.card}>
-                    <h3 style={styles.title}>Loading Batch Data...</h3>
+                    <h3 style={styles.title}>{t("batch.loading")}</h3>
                 </div>
             </div>
         );
     }
 
-    const formTitle = isEditMode ? "Edit Batch" : "Add Batch";
-    const submitButtonText = isEditMode ? "Save Changes" : "Add Batch";
+     const formTitle = isEditMode ? t("batch.editBatch") : t("batch.addBatch");
+    const submitButtonText = isEditMode ? t("batch.saveChanges") : t("batch.addBatch");
 
     return (
         <div style={styles.page}>
@@ -142,18 +144,18 @@ function AddBatch() {
                 <h3 style={styles.title}>{formTitle}</h3>
 
                 <h5 className="mb-4 text-center" style={{ fontWeight: 1000, color: "#555" }}>
-                    Batch Information
+                    {t("batch.batchInformation")}
                 </h5>
 
                 <form onSubmit={handleSubmit}>
                     {/* Preserving your original layout for Batch Name */}
                     <div className="mb-3">
-                        <label className="col-sm-2 col-form-label">Batch Name</label>
+                        <label className="col-sm-2 col-form-label">{t("batch.batchName")}</label>
                         <input
                             type="text"
                             className="form-control"
                             name="name"
-                            placeholder="Enter Batch Name"
+                            placeholder={t("batch.enterBatchName")}
                             value={formData.name}
                             onChange={handleChange}
                             required
@@ -162,7 +164,7 @@ function AddBatch() {
 
                     {/* Preserving your original row/col layout for Location & Status */}
                     <div className="mb-3">
-                        <label className="col-sm-2 col-form-label">Location</label>
+                        <label className="col-sm-2 col-form-label">{t("batch.location")}</label>
                         <select
                             className="form-control"
                             name="location"
@@ -170,7 +172,7 @@ function AddBatch() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select Location</option>
+                            <option value="">{t("batch.selectLocation")}</option>
                             <option value="Manila">Manila</option>
                             <option value="Cebu">Cebu</option>
                         </select>
@@ -180,7 +182,7 @@ function AddBatch() {
                     <div className="row mb-3">
                         <div className="col">
                             <label htmlFor="start_date" className="form-label" style={styles.label}>
-                                Start Date
+                                {t("batch.startDate")}
                             </label>
                             <input
                                 id="start_date"
@@ -196,7 +198,7 @@ function AddBatch() {
 
                         <div className="col">
                             <label htmlFor="end_date" className="form-label" style={styles.label}>
-                                End Date
+                                {t("batch.endDate")}
                             </label>
                             <input
                                 id="end_date"
@@ -222,7 +224,7 @@ function AddBatch() {
                             style={styles.btn}
                             onClick={() => navigate("/admin/batch-management")}
                         >
-                            Cancel
+                            {t("batch.cancel")}
                         </button>
                     </div>
                 </form>

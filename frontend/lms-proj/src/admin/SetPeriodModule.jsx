@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 
 function SetPeriodModule() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { id } = useParams(); // Note: if this is for a batch period, 'id' might be a batchId
     const isEditMode = !!id;
     const token = localStorage.getItem("authToken");
@@ -108,7 +110,7 @@ function SetPeriodModule() {
 
         // 1. PRE-SUBMIT VALIDATION
         if (!formData.batch || formData.batch.length < 30) {
-            alert("Please select a valid Batch from the dropdown.");
+            alert(t("module_period.select_valid_batch"));
             return;
         }
 
@@ -147,11 +149,11 @@ function SetPeriodModule() {
                 throw new Error(result.error || "Server rejected the request");
             }
 
-            alert("Module periods saved successfully!");
+            alert(t("module_period.saved_successfully"));
             navigate("/admin/module-management");
         } catch (err) {
             console.error("Submit Error:", err);
-            alert("Save failed: " + err.message);
+            alert(t("module_period.save_failed") + ": " + err.message);
         }
     };
 
@@ -171,7 +173,7 @@ function SetPeriodModule() {
             <div style={styles.card}>
                 <h3 style={styles.title}>{formTitle}</h3>
                 <h5 className="mb-4 text-center" style={{ fontWeight: 1000, color: "#555" }}>
-                    Module Period Information
+                    {t("module_period.module_period_information")}
                 </h5>
 
                 <form onSubmit={handleSubmit}>
@@ -179,7 +181,7 @@ function SetPeriodModule() {
                     <div className="row mb-3">
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label">Batch</label>
+                                <label className="col-sm-3 col-form-label">{t("module_period.batch")}</label>
                                 <div className="col-sm-9">
                                     <select
                                         className="form-select"
@@ -188,7 +190,7 @@ function SetPeriodModule() {
                                         onChange={handleChange}
                                         required
                                     >
-                                        <option value="">Select Batch</option>
+                                        <option value="">{t("module_period.select_batch")}</option>
 
                                         {Array.isArray(batches) && batches.map((b) => {
                                             const idToUse = b.curriculum_id || b.batch_id;
@@ -204,7 +206,7 @@ function SetPeriodModule() {
                                                     disabled={isDisabled}
                                                     style={isDisabled ? { color: '#a0a0a0', backgroundColor: '#f8f9fa' } : {}}
                                                 >
-                                                    {b.name} {b.location} {isDisabled ? " — Modules already set" : ""}
+                                                    {b.name} {b.location} {isDisabled ? t("module_period.modules_already_set") : ""}
                                                 </option>
                                             );
                                         })}
@@ -217,10 +219,10 @@ function SetPeriodModule() {
 
                     {/* Module 1 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 1</label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>{t("module_period.module")} 1</label>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.start_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod1_start" value={formData.mod1_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -228,7 +230,7 @@ function SetPeriodModule() {
                         </div>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.end_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod1_end" value={formData.mod1_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -238,10 +240,10 @@ function SetPeriodModule() {
 
                     {/* Module 2 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 2</label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>{t("module_period.module")} 2</label>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}> {t("module_period.start_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod2_start" value={formData.mod2_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -249,7 +251,7 @@ function SetPeriodModule() {
                         </div>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.end_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod2_end" value={formData.mod2_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -259,10 +261,10 @@ function SetPeriodModule() {
 
                     {/* Module 3 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 3</label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>{t("module_period.module")} 3</label>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}> {t("module_period.start_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod3_start" value={formData.mod3_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -270,7 +272,7 @@ function SetPeriodModule() {
                         </div>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.end_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod3_end" value={formData.mod3_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -280,10 +282,10 @@ function SetPeriodModule() {
 
                     {/* Module 4 */}
                     <div className="row mb-3">
-                        <label className="col-sm-12 col-form-label" style={styles.label}>Module 4</label>
+                        <label className="col-sm-12 col-form-label" style={styles.label}>{t("module_period.module")} 4</label>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>Start Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.start_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod4_start" value={formData.mod4_start} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>
@@ -291,7 +293,7 @@ function SetPeriodModule() {
                         </div>
                         <div className="col">
                             <div className="row">
-                                <label className="col-sm-3 col-form-label" style={styles.label}>End Date</label>
+                                <label className="col-sm-3 col-form-label" style={styles.label}>{t("module_period.end_date")}</label>
                                 <div className="col-sm-9">
                                     <input type="date" className="form-control" name="mod4_end" value={formData.mod4_end} onChange={handleChange} onClick={(e) => e.target.showPicker()} required />
                                 </div>

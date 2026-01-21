@@ -371,22 +371,14 @@ const DashboardHeader = () => {
     );
 };
 
+// ==================== Dashboard ====================
 const Dashboard = () => {
-
-    // State
-    const [activeTab, setActiveTab] = useState('PhilNITS');
-
-    // Define tabs BEFORE using them
-    const tabs = ['PhilNITS', 'Nihongo', 'Others'];
-
     return (
         <div className="container mt-4">
             <DashboardHeader />
-
             <div className="col-md-12">
                 <AttendanceCard />
             </div>
-
             <div className="row">
                 <div className="col-md-7 mb-4 d-flex">
                     <StatGroupCard />
@@ -395,7 +387,6 @@ const Dashboard = () => {
                     <AICoachCard />
                 </div>
             </div>
-
             <div className="col-md-12">
                 <TraineeChartCard />
             </div>
