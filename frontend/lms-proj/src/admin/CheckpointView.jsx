@@ -164,7 +164,7 @@ const CheckpointView = () => {
         </span>
       </nav>
       <div className="checkpoint-card">
-        <div className="checkpoint-header">
+            <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="checkpoint-title">
             Trainee List
           </h2>
@@ -180,22 +180,22 @@ const CheckpointView = () => {
         </div>
 
 
-        <div className="table-wrapper">
-          <table className="checkpoint-table">
-            <thead>
+        <div className="table-responsive">
+          <table className="table align-middle" style={{ tableLayout: 'fixed', width: '100%' }}>
+            <thead className="table-light">
               <tr>
-                <th>{t("checkpoint.trainee_name")}</th>
-                <th className="header-purple">{t("checkpoint.bpi")}</th>
-                <th className="header-purple">{t("checkpoint.sss")}</th>
-                <th className="header-purple">{t("checkpoint.tin")}</th>
-                <th className="header-purple">{t("checkpoint.pagibig")}</th>
-                <th className="header-purple">{t("checkpoint.philhealth")}</th>
-                <th className="header-orange">{t("checkpoint.uaf_ims")}</th>
-                <th className="header-orange">{t("checkpoint.telework_office")}</th>
-                <th className="header-orange">{t("checkpoint.telework_personal")}</th>
-                <th className="header-orange">{t("checkpoint.passport")}</th>
-                <th className="header-orange">{t("checkpoint.imf_uaf")}</th>
-                <th>{t("checkpoint.action")}</th>
+                <th className="text-center">{t("checkpoint.trainee_name")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.bpi")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.sss")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.tin")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.pagibig")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.philhealth")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.uaf_ims")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_office")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_personal")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.passport")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.imf_uaf")}</th>
+                <th className="text-center">{t("checkpoint.action")}</th>
               </tr>
             </thead>
             <tbody>
@@ -217,20 +217,20 @@ const CheckpointView = () => {
               ) : (
                 rows.map((user) => (
                   <tr key={user.user_id}>
-                    <td className="name-col">
+                    <td className="name-col text-center">
                       {user.first_name} {user.last_name}
                     </td>
-                    <td>{user.bpi_account_no || <span className="null-val">---</span>}</td>
-                    <td>{user.sss_no || <span className="null-val">---</span>}</td>
-                    <td>{user.tin_no || <span className="null-val">---</span>}</td>
-                    <td>{user.pagibig_no || <span className="null-val">---</span>}</td>
-                    <td>{user.philhealth_no || <span className="null-val">---</span>}</td>
-                    <td className="status-cell"><StatusIcon value={user.uaf_ims} /></td>
-                    <td className="status-cell"><StatusIcon value={user.office_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.personal_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.passport_ok} /></td>
-                    <td className="status-cell"><StatusIcon value={user.imf_awareness_ok} /></td>
-                    <td>
+                    <td className="text-center">{user.bpi_account_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.sss_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.tin_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.pagibig_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.philhealth_no || <span className="null-val">---</span>}</td>
+                    <td className="status-cell text-center"><StatusIcon value={user.uaf_ims} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.office_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.personal_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.passport_ok} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.imf_awareness_ok} /></td>
+                    <td className="text-center">
                       <button className="edit-btn-action" onClick={() => openEditModal(user)}>
                         <FaEdit />
                       </button>

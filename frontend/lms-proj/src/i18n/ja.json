@@ -142,7 +142,17 @@
         "hidden": "非表示",
         "edit_module": "モジュールを編集",
         "make_hidden": "非表示にする",
-        "make_visible": "表示する"
+        "make_visible": "表示する",
+        "title_default": "モジュール管理",
+        "module_period": "モジュール期間",
+        "set_module_period": "モジュール期間の設定",
+        "delete_modules": "削除 ({{count}})",
+        "filter_by_batch":"バッチで絞り込む",
+        "search_placeholder": "モジュールを検索",
+        "table_module": "モジュール",
+        "table_start_date": "開始日",
+        "table_end_date": "終了日",
+        "table_action": "操作"
     },
     "module": {
         "loading": "モジュールデータを読み込み中...",

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { FaEdit } from 'react-icons/fa';
+import { Link } from "react-router-dom";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "./ProfileInfo.css";
 
 import { Pencil, Check, X } from 'lucide-react';
@@ -135,7 +138,6 @@ export default function ProfileInfo() {
   return (
     <div className="checkpoint-container">
       {/* SECTION 1: User Information Card */}
-      {/* SECTION 1: User Information Card */}
       <div className="checkpoint-card user-info-card">
         <div className="user-info-header">
           <div className="profile-picture">
@@ -161,8 +163,18 @@ export default function ProfileInfo() {
         </div>
 
         <div className="user-info-box">
-          <h4 className="user-info-title">User Information</h4>
-
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h4 className="user-info-title" style={{ margin: 0 }}>User Information</h4>
+            <Link 
+              to="/admin/profile" 
+              className="icon-btn" 
+              title="Edit Profile"
+              style={{ textDecoration: 'none' }} // Ensures no blue underline from the Link tag
+            >
+              <i className="bi bi-pencil-fill"></i>
+            </Link>
+          </div>
+            
           <div className="user-info-grid">
             <div>
               <label>First Name:</label>
@@ -190,10 +202,17 @@ export default function ProfileInfo() {
       {/* SECTION 2: Onboarding Requirements */}
       {userProfile.role === "Trainee" && (
         <div className="checkpoint-card">
-          <div className="card-header-flex">
-            <h3 className="card-title">Onboarding Requirements</h3>
+          <div className="card-header-flex d-flex justify-content-between align-items-center mb-3">
+            <h3 className="card-title mb-0">Onboarding Requirements</h3>
+            
             {!isEditing && hasData && (
-              <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit</button>
+              <button 
+                className="icon-btn" 
+                onClick={() => setIsEditing(true)}
+                title="Edit Onboarding"
+              >
+                <i className="bi bi-pencil-fill"></i>
+              </button>
             )}
           </div>
 
@@ -203,8 +222,8 @@ export default function ProfileInfo() {
               <button className="btn-add" onClick={() => setIsEditing(true)}>+ Add Details</button>
             </div>
           ) : (
-            <div className="onboarding-table-wrapper">
-              <table className="onboarding-table">
+            <div className="table-responsive">
+              <table className="onboarding-table align-middle">
                 <thead>
                   <tr><th>Requirement</th><th>Details</th></tr>
                 </thead>
@@ -237,14 +256,23 @@ export default function ProfileInfo() {
                   ].map((item) => (
                     <tr key={item.field}>
                       <td>{item.label}</td>
-                      <td>
+                      <td className="text-left">
                         {isEditing ? (
-                          <select className="table-select" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
+                          <select 
+                            className="table-select" 
+                            value={String(onboarding[item.field])} 
+                            onChange={(e) => handleChange(item.field, e.target.value)}
+                          >
                             <option value="false">{item.no}</option>
                             <option value="true">{item.yes}</option>
                           </select>
                         ) : (
-                          onboarding[item.field] ? "✔" : "X"
+                          /* Removed the extra curly braces here */
+                          onboarding[item.field] ? (
+                            <FaCheckCircle style={{ color: "#28a745", fontSize: "1.2rem" }} title="Completed" />
+                          ) : (
+                            <FaTimesCircle style={{ color: "#dc3545", fontSize: "1.2rem" }} title="Pending" />
+                          )
                         )}
                       </td>
                     </tr>

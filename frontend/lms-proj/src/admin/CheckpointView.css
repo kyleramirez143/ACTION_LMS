@@ -10,21 +10,21 @@ updated checkpoint.css
   box-sizing: border-box;
 }
 
-
 .checkpoint-title {
-  font-size: 28px;
   font-weight: 600;
-  margin-bottom: 20px;
-  color: #000000 !important;
+  font-size: 1.5rem;
+  color: #333;
 }
 
 
 .checkpoint-card {
-  border-radius: 12px;
-  background: #fff;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  max-width: 1400px;
+  margin: 20px auto;
 }
 
 
@@ -283,13 +283,6 @@ updated checkpoint.css
 .breadcrumb-current {
   color: #0f172a; /* Darker Slate for the current page */
   font-weight: 600;
-}
-
-.checkpoint-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0;
-  color: #000000 !important;
 }
 
 .export-csv-btn {

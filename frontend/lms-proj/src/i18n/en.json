@@ -165,7 +165,9 @@
         "cancel": "Cancel",
         "no_data": "No data available for the selected batch.",
         "delete_confirmation": "Delete {{count}} modules?",
-        "generic_error": "Something went wrong. Please try again."
+        "generic_error": "Something went wrong. Please try again.",
+        "title_default": "Module Management",
+        "module_period": "Module Period"
     },
     "module": {
         "loading": "Loading module data...",
