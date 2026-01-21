@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import ModuleAccordion from "./ModuleAccordion";
 import UpcomingPanel from "./UpcomingPanel";
 import "./modules.css";
 
 export default function TraineeModuleScreen({ courseId }) {
+  const { t } = useTranslation();
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
@@ -24,13 +26,13 @@ export default function TraineeModuleScreen({ courseId }) {
     <div className="module-container">
       {/* LEFT: Accordion */}
       <div className="module-left">
-        <div className="module-title">Modules for this Course</div>
+        <div className="module-title">{t('modules.modules_for_this_course')}</div>
         <ModuleAccordion isTrainerView={false} modules={modules} />
       </div>
 
       {/* RIGHT: Upcoming Panel */}
       <div className="module-right">
-        <div className="upcoming-title">Upcoming</div>
+        <div className="upcoming-title">{t('modules.upcoming')}</div>
         <UpcomingPanel />
       </div>
     </div>

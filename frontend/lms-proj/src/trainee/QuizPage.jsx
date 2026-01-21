@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios';
 import { SubmitConfirmationModal, QuizResultModal, TimeUpModal } from './QuizModals';
 import { RecorderState } from './recorder';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTranslation } from 'react-i18next';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const QuizPage = () => {
 	const { t } = useTranslation();
@@ -29,6 +28,7 @@ const QuizPage = () => {
 	const [isUploading, setIsUploading] = useState(false);
 	const [timeLeft, setTimeLeft] = useState(20 * 60);
 	const [submissionResult, setSubmissionResult] = useState(null);
+	const submissionLock = useRef(false);
 
 	// --- AUTH CHECK ---
 	useEffect(() => {
@@ -45,10 +45,12 @@ const QuizPage = () => {
 		}
 	}, [token, navigate]);
 
-	// --- SESSION CHECK ---
+	// ---------- SESSION CHECK ----------
 	useEffect(() => {
-		if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
-	}, [sessionId, assessment_id, navigate]);
+		if (screenMonitoring && !sessionId) {
+			navigate(`/quiz/${assessment_id}/permission`);
+		}
+	}, [screenMonitoring, sessionId, assessment_id, navigate]);
 
 	// --- FETCH QUESTIONS ---
 	useEffect(() => {
@@ -68,7 +70,7 @@ const QuizPage = () => {
 		fetchQuestions();
 	}, [assessment_id, token, navigate]);
 
-	// --- TIMER ---
+	// ---------- TIMER ----------
 	useEffect(() => {
 		if (showTimeUpModal || hasSubmitted || timeLeft <= 0) return;
 
@@ -87,7 +89,7 @@ const QuizPage = () => {
 		return () => clearInterval(timer);
 	}, [showTimeUpModal, hasSubmitted, timeLeft]);
 
-	// --- COUNTDOWN EFFECT ---
+	// ---------- COUNTDOWN ----------
 	useEffect(() => {
 		if (!showTimeUpModal || hasSubmitted) return;
 
@@ -131,144 +133,101 @@ const QuizPage = () => {
 
 	if (isUploading) return <p>Submitting quiz...</p>;
 
-
-	// --- SUBMIT QUIZ ---
-
-	// const onConfirmSubmit = async () => {
-	//   if (hasSubmitted) return;
-	//   setHasSubmitted(true);
-
-	//   setShowSubmitModal(false);
-	//   setShowTimeUpModal(false);
-	//   setAutoSubmitCountdown(0);
-	//   setIsUploading(true);
-
-	//   try {
-	//     RecorderState.stop();
-
-	//     const chunks = RecorderState.getChunks();
-	//     if (chunks.length > 0) {
-	//       const blob = new Blob(chunks, { type: 'video/webm' });
-	//       const formData = new FormData();
-	//       formData.append('recording', blob, `session_${sessionId}.webm`);
-
-	//       await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-	//         headers: { 'Content-Type': 'multipart/form-data' }
-	//       });
-	//     }
-
-	//     const response = await API.post(`/quizzes/responses`, {
-	//       assessment_id,
-	//       answers,
-	//       start_time: state?.startTime
-	//     }, { headers: { Authorization: `Bearer ${token}` } });
-
-	//     setSubmissionResult(response.data);
-	//     setShowResultModal(true);
-	//   } catch (err) {
-	//     console.error('Submission error:', err);
-	//     alert('Failed to submit quiz.');
-	//   } finally {
-	//     setIsUploading(false);
-	//   }
-	// };
-
-	let submissionInProgress = false; // outside component, or useRef
-
 	const onConfirmSubmit = async () => {
-		if (submissionInProgress) return; // block double submission
-		submissionInProgress = true;
+		if (submissionLock.current) return;
+		submissionLock.current = true;
 
 		setHasSubmitted(true);
+		setIsUploading(true);
+		setShowSubmitModal(false);
+		setShowTimeUpModal(false);
 
 		try {
-			setIsUploading(true);
-			setShowSubmitModal(false);
-			setShowTimeUpModal(false);
-
-			// Upload recording
-			RecorderState.stop();
-
-			const chunks = RecorderState.getChunks();
-			if (chunks.length > 0) {
-				const blob = new Blob(chunks, { type: 'video/webm' });
-				const formData = new FormData();
-				formData.append('recording', blob, `session_${sessionId}.webm`);
-				await API.post(`/quizzes/proctor/upload/${sessionId}`, formData, {
-					headers: { 'Content-Type': 'multipart/form-data' }
-				});
+			if (screenMonitoring) {
+				RecorderState.stop();
+				const chunks = RecorderState.getChunks();
+				if (chunks.length) {
+					const blob = new Blob(chunks, { type: 'video/webm' });
+					const formData = new FormData();
+					formData.append('recording', blob, `session_${sessionId}.webm`);
+					await API.post(`/quizzes/proctor/upload/${sessionId}`, formData,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`
+							}
+						});
+				}
 			}
 
-			// Submit answers
-			const response = await API.post(
+			const res = await API.post(
 				`/quizzes/responses`,
 				{
 					assessment_id,
 					answers,
-					start_time: state?.startTime,
+					start_time: state?.startTime
 				},
 				{ headers: { Authorization: `Bearer ${token}` } }
 			);
 
-			setSubmissionResult(response.data);
+			setSubmissionResult(res.data);
 			setShowResultModal(true);
 		} catch (err) {
-			console.error('Submission error:', err);
-			alert('Failed to submit quiz.');
+			console.error(err);
+			alert(t('quiz_page.submit_failed'));
 		} finally {
 			setIsUploading(false);
-			submissionInProgress = false; // reset lock if needed
+			submissionLock.current = false;
 		}
 	};
 
-
-	if (!questions.length) return <p>Loading quiz...</p>;
+	if (!questions.length) {
+		return <p>{t('quiz_page.loading')}</p>;
+	}
 
 	const question = questions[currentQuestion];
 	const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
 
 	return (
 		<div className="container py-4">
-			<h2 className="mb-3">{state?.quizTitle || 'Assessment'}</h2>
+			<h2 className="mb-3">{state?.quizTitle || t('quiz_page.assessment')}</h2>
+
 			<div className="row">
 				<div className="col-md-9">
-					<div className="mb-3">
-						<div className="d-flex justify-content-between mb-1">
-							<strong>Question {currentQuestion + 1}</strong>
-							<small>{currentQuestion + 1} of {questions.length}</small>
-						</div>
-						<div className="progress mb-3" style={{ height: '10px' }}>
-							<div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
-						</div>
-						<p className="fw-bold">{question.question_text}</p>
-						<div className="d-grid gap-2">
-							{/* --- MULTIPLE CHOICE --- */}
-							{question.options && Object.keys(question.options).length > 0 ? (
-								Object.entries(question.options).map(([key, option]) => (
-									<button
-										key={key}
-										className={`btn ${answers[question.question_id] === key ? 'btn-primary' : 'btn-outline-primary'}`}
-										onClick={() => handleAnswer(currentQuestion, key)}
-									>
-										{option}
-									</button>
-								))
-							) : (
-								/* Free-text input for Nihongo questions */
-								<input
-									type="text"
-									className="form-control"
-									value={answers[question.question_id] || ''}
-									onChange={(e) =>
-										setAnswers((prev) => ({
-											...prev,
-											[question.question_id]: e.target.value.toLowerCase() // lowercase before sending
-										}))
-									}
-									placeholder="Type your answer here"
-								/>
-							)}
-						</div>
+					<strong>
+						{t('quiz_page.question')} {currentQuestion + 1} {t('quiz_page.of')} {questions.length}
+					</strong>
+
+					<div className="progress my-2" style={{ height: '10px' }}>
+						<div className="progress-bar" style={{ width: `${progressPercent}%` }} />
+					</div>
+
+					<p className="fw-bold">{question.question_text}</p>
+
+					<div className="d-grid gap-2">
+						{question.options ? (
+							Object.entries(question.options).map(([key, opt], i) => (
+								<button
+									key={key}
+									className={`btn ${answers[question.question_id] === key
+											? 'btn-primary'
+											: 'btn-outline-primary'
+										}`}
+									onClick={() => handleAnswer(currentQuestion, key)}
+								>
+									<strong>{String.fromCharCode(65 + i)}.</strong> {opt}
+								</button>
+							))
+						) : (
+							<input
+								type="text"
+								className="form-control"
+								value={answers[question.question_id] || ''}
+								onChange={(e) =>
+									handleAnswer(currentQuestion, e.target.value.toLowerCase())
+								}
+								placeholder={t('quiz_page.type_answer')}
+							/>
+						)}
 					</div>
 
 					<div className="mt-4 d-flex justify-content-between">
@@ -276,17 +235,18 @@ const QuizPage = () => {
 							{currentQuestion > 0 && (
 								<button
 									className="btn btn-outline-secondary me-2"
-									onClick={() => goToQuestion(currentQuestion - 1)}
+									onClick={() => setCurrentQuestion(prev => prev - 1)}
 								>
-									{t("quiz.previous")}
+									{t('quiz_page.previous')}
 								</button>
 							)}
+
 							{currentQuestion < questions.length - 1 && (
 								<button
 									className="btn btn-outline-secondary"
-									onClick={() => goToQuestion(currentQuestion + 1)}
+									onClick={() => setCurrentQuestion(prev => prev + 1)}
 								>
-									{t("quiz.next")}
+									{t('quiz_page.next')}
 								</button>
 							)}
 						</div>
@@ -296,7 +256,7 @@ const QuizPage = () => {
 								className="btn btn-success"
 								onClick={() => setShowSubmitModal(true)}
 							>
-								{t("quiz.submit")}
+								{t('quiz_page.submit_quiz')}
 							</button>
 						)}
 					</div>
@@ -304,25 +264,31 @@ const QuizPage = () => {
 
 				<div className="col-md-3">
 					<div className="card p-3 shadow-sm">
-						<h6 className="text-center">Question Navigator</h6>
-						{sessionId && (
-							<div className="alert alert-warning mt-3 d-flex align-items-center">
-								Recording in Progress
+						<h6 className="text-center">{t('quiz_page.navigator')}</h6>
+
+						{screenMonitoring && sessionId && (
+							<div className="alert alert-warning mt-2">
+								{t('quiz_page.recording')}
 							</div>
 						)}
-						<div className="d-flex flex-wrap justify-content-center gap-2 mt-2">
-							{questions.map((_, idx) => (
+
+						<div className="d-flex flex-wrap gap-2 justify-content-center mt-2">
+							{questions.map((_, i) => (
 								<button
-									key={idx}
-									className={`btn btn-sm ${currentQuestion === idx ? 'btn-primary' : 'btn-outline-secondary'}`}
-									onClick={() => goToQuestion(idx)}
+									key={i}
+									className={`btn btn-sm ${currentQuestion === i
+											? 'btn-primary'
+											: 'btn-outline-secondary'
+										}`}
+									onClick={() => setCurrentQuestion(i)}
 								>
-									{idx + 1}
+									{i + 1}
 								</button>
 							))}
 						</div>
+
 						<div className="mt-3 text-center text-muted">
-							Time Left: <span className="fw-bold">{formatTime(timeLeft)}</span>
+							{t('quiz_page.time_left')}: <span className="fw-bold">{formatTime(timeLeft)}</span>
 						</div>
 					</div>
 				</div>
