@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEdit, FaCheckCircle, FaTimesCircle, FaDownload } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./CheckpointView.css";
@@ -73,6 +73,43 @@ const CheckpointView = () => {
     setEditData((prev) => ({ ...prev, [field]: val }));
   };
 
+  const handleExportCSV = () => {
+    if (rows.length === 0) return;
+
+    // Define headers
+    const headers = [
+      "Trainee Name", "BPI", "SSS", "TIN", "Pag-IBIG", "PhilHealth", 
+      "UAF IMS", "Telework Office", "Telework Personal", "Passport", "IMF UAF"
+    ];
+
+    // Map rows to CSV format
+    const csvRows = rows.map(user => [
+      `"${user.first_name} ${user.last_name}"`,
+      `"${user.bpi_account_no || ""}"`,
+      `"${user.sss_no || ""}"`,
+      `"${user.tin_no || ""}"`,
+      `"${user.pagibig_no || ""}"`,
+      `"${user.philhealth_no || ""}"`,
+      user.uaf_ims ? "Completed" : "Pending",
+      user.office_pc_telework ? "Approved" : "Pending",
+      user.personal_pc_telework ? "Approved" : "Pending",
+      user.passport_ok ? "OK" : "None",
+      user.imf_awareness_ok ? "Done" : "Pending"
+    ].join(","));
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Batch_${batchInfo.name || "Export"}_Checkpoints.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSave = async () => {
     const token = localStorage.getItem("authToken");
@@ -130,6 +167,15 @@ const CheckpointView = () => {
           <h2 className="checkpoint-title">
             Trainee List
           </h2>
+
+          <button 
+            className="btn btn-success rounded-pill" 
+            onClick={handleExportCSV}
+            disabled={rows.length === 0}
+          >
+            <i className="bi bi-file-earmark-spreadsheet me-2"></i>
+            {t("checkpoint.export_csv")}
+          </button>
         </div>
 
 

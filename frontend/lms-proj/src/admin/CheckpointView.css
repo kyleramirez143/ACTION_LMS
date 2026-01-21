@@ -243,8 +243,8 @@ updated checkpoint.css
    ============================================================ */
 .checkpoint-header {
   display: flex;
-  flex-direction: column; /* Stacked look */
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
@@ -290,6 +290,23 @@ updated checkpoint.css
   font-weight: 700;
   margin: 0;
   color: #000000 !important;
+}
+
+.export-csv-btn {
+  transition: background-color 0.2s ease;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+.export-csv-btn:hover {
+  background-color: #218838;
+}
+
+.export-csv-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* ============================================================
