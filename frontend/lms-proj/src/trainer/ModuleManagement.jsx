@@ -193,7 +193,25 @@ export default function ModuleManagement() {
 
             {/* Empty */}
             {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">No modules found.</p>
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                    <img
+                        src={moduleImage}
+                        alt="No modules"
+                        style={{ maxWidth: "220px", opacity: 0.9 }}
+                        className="mb-3"
+                    />
+                    <p className="text-center text-muted mb-0">
+                        {t("module_management.no_modules_found")}
+                    </p>
+                    {/* {userRole === "Trainer" && (
+                        <button
+                            className="btn btn-outline-primary mt-3"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add your first module
+                        </button>
+                    )} */}
+                </div>
             ) : (
                 <>
                     {/* Grid */}

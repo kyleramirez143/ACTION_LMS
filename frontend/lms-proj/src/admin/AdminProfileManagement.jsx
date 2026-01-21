@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../hooks/useAuth";
+import { useTranslation } from "react-i18next"; // 🔹 add
 import "./AdminProfileManagement.css";
 
 const backendURL = "http://localhost:5000";
@@ -10,6 +11,7 @@ function AdminProfileManagement() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
     const { userProfile, setUserProfile } = useAuth();
+    const { t } = useTranslation(); // 🔹 add
 
     const [preview, setPreview] = useState(userProfile?.profile_picture || null);
     const [showModal, setShowModal] = useState(false);
@@ -85,7 +87,7 @@ function AdminProfileManagement() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Upload failed");
+            if (!res.ok) throw new Error(data.error || t("admin-profile.upload_failed"));
 
             setPreview(`${backendURL}/${data.profileImageUrl}`);
             setUserProfile((prev) => ({
@@ -93,11 +95,11 @@ function AdminProfileManagement() {
                 profile_picture: data.profileImageUrl,
             }));
 
-            alert("Profile image updated successfully!");
+            alert(t("admin-profile.image_updated"));
             setSelectedFile(null);
         } catch (err) {
             console.error(err);
-            alert("Error uploading image: " + err.message);
+            alert(t("admin-profile.image_upload_error") + ": " + err.message);
         }
     };
 
@@ -110,7 +112,7 @@ function AdminProfileManagement() {
 
     const handleChangePassword = async () => {
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            alert("New passwords do not match!");
+            alert(t("admin-profile.password_mismatch"));
             return;
         }
         try {
@@ -131,12 +133,12 @@ function AdminProfileManagement() {
                 }
             );
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Error changing password");
-            alert("Password changed successfully!");
+            if (!res.ok) throw new Error(data.error || t("admin-profile.password_change_failed"));
+            alert(t("admin-profile.password_changed"));
             handleCloseModal();
         } catch (err) {
             console.error(err);
-            alert("Error: " + err.message);
+            alert(t("admin-profile.password_error") + ": " + err.message);
         }
     };
 
@@ -146,24 +148,24 @@ function AdminProfileManagement() {
         setShowModal(false);
     };
 
-    if (!userProfile) return <div>Loading profile...</div>;
+    if (!userProfile) return <div>{t("admin-profile.loading_profile")}</div>;
 
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-                <h3 style={styles.title}>Profile</h3>
+                <h3 style={styles.title}>{t("admin-profile.profile")}</h3>
                 <div style={styles.profileLayout}>
                     {/* Image */}
                     <div className="profile-image-card">
                         <div className="image-square">
                             {preview ? (
-                                <img src={preview} alt="Profile" className="image-square-img" />
+                                <img src={preview} alt={t("admin-profile.profile")} className="image-square-img" />
                             ) : (
                                 <div className="image-placeholder">👤</div>
                             )}
                         </div>
                         <div className="upload-link" onClick={handleFileClick}>
-                            Upload
+                            {t("admin-profile.upload")}
                         </div>
                         <input
                             type="file"
@@ -186,7 +188,7 @@ function AdminProfileManagement() {
                 {/* Profile Fields */}
                 <div style={styles.formSection}>
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">First Name</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.first_name")}</label>
                         <div className="col-12 col-sm-8">
                             <input
                                 type="text"
@@ -198,7 +200,7 @@ function AdminProfileManagement() {
                     </div>
 
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Last Name</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.last_name")}</label>
                         <div className="col-12 col-sm-8">
                             <input
                                 type="text"
@@ -210,7 +212,7 @@ function AdminProfileManagement() {
                     </div>
 
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Email</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.email")}</label>
                         <div className="col-12 col-sm-8">
                             <input
                                 type="email"
@@ -229,7 +231,7 @@ function AdminProfileManagement() {
                         className="btn btn-primary rounded-pill"
                         onClick={handleOpenModal}
                     >
-                        Change Password
+                        {t("admin-profile.change_password")}
                     </button>
 
                     <button
@@ -238,7 +240,7 @@ function AdminProfileManagement() {
                         onClick={handleSaveImage}
                         disabled={!selectedFile}
                     >
-                        Save Changes
+                        {t("admin-profile.save_changes")}
                     </button>
                 </div>
 
@@ -247,11 +249,11 @@ function AdminProfileManagement() {
                     <div className="modal-overlay">
                         <div className="modal-content">
                             <h4 style={{ textAlign: "center", fontWeight: "600" }}>
-                                Change Password
+                                 {t("admin-profile.change_password")}
                             </h4>
 
                             <div className="mb-3">
-                                <label>Current Password</label>
+                                <label>{t("admin-profile.current_password")}</label>
                                 <input
                                     type="password"
                                     className="form-control"
@@ -262,7 +264,7 @@ function AdminProfileManagement() {
                             </div>
 
                             <div className="mb-3">
-                                <label>New Password</label>
+                                <label>{t("admin-profile.new_password")}</label>
                                 <input
                                     type="password"
                                     className="form-control"
@@ -273,7 +275,7 @@ function AdminProfileManagement() {
                             </div>
 
                             <div className="mb-3">
-                                <label>Confirm New Password</label>
+                                <label>{t("admin-profile.confirm_new_password")}</label>
                                 <input
                                     type="password"
                                     className="form-control"
@@ -288,13 +290,13 @@ function AdminProfileManagement() {
                                     className="btn btn-primary rounded-pill"
                                     onClick={handleChangePassword}
                                 >
-                                    Save
+                                    {t("admin-profile.save")}
                                 </button>
                                 <button
                                     className="btn btn-outline-primary rounded-pill"
                                     onClick={handleCloseModal}
                                 >
-                                    Cancel
+                                    {t("admin-profile.cancel")}
                                 </button>
                             </div>
                         </div>

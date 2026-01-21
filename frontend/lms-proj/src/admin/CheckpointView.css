@@ -58,13 +58,6 @@ updated checkpoint.css
   color: #000000 !important; /* This forces black text on data */
 }
 
-
-/* ============================================================
-   2. ACTION BUTTONS (FIXING THE BLACK BG/TEXT ISSUE)
-   ============================================================ */
-/* ============================================================
-   6. ACTION BUTTONS (SPECIFICALLY FOR ICONS)
-   ============================================================ */
 .edit-btn-action {
   background: none;
   border: none;
@@ -245,6 +238,59 @@ updated checkpoint.css
   cursor: pointer;
 }
 
+/* ============================================================
+   BACK BUTTON STYLING
+   ============================================================ */
+.checkpoint-header {
+  display: flex;
+  flex-direction: column; /* Stacked look */
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   BREADCRUMB STYLING
+   ============================================================ */
+.checkpoint-header {
+  margin-bottom: 24px;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.breadcrumb-link {
+  color: #64748b; /* Slate Gray */
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #0047AB; /* Primary Blue */
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #94a3b8; /* Lighter Gray */
+  font-weight: 400;
+}
+
+.breadcrumb-current {
+  color: #0f172a; /* Darker Slate for the current page */
+  font-weight: 600;
+}
+
+.checkpoint-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #000000 !important;
+}
 
 /* ============================================================
    6. RESPONSIVE

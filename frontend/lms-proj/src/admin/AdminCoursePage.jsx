@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import './AdminCoursePage.css';
 
 function AdminCoursePage() {
@@ -8,6 +9,7 @@ function AdminCoursePage() {
     const { course_id } = useParams(); // For edit mode
     const isEditMode = Boolean(course_id);
     const token = localStorage.getItem("authToken");
+    const { t } = useTranslation();
 
     // AUTH CHECK
     useEffect(() => {
@@ -133,9 +135,9 @@ function AdminCoursePage() {
 
     // CREATE COURSE
     const createCourse = async () => {
-        if (!courseTitle.trim()) return alert("Course Title is required");
-        if (!selectedBatch) return alert("Please select a batch");
-        if (selectedTrainers.length === 0) return alert("Select at least one trainer");
+        if (!courseTitle.trim()) return alert(t("admin-course.alertCourseTitleRequired"));
+        if (!selectedBatch) return alert(t("admin-course.alertSelectBatch"));
+        if (selectedTrainers.length === 0) return alert(t("admin-course.alertSelectTrainer"));
 
         let uploadedFilename = existingImage;
         // const trainerEmails = selectedTrainers.map(t => t.email);
@@ -155,7 +157,7 @@ function AdminCoursePage() {
 
             if (!uploadRes.ok) {
                 const err = await uploadRes.json();
-                return alert("Image upload failed: " + err.error);
+                return alert(t("admin-course.alertImageUploadFailed") + ": " + err.error);
             }
 
             const data = await uploadRes.json();
@@ -185,23 +187,23 @@ function AdminCoursePage() {
             });
 
             if (res.ok) {
-                alert(isEditMode ? "Course updated!" : "Course added!");
+                alert(isEditMode ? t("admin-course.alertCourseUpdated") : t("admin-course.alertCourseAdded"));
                 navigate("/admin/course-management");
             } else {
                 const err = await res.json();
-                alert("Error: " + err.error);
+                alert(t("admin-course.alertSomethingWentWrong") + ": " + err.error);
             }
         } catch (error) {
             console.log(error);
             console.error(error);
-            alert("Something went wrong. Please try again later.");
+            alert(t("admin-course.alertSomethingWentWrong"));
         }
     };
 
     return (
         <div style={styles.page}>
             <div style={styles.card}>
-                <h3 style={styles.title}>{isEditMode ? "Edit Course" : "Add Course"}</h3>
+                <h3>{isEditMode ? t("admin-course.editCourse") : t("admin-course.addCourse")}</h3>
 
                 {/* COVER PHOTO AREA */}
                 <div style={styles.profileLayout}>
@@ -246,12 +248,12 @@ function AdminCoursePage() {
                 <form style={{ marginTop: "20px" }} onSubmit={e => e.preventDefault()}>
                     {/* Course Title */}
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Course Title</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-course.courseTitle")}</label>
                         <div className="col-12 col-sm-8">
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Enter Course Title"
+                                placeholder={t("admin-course.enterCourseTitle")}
                                 value={courseTitle}
                                 onChange={(e) => setCourseTitle(e.target.value)}
                             />
@@ -260,11 +262,11 @@ function AdminCoursePage() {
 
                     {/* Description */}
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Course Description</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-course.courseDescription")}</label>
                         <div className="col-12 col-sm-8">
                             <textarea
                                 className="form-control"
-                                placeholder="Enter Course Description"
+                                placeholder={t("admin-course.enterCourseDescription")}
                                 value={courseDescription}
                                 onChange={(e) => setCourseDescription(e.target.value)}
                             />
@@ -273,7 +275,7 @@ function AdminCoursePage() {
 
                     {/* Batch */}
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Batch</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-course.batch")}</label>
                         <div className="col-12 col-sm-8">
                             <select
                                 className="form-control"
@@ -281,7 +283,7 @@ function AdminCoursePage() {
                                 onChange={(e) => setSelectedBatch(e.target.value)}
                                 required
                             >
-                                <option value="">Select Batch</option>
+                                <option value="">{t("admin-course.selectBatch")}</option>
                                 {batches.map((b) => (
                                     <option key={b.batch_id} value={b.batch_id}>
                                         {b.name} {b.location}
@@ -293,7 +295,7 @@ function AdminCoursePage() {
 
                     {/* Trainer Multi-Select */}
                     <div className="mb-3 row">
-                        <label className="col-12 col-sm-2 col-form-label">Trainers</label>
+                        <label className="col-12 col-sm-2 col-form-label">{t("admin-course.trainers")}</label>
                         <div className="col-12 col-sm-8">
                             <select className="form-control"
                                 onChange={(e) => {
@@ -319,7 +321,7 @@ function AdminCoursePage() {
                                 }}
                                 value="">
 
-                                <option value="">Select Trainer</option>
+                                <option value="">{t("admin-course.selectTrainer")}</option>
                                 {trainers
                                     .filter(t => !selectedTrainers.some(st => st.id === t.id)) // avoid duplicates
                                     .map(t => (
@@ -349,8 +351,8 @@ function AdminCoursePage() {
                                 style={styles.btn}
                                 onClick={createCourse}
                             >
-                                {isEditMode ? "Update Course" : "Add Course"}
-                            </button>
+                                {isEditMode ? t("admin-course.updateCourse") : t("admin-course.addCourse")}
+                                </button>
 
                             <button
                                 type="button"
