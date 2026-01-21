@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaEdit, FaCheckCircle, FaTimesCircle, FaDownload } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
+import noDataImg from "../image/no-data.svg";
 import "./CheckpointView.css";
 
 
@@ -201,7 +202,18 @@ const CheckpointView = () => {
               {loading ? (
                 <tr><td colSpan="11" className="text-center py-5">{t("checkpoint.loading")}</td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan="11" className="text-center py-5 text-muted">{t("checkpoint.no_trainees")}</td></tr>
+                <tr>
+                  <td colSpan="11" className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center">
+                      <img 
+                        src={noDataImg} 
+                        alt="No data" 
+                        style={{ width: '200px', marginBottom: '1rem' }} 
+                      />
+                      <span>{t("checkpoint.no_trainees")}</span>
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 rows.map((user) => (
                   <tr key={user.user_id}>
