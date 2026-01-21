@@ -4,8 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api/axios";
 import { RecorderState } from "./recorder";
+import { useTranslation } from "react-i18next";
 
 const QuizScreenRecord = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { assessment_id } = useParams();
     const token = localStorage.getItem("authToken");
@@ -41,7 +43,7 @@ const QuizScreenRecord = () => {
 
             if (settings.displaySurface !== "monitor") {
                 mediaStream.getTracks().forEach(t => t.stop());
-                setError("You must share your ENTIRE SCREEN.");
+                setError(t("quiz_screen.error_entire_screen"));
                 return;
             }
 
@@ -49,7 +51,7 @@ const QuizScreenRecord = () => {
             setIsPermissionGranted(true);
 
         } catch {
-            setError("Permission denied. Screen access is required.");
+            setError(t("quiz_screen.error_permission_denied"));
         }
     };
 
@@ -66,7 +68,7 @@ const QuizScreenRecord = () => {
 
         } catch (err) {
             console.error(err);
-            setError("Failed to initialize quiz session.");
+            setError(t("quiz_screen.error_start_quiz"));
         }
     };
 
@@ -79,7 +81,7 @@ const QuizScreenRecord = () => {
                             <button onClick={() => navigate(-1)} className="btn btn-link text-dark p-0 me-2">
                                 <FaArrowLeft size={20} />
                             </button>
-                            <h5 className="mb-0">Setup Proctoring</h5>
+                            <h5 className="mb-0">{t("quiz_screen.title")}</h5>
                         </div>
 
                         <div className={`rounded-circle mb-3 d-flex justify-content-center align-items-center ${isPermissionGranted ? 'bg-success bg-opacity-10' : 'bg-primary bg-opacity-10'}`}
@@ -87,21 +89,21 @@ const QuizScreenRecord = () => {
                             <FaVideo size={32} className={isPermissionGranted ? 'text-success' : 'text-primary'} />
                         </div>
 
-                        <h5>{isPermissionGranted ? "Screen Ready" : "Screen Recording"}</h5>
+                        <h5>{isPermissionGranted ? t("quiz_screen.screen_ready") : t("quiz_screen.screen_recording")}</h5>
                         <p className="text-muted mb-4">
                             {isPermissionGranted
-                                ? "Your screen is being shared correctly. You can start the quiz."
-                                : "You must share your ENTIRE SCREEN to continue."}
+                                ? t("quiz_screen.screen_ready_desc")
+                                : t("quiz_screen.screen_required_desc")}
                         </p>
 
                         <div className="mb-3 text-start p-3 border rounded-3 bg-light">
                             <div className="d-flex align-items-center mb-2">
                                 <FaShieldAlt className="text-success me-2" />
-                                <small>Status: {isPermissionGranted ? "Validated" : "Waiting for permission"}</small>
+                                <small>{t("quiz_screen.status")}: {isPermissionGranted ? t("quiz_screen.validated") : t("quiz_screen.waiting_permission")}</small>
                             </div>
                             <div className="d-flex align-items-center">
                                 <FaCheckCircle className="text-success me-2" />
-                                <small>Entire screen sharing check enabled.</small>
+                                <small>{t("quiz_screen.entire_screen_check")}</small>
                             </div>
                         </div>
 
@@ -115,11 +117,11 @@ const QuizScreenRecord = () => {
                         <div>
                             {!isPermissionGranted ? (
                                 <button className="btn btn-primary btn-lg rounded-pill w-100" onClick={handleRequestPermission}>
-                                    Enable Entire Screen
+                                    {t("quiz_screen.enable_entire_screen")}
                                 </button>
                             ) : (
                                 <button className="btn btn-success btn-lg rounded-pill w-100" onClick={handleStartQuiz}>
-                                    Start Quiz Now
+                                    {t("quiz_screen.start_quiz_now")}
                                 </button>
                             )}
                         </div>

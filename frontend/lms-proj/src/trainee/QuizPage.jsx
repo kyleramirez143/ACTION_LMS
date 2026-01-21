@@ -65,7 +65,7 @@ const QuizPage = () => {
           setTimeLeft(res.data.quiz.time_limit * 60);
         }
       } catch {
-        alert(t('quiz.upload_failed'));
+        alert(t('quiz_page.load_failed'));
         navigate(-1);
       }
     };
@@ -160,7 +160,7 @@ const QuizPage = () => {
       setShowResultModal(true);
     } catch (err) {
       console.error(err);
-      alert(t('quiz.upload_failed'));
+      alert(t('quiz_page.submit_failed'));
     } finally {
       setIsUploading(false);
       submissionLock.current = false;
@@ -168,7 +168,7 @@ const QuizPage = () => {
   };
 
   if (!questions.length) {
-    return <p>{t('quiz.loading')}</p>;
+    return <p>{t('quiz_page.loading')}</p>;
   }
 
   const question = questions[currentQuestion];
@@ -176,12 +176,12 @@ const QuizPage = () => {
 
   return (
     <div className="container py-4">
-      <h2 className="mb-3">{state?.quizTitle || t('quiz.title')}</h2>
+      <h2 className="mb-3">{state?.quizTitle || t('quiz_page.assessment')}</h2>
 
       <div className="row">
         <div className="col-md-9">
           <strong>
-            {t('Question')} {currentQuestion + 1} {t(' of')} {questions.length}
+            {t('quiz_page.question')} {currentQuestion + 1} {t('quiz_page.of')} {questions.length}
           </strong>
 
           <div className="progress my-2" style={{ height: '10px' }}>
@@ -213,7 +213,7 @@ const QuizPage = () => {
                 onChange={(e) =>
                   handleAnswer(currentQuestion, e.target.value.toLowerCase())
                 }
-                placeholder={t('quiz.type_answer')}
+                placeholder={t('quiz_page.type_answer')}
               />
             )}
           </div>
@@ -225,7 +225,7 @@ const QuizPage = () => {
                   className="btn btn-outline-secondary me-2"
                   onClick={() => setCurrentQuestion(prev => prev - 1)}
                 >
-                  {t('quiz.previous')}
+                  {t('quiz_page.previous')}
                 </button>
               )}
 
@@ -234,7 +234,7 @@ const QuizPage = () => {
                   className="btn btn-outline-secondary"
                   onClick={() => setCurrentQuestion(prev => prev + 1)}
                 >
-                  {t('Next')}
+                  {t('quiz_page.next')}
                 </button>
               )}
             </div>
@@ -244,7 +244,7 @@ const QuizPage = () => {
                 className="btn btn-success"
                 onClick={() => setShowSubmitModal(true)}
               >
-                {t('Submit')}
+                {t('quiz_page.submit_quiz')}
               </button>
             )}
           </div>
@@ -252,11 +252,11 @@ const QuizPage = () => {
 
         <div className="col-md-3">
           <div className="card p-3 shadow-sm">
-            <h6 className="text-center">{t('quiz.question')}</h6>
+            <h6 className="text-center">{t('quiz_page.navigator')}</h6>
 
             {screenMonitoring && sessionId && (
               <div className="alert alert-warning mt-2">
-                {t('quiz.recording')}
+                {t('quiz_page.recording')}
               </div>
             )}
 
@@ -277,8 +277,7 @@ const QuizPage = () => {
             </div>
 
             <div className="mt-3 text-center text-muted">
-              {t('quiz time left')}:{' '}
-              <span className="fw-bold">{formatTime(timeLeft)}</span>
+              {t('quiz_page.time_left')}: <span className="fw-bold">{formatTime(timeLeft)}</span>
             </div>
           </div>
         </div>
@@ -308,7 +307,7 @@ const QuizPage = () => {
 
       {isUploading && (
         <div className="alert alert-info mt-3">
-          {t('quiz.submitting')}
+          {t('quiz_page.submitting')}
         </div>
       )}
     </div>
