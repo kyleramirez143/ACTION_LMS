@@ -44,7 +44,7 @@ function Course() {
 
     return (
         <>
-            <div className="container px-4 py-0">
+            <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h3 className="mb-0">Courses</h3>
                 </div>

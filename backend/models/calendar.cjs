@@ -90,10 +90,6 @@ module.exports = (sequelize, DataTypes) => {
         CalendarEvent.belongsTo(models.Lecture, { foreignKey: 'lecture_id' });
         CalendarEvent.belongsTo(models.Assessment, { foreignKey: 'assessment_id' });
         CalendarEvent.belongsTo(models.User, { foreignKey: 'created_by', as: 'creator' });
-        // CalendarEvent.belongsTo(models.Course, {
-        //     foreignKey: 'course_id',
-        //     as: 'course'
-        // });
     };
 
     return CalendarEvent;

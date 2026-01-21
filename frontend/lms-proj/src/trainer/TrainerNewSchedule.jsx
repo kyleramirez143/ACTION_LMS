@@ -35,46 +35,52 @@ function TrainerNewSchedule() {
     const [modules, setModules] = useState([]); // Fetch based on batch
     const [selectedBatch, setSelectedBatch] = useState(null);
     const [lectures, setLectures] = useState([]); // Fetch based on module
-    const [isLoadingModules, setIsLoadingModules] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     /* -----------------------------
-       Fetch Batches for Course
+       Fetch Batches
     ----------------------------- */
-    const fetchBatches = async () => {
+    useEffect(() => {
+        const fetchBatches = async () => {
+            try {
+                const res = await axios.get("/api/batches/dropdown", { headers });
+                setBatches(res.data || []);
+            } catch (err) {
+                console.error("Failed to fetch batches:", err);
+                setBatches([]);
+            }
+        };
+        fetchBatches();
+    }, []);
+
+    /* -----------------------------
+   Fetch Modules & Lectures for Batch
+----------------------------- */
+    const fetchModulesAndLectures = async (batchId) => {
+        if (!batchId) {
+            setModules([]);
+            setLectures([]);
+            return;
+        }
+
+        setLoading(true);
         try {
-            const res = await axios.get("/api/batches/dropdown", { headers });
-            setBatches(res.data); // ✅ ARRAY
+            // Use the backend endpoint we just created
+            const res = await axios.get(`${API_BASE}/api/lectures/batch/${batchId}`, { headers });
+
+            // Set independent arrays
+            setModules(res.data.modules || []);
+            setLectures(res.data.lectures || []);
+
         } catch (err) {
-            console.error("Failed to fetch batches:", err);
-            setBatches([]);
+            console.error("Failed to fetch modules or lectures for batch", err);
+            setModules([]);
+            setLectures([]);
+        } finally {
+            setLoading(false);
         }
     };
 
-    /* -----------------------------
-       Fetch Modules for Selected Batch
-    ----------------------------- */
-    const fetchModulesByBatch = async (batchId) => {
-        if (!batchId) return setModules([]);
-        try {
-            const res = await axios.get(`/api/modules/batch/${batchId}`, { headers });
-            setModules(res.data || []);
-        } catch (err) {
-            console.error("Failed to fetch modules:", err);
-        }
-    };
-
-    /* -----------------------------
-       Fetch Lectures for Selected Batch
-    ----------------------------- */
-    const fetchLecturesByBatch = async (batchId) => {
-        if (!batchId) return setLectures([]);
-        try {
-            const res = await axios.get(`/api/lectures/batch/${batchId}`, { headers });
-            setLectures(res.data || []);
-        } catch (err) {
-            console.error("Failed to fetch lectures:", err);
-        }
-    };
 
     /* -----------------------------
        Fetch event data if editing
@@ -98,10 +104,7 @@ function TrainerNewSchedule() {
                     end_time: data.end_time?.split("T")[1]?.slice(0, 5) || "",
                 }));
 
-                if (data.batch_id) {
-                    await fetchModulesByBatch(data.batch_id);
-                    await fetchLecturesByBatch(data.batch_id);
-                }
+                if (data.batch_id) await fetchModulesAndLectures(data.batch_id);
             } catch (err) {
                 console.error("Failed to fetch event", err);
             }
@@ -110,12 +113,9 @@ function TrainerNewSchedule() {
         fetchEvent();
     }, [event_id]);
 
-    // Fetch batches on mount
-    useEffect(() => {
-        fetchBatches();
-    }, []);
-
-    // --- HANDLERS ---
+    /* -----------------------------
+       Handlers
+    ----------------------------- */
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -124,66 +124,49 @@ function TrainerNewSchedule() {
         }));
     };
 
-    const handleTimeChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
     const handleBatchChange = async (e) => {
         const batchId = e.target.value;
-
-        // Reset module & lecture selections
-        setFormData(prev => ({
-            ...prev,
-            batch_id: batchId,
-            module_id: "",
-            lecture_id: ""
-        }));
-
-        try {
-            // Fetch modules for this batch
-            const modulesRes = await axios.get(`/api/modules/batch/${batchId}`, { headers });
-            setModules(modulesRes.data);
-
-            // Fetch lectures for this batch
-            const lecturesRes = await axios.get(`/api/lectures/batch/${batchId}`, { headers });
-            setLectures(lecturesRes.data);
-
-        } catch (err) {
-            console.error("Failed to fetch modules or lectures for batch", err);
-            setModules([]);
-            setLectures([]);
-        }
+        setFormData(prev => ({ ...prev, batch_id: batchId, module_id: "", lecture_id: "" }));
+        await fetchModulesAndLectures(batchId);
     };
-
-
-    useEffect(() => {
-        fetchBatches();
-    }, []);
 
     const handleModuleChange = (e) => {
         const moduleId = e.target.value;
+        setFormData(prev => ({ ...prev, module_id: moduleId, lecture_id: "" }));
 
-        setFormData(prev => ({
-            ...prev,
-            module_id: moduleId,
-            lecture_id: "" // reset lecture
-        }));
-
-        // Optional: filter lectures of this module
-        const filteredLectures = lectures.filter(l => l.module.module_id === moduleId);
+        // Filter lectures to show only those under selected module
+        const filteredLectures = lectures.filter(l => l.module?.module_id === moduleId);
         setLectures(filteredLectures);
     };
 
     const handleLectureChange = (e) => {
         const lectureId = e.target.value;
+        const selectedLecture = lectures.find(l => l.lecture_id === lectureId);
+
+        let lectureDate = "";
+
+        if (selectedLecture) {
+            // Use lecture start_date if available
+            if (selectedLecture.start_date) {
+                lectureDate = selectedLecture.start_date.split("T")[0];
+            }
+            // Otherwise, fallback to module start_date
+            else if (selectedLecture.module?.start_date) {
+                lectureDate = selectedLecture.module.start_date.split("T")[0];
+            }
+        }
 
         setFormData(prev => ({
             ...prev,
-            lecture_id: lectureId
+            lecture_id: lectureId,
+            module_id: selectedLecture?.module_id || "",
+            date: lectureDate,
         }));
+    };
+
+
+    const handleTimeChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleDayChange = (day) => {
@@ -195,23 +178,84 @@ function TrainerNewSchedule() {
         }));
     };
 
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
-            const method = event_id ? "put" : "post";
-            const url = event_id ? `/api/calendar/${event_id}` : "/api/calendar";
+            // 1️⃣ Determine event_date from lecture → module fallback
+            let eventDate = formData.date; // default from date picker
 
-            const res = await axios({
-                method,
-                url,
-                data: formData,
-                headers
-            });
+            if (formData.lecture_id) {
+                const lecture = lectures.find(l => l.lecture_id === formData.lecture_id);
+                eventDate = lecture?.start_date || lecture?.module?.start_date || "";
+            } else if (formData.module_id) {
+                const module = modules.find(m => m.module_id === formData.module_id);
+                eventDate = module?.start_date || "";
+            }
 
-            alert(res.data.message);
+            if (!eventDate) {
+                return alert("No start date found for selected lecture/module.");
+            }
+
+            // 2️⃣ Convert start_time and end_time to valid ISO strings
+            let startTimeISO = null;
+            let endTimeISO = null;
+
+            if (formData.is_all_day) {
+                startTimeISO = new Date(`${eventDate}T00:00:00`).toISOString();
+                endTimeISO = new Date(`${eventDate}T23:59:59`).toISOString();
+            } else {
+                if (formData.start_time && formData.end_time) {
+                    startTimeISO = new Date(`${eventDate}T${formData.start_time}`).toISOString();
+                    endTimeISO = new Date(`${eventDate}T${formData.end_time}`).toISOString();
+                } else {
+                    return alert("Start and end time are required for non-all-day events.");
+                }
+            }
+
+            // 3️⃣ Build payload
+            const payload = {
+                title: formData.title,
+                description: formData.description || null,
+                batch_id: formData.batch_id,
+                event_type: formData.event_type,
+                event_date: eventDate,
+                start_time: startTimeISO,
+                end_time: endTimeISO,
+                is_all_day: formData.is_all_day || false,
+                is_recurring: formData.is_recurring || false,
+                recurrence_rule: null,
+                module_id: ["module_session", "lecture", "assessments"].includes(formData.event_type) ? formData.module_id : null,
+                lecture_id: formData.event_type === "lecture" ? formData.lecture_id : null,
+                created_by: decoded?.user_id || null,
+            };
+
+            // 4️⃣ Build recurrence_rule if recurring
+            if (formData.is_recurring) {
+                if (formData.repetition === "Daily") payload.recurrence_rule = "FREQ=DAILY";
+                else if (formData.repetition === "Weekly") {
+                    const days = formData.weekly_days.map(d => d.slice(0, 2).toUpperCase());
+                    payload.recurrence_rule = `FREQ=WEEKLY;BYDAY=${days.join(",")}`;
+                } else if (formData.repetition === "Monthly") {
+                    payload.recurrence_rule = `FREQ=MONTHLY;BYMONTHDAY=${formData.monthly_date}`;
+                }
+            }
+
+            // 5️⃣ Determine API method and URL
+            const method = isEditMode ? "put" : "post";
+            console.log(method);
+            const url = isEditMode ? `${API_BASE}/api/schedules/${event_id}` : `${API_BASE}/api/schedules`;
+
+            // 6️⃣ Send request
+            const res = await axios({ method, url, data: payload, headers });
+            alert(res.data.message || "Schedule saved successfully!");
             navigate("/trainer/calendar");
+
         } catch (err) {
-            console.error(err);
+            console.error("Submit Error:", err);
+            console.log(err);
             alert(err.response?.data?.error || "Failed to save schedule");
         }
     };
@@ -235,7 +279,7 @@ function TrainerNewSchedule() {
                     <div className="row mb-3">
                         <label className="col-sm-3 col-form-label">Schedule Title </label>
                         <div className="col-sm-9">
-                            <input name="title" type="text" className="form-control" onChange={handleChange} required placeholder="Enter Schedule Title" />
+                            <input name="title" type="text" className="form-control" value={formData.title} onChange={handleChange} required placeholder="Enter Schedule Title" />
                         </div>
                     </div>
 
@@ -304,7 +348,7 @@ function TrainerNewSchedule() {
                                     name="module_id"
                                     className="form-select"
                                     value={formData.module_id}
-                                    onChange={handleChange}
+                                    onChange={handleModuleChange}
                                     required
                                 >
                                     <option value="">-- Choose Module --</option>
@@ -331,13 +375,11 @@ function TrainerNewSchedule() {
                                     required
                                 >
                                     <option value="">-- Choose Lecture --</option>
-                                    {lectures
-                                        .filter(l => l.module?.module_id === formData.module_id)
-                                        .map(l => (
-                                            <option key={l.lecture_id} value={l.lecture_id}>
-                                                {l.title}
-                                            </option>
-                                        ))}
+                                    {lectures.map(l => (
+                                        <option key={l.lecture_id} value={l.lecture_id}>
+                                            {l.title} ({l.module?.title || "No Module"})
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

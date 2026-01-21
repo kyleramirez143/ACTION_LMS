@@ -4,7 +4,8 @@ import {
     getSchedulesByCourse,
     getCalendarEventById,
     addOrUpdateCalendarEvent,
-    deleteCalendarEvent
+    deleteCalendarEvent,
+    getSchedulesByBatchModules
 } from "../controllers/scheduleController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -28,5 +29,6 @@ router.get("/:event_id", protect, getCalendarEventById);
 router.post("/", protect, addOrUpdateCalendarEvent);
 router.put("/:event_id", protect, addOrUpdateCalendarEvent);
 router.delete("/:event_id", protect, deleteCalendarEvent);
+router.get("/batch/:batch_id/events", getSchedulesByBatchModules);
 
 export default router;

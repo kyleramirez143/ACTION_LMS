@@ -528,3 +528,64 @@ export const getLecturesByBatch = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch lectures" });
     }
 };
+
+export const getModulesAndLecturesByBatch = async (req, res) => {
+    try {
+        const { batch_id } = req.params;
+        const userRole = req.user?.roles?.[0];
+
+        if (!batch_id) return res.status(400).json({ error: "batch_id is required" });
+
+        // 1️⃣ Get all courses linked to this batch
+        const courses = await db.Course.findAll({
+            include: [{
+                model: db.Batch,
+                as: "batch",
+                where: { batch_id },
+                attributes: [] // we only need course_id
+            }],
+            attributes: ["course_id"],
+            raw: true
+        });
+
+        const courseIds = courses.map(c => c.course_id);
+        if (courseIds.length === 0) return res.json({ modules: [], lectures: [] });
+
+        // 2️⃣ Get all modules for these courses
+        const modules = await db.Module.findAll({
+            where: { course_id: { [Op.in]: courseIds } },
+            attributes: ["module_id", "title", "start_date", "end_date"],
+            raw: true
+        });
+
+        const moduleIds = modules.map(m => m.module_id);
+
+        // 3️⃣ Get all lectures for these modules
+        let lectures = [];
+        if (moduleIds.length > 0) {
+            const lectureWhere = { module_id: { [Op.in]: moduleIds } };
+            if (userRole === "Trainee") lectureWhere.is_visible = true;
+
+            lectures = await db.Lecture.findAll({
+                where: lectureWhere,
+                attributes: ["lecture_id", "title", "module_id", "start_date", "end_date", "is_visible"],
+                include: [
+                    {
+                        model: db.Module,
+                        as: "module",
+                        attributes: ["module_id", "title"],
+                    }
+                ],
+                order: [["created_at", "ASC"]]
+            });
+        }
+
+        res.json({ modules, lectures });
+    } catch (err) {
+        console.error("Get Modules & Lectures By Batch Error:", err);
+        res.status(500).json({
+            error: "Failed to fetch modules and lectures by batch",
+            details: err.message
+        });
+    }
+};

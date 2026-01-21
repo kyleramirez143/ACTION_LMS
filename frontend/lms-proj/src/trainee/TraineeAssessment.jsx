@@ -106,155 +106,160 @@ export default function AssessmentDashboard() {
   // RENDER
   // =========================
   return (
-    <div className="assessment-wrapper">
-      <div className="assessment-content">
+    <div className="user-role-card">
 
-        {/* HEADER */}
-        <div className="title-back-row">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-          >
-            <ArrowLeft size={20} strokeWidth={2.2} />
-          </button>
-          <h2 className="page-title">Assessment</h2>
+      {/* HEADER + SEARCH ROW */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        {/* LEFT SIDE: BACK + TITLE */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <h3
+            className="section-title">
+            Assessment
+          </h3>
         </div>
 
-        <div className="white-card">
-
-          {/* SEARCH */}
-          <div className="filter-controls">
-            <div className="search-box">
-              <Search size={20} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search assessments"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* TABLE */}
-          <div className="results-table-scroll">
-            <table className="results-table">
-              <thead>
-                <tr>
-                  <th>Course</th>
-                  <th>Module</th>
-                  <th>Quiz Title</th>
-                  <th>Score</th>
-                  <th>Status</th>
-                  <th>Feedback</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                      Loading results...
-                    </td>
-                  </tr>
-                ) : displayedResults.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                      No assessment records found
-                    </td>
-                  </tr>
-                ) : (
-                  displayedResults.map((r, i) => (
-                    <tr key={r.attempt_id}>
-                      <td>
-                        {r.course}
-                      </td>
-                      <td>
-                        {r.module}
-                      </td>
-                      <td>
-                        <button
-                          className="title-link text-primary text-decoration-underline"
-                          type="button"
-                          onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
-                        >
-                          {r.title}
-                        </button>
-                      </td>
-
-                      <td>{r.score}</td>
-
-                      <td>
-                        <span
-                          className={`status-pill ${statusClass[r.status] || ""
-                            }`}
-                        >
-                          {r.status}
-                        </span>
-                      </td>
-
-                      <td>{r.feedback}</td>
-
-                      <td>
-                        {new Date(r.date).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* PAGINATION */}
-          <div className="pagination-wrapper">
-            <nav>
-              <ul className="pagination custom-pagination">
-
-                {/* PREV */}
-                <li className="page-item">
-                  <button
-                    className="page-link"
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    ‹
-                  </button>
-                </li>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li
-                    key={i}
-                    className={`page-item ${currentPage === i + 1 ? "active" : ""
-                      }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => goToPage(i + 1)}
-                    >
-                      {i + 1}
-                    </button>
-                  </li>
-                ))}
-
-                {/* NEXT */}
-                <li className="page-item">
-                  <button
-                    className="page-link"
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    ›
-                  </button>
-                </li>
-
-              </ul>
-            </nav>
-          </div>
-
+        {/* RIGHT SIDE: SEARCH */}
+        <div
+          className="filter-controls"
+          style={{
+            display: "flex",
+            alignItems: "center", // 🔑 center search vertically
+          }}
+        >
+          <input
+            type="text"
+            className="form-control"
+            style={{ minWidth: "300px" }}
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
+
+
+      {/* TABLE */}
+      <div className="results-table-scroll">
+        <table className="results-table">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Module</th>
+              <th>Quiz Title</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Feedback</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  Loading results...
+                </td>
+              </tr>
+            ) : displayedResults.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: "center" }}>
+                  No assessment records found
+                </td>
+              </tr>
+            ) : (
+              displayedResults.map((r, i) => (
+                <tr key={r.attempt_id}>
+                  <td>
+                    {r.course}
+                  </td>
+                  <td>
+                    {r.module}
+                  </td>
+                  <td>
+                    <button
+                      className="title-link text-primary text-decoration-underline"
+                      type="button"
+                      onClick={() => openAssessment(r.assessment_id, r.attempt_id)}
+                    >
+                      {r.title}
+                    </button>
+                  </td>
+
+                  <td>{r.score}</td>
+
+                  <td>
+                    <span
+                      className={`status-pill ${statusClass[r.status] || ""
+                        }`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+
+                  <td>{r.feedback}</td>
+
+                  <td>
+                    {new Date(r.date).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="pagination-wrapper">
+        <nav>
+          <ul className="pagination custom-pagination">
+
+            {/* PREV */}
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ‹
+              </button>
+            </li>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li
+                key={i}
+                className={`page-item ${currentPage === i + 1 ? "active" : ""
+                  }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => goToPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+
+            {/* NEXT */}
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                ›
+              </button>
+            </li>
+
+          </ul>
+        </nav>
+      </div>
+
     </div>
   );
 }

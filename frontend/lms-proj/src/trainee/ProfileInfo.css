@@ -5,7 +5,7 @@
   max-width: 1400px;
   margin: 40px auto;
   padding: 0 20px;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   line-height: 1.5;
 }
 
@@ -15,24 +15,31 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 25px;
   border: 1px solid #e0e0e0;
-  overflow: hidden; /* Ensures background colors don't bleed out of corners */
+  overflow: hidden;
 }
 
 /* ============================= */
 /* 2. USER PROFILE SECTION       */
 /* ============================= */
 .user-info-card {
+  display: flex;           /* Horizontal layout */
+  flex-direction: row;
+  gap: 40px;               /* space between left and right */
   padding: 30px;
+  align-items: flex-start; /* top aligned */
 }
 
 .user-info-header {
-  text-align: center;
-  margin-bottom: 25px;
+  text-align: center;      
+  margin-bottom: 0;        /* remove old vertical margin */
+  flex: 1;                 /* left section width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Fixed Centering for Profile Picture */
 .profile-picture {
-  margin: 0 auto 15px;
+  margin: 0 0 15px;
   width: 100px;
   height: 100px;
   border-radius: 50%;
@@ -72,22 +79,36 @@
 }
 
 .status-badge {
-  display: inline-block;
-  background: #22c55e;
-  color: white;
-  font-size: 12px;
-  padding: 4px 14px;
-  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 600;
+  margin-top: 5px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  display: inline-block;
 }
 
-/* Inner Info Box */
+.status-badge.active {
+  color: #2e7d32; 
+  background-color: #e8f5e9;
+}
+
+.status-badge.inactive {
+  color: #d32f2f; 
+  background-color: #ffebee;
+}
+
+.role-text {
+  font-weight: 600;
+  color: #555;
+}
+
 .user-info-box {
+  flex: 2;                 /* right section width */
+  margin-top: 0;           /* remove old vertical margin */
   background-color: #fbfcfd;
   border: 1px solid #eef0f2;
   border-radius: 10px;
   padding: 20px;
-  margin-top: 20px;
 }
 
 .user-info-title {
@@ -120,30 +141,6 @@
   margin: 0;
 }
 
-.status-badge {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-top: 5px;
-  padding: 2px 10px;
-  border-radius: 12px;
-  display: inline-block;
-}
-
-.status-badge.active {
-  color: #2e7d32; /* Green */
-  background-color: #e8f5e9;
-}
-
-.status-badge.inactive {
-  color: #d32f2f; /* Red */
-  background-color: #ffebee;
-}
-
-.role-text {
-  font-weight: 600;
-  color: #555;
-}
-
 /* ============================= */
 /* 3. ONBOARDING TABLE           */
 /* ============================= */
@@ -153,13 +150,13 @@
   align-items: center;
   margin-bottom: 20px;
   /* padding: 20px 30px; */
-  background: transparent; /* Changed from #fcfcfc to transparent */
-  border-bottom: 1px solid #eee; /* Keeps the separation line */
+  background: transparent;
+  border-bottom: 1px solid #eee;
 }
 
-.onboarding-table-wrapper {
+/* .onboarding-table-wrapper {
   padding: 0 30px 30px;
-}
+} */
 
 .onboarding-table {
   width: 100%;
@@ -183,41 +180,31 @@
   vertical-align: middle;
 }
 
-/* High Contrast Inputs */
+/* ============================= */
+/* 4. INPUTS & SELECTS           */
+/* ============================= */
 .table-input, 
 .table-select {
   width: 100%;
-  padding: 8px 10px;
-  border: 1.5px solid #b0b0b0; /* Stronger border visibility */
-  border-radius: 6px;
+  padding: 10px 16px;
+  border: 1.5px solid #5B5B5B;
+  border-radius: 50px;
   font-size: 14px;
-  color: #000 !important; 
   font-weight: 500;
+  color: #000;
   background-color: #fff;
   transition: all 0.2s;
+  outline: none;
 }
 
 .table-input:focus, 
 .table-select:focus {
-  outline: none;
   border-color: #0047AB;
-  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
+  box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.15);
 }
 
-/* Targeted width for the Requirement column */
-.onboarding-table th:first-child,
-.onboarding-table td:first-child {
-  width: 50%; /* Adjust this percentage or use px (e.g., 250px) to make it even narrower */
-  white-space: nowrap; /* Prevents the label from wrapping to two lines */
-}
-
-/* Ensure the Value/Status column takes up the remaining space */
-.onboarding-table th:last-child,
-.onboarding-table td:last-child {
-  width: auto;
-}
 /* ============================= */
-/* 4. BUTTONS & ACTIONS          */
+/* 5. BUTTONS & ACTIONS          */
 /* ============================= */
 .table-actions {
   margin-top: 20px;
@@ -226,47 +213,71 @@
   border-top: 1px solid #eee;
 }
 
+.btn-edit,
+.btn-cancel,
+.btn-save,
+.empty-state .btn-add {
+  min-width: 130px;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 50px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
 .btn-edit {
   background: #fff;
   color: #0047AB;
-  border: 1.5px solid #0047AB;
-  padding: 6px 16px;
-  border-radius: 100px;
-  font-weight: 600;
-  cursor: pointer;
+  border: 1px solid #0047AB;
 }
 
-.btn-edit:hover { background: #f0f4f8; }
+.btn-edit:hover {
+  background: #f0f4f8;
+}
 
 .btn-save {
   background: #0047AB;
-  color: white;
+  color: #fff;
   border: none;
-  padding: 10px 24px;
-  border-radius: 100px;
-  font-weight: 600;
-  cursor: pointer;
+}
+
+.btn-save:hover {
+  background-color: #003b94;
 }
 
 .btn-cancel {
-  background: #f3f4f6;
-  color: #4b5563;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 100px;
+  background: #fff;
+  color: #0047AB;
+  border: 1px solid #0047AB;
   margin-left: 10px;
-  cursor: pointer;
 }
 
-/* Empty State Styling - High Visibility Green */
+.btn-cancel:hover {
+  background-color: #0047AB;
+  color: #fff;
+}
+
+.empty-state .btn-add {
+  background-color: #0047AB;
+  color: #fff;
+  border: none;
+}
+
+.empty-state .btn-add:hover {
+  background-color: #047857;
+}
+
+/* ============================= */
+/* 6. EMPTY STATE                */
+/* ============================= */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  /* Force the green background to override the card gray */
-  background-color: #f8f9fa !important; 
-  border: 2px dashed #a2a2a2; 
+  background-color: #f8f9fa;
+  border: 2px dashed #a2a2a2;
   border-radius: 12px;
-  /* margin: 20px 30px;  */
+  /* margin: 20px 30px; */
 }
 
 .empty-state p {
@@ -276,27 +287,26 @@
   font-size: 16px;
 }
 
-/* Ensure the button is distinct from the green box */
-.empty-state .btn-add {
-  background-color: #27b052;
-  color: white;
-  border: none;
-  padding: 12px 28px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s;
+/* ============================= */
+/* 7. RESPONSIVE                  */
+/* ============================= */
+@media (max-width: 768px) {
+  .user-info-card {
+    flex-direction: column; /* stack vertically on small screens */
+  }
+
+  .user-info-box {
+    margin-top: 20px;
+  }
 }
 
-.empty-state .btn-add:hover {
-  background-color: #047857;
-}
-
-/* Mobile Adjustments */
 @media (max-width: 600px) {
   .user-info-grid { grid-template-columns: 1fr; gap: 15px; }
   .card-header-flex { flex-direction: column; gap: 10px; text-align: center; }
-  .onboarding-table th { display: none; } /* Hide headers on small mobile */
+  .onboarding-table th { display: none; }
   .onboarding-table td { display: block; width: 100%; box-sizing: border-box; }
+  .btn-edit, .btn-save, .btn-cancel, .empty-state .btn-add {
+    width: 100%;
+    margin-bottom: 10px;
+  }
 }

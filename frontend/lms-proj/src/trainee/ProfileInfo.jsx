@@ -134,12 +134,21 @@ function ProfileInfo() {
 
   return (
     <>
-      <div className="user-role-card" style={{
-        marginBottom: "0.5px",  // small space below the card
-        backgroundColor: "#fff" // optional: white background
-      }}>
+      <div
+        className="user-role-card"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "40px",
+          padding: "30px",
+          alignItems: "flex-start",
+          marginBottom: "0.5px",   // small space below the card
+          backgroundColor: "#fff", // optional: white background
+        }}
+      >
         {/* SECTION 1: User Information Card */}
         {/* SECTION 1: User Information Card */}
+        {/* <div className="checkpoint-card user-info-card"> */}
         <div className="user-info-header">
           <div className="profile-picture">
             {userProfile.profile_picture ? (
@@ -153,9 +162,9 @@ function ProfileInfo() {
             )}
           </div>
 
-          <h3 className="section-title">
+          <h2 className="user-name">
             {userProfile.first_name} {userProfile.last_name}
-          </h3>
+          </h2>
 
           {/* Status Badge under the name */}
           <div className={`status-badge ${userProfile.is_active ? "active" : "inactive"}`}>
@@ -164,37 +173,32 @@ function ProfileInfo() {
         </div>
 
         <div className="user-info-box">
-          <h5
-            className="section-title"
-            style={{ borderBottom: "1px solid #eee", paddingBottom: "0.25rem" }}
-          >
-            USER INFORMATION
-          </h5>
-
+          <h5 className="section-title py-1" style={{ borderBottom: "1px solid #eee" }}>User Information</h5>
 
           <div className="user-info-grid">
             <div>
-              <label>First Name:</label>
+              <p className="text-muted">First Name:</p>
               <p>{userProfile.first_name}</p>
             </div>
 
             <div>
-              <label>Email:</label>
+              <p className="text-muted">Email:</p>
               <p>{userProfile.email}</p>
             </div>
 
             <div>
-              <label>Last Name:</label>
+              <p className="text-muted">Last Name:</p>
               <p>{userProfile.last_name}</p>
             </div>
 
             <div>
-              <label>Role:</label>
+              <p className="text-muted">Role:</p>
               <p className="role-text">{userProfile.role}</p>
             </div>
           </div>
         </div>
       </div>
+
 
       {/* SECTION 2: Onboarding Requirements */}
       {
@@ -230,7 +234,7 @@ function ProfileInfo() {
                         <td>{item.label}</td>
                         <td>
                           {isEditing ? (
-                            <input type="text" className="table-input" value={onboarding[item.field] || ""} onChange={(e) => handleChange(item.field, e.target.value)} />
+                            <input type="text" className="form-control" value={onboarding[item.field] || ""} onChange={(e) => handleChange(item.field, e.target.value)} />
                           ) : (
                             onboarding[item.field] || "---"
                           )}
@@ -249,7 +253,7 @@ function ProfileInfo() {
                         <td>{item.label}</td>
                         <td>
                           {isEditing ? (
-                            <select className="table-select" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
+                            <select className="form-control" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
                               <option value="false">{item.no}</option>
                               <option value="true">{item.yes}</option>
                             </select>
@@ -271,7 +275,9 @@ function ProfileInfo() {
               </div>
             )}
           </div>
-        )}
+
+        )
+      }
     </>
   );
 }

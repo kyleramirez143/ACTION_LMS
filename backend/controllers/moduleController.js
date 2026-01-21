@@ -1,12 +1,12 @@
 // /backend/controllers/moduleController.js
 
-import { Op } from "sequelize";
 import db from "../models/index.cjs";
+const { Module, Course, CourseInstructor, User, Lecture } = db;
 
 export const createModule = async (req, res) => {
     try {
         const { title, description, course_id, start_date, end_date } = req.body;
-        const trainerIdc = req.user?.id;
+        const trainerId = req.user?.id;
 
         if (!title) return res.status(400).json({ error: "Module title is required" });
         if (!course_id) return res.status(400).json({ error: "Course ID is required" });
