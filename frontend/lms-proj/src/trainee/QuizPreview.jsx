@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 const QuizPreview = () => {
 	const { t } = useTranslation();
-	const { assessment_id } = useParams();
+	const { assessment_id, course_id, module_id } = useParams();
 	const navigate = useNavigate();
 	const token = localStorage.getItem("authToken");
 
@@ -59,7 +59,7 @@ const QuizPreview = () => {
 					<FaArrowLeft
 						className="back-icon me-3"
 						style={{ cursor: "pointer" }}
-						onClick={() => navigate(-1)}
+						onClick={() => navigate(`/${course_id}/modules/${module_id}/lectures`)}
 					/>
 					<h2 className="mb-0">{quiz.title}</h2>
 				</div>

@@ -121,7 +121,7 @@ function AppContent() {
             <Route path="/all/notificationview" element={<NotificationView />} />
 
             {/* Checkpoint View */}
-            <Route path="/admin/checkpointview" element={<CheckpointView />} />
+            <Route path="/admin/checkpoint-view" element={<CheckpointView />} />
 
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
@@ -178,7 +178,7 @@ function AppContent() {
             <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
 
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
-            <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
+            <Route path="/:course_id/modules/:module_id/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />

@@ -131,7 +131,13 @@ export default function TrainerModuleScreen() {
               : t("lecture.empty_trainee")}
           </p>
         ) : (
-          <ModuleAccordion isTrainerView={userRole === "Trainer"} userRole={userRole} lectures={lectures} />
+          <ModuleAccordion
+            isTrainerView={userRole === "Trainer"}
+            userRole={userRole}
+            lectures={lectures}
+            courseId={course_id}
+            moduleId={module_id}
+          />
         )}
       </div>
 

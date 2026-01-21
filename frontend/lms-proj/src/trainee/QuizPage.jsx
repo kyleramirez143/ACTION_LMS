@@ -47,7 +47,9 @@ const QuizPage = () => {
 
 	// --- SESSION CHECK ---
 	useEffect(() => {
-		if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
+		if (screenMonitoring && !sessionId) {
+			navigate(`/quiz/${assessment_id}/permission`);
+		}
 	}, [sessionId, assessment_id, navigate]);
 
 	// --- FETCH QUESTIONS ---

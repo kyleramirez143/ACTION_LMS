@@ -414,7 +414,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         if (userRole === "Trainer") {
                                                             navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`);
                                                         } else {
-                                                            navigate(`/quiz/${quiz.assessment_id}`);
+                                                            navigate(`/${courseId}/modules/${moduleId}/quiz/${quiz.assessment_id}`);
                                                         }
                                                     }}
                                                 >
