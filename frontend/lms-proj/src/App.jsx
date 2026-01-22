@@ -12,9 +12,6 @@ import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 import NotificationView from "./all/NotificationView.jsx";
 
-//Checkpoint View
-import CheckpointView from "./admin/CheckpointView.jsx";
-
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
 
@@ -120,7 +117,6 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit" element={<AddLecture />} />
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
-            <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
             
 

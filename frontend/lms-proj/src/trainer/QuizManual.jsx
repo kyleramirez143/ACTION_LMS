@@ -245,9 +245,9 @@ function QuizManual() {
                   ))}
                 </ul>
               )}
-              <p className="text-success mb-1"><strong>{t("quiz.answer")}:</strong> {q.correct_answer.toUpperCase()}</p> {/* TRANSLATED */}
+              <p className="text-success mb-1"><strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}</p> {/* TRANSLATED */}
               {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
-                <small className="text-muted d-block fw-bold">{t("quiz.explanation")}:</small>
+                <small className="text-muted d-block fw-bold">{t("quiz.explanation")}</small>
                 <small className="text-dark">{q.explanation}</small>
               </div>}
             </div>

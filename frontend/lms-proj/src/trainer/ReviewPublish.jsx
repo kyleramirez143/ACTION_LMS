@@ -453,7 +453,7 @@ const ReviewPublish = () => {
         {/* --- ANSWER --- */}
         {q.correct_answer && !isEditing && (
           <p className="text-success mb-1 mt-2" style={{ marginLeft: "1rem" }}>
-            <strong>{t("quiz.answer")}:</strong> {q.correct_answer.toUpperCase()}
+            <strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}
           </p>
         )}
 
@@ -463,7 +463,7 @@ const ReviewPublish = () => {
             padding: "0.75rem 1rem",  // top/bottom 0.75rem, left/right 1rem
             margin: "0.5rem 0.5rem",  // top/bottom 0.5rem, left/right 0.5rem
           }}>
-            <p className="fw-bold">{t("quiz.explanation")}:</p>
+            <p className="fw-bold">{t("quiz.explanation")}</p>
             <p className="text-muted">{q.explanation}</p>
           </div>
         )}
