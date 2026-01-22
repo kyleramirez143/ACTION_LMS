@@ -6,7 +6,7 @@ import "./QuizPreview.css";
 
 const QuizPreview = () => {
 	const { t } = useTranslation();
-	const { assessment_id } = useParams();
+	const { assessment_id, course_id, module_id } = useParams();
 	const navigate = useNavigate();
 	const token = localStorage.getItem("authToken");
 

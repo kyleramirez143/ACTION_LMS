@@ -10,7 +10,8 @@ const {
     AssessmentAttempt,
     Grade,
     LectureAssessment,
-    sequelize
+    sequelize,
+    Sequelize
 } = pkg;
 
 // Fetch quiz + questions
@@ -402,10 +403,9 @@ export async function getQuizReview(req, res) {
                         'explanations',
                         'points'
                     ],
-                    // order: [['question_id', 'ASC']]
+                    order: [['question_id', 'ASC']]
                 }
             ],
-            order: [['response_id', 'ASC']]
         });
 
         const formatted = responses.map(r => ({
@@ -438,7 +438,10 @@ export async function getUpcoming(req, res) {
 
         const upcomingQuizzes = await Assessment.findAll({
             where: {
-                due_date: { [Op.gt]: today },
+                [Op.or]: [
+                    { due_date: { [Op.gt]: today } },
+                    { due_date: null }
+                ]
             },
             attributes: ["assessment_id", "title", "due_date"],
             include: [
@@ -459,7 +462,11 @@ export async function getUpcoming(req, res) {
                     ]
                 }
             ],
-            order: [["due_date", "ASC"]],
+            order: [
+                // Put NULL dates last (Postgres)
+                [Sequelize.literal('due_date IS NULL'), 'ASC'],
+                ['due_date', 'ASC']
+            ],
             distinct: true
         });
 

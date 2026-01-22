@@ -62,6 +62,7 @@ export const uploadLectureFile = async (req, res) => {
             for (let file of req.files) {
                 const resource = await Resource.create({
                     file_url: file.filename, // store uploaded file name
+                    display_name: file.originalname,
                     is_visible: true,
                 });
 
