@@ -1,5 +1,10 @@
 {
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "@schedule-x/calendar": "^3.7.2",
+    "@schedule-x/events-service": "^3.7.2",
+    "@schedule-x/react": "^3.7.0",
+    "@schedule-x/theme-default": "^3.7.2",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
@@ -8,6 +13,7 @@
     "pg-hstore": "^2.3.4",
     "react-datepicker": "^9.1.0",
     "sequelize": "^6.37.7",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "temporal-polyfill": "^0.3.0"
   }
 }

@@ -156,7 +156,7 @@ export default function ModuleManagement() {
     if (loading) return <p className="text-center py-5">Loading modules...</p>;
 
     return (
-        <div className="container px-4 py-0">
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <div className="title-back-row p-0 m-0">
@@ -178,12 +178,21 @@ export default function ModuleManagement() {
                     <h3 className="mb-0">{courseTitle}</h3>
                 </div>
                 {userRole === "Trainer" && (
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
-                    >
-                        Add New Module
-                    </button>
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={() => navigate(`/trainer/${course_id}/add-new-schedule`)}
+                        >
+                            Add Schedule
+                        </button>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add New Module
+                        </button>
+                    </div>
                 )}
             </div>
 

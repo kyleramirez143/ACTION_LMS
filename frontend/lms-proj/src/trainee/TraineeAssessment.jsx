@@ -98,11 +98,11 @@ export default function TraineeAssessment() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredResults = normalizedSearch
     ? assessmentData.filter(
-        (r) =>
-          r.title.toLowerCase().includes(normalizedSearch) ||
-          r.status.toLowerCase().includes(normalizedSearch) ||
-          r.feedback.toLowerCase().includes(normalizedSearch)
-      )
+      (r) =>
+        r.title.toLowerCase().includes(normalizedSearch) ||
+        r.status.toLowerCase().includes(normalizedSearch) ||
+        r.feedback.toLowerCase().includes(normalizedSearch)
+    )
     : assessmentData;
 
   const totalPages = Math.max(1, Math.ceil(filteredResults.length / itemsPerPage));
@@ -238,9 +238,8 @@ export default function TraineeAssessment() {
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li
                     key={i}
-                    className={`page-item ${
-                      currentPage === i + 1 ? "active" : ""
-                    }`}
+                    className={`page-item ${currentPage === i + 1 ? "active" : ""
+                      }`}
                   >
                     <button
                       className="page-link"

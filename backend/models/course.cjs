@@ -52,6 +52,11 @@ module.exports = (sequelize, DataTypes) => {
 
         // Many-to-many CourseInstructor
         Course.hasMany(models.CourseInstructor, { foreignKey: "course_id", as: "course_instructors" });
+
+        Course.hasMany(models.CalendarEvent, {
+            foreignKey: 'course_id',
+            as: 'events'
+        });
     };
 
     return Course;

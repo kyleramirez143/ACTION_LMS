@@ -27,13 +27,18 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Resource.associate = (models) => {
-        Resource.hasMany(models.LectureResource, { foreignKey: 'resource_id', as: 'lectureResources' });
+        if (!models.LectureResource) return; // avoids crash
+
+        Resource.hasMany(models.LectureResource, {
+            foreignKey: "resources_id",
+            as: "lectureResources"
+        });
 
         Resource.belongsToMany(models.Lecture, {
             through: models.LectureResource,
-            foreignKey: 'resource_id',
-            otherKey: 'lecture_id',
-            as: 'lectures'
+            foreignKey: "resources_id",
+            otherKey: "lecture_id",
+            as: "lectures"
         });
     };
 

@@ -1,8 +1,34 @@
 import express from "express";
-import { getSchedulesByBatch } from "../controllers/scheduleController.js";
+import {
+    getSchedulesByBatch,
+    getSchedulesByCourse,
+    getCalendarEventById,
+    addOrUpdateCalendarEvent,
+    deleteCalendarEvent,
+    getSchedulesByBatchModules
+} from "../controllers/scheduleController.js";
+
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/batch/:batch_id", getSchedulesByBatch);
+// -----------------------------
+// FETCHERS
+// -----------------------------
+router.get("/batch/:batch_id", protect, getSchedulesByBatch);
+
+// Optional module filter via query: /course/:batch_id?module_id=...
+router.get("/course/:batch_id", protect, getSchedulesByCourse);
+
+// Get single event by ID
+router.get("/:event_id", protect, getCalendarEventById);
+
+// -----------------------------
+// CREATE / UPDATE / DELETE
+// -----------------------------
+router.post("/", protect, addOrUpdateCalendarEvent);
+router.put("/:event_id", protect, addOrUpdateCalendarEvent);
+router.delete("/:event_id", protect, deleteCalendarEvent);
+router.get("/batch/:batch_id/events", getSchedulesByBatchModules);
 
 export default router;

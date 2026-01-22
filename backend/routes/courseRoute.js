@@ -7,7 +7,8 @@ import {
     updateCourse,
     deleteCourse,
     getTrainerCourses,
-    getCourseById
+    getCourseById,
+    getCoursesByBatch
 } from "../controllers/courseController.js";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.post("/upload-image", protect, checkRole(["Admin"]), uploadImage.single("
 
 // Admin full list
 router.get("/", protect, checkRole(["Admin", "Trainee"]), getCourses);
+router.get("/batch/:batch_id", protect, checkRole(["Admin", "Trainer"]), getCoursesByBatch);
 router.get("/id/:course_id", protect, checkRole(["Admin", "Trainer", "Trainee"]), getCourseById)
 router.post("/", protect, checkRole(["Admin"]), createCourse);
 router.put("/:course_id", protect, checkRole(["Admin"]), updateCourse);

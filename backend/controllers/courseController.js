@@ -292,3 +292,33 @@ export const getTrainerCourses = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+export const getCoursesByBatch = async (req, res) => {
+    try {
+        const { batch_id } = req.params;
+
+        const courses = await Course.findAll({
+            where: { batch_id },
+            attributes: ["course_id", "title", "image", "description", "is_published", "batch_id"],
+            include: [
+                {
+                    model: CourseInstructor,
+                    as: "course_instructors",
+                    include: [
+                        {
+                            model: User,
+                            as: "instructor",
+                            attributes: ["id", "first_name", "last_name", "email"]
+                        }
+                    ]
+                }
+            ],
+            order: [["title", "ASC"]],
+        });
+
+        res.json(courses);
+    } catch (err) {
+        console.error("Failed to fetch courses by batch:", err);
+        res.status(500).json({ error: "Failed to fetch courses by batch" });
+    }
+};

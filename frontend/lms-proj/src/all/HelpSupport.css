@@ -56,3 +56,28 @@
 .help-dropdown p {
   margin: 6px 0;
 }
+
+.accordion-button {
+  font-weight: 600;
+}
+
+.accordion-body p {
+  margin-bottom: 0.5rem;
+}
+
+/* Accordion container */
+#helpAccordion {
+  background-color: #ffffff;
+}
+
+.accordion-body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.accordion-button {
+  background-color: #ffffff !important;
+  color: #000000;
+  font-weight: 600;
+  box-shadow: none;
+}

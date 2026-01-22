@@ -278,7 +278,9 @@ export default function ProfileInfo() {
             </div>
           )}
         </div>
-      )}
+
+      )
+      }
     </div>
   );
 }

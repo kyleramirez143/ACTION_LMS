@@ -195,7 +195,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
     };
 
     return (
-        <div className="accordion-wrapper">
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {localLectures.length === 0 ? (
                 <p className="no-res">{t("lecture.none")}</p>
             ) : (
