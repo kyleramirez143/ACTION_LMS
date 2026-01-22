@@ -306,7 +306,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                         >
                                                             {userRole === "Trainer" && (
                                                                 <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
-                                                                    {res.is_visible ? t("resource.hide") : t("resource.make_visible")}
+                                                                    {res.is_visible ? t("common.visible") : t("common.hidden")}
                                                                 </span>
                                                             )}
                                                             {isLink ? (

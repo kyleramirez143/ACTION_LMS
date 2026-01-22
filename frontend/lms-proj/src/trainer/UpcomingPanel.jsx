@@ -34,6 +34,8 @@ export default function UpcomingPanel({ moduleId }) {
     };
 
     const formatDateTime = (dateStr) => {
+        if (!dateStr) return t("quiz.no_due_date"); // ⬅️ important
+
         const date = new Date(dateStr);
         return date.toLocaleString(undefined, {
             month: "numeric",

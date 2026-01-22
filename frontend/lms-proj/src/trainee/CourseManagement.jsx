@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import { useTranslation } from "react-i18next"; // <-- import i18n
 import logo from "../image/courses.svg"; // <-- imported SVG
+import UpcomingPanel from "../trainer/UpcomingPanel";
 
 function TraineeCourseManagement() {
     const { t } = useTranslation(); // <-- translation hook
@@ -49,7 +50,7 @@ function TraineeCourseManagement() {
         <>
             <div className="container px-4 py-0">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
+                    <h3 className="mb-0">{t("course_management.courses")}</h3>
                 </div>
 
                 {courses.length === 0 ? (
@@ -102,11 +103,11 @@ function TraineeCourseManagement() {
                                                 <strong>{t("course_management.trainers")}:</strong>{" "}
                                                 {course.course_instructors?.length
                                                     ? course.course_instructors
-                                                            .map(
-                                                                (ci) =>
-                                                                    `${ci.instructor.first_name} ${ci.instructor.last_name}`
-                                                            )
-                                                            .join(", ")
+                                                        .map(
+                                                            (ci) =>
+                                                                `${ci.instructor.first_name} ${ci.instructor.last_name}`
+                                                        )
+                                                        .join(", ")
                                                     : t("course_management.no_trainers")}
                                             </p>
                                             <p className="card-text text-muted mb-0">
@@ -119,6 +120,7 @@ function TraineeCourseManagement() {
                         </div>
                     </>
                 )}
+                
             </div>
         </>
     );
