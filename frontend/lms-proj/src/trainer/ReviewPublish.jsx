@@ -385,7 +385,7 @@ const ReviewPublish = () => {
                 <>
                   <button className="btn btn-success btn-sm me-1" onClick={() => handleSaveQuestion(index)}>{t("quiz.save")}</button>
                   <button className="btn btn-secondary btn-sm me-1" onClick={() => handleCancelEdit(index)}> {t("quiz.cancel")} </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(index)}> {t("quiz.cancel")} </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(index)}> {t("quiz.delete")} </button>
                 </>
               ) : (
                 <button className="btn btn-outline-primary btn-sm" onClick={() => setEditingQuestionIndex(index)}> {t("quiz.edit")}</button>

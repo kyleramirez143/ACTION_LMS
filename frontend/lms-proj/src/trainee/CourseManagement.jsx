@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
-import { useTranslation } from "react-i18next"; // <-- import i18n
 import logo from "../image/courses.svg"; // <-- imported SVG
+import { useTranslation } from "react-i18next";
 
 function TraineeCourseManagement() {
     const { t } = useTranslation(); // <-- translation hook
@@ -27,6 +27,7 @@ function TraineeCourseManagement() {
         }
     }, [token, navigate]);
 
+    // FETCH COURSES
     useEffect(() => {
         const fetchCourses = async () => {
             try {
@@ -43,7 +44,7 @@ function TraineeCourseManagement() {
             }
         };
         fetchCourses();
-    }, []);
+    }, [token]);
 
     return (
         <>
@@ -52,49 +53,44 @@ function TraineeCourseManagement() {
                     <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
                 </div>
 
-                {courses.length === 0 ? (
-                    <div className="text-center text-muted py-5">
-                        <img
-                            src={logo} // <-- use imported SVG variable
-                            alt="No courses"
-                            className="img-fluid mb-3"
-                            style={{ maxWidth: "200px" }}
-                        />
-                        <h3 className="mb-0">{t("course_management.no_courses_yet")}</h3>
-                        <p className="text-muted mb-0">
-                            {t("course_management.appear")}
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
-                            {courses.map((course) => (
-                                <div
-                                    key={course.course_id}
-                                    onClick={() => navigate(`/${course.course_id}/modules`)}
-                                    style={{ cursor: "pointer" }}
-                                >
-                                    <div className="card h-100 shadow-sm">
-                                        <div className="p-3">
-                                            <div
-                                                className="bg-light rounded overflow-hidden"
-                                                style={{
-                                                    aspectRatio: "16/9",
-                                                    border: "1px solid #dee2e6",
-                                                    padding: "0.5rem",
-                                                }}
-                                            >
-                                                <img
-                                                    src={
-                                                        course.image
-                                                            ? `/uploads/profile/${course.image}`
-                                                            : defaultImage
-                                                    }
-                                                    alt={course.title}
-                                                    className="card-img-top"
-                                                />
-                                            </div>
-                                        </div>
+            {courses.length === 0 ? (
+                <div className="text-center text-muted py-5">
+                    <img
+                        src={logo}
+                        alt={t("course_management.no_courses_yet")}
+                        className="img-fluid mb-3"
+                        style={{ maxWidth: "200px" }}
+                    />
+                    <h3 className="mb-0">{t("course_management.no_courses_yet")}</h3>
+                    <p className="text-muted mb-0">
+                        {t("course_management.no_courses_batch_desc")}
+                    </p>
+                </div>
+            ) : (
+                <div className="row row-col-1 rowl-cols-sm-2 row-cols-lg-4 g-3">
+                    {courses.map((course) => (
+                        <div
+                            key={course.course_id}
+                            onClick={() => navigate(`/${course.course_id}/modules`)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            <div className="card h-100 shadow-sm">
+                                <div className="p-3">
+                                    <div
+                                        className="bg-light rounded overflow-hidden"
+                                        style={{
+                                            aspectRatio: "16/9",
+                                            border: "1px solid #dee2e6",
+                                            padding: "0.5rem",
+                                        }}
+                                    >
+                                        <img
+                                            src={course.image ? `/uploads/profile/${course.image}` : defaultImage}
+                                            alt={course.title}
+                                            className="card-img-top"
+                                        />
+                                    </div>
+                                </div>
 
                                         <div className="card-body pt-2">
                                             <h5 className="card-title mb-2">{course.title}</h5>
@@ -117,7 +113,6 @@ function TraineeCourseManagement() {
                                 </div>
                             ))}
                         </div>
-                    </>
                 )}
             </div>
         </>

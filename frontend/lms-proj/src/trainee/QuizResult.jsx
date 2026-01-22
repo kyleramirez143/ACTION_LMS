@@ -2,6 +2,7 @@ import React from "react";
 import "./QuizResult.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { useTranslation } from "react-i18next";
 import {
     RadialBarChart,
     RadialBar,
@@ -10,6 +11,7 @@ import {
 } from "recharts";
 
 function CircleChart({ value, label, color }) {
+    const { t } = useTranslation();
     const data = [
         {
             name: label,
@@ -46,7 +48,7 @@ function CircleChart({ value, label, color }) {
                 </ResponsiveContainer>
                 <div className="col-md-6">
                     <div className="text-center fw-semibold mt-2" style={{ color }}>
-                        {label} {value}%
+                        {t(label)} {value}%
                     </div>
                 </div>
             </div>
@@ -55,6 +57,8 @@ function CircleChart({ value, label, color }) {
 }
 
 function QuizResult() {
+    const { t } = useTranslation();
+
     const totalTrainees = 12;
     const tookQuiz = 2;
     const didNotTake = 2;
@@ -74,7 +78,7 @@ function QuizResult() {
     return (
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">Quiz Result</h3>
+                <h3 className="section-title">{t("quiz_result.title")}</h3>
             </div>
 
             {/* Summary and Charts */}
@@ -87,21 +91,21 @@ function QuizResult() {
                                 <i className="bi bi-people-fill text-white bg-success rounded-circle p-2 fs-4"></i>
                                 <div className="d-flex flex-column">
                                     <div className="fw-bold fs-5">{totalTrainees}</div>
-                                    <div className="text-muted">Total Number of Trainees</div>
+                                    <div className="text-muted">{t("quiz_result.total_trainees")}</div>
                                 </div>
                             </div>
                             <div className="col-md-4 d-flex align-items-center gap-3">
                                 <i className="bi bi-pencil-fill text-white bg-warning rounded-circle p-2 fs-4"></i>
                                 <div className="d-flex flex-column">
                                     <div className="fw-bold fs-5">{tookQuiz}</div>
-                                    <div className="text-muted">Took the Quiz</div>
+                                    <div className="text-muted">{t("quiz_result.took_quiz")}</div>
                                 </div>
                             </div>
                             <div className="col-md-4 d-flex align-items-center gap-3">
                                 <i className="bi bi-x-circle-fill text-white bg-danger rounded-circle p-2 fs-4"></i>
                                 <div className="d-flex flex-column">
                                     <div className="fw-bold fs-5">{didNotTake}</div>
-                                    <div className="text-muted">Did Not Take</div>
+                                    <div className="text-muted">{t("quiz_result.did_not_take")}</div>
                                 </div>
                             </div>
                         </div>
@@ -111,26 +115,25 @@ function QuizResult() {
                 {/* Circular Charts */}
                 <div className="col-md-6 d-flex">
                     <div className="card border-0 shadow-sm bg-white rounded p-3 w-100 d-flex flex-row justify-content-around align-items-center">
-                        <CircleChart value={38} label="Passing Rate" color="#28a745" />
-                        <CircleChart value={38} label="Failing Rate" color="#dc3545" />
+                        <CircleChart value={passingRate} label="quiz_result.passing_rate" color="#28a745" />
+                        <CircleChart value={failingRate} label="quiz_result.failing_rate" color="#dc3545" />
                     </div>
                 </div>
             </div>
-
 
             {/* Trainee Results Table */}
             <div className="row">
                 <div className="col-md-8">
                     <div className="card border-0 shadow-sm bg-white rounded p-3 mb-3">
-                        <h5 className="fw-semibold mb-3">Individual Results</h5>
+                        <h5 className="fw-semibold mb-3">{t("quiz_result.individual_results")}</h5>
                         <table className="table">
                             <thead className="table-light">
                                 <tr>
-                                    <th className="text-center">Name</th>
-                                    <th className="text-center">Score</th>
-                                    <th className="text-center">Time Finish</th>
-                                    <th className="text-center">Submission</th>
-                                    <th className="text-center">Status</th>
+                                    <th className="text-center">{t("quiz_result.name")}</th>
+                                    <th className="text-center">{t("quiz_result.score")}</th>
+                                    <th className="text-center">{t("quiz_result.time_finished")}</th>
+                                    <th className="text-center">{t("quiz_result.submission")}</th>
+                                    <th className="text-center">{t("quiz_result.status")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,18 +167,18 @@ function QuizResult() {
                 {/* Test Summary */}
                 <div className="col-md-4">
                     <div className="card border-0 shadow-sm bg-white rounded p-3 mb-3">
-                        <h5 className="fw-semibold mb-3">Test Summary</h5>
+                        <h5 className="fw-semibold mb-3">{t("quiz_result.title")}</h5>
                         <ul className="list-unstyled small">
-                            <li><strong>Quiz Name:</strong> Data Structure</li>
-                            <li><strong>Total Items:</strong> 20 Items</li>
-                            <li><strong>Passing Rate:</strong> 78% (10/2)</li>
-                            <li><strong>Time Limit:</strong> 20 Minutes</li>
-                            <li><strong>Created On:</strong> July 12, 2025</li>
-                            <li><strong>Attempts:</strong> 1 Attempt</li>
+                            <li><strong>{t("quiz_result.quiz_name")}:</strong> Data Structure</li>
+                            <li><strong>{t("quiz_result.total_items")}:</strong> 20 Items</li>
+                            <li><strong>{t("quiz_result.passing_rate")}:</strong> 78% (10/2)</li>
+                            <li><strong>{t("quiz_result.time_limit")}:</strong> 20 Minutes</li>
+                            <li><strong>{t("quiz_result.created_on")}:</strong> July 12, 2025</li>
+                            <li><strong>{t("quiz_result.attempts")}:</strong> 1 Attempt</li>
                         </ul>
                         <div className="d-flex gap-2 mt-3">
-                            <button className="btn btn-outline-primary">Export XML</button>
-                            <button className="btn btn-outline-secondary">Cancel</button>
+                            <button className="btn btn-outline-primary">{t("quiz_result.export_xml")}</button>
+                            <button className="btn btn-outline-secondary">{t("quiz_result.cancel")}</button>
                         </div>
                     </div>
                 </div>

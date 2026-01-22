@@ -141,6 +141,25 @@
   margin: 0;
 }
 
+.icon-btn {
+    background-color: transparent;
+    color: #333;
+    padding: 4px;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    border-color: #0d6efd;
+    color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
 /* ============================= */
 /* 3. ONBOARDING TABLE           */
 /* ============================= */
@@ -213,7 +232,6 @@
   border-top: 1px solid #eee;
 }
 
-.btn-edit,
 .btn-cancel,
 .btn-save,
 .empty-state .btn-add {
@@ -224,16 +242,6 @@
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
-}
-
-.btn-edit {
-  background: #fff;
-  color: #0047AB;
-  border: 1px solid #0047AB;
-}
-
-.btn-edit:hover {
-  background: #f0f4f8;
 }
 
 .btn-save {
@@ -305,7 +313,7 @@
   .card-header-flex { flex-direction: column; gap: 10px; text-align: center; }
   .onboarding-table th { display: none; }
   .onboarding-table td { display: block; width: 100%; box-sizing: border-box; }
-  .btn-edit, .btn-save, .btn-cancel, .empty-state .btn-add {
+  .btn-save, .btn-cancel, .empty-state .btn-add {
     width: 100%;
     margin-bottom: 10px;
   }
