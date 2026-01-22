@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import logo from "../image/courses.svg"; // <-- imported SVG
+import { useTranslation } from "react-i18next";
 
 function TraineeCourseManagement() {
     const { t } = useTranslation(); // <-- translation hook

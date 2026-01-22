@@ -3,7 +3,6 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./QuizPreview.css";
-import { useTranslation } from "react-i18next";
 
 const QuizPreview = () => {
 	const { t } = useTranslation();
