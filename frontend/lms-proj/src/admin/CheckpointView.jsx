@@ -166,7 +166,7 @@ const CheckpointView = () => {
       <div className="checkpoint-card">
             <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="checkpoint-title">
-            Trainee List
+            {t("checkpoint.trainee_list")}
           </h2>
 
           <button 

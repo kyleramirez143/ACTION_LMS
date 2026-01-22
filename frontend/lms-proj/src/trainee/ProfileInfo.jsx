@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 const backendURL = "http://localhost:5000";
 
 export default function ProfileInfo() {
+  const { t } = useTranslation(); // <-- translation hook
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
 
@@ -178,10 +179,10 @@ export default function ProfileInfo() {
         <div className="checkpoint-card">
           <div className="card-header-flex d-flex justify-content-between align-items-center mb-3">
             <h3 className="card-title mb-0">{t("profile_info.onboarding_requirements")}</h3>
-            
+
             {!isEditing && hasData && (
-              <button 
-                className="icon-btn" 
+              <button
+                className="icon-btn"
                 onClick={() => setIsEditing(true)}
                 title={t("profile_info.edit")}
               >
