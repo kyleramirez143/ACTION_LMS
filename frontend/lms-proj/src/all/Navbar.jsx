@@ -221,6 +221,8 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   {t("navbar.profile")}
                 </Dropdown.Item>
+
+
                 <Dropdown.Divider />
 
                 <Dropdown.Item as={Link} to="/admin/profile">

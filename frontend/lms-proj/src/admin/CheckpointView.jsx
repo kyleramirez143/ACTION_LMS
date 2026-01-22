@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEdit, FaCheckCircle, FaTimesCircle, FaDownload } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
+import noDataImg from "../image/no-data.svg";
 import "./CheckpointView.css";
 
 
@@ -73,6 +74,43 @@ const CheckpointView = () => {
     setEditData((prev) => ({ ...prev, [field]: val }));
   };
 
+  const handleExportCSV = () => {
+    if (rows.length === 0) return;
+
+    // Define headers
+    const headers = [
+      "Trainee Name", "BPI", "SSS", "TIN", "Pag-IBIG", "PhilHealth", 
+      "UAF IMS", "Telework Office", "Telework Personal", "Passport", "IMF UAF"
+    ];
+
+    // Map rows to CSV format
+    const csvRows = rows.map(user => [
+      `"${user.first_name} ${user.last_name}"`,
+      `"${user.bpi_account_no || ""}"`,
+      `"${user.sss_no || ""}"`,
+      `"${user.tin_no || ""}"`,
+      `"${user.pagibig_no || ""}"`,
+      `"${user.philhealth_no || ""}"`,
+      user.uaf_ims ? "Completed" : "Pending",
+      user.office_pc_telework ? "Approved" : "Pending",
+      user.personal_pc_telework ? "Approved" : "Pending",
+      user.passport_ok ? "OK" : "None",
+      user.imf_awareness_ok ? "Done" : "Pending"
+    ].join(","));
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Batch_${batchInfo.name || "Export"}_Checkpoints.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSave = async () => {
     const token = localStorage.getItem("authToken");
@@ -126,55 +164,79 @@ const CheckpointView = () => {
         </span>
       </nav>
       <div className="checkpoint-card">
-        <div className="checkpoint-header">
+            <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="checkpoint-title">
-            Trainee List
+            {t("checkpoint.trainee_list")}
           </h2>
+
+          <button 
+            className="btn btn-success rounded-pill" 
+            onClick={handleExportCSV}
+            disabled={rows.length === 0}
+          >
+            <i className="bi bi-file-earmark-spreadsheet me-2"></i>
+            {t("checkpoint.export_csv")}
+          </button>
         </div>
 
 
-        <div className="table-wrapper">
-          <table className="checkpoint-table">
-            <thead>
+        <div className="table-responsive">
+          <table className="table align-middle" style={{ tableLayout: 'fixed', width: '100%' }}>
+            <thead className="table-light">
               <tr>
-                <th>{t("checkpoint.trainee_name")}</th>
-                <th className="header-purple">{t("checkpoint.bpi")}</th>
-                <th className="header-purple">{t("checkpoint.sss")}</th>
-                <th className="header-purple">{t("checkpoint.tin")}</th>
-                <th className="header-purple">{t("checkpoint.pagibig")}</th>
-                <th className="header-purple">{t("checkpoint.philhealth")}</th>
-                <th className="header-orange">{t("checkpoint.uaf_ims")}</th>
-                <th className="header-orange">{t("checkpoint.telework_office")}</th>
-                <th className="header-orange">{t("checkpoint.telework_personal")}</th>
-                <th className="header-orange">{t("checkpoint.passport")}</th>
-                <th className="header-orange">{t("checkpoint.imf_uaf")}</th>
-                <th>{t("checkpoint.action")}</th>
+                <th className="text-center">{t("checkpoint.trainee_name")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.bpi")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.sss")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.tin")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.pagibig")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.philhealth")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.uaf_ims")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_office")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_personal")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.passport")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.imf_uaf")}</th>
+                <th className="text-center">{t("checkpoint.action")}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan="11" className="text-center py-5">{t("checkpoint.loading")}</td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan="11" className="text-center py-5 text-muted">{t("checkpoint.no_trainees")}</td></tr>
+                <tr>
+                  <td colSpan="11" className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center">
+                      <img 
+                        src={noDataImg} 
+                        alt="No data" 
+                        style={{ width: '200px', marginBottom: '1rem' }} 
+                      />
+                      <span>{t("checkpoint.no_trainees")}</span>
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 rows.map((user) => (
                   <tr key={user.user_id}>
-                    <td className="name-col">
+                    <td className="name-col text-center">
                       {user.first_name} {user.last_name}
                     </td>
-                    <td>{user.bpi_account_no || <span className="null-val">---</span>}</td>
-                    <td>{user.sss_no || <span className="null-val">---</span>}</td>
-                    <td>{user.tin_no || <span className="null-val">---</span>}</td>
-                    <td>{user.pagibig_no || <span className="null-val">---</span>}</td>
-                    <td>{user.philhealth_no || <span className="null-val">---</span>}</td>
-                    <td className="status-cell"><StatusIcon value={user.uaf_ims} /></td>
-                    <td className="status-cell"><StatusIcon value={user.office_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.personal_pc_telework} /></td>
-                    <td className="status-cell"><StatusIcon value={user.passport_ok} /></td>
-                    <td className="status-cell"><StatusIcon value={user.imf_awareness_ok} /></td>
-                    <td>
-                      <button className="edit-btn-action" onClick={() => openEditModal(user)}>
-                        <FaEdit />
+                    <td className="text-center">{user.bpi_account_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.sss_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.tin_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.pagibig_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.philhealth_no || <span className="null-val">---</span>}</td>
+                    <td className="status-cell text-center"><StatusIcon value={user.uaf_ims} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.office_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.personal_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.passport_ok} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.imf_awareness_ok} /></td>
+                    <td className="text-center">
+                     <button 
+                        className="icon-btn d-inline-flex align-items-center justify-content-center" 
+                        onClick={() => openEditModal(user)} 
+                        title="Edit Onboarding"
+                      >
+                        <i className="bi bi-pencil-fill"></i>
                       </button>
                     </td>
                   </tr>
