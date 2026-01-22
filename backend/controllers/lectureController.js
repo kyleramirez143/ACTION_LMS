@@ -5,6 +5,15 @@ import db from "../models/index.cjs";
 
 // import { v4 as uuidv4 } from "uuid";
 
+// ✅ Destructure models
+const {
+    Lecture,
+    Module,
+    Resource,
+    Assessment,
+    LectureResource,
+    sequelize
+} = db;
 
 // Create a new lecture
 export const createLecture = async (req, res) => {
@@ -74,7 +83,7 @@ export const uploadLectureFile = async (req, res) => {
 
                 await LectureResource.create({
                     lecture_id,
-                    resources_id: resource.resource_id
+                    resource_id: resource.resource_id
                 });
 
                 uploadedResources.push(resource);
@@ -273,43 +282,33 @@ export const deleteResources = async (req, res) => {
     }
 
     try {
-        // 1. Find the resource file names to delete from the filesystem
         const resources = await Resource.findAll({
             where: { resource_id: resource_ids },
-            attributes: ['resource_id', 'file_url']
+            attributes: ["resource_id", "file_url"]
         });
 
-        // Use a transaction to ensure atomic deletion
         await sequelize.transaction(async (t) => {
-            // 2. Delete entries in the junction table (LectureResource)
             await LectureResource.destroy({
-                where: { resource_id: resource_ids },
+                where: { resources_id: resource_ids },
                 transaction: t
             });
 
-            // 3. Delete entries in the Resource table
             await Resource.destroy({
                 where: { resource_id: resource_ids },
                 transaction: t
             });
-
-            // 4. Delete the physical files
-            const uploadDir = path.resolve('uploads', 'lectures'); // Adjust path as needed
-
-            resources.forEach(resource => {
-                const filePath = path.join(uploadDir, resource.file_url);
-
-                // Only attempt deletion if file exists (prevents crashing on missing files)
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                    console.log(`Deleted file: ${resource.file_url}`);
-                } else {
-                    console.warn(`File not found on disk, skipping: ${resource.file_url}`);
-                }
-            });
         });
 
-        res.status(200).json({ message: `${resources.length} resources deleted successfully.` });
+        // delete files AFTER transaction
+        const uploadDir = path.resolve("uploads", "lectures");
+        resources.forEach(({ file_url }) => {
+            if (!file_url.startsWith("http")) {
+                const filePath = path.join(uploadDir, file_url);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+        });
+
+        res.json({ message: `${resources.length} resources deleted successfully.` });
 
     } catch (err) {
         console.error("Delete Resources Error:", err);
@@ -321,12 +320,11 @@ export const deleteLecture = async (req, res) => {
     const { lecture_id } = req.params;
 
     try {
-        // Fetch all resources associated with the lecture before deletion
         const lecture = await Lecture.findByPk(lecture_id, {
             include: [{
                 model: Resource,
-                as: 'resources',
-                attributes: ['file_url']
+                as: "resources",
+                attributes: ["file_url"]
             }]
         });
 
@@ -334,33 +332,26 @@ export const deleteLecture = async (req, res) => {
             return res.status(404).json({ error: "Lecture not found" });
         }
 
-        const resourcesToDelete = lecture.resources.map(res => res.file_url);
+        const files = lecture.resources
+            .map(r => r.file_url)
+            .filter(url => !url.startsWith("http"));
 
         await sequelize.transaction(async (t) => {
-            // Sequelize is usually configured to cascade delete junction table entries
-            // but explicitly deleting the lecture is the main step
-            const deletedCount = await Lecture.destroy({
+            await Lecture.destroy({
                 where: { lecture_id },
                 transaction: t
             });
-
-            if (deletedCount === 0) {
-                return res.status(404).json({ error: "Lecture not found or already deleted" });
-            }
-
-            // Clean up physical files after successful database deletion
-            const uploadDir = path.resolve('uploads', 'lectures');
-            resourcesToDelete.forEach(fileUrl => {
-                const filePath = path.join(uploadDir, fileUrl);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                    console.log(`Deleted file: ${fileUrl}`);
-                }
-            });
         });
 
+        // delete physical files after DB success
+        const uploadDir = path.resolve("uploads", "lectures");
+        files.forEach(file => {
+            const filePath = path.join(uploadDir, file);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        });
 
-        res.status(200).json({ message: "Lecture and associated data deleted successfully" });
+        res.json({ message: "Lecture deleted successfully" });
+
     } catch (err) {
         console.error("Delete Lecture Error:", err);
         res.status(500).json({ error: "Failed to delete lecture", details: err.message });

@@ -5,31 +5,31 @@ import { useTranslation } from "react-i18next";
 import "./QuizPreview.css";
 
 const QuizPreview = () => {
-	const { t } = useTranslation();
-	const { assessment_id } = useParams();
-	const navigate = useNavigate();
-	const token = localStorage.getItem("authToken");
+    const { t } = useTranslation();
+    const { assessment_id } = useParams();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("authToken");
 
-	const [quiz, setQuiz] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(null);
+    const [quiz, setQuiz] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-	const isExpired = quiz?.due_date
-		? new Date(quiz.due_date) < new Date()
-		: false;
+    const isExpired = quiz?.due_date
+        ? new Date(quiz.due_date) < new Date()
+        : false;
 
-	// Fetch Quiz Details
-	useEffect(() => {
-		const fetchQuiz = async () => {
-			try {
-				const res = await fetch(`/api/quizzes/${assessment_id}`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-						"Content-Type": "application/json",
-					},
-				});
+    // Fetch Quiz Details
+    useEffect(() => {
+        const fetchQuiz = async () => {
+            try {
+                const res = await fetch(`/api/quizzes/${assessment_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
 
-				const data = await res.json();
+                const data = await res.json();
 
                 if (!res.ok) {
                     throw new Error(data.error || t("quiz_preview.load_failed"));
@@ -51,120 +51,124 @@ const QuizPreview = () => {
     if (!quiz) return <p className="quiz-error">{t("quiz_preview.not_found")}</p>;
 
     return (
-        <div className="quiz-preview-page">
-            <div className="card shadow-sm p-4">
-
-                {/* Header */}
-                <div className="quiz-preview-header d-flex align-items-center mb-4">
-                    <FaArrowLeft
-                        className="back-icon me-3"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => navigate(-1)}
-                        aria-label={t("common.back")}
-                    />
-                    <h2 className="mb-0">{quiz.title}</h2>
-                </div>
-
-				<hr />
-
-                {/* Quiz Details */}
-                <div className="quiz-details mb-2">
-                    <div className="row">
-                        <div className="col-6">
-                            <strong>{t("quiz_preview.due_date")}:</strong>
-                            <p className="text-danger">
-                                {quiz.due_date
-                                    ? new Date(quiz.due_date).toLocaleString()
-                                    : t("quiz_preview.no_due_date")}
-                            </p>
+        <div className="module-container w-100 px-0 py-4">
+            <div className="container" style={{ maxWidth: "1400px" }}>
+                <div className="row">
+                    {/* LEFT PANEL */}
+                    <div className="col-12 col-lg-8" style={{ height: "100vh", overflowY: "auto" }}>
+                        <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}></div>
+                        <div className="quiz-preview-header d-flex align-items-center mb-4">
+                            <FaArrowLeft
+                                className="back-icon me-3"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate(-1)}
+                            />
+                            <h2 className="mb-0">{quiz.title}</h2>
                         </div>
 
-                        <div className="col-6">
-                            <strong>{t("quiz_preview.points")}:</strong>
-                            <p className="text-danger">
-                                {quiz.totalPoints || t("quiz_preview.not_specified")}
-                            </p>
-                        </div>
-                    </div>
 
-                    <div className="row">
-                        <div className="col-6">
-                            <strong>{t("quiz_preview.questions")}:</strong>
-                            <p className="text-danger">
-                                {(quiz.questions || []).length} {t("quiz_preview.questions_label")}
-                            </p>
+                        <hr />
+
+                        {/* Quiz Details */}
+                        <div className="quiz-details mb-2">
+                            <div className="row">
+                                <div className="col-6">
+                                    <strong>{t("quiz_preview.due_date")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.due_date
+                                            ? new Date(quiz.due_date).toLocaleString()
+                                            : t("quiz_preview.no_due_date")}
+                                    </p>
+                                </div>
+
+                                <div className="col-6">
+                                    <strong>{t("quiz_preview.points")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.totalPoints || t("quiz_preview.not_specified")}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-6">
+                                    <strong>{t("quiz_preview.questions")}:</strong>
+                                    <p className="text-danger">
+                                        {(quiz.questions || []).length} {t("quiz_preview.questions_label")}
+                                    </p>
+                                </div>
+
+                                <div className="col-6">
+                                    <strong>{t("quiz_preview.time_limit")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.time_limit
+                                            ? t("quiz_preview.minutes", { count: quiz.time_limit })
+                                            : t("quiz_preview.no_time_limit")}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-12">
+                                    <strong>{t("quiz_preview.attempts")}:</strong>
+                                    <p
+                                        className={
+                                            quiz.attempts_taken >= quiz.attempts_allowed || isExpired
+                                                ? "text-danger fw-bold"
+                                                : "text-success"
+                                        }
+                                    >
+                                        {quiz.attempts_taken} / {quiz.attempts_allowed}{" "}
+                                        {t("quiz_preview.attempts_used")}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="col-6">
-                            <strong>{t("quiz_preview.time_limit")}:</strong>
-                            <p className="text-danger">
-                                {quiz.time_limit
-                                    ? t("quiz_preview.minutes", { count: quiz.time_limit })
-                                    : t("quiz_preview.no_time_limit")}
-                            </p>
-                        </div>
-                    </div>
+                        {/* Quiz Instructions */}
+                        <div className="quiz-preview-center">
+                            <h3>{t("quiz.instructions")}</h3>
+                            {isExpired && (
+                                <div className="alert alert-danger mt-3">
+                                    {t("quiz.expired_message")}
+                                </div>
+                            )}
+                            {quiz.description ? (
+                                <ol>
+                                    {quiz.description.split("\n").map((line, idx) => (
+                                        <li key={idx}>{line}</li>
+                                    ))}
+                                </ol>
+                            ) : (
+                                <p>{t("quiz.no_instructions")}</p>
+                            )}
 
-                    <div className="row">
-                        <div className="col-12">
-                            <strong>{t("quiz_preview.attempts")}:</strong>
-                            <p
-                                className={
-                                    quiz.attempts_taken >= quiz.attempts_allowed || isExpired
-                                        ? "text-danger fw-bold"
-                                        : "text-success"
-                                }
+                            {quiz.attempts_taken >= quiz.attempts_allowed ? (
+                                <div className="alert alert-danger mt-4">
+                                    {t("quiz.attempt_limit_reached")}
+                                </div>
+                            ) : null}
+
+                            <button
+                                className="btn btn-primary mt-4 w-100"
+                                disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
+                                onClick={() => {
+                                    if (quiz.screen_monitoring) {
+                                        navigate(`/quiz/${quiz.assessment_id}/permission`);
+                                    } else {
+                                        navigate(`/quiz/${quiz.assessment_id}/start`, {
+                                            state: { screenMonitoring: false },
+                                        });
+                                    }
+                                }}
                             >
-                                {quiz.attempts_taken} / {quiz.attempts_allowed}{" "}
-                                {t("quiz_preview.attempts_used")}
-                            </p>
+                                {isExpired
+                                    ? t("quiz_preview.expired")
+                                    : quiz.attempts_taken >= quiz.attempts_allowed
+                                        ? t("quiz_preview.limit_reached")
+                                        : t("quiz_preview.take_quiz")}
+                            </button>
                         </div>
                     </div>
-                </div>
-
-				{/* Quiz Instructions */}
-				<div className="quiz-preview-center">
-					<h3>{t("quiz.instructions")}</h3>
-					{isExpired && (
-						<div className="alert alert-danger mt-3">
-							{t("quiz.expired_message")}
-						</div>
-					)}
-					{quiz.description ? (
-						<ol>
-							{quiz.description.split("\n").map((line, idx) => (
-								<li key={idx}>{line}</li>
-							))}
-						</ol>
-					) : (
-						<p>{t("quiz.no_instructions")}</p>
-					)}
-
-					{quiz.attempts_taken >= quiz.attempts_allowed ? (
-						<div className="alert alert-danger mt-4">
-							{t("quiz.attempt_limit_reached")}
-						</div>
-					) : null}
-
-                    <button
-                        className="btn btn-primary mt-4 w-100"
-                        disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
-                        onClick={() => {
-                            if (quiz.screen_monitoring) {
-                                navigate(`/quiz/${quiz.assessment_id}/permission`);
-                            } else {
-                                navigate(`/quiz/${quiz.assessment_id}/start`, {
-                                    state: { screenMonitoring: false },
-                                });
-                            }
-                        }}
-                    >
-                        {isExpired
-                            ? t("quiz_preview.expired")
-                            : quiz.attempts_taken >= quiz.attempts_allowed
-                                ? t("quiz_preview.limit_reached")
-                                : t("quiz_preview.take_quiz")}
-                    </button>
                 </div>
             </div>
         </div>
