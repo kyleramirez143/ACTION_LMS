@@ -165,14 +165,6 @@ export default function ProfileInfo() {
         <div className="user-info-box">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h4 className="user-info-title" style={{ margin: 0 }}>User Information</h4>
-            <Link 
-              to="/admin/profile" 
-              className="icon-btn" 
-              title="Edit Profile"
-              style={{ textDecoration: 'none' }} // Ensures no blue underline from the Link tag
-            >
-              <i className="bi bi-pencil-fill"></i>
-            </Link>
           </div>
             
           <div className="user-info-grid">
