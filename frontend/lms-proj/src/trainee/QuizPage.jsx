@@ -187,7 +187,7 @@ const QuizPage = () => {
                 <small>{currentQuestion + 1} of {questions.length}</small>
               </div>
               <div className="progress mb-3" style={{ height: '10px' }}>
-                <div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
+                <div className="progress-bar progress-bar-striped" style={{ width: `${progressPercent}%` }}></div>
               </div>
               <p className="fw-bold">{question.question_text}</p>
               <div className="d-grid gap-2">
