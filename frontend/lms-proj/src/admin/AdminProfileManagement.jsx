@@ -258,6 +258,7 @@ function AdminProfileManagement() {
                                     type="password"
                                     className="form-control"
                                     name="currentPassword"
+                                    autoComplete="one-time-code"
                                     value={passwordForm.currentPassword}
                                     onChange={handlePasswordChange}
                                 />
@@ -269,6 +270,7 @@ function AdminProfileManagement() {
                                     type="password"
                                     className="form-control"
                                     name="newPassword"
+                                    autoComplete="one-time-code"
                                     value={passwordForm.newPassword}
                                     onChange={handlePasswordChange}
                                 />
@@ -280,6 +282,7 @@ function AdminProfileManagement() {
                                     type="password"
                                     className="form-control"
                                     name="confirmPassword"
+                                    autoComplete="one-time-code"
                                     value={passwordForm.confirmPassword}
                                     onChange={handlePasswordChange}
                                 />
