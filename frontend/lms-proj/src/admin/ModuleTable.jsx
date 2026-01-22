@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import "./UserRoleTable.css";
 
 function ModuleTable() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
-
+    const { t } = useTranslation();
     // --- State Management ---
     const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
     const [periods, setPeriods] = useState([]);
@@ -156,7 +158,7 @@ function ModuleTable() {
                 setEditingId(null);
                 fetchPeriods(); // Refresh the table
             } else {
-                alert("Failed to update module.");
+                alert(t("module_management.update_failed"));
             }
         } catch (err) {
             console.error("Update error:", err);
@@ -176,7 +178,7 @@ function ModuleTable() {
                 <div className="d-flex gap-2">
                     <Link to="/admin/set-module-date">
                         <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-calendar-check-fill"></i> Set Module Period
+                            <i className="bi bi-calendar-check-fill"></i> {t("module_management.set_module_period")}
                         </button>
                     </Link>
 
@@ -186,7 +188,8 @@ function ModuleTable() {
                         onClick={handleBulkDelete}
                         disabled={selectedModules.length === 0}
                     >
-                        <i className="bi bi-trash3-fill"></i> Delete ({selectedModules.length})
+                        <i className="bi bi-trash3-fill"></i> {t("module_management.delete_modules", { count: selectedModules.length })}
+
                     </button>
                 </div>
             </div>
@@ -194,7 +197,7 @@ function ModuleTable() {
             {/* Filters */}
             <div className="d-flex gap-3 mb-3 flex-wrap">
                 <div>
-                    <label className="me-2">Filter by Batch:</label>
+                    <label className="me-2">{t("module_management.filter_by_batch")}</label>
                     <select className="form-select w-auto d-inline-block"
                         value={selectedCurriculumId}
                         onChange={(e) => setSelectedCurriculumId(e.target.value)}>
@@ -204,26 +207,26 @@ function ModuleTable() {
                                 value={b.curriculum_id || "null"}
                                 disabled={!b.curriculum_id}
                             >
-                                {b.name} {b.location} {!b.curriculum_id ? "No Curriculum" : ""}
+                                {b.name} {b.location} {!b.curriculum_id ? t("module_management.no_curriculum") : ""}
                             </option>
                         ))}
                     </select>
                 </div>
 
                 <input type="text" className="form-control"
-                    style={{ maxWidth: "300px" }} placeholder="Search Module"
+                    style={{ maxWidth: "300px" }} placeholder={t("module_management.search_placeholder")}
                     value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
-            {loading ? <div className="text-center p-5">Loading...</div> : (
+            {loading ? <div className="text-center p-5">{t("module_management.loading")}</div> : (
                 <div className="table-responsive">
                     <table className="table align-middle">
                         <thead className="table-light">
                             <tr>
-                                <th className="text-center">Module</th>
-                                <th className="text-center">Start Date</th>
-                                <th className="text-center">End Date</th>
-                                <th className="text-center">Action</th>
+                                <th className="text-center">{t("module_management.table_module")}</th>
+                                <th className="text-center">{t("module_management.table_start_date")}</th>
+                                <th className="text-center">{t("module_management.table_end_date")}</th>
+                                <th className="text-center">{t("module_management.table_action")}</th>
                                 <th className="text-center">
                                     <input
                                         type="checkbox"
@@ -285,14 +288,14 @@ function ModuleTable() {
                                                             <button
                                                                 className="icon-btn"
                                                                 onClick={() => handleSave(period.quarter_id)}
-                                                                title="Save"
+                                                                title={t("module_management.save")}
                                                             >
                                                                 <i className="bi bi-check-square-fill"></i>
                                                             </button>
                                                             <button
                                                                 className="icon-btn"
                                                                 onClick={handleCancel}
-                                                                title="Cancel"
+                                                                title={t("module_management.cancel")}
                                                             >
                                                                 <i className="bi bi-x-square-fill"></i>
                                                             </button>
@@ -302,7 +305,7 @@ function ModuleTable() {
                                                             <button
                                                                 className="icon-btn"
                                                                 onClick={() => handleEditClick(period)}
-                                                                title="Edit"
+                                                                title={t("module_management.edit")}
                                                             >
                                                                 <i className="bi bi-pencil-fill"></i>
                                                             </button>
@@ -326,7 +329,7 @@ function ModuleTable() {
                             ) : (
                                 <tr>
                                     <td colSpan="5" className="text-center p-5 text-muted">
-                                        No data available for the selected batch.
+                                        {t("module_management.no_data")}
                                     </td>
                                 </tr>
                             )}

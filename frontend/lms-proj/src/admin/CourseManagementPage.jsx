@@ -128,7 +128,7 @@ export default function CourseManagementPage() {
 
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.error || "Failed to update visibility");
+                throw new Error(err.error || t("course_management.update_visibility_failed"));
             }
         } catch (err) {
             alert(err.message);
@@ -142,7 +142,7 @@ export default function CourseManagementPage() {
     };
 
     const handleDeleteCourse = async (courseId) => {
-        if (!window.confirm("Are you sure you want to delete this course?")) return;
+        if (!window.confirm(t("course_management.delete_confirm"))) return;
 
         try {
             const res = await fetch(`/api/courses/${courseId}`, {
@@ -154,15 +154,15 @@ export default function CourseManagementPage() {
             });
 
             if (res.ok) {
-                alert("Course deleted successfully!");
+                alert(t("course_management.delete_success"));
                 setCourses(prev => prev.filter(c => c.course_id !== courseId));
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to delete course");
+                alert(err.error || t("course_management.delete_course_failed"));
             }
         } catch (err) {
             console.error(err);
-            alert("Something went wrong. Please try again.");
+             alert(t("course_management.generic_error_try_again"));
         }
     };
 

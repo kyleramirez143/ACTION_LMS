@@ -34,6 +34,8 @@ export default function UpcomingPanel({ moduleId }) {
     };
 
     const formatDateTime = (dateStr) => {
+        if (!dateStr) return t("quiz.no_due_date"); // ⬅️ important
+
         const date = new Date(dateStr);
         return date.toLocaleString(undefined, {
             month: "numeric",
@@ -48,9 +50,9 @@ export default function UpcomingPanel({ moduleId }) {
     return (
         <div className="upcoming-wrapper">
             {loading ? (
-                <p>Loading upcoming quizzes...</p>
+                <p>{t("upcoming.loading")}</p>
             ) : events.length === 0 ? (
-                <p className="text-secondary">No upcoming quizzes.</p>
+                <p className="text-secondary">{t("upcoming.no_upcoming")}</p>
             ) : (
                 events.map((e, i) => (
                     <div key={i} className="upcoming-card green">

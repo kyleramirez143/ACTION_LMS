@@ -5,8 +5,11 @@ import API from '../api/axios';
 import { SubmitConfirmationModal, QuizResultModal, TimeUpModal } from './QuizModals';
 import { RecorderState } from './recorder';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useTranslation } from 'react-i18next';
+
 
 const QuizPage = () => {
+	const { t } = useTranslation();
 	const { assessment_id } = useParams();
 	const { state } = useLocation();
 	const navigate = useNavigate();
@@ -44,7 +47,9 @@ const QuizPage = () => {
 
 	// --- SESSION CHECK ---
 	useEffect(() => {
-		if (!sessionId) navigate(`/quiz/${assessment_id}/permission`);
+		if (screenMonitoring && !sessionId) {
+			navigate(`/quiz/${assessment_id}/permission`);
+		}
 	}, [sessionId, assessment_id, navigate]);
 
 	// --- FETCH QUESTIONS ---
