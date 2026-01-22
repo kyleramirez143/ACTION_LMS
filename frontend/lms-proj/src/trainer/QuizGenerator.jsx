@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { usePrompt } from "../hooks/usePrompt";
 import "./QuizGenerator.css";
+import logo from "../image/nothing.svg";
 
 function useUnsavedQuizPrompt(quiz, isSaved) {
     const navigate = useNavigate();
@@ -259,172 +260,191 @@ function QuizGenerator() {
     };
 
     return (
-        <div className="container-fluid bg-white" style={{ minHeight: "100vh" }}>
-            <div className="row">
-                {/* LEFT PANEL */}
-                <div className="col-md-6 p-4" style={{ height: "100vh", overflowY: "auto" }}>
-                    <div className="p-3 mb-4 shadow-sm rounded bg-light">
-                        <h1 className="mb-4">📘 ACTION LMS AI Quiz Generator</h1>
+        <div className="module-container w-100 px-0 py-4">
+            <div className="container" style={{ maxWidth: "1400px" }}>
+                <div className="row">
+                    {/* LEFT PANEL */}
+                    <div className="col-12 col-lg-6" style={{ maxHeight: "100vh", overflowY: "auto" }}>
+                        <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
+                            {/* Header */}
+                            <h3 className="section-title">📘 AI Quiz Generator</h3>
 
-                        {/* PDF Upload */}
-                        <div className="assessment-page">
-                            <div className="file-upload-wrapper enhanced-upload"
-                                onClick={() => {
-                                    if (!quiz) {
-                                        const input = document.getElementById("pdfInput");
-                                        input.value = "";
-                                        input.click();
-                                    }
-                                }}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={handleDrop}
-                            >
-                                <i className="bi bi-upload upload-icon"></i>
-                                <span className="fw-semibold text-primary mb-1">Upload PDF</span>
-                                {file && <span className="uploaded-file mt-2">{file.name}</span>}
+                            {/* PDF Upload */}
+                            <div className="assessment-page mb-3">
+                                <div className="file-upload-wrapper enhanced-upload"
+                                    onClick={() => {
+                                        if (!quiz) {
+                                            const input = document.getElementById("pdfInput");
+                                            input.value = "";
+                                            input.click();
+                                        }
+                                    }}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={handleDrop}
+                                >
+                                    <i className="bi bi-upload upload-icon"></i>
+                                    <span className="fw-semibold text-primary mb-1">Upload PDF</span>
+                                    {file && <span className="uploaded-file mt-2">{file.name}</span>}
+                                    <input
+                                        type="file"
+                                        id="pdfInput"
+                                        accept="application/pdf"
+                                        style={{ display: "none" }}
+                                        disabled={!!quiz}
+                                        onChange={e => setFile(e.target.files[0])}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Quiz Title */}
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">Quiz Title</label>
                                 <input
-                                    type="file"
-                                    id="pdfInput"
-                                    accept="application/pdf"
-                                    style={{ display: "none" }}
+                                    type="text"
+                                    className="form-control"
+                                    value={quizTitle}
+                                    onChange={(e) => setQuizTitle(e.target.value)}
                                     disabled={!!quiz}
-                                    onChange={e => setFile(e.target.files[0])}
+                                    placeholder="Enter quiz title"
                                 />
                             </div>
-                        </div>
 
-                        {/* Quiz Title */}
-                        <div className="mb-3 p-3 shadow-sm rounded bg-white">
-                            <label className="form-label fw-bold">Quiz Title</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={quizTitle}
-                                onChange={(e) => setQuizTitle(e.target.value)}
-                                disabled={!!quiz}
-                                placeholder="Enter quiz title"
-                            />
-                        </div>
+                            {/* Quiz Type */}
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">Choose Quiz Type</label>
+                                {["Multiple Choice", "Identification", "Nihongo"].map(type => (
 
-                        {/* Quiz Type */}
-                        <div className="mb-3 p-3 shadow-sm rounded bg-white mt-3">
-                            <label className="form-label fw-bold">Choose Quiz Type</label>
-                            {["Multiple Choice", "Identification", "Nihongo"].map(type => (
-
-                                <div className="form-check" key={type}>
-                                    <input className="form-check-input" type="radio" name="quizType"
-                                        checked={quizType === type} onChange={() => setQuizType(type)} disabled={!!quiz} />
-                                    <label className="form-check-label">{type}</label>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Assessment Type */}
-                        <div className="mb-3 p-3 shadow-sm rounded bg-white mt-3">
-                            <label className="form-label fw-bold">Assessment Type</label>
-                            <select
-                                className="form-select"
-                                value={assessmentType}
-                                onChange={e => setAssessmentType(e.target.value)}
-                                disabled={!!quiz} // disable only after quiz exists
-                            >
-                                <option value="">-- Select Assessment Type --</option>
-                                {assessmentTypes.map(type => (
-                                    <option key={type} value={type}>
-                                        {type}
-                                    </option>
+                                    <div className="form-check" key={type}>
+                                        <input className="form-check-input" type="radio" name="quizType"
+                                            checked={quizType === type} onChange={() => setQuizType(type)} disabled={!!quiz} />
+                                        <label className="form-check-label">{type}</label>
+                                    </div>
                                 ))}
-                            </select>
+                            </div>
+
+                            {/* Assessment Type */}
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">Assessment Type</label>
+                                <select
+                                    className="form-select"
+                                    value={assessmentType}
+                                    onChange={e => setAssessmentType(e.target.value)}
+                                    disabled={!!quiz} // disable only after quiz exists
+                                >
+                                    <option value="">-- Select Assessment Type --</option>
+                                    {assessmentTypes.map(type => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Question Quantity */}
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">Set Question Quantity</label>
+                                <input type="number" className="form-control" value={questionQty} min={1} onChange={(e) => setQuestionQty(e.target.value)} disabled={!!quiz} />
+                            </div>
+
+                            {/* Target Placement */}
+                            <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
+                                <label className="form-label fw-bold text-primary">Target Placement</label>
+                                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={!!quiz}>
+                                    <option value="">-- Select Course --</option>
+                                    {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
+                                </select>
+                                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || !!quiz}>
+                                    <option value="">-- Select Module --</option>
+                                    {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
+                                </select>
+                                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || !!quiz}>
+                                    <option value="">-- Select Lecture --</option>
+                                    {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
+                                </select>
+                            </div>
+
+                            {/* Generate Quiz */}
+                            <button className="btn btn-primary w-100" onClick={handleUpload} disabled={loading || !!quiz} >
+                                {loading ? "Generating..." : "Generate Quiz"}
+                            </button>
                         </div>
+                    </div>
 
+                    {/* RIGHT PANEL */}
+                    <div className="col-12 col-lg-6 d-flex">
+                        <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{
+                            minHeight: "100%",
+                            overflowY: "auto",
+                            margin: 0,
+                            maxHeight: "100vh",
+                        }}
+                        >
+                            <h3 className="section-title mb-2">Generated Quiz</h3>
+                            {!quiz ? (
+                                <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                                    <img
+                                        src={logo}
+                                        alt="Logo"
+                                        style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
+                                    />
+                                    <p className="text-muted text-center mb-0">
+                                        No quiz generated yet.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    {quiz.quizType === "Nihongo" ? (
+                                        ["Grammar", "Vocabulary", "Listening"].map(section =>
+                                            renderQuizSection(section)
+                                        )
+                                    ) : (
+                                        <div className="mb-4">
+                                            {quiz.questions.map((q, i) => (
+                                                <div className="card shadow-sm mb-3" key={i}>
+                                                    <div className="card-body">
+                                                        <h5 className="card-title fw-bold">
+                                                            Q{i + 1}: {q.question}
+                                                        </h5>
 
+                                                        {q.options && (
+                                                            <ul className="list-group list-group-flush mb-2">
+                                                                {Object.entries(q.options).map(([k, v]) => (
+                                                                    <li key={k} className="list-group-item">
+                                                                        <strong>{k.toUpperCase()}.</strong> {v}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
 
+                                                        <p className="text-success mb-1">
+                                                            <strong>Answer:</strong> {q.correct_answer}
+                                                        </p>
 
-                        {/* Question Quantity */}
-                        <div className="mb-3 p-3 shadow-sm rounded bg-white">
-                            <label className="form-label fw-bold">Set Question Quantity</label>
-                            <input type="number" className="form-control" value={questionQty} min={1} onChange={(e) => setQuestionQty(e.target.value)} disabled={!!quiz} />
+                                                        {q.explanation && (
+                                                            <div className="p-2 bg-light rounded border">
+                                                                <p className="fw-bold">Explanation:</p>
+                                                                <p className="text-muted">{q.explanation}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="d-flex justify-content-center gap-3">
+                                        <button className="btn btn-success" style={{ width: "220px" }} onClick={handleReviewPublish} disabled={!quiz || saving}>
+                                            {saving ? "Saving..." : "Review & Publish"}
+                                        </button>
+                                        <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>Discard Quiz</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
-
-                        {/* Target Placement */}
-                        <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
-                            <label className="form-label fw-bold text-primary">Target Placement</label>
-                            <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={!!quiz}>
-                                <option value="">-- Select Course --</option>
-                                {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
-                            </select>
-                            <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || !!quiz}>
-                                <option value="">-- Select Module --</option>
-                                {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
-                            </select>
-                            <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || !!quiz}>
-                                <option value="">-- Select Lecture --</option>
-                                {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
-                            </select>
-                        </div>
-
-                        {/* Generate Quiz */}
-                        <button className="btn btn-primary w-100" onClick={handleUpload} disabled={loading || !!quiz} >
-                            {loading ? "Generating..." : "Generate Quiz"}
-                        </button>
                     </div>
                 </div>
-
-                {/* RIGHT PANEL */}
-                <div className="col-md-6 p-4" style={{ height: "100vh", overflowY: "auto", backgroundColor: "#f8f9fa" }}>
-                    <h2 className="mb-4">Generated Quiz</h2>
-                    {!quiz ? <p className="text-muted">No quiz generated yet.</p> :
-                        <>
-                            {quiz.quizType === "Nihongo" ? (
-                                ["Grammar", "Vocabulary", "Listening"].map(section =>
-                                    renderQuizSection(section)
-                                )
-                            ) : (
-                                <div className="mb-4">
-                                    {quiz.questions.map((q, i) => (
-                                        <div className="card shadow-sm mb-3" key={i}>
-                                            <div className="card-body">
-                                                <h5 className="card-title">
-                                                    Q{i + 1}: {q.question}
-                                                </h5>
-
-                                                {q.options && (
-                                                    <ul className="list-group list-group-flush mb-2">
-                                                        {Object.entries(q.options).map(([k, v]) => (
-                                                            <li key={k} className="list-group-item">
-                                                                <strong>{k.toUpperCase()}.</strong> {v}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                )}
-
-                                                <p className="text-success mb-1">
-                                                    <strong>Answer:</strong> {q.correct_answer}
-                                                </p>
-
-                                                {q.explanation && (
-                                                    <div className="mt-2 p-2 bg-light rounded border">
-                                                        <small className="fw-bold d-block">Explanation:</small>
-                                                        <small>{q.explanation}</small>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="d-flex justify-content-between mt-3 pb-5">
-                                <button className="btn btn-success px-5" onClick={handleReviewPublish} disabled={!quiz || saving}>
-                                    {saving ? "Saving..." : "Review & Publish"}
-                                </button>
-                                <button className="btn btn-outline-danger" onClick={handleDiscardQuiz}>Discard</button>
-                            </div>
-                        </>
-                    }
-                </div>
-            </div>
-        </div>
-    );
+            </div >
+        </div >
+    )
 }
 
 export default QuizGenerator;

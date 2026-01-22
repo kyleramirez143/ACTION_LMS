@@ -85,6 +85,30 @@ export default function LectureForm() {
     setNewResources([...newResources, { type: "PDF", value: null }]);
   };
 
+  const handleDeleteLecture = async (lectureId, lectureTitle) => {
+    if (!window.confirm(`Are you sure you want to permanently delete the lecture: ${lectureTitle}?`)) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(`/api/lectures/${lectureId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        alert("Lecture deleted successfully!");
+        setLectures(prev => prev.filter(lec => lec.lecture_id !== lectureId));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete lecture.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong during deletion.");
+    }
+  };
+
+
   const handleResourceTypeChange = (index, type) => {
     const updated = [...newResources];
     updated[index].type = type;
@@ -105,11 +129,17 @@ export default function LectureForm() {
   };
 
   const handleDeleteExistingResource = (resourceId) => {
-    if (window.confirm("Are you sure you want to permanently delete this resource file?")) {
-      setResourcesToDelete(prev => [...prev, resourceId]);
-      setExistingResources(prev => prev.filter(res => res.resource_id !== resourceId));
-    }
-  };
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this resource file?"
+    );
+
+    if (!confirmed) return;
+
+    setResourcesToDelete(prev => [...prev, resourceId]);
+    setExistingResources(prev =>
+      prev.filter(res => res.resource_id !== resourceId)
+    );
+  }
 
   // --- Submission Handlers ---
   const handleLectureMetadata = async (dataToSubmit) => {
@@ -352,13 +382,27 @@ export default function LectureForm() {
               <div className="card p-3 mb-3 bg-light">
                 <h6 className="card-title text-muted small">Existing Files:</h6>
                 {existingResources.map(res => (
-                  <div key={res.resource_id} className="d-flex justify-content-between align-items-center mb-1 py-1 border-bottom">
-                    <a href={`${window.location.origin}/uploads/lectures/${res.file_url}`} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center text-truncate me-2">
+                  <div
+                    key={res.resource_id}
+                    className="d-flex justify-content-between align-items-center mb-1 py-1 border-bottom"
+                  >
+                    <a
+                      href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="d-flex align-items-center text-truncate me-2"
+                    >
                       <FileText size={16} className="me-2 text-primary" />
-                      {res.file_url}
+                      {res.display_name || res.file_url}
                     </a>
-                    <button type="button" className="btn btn-sm text-danger p-0" onClick={() => handleDeleteExistingResource(res.resource_id)} disabled={isSubmitting}>
-                      <X size={18} />
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDeleteExistingResource(res.resource_id)}
+                      disabled={isSubmitting}
+                    >
+                      <X size={14} />
                     </button>
                   </div>
                 ))}
@@ -395,9 +439,6 @@ export default function LectureForm() {
 
           {/* Action Buttons */}
           <div className="d-flex justify-content-end pt-4 border-top">
-            {isEditMode && (
-              <button type="button" className="btn btn-danger rounded-pill me-auto" style={styles.btn} onClick={handleDelete} disabled={isSubmitting}>Delete</button>
-            )}
             <button type="button" className="btn btn-outline-secondary rounded-pill me-2" style={styles.btn} onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
             <button type="submit" className="btn btn-primary rounded-pill" style={styles.btn} disabled={isSubmitting || (!isEditMode && !title.trim())}>
               {isSubmitting ? "Processing..." : isEditMode ? "Update Lecture" : "Create Lecture"}

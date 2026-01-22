@@ -71,3 +71,5 @@ router.get(
     checkRole(['Trainer', 'Trainee']),
     quizController.getUpcoming
 );
+
+router.delete("/:assessment_id", protect, checkRole(["Trainer"]), quizController.deleteQuiz);

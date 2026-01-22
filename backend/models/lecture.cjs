@@ -64,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
         Lecture.belongsToMany(models.Resource, {
             through: models.LectureResource,
             foreignKey: 'lecture_id',      // column in LectureResource pointing to Lecture
-            otherKey: 'resources_id',      // column in LectureResource pointing to Resource
+            otherKey: 'resource_id',      // column in LectureResource pointing to Resource
             as: 'resources'
         });
 

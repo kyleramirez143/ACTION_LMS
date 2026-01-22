@@ -1,41 +1,64 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FileText, FileArchive, ChevronUp, ChevronDown, MoreVertical, ShieldAlert, Edit, Eye, EyeOff, Link, Trash2 } from "lucide-react";
+import {
+    FileText,
+    FileArchive,
+    ChevronUp,
+    ChevronDown,
+    MoreVertical,
+    ShieldAlert,
+    Edit,
+    Eye,
+    EyeOff,
+    Link,
+    Trash2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export default function ModuleAccordion({ isTrainerView, userRole, lectures = [], courseId, moduleId }) {
+export default function ModuleAccordion({
+    isTrainerView,
+    userRole,
+    lectures = [],
+    courseId,
+    moduleId,
+    isSubmitting,
+    handleDeleteExistingResource, // passed from parent
+}) {
     const [openIndex, setOpenIndex] = useState(-1);
     const [showLectureMenuIndex, setShowLectureMenuIndex] = useState(-1);
     const [showQuizMenuId, setShowQuizMenuId] = useState(null);
     const [localLectures, setLectures] = useState([]);
     const [showResourceMenuId, setShowResourceMenuId] = useState(null);
-    const [editingResourceId, setEditingResourceId] = useState(null); // which resource is being edited
-    const [tempDisplayName, setTempDisplayName] = useState(""); // temporary input value
+    const [editingResourceId, setEditingResourceId] = useState(null);
+    const [tempDisplayName, setTempDisplayName] = useState("");
 
     const lectureMenuRefs = useRef([]);
     const quizMenuRefs = useRef({});
     const resourceMenuRefs = useRef({});
     const navigate = useNavigate();
 
-    // 1. RBAC & Visibility Logic: Filter content based on role
+    // Filter lectures based on role
     useEffect(() => {
         const filteredLectures = isTrainerView
             ? lectures
             : lectures
-                .filter(lec => lec.is_visible)
-                .map(lec => ({
+                .filter((lec) => lec.is_visible)
+                .map((lec) => ({
                     ...lec,
-                    assessments: (lec.assessments || []).filter(q => q.is_published),
-                    resources: (lec.resources || []).filter(r => r.is_visible),
+                    assessments: (lec.assessments || []).filter((q) => q.is_published),
+                    resources: (lec.resources || []).filter((r) => r.is_visible),
                 }));
-
         setLectures(filteredLectures);
     }, [lectures, isTrainerView]);
 
-    // 2. Click Outside Logic: Close all menus when clicking elsewhere
+    // Close menus on outside click
     useEffect(() => {
         function handleClick(e) {
-            const isOutsideLecture = !lectureMenuRefs.current.some(ref => ref && ref.contains(e.target));
-            const isOutsideQuiz = !Object.values(quizMenuRefs.current).some(ref => ref && ref.contains(e.target));
+            const isOutsideLecture = !lectureMenuRefs.current.some(
+                (ref) => ref && ref.contains(e.target)
+            );
+            const isOutsideQuiz = !Object.values(quizMenuRefs.current).some(
+                (ref) => ref && ref.contains(e.target)
+            );
 
             if (isOutsideLecture) setShowLectureMenuIndex(-1);
             if (isOutsideQuiz) setShowQuizMenuId(null);
@@ -80,7 +103,6 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
 
         try {
             const token = localStorage.getItem("authToken");
-
             const res = await fetch(`/api/lectures/resource/rename/${resourceId}`, {
                 method: "PATCH",
                 headers: {
@@ -94,9 +116,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                 const updatedLectures = localLectures.map((lec) => ({
                     ...lec,
                     resources: lec.resources.map((r) =>
-                        r.resource_id === resourceId
-                            ? { ...r, display_name: newName }
-                            : r
+                        r.resource_id === resourceId ? { ...r, display_name: newName } : r
                     ),
                 }));
                 setLectures(updatedLectures);
@@ -138,12 +158,66 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
         }
     };
 
+    const handleDeleteLecture = async (lectureId, lectureTitle) => {
+        if (!window.confirm(`Are you sure you want to permanently delete the lecture: ${lectureTitle}?`)) return;
+
+        try {
+            const token = localStorage.getItem("authToken");
+
+            const res = await fetch(`/api/lectures/${lectureId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (res.ok) {
+                // Only remove from UI if backend confirms
+                setLectures(prev => prev.filter(lec => lec.lecture_id !== lectureId));
+                alert("Lecture deleted successfully!");
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || "Failed to delete lecture");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong during deletion.");
+        }
+    };
+
     const handleDeleteResource = async (resourceId) => {
         if (!window.confirm("Are you sure you want to remove this resource?")) return;
 
         try {
             const token = localStorage.getItem("authToken");
             const res = await fetch(`/api/lectures/resource/${resourceId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            });
+
+            if (res.ok) {
+                // ✅ Only remove after backend confirms
+                setLectures(prevLectures =>
+                    prevLectures.map(lec => ({
+                        ...lec,
+                        resources: lec.resources.filter(r => r.resource_id !== resourceId),
+                    }))
+                );
+            } else {
+                // Attempt to parse backend error
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || "Failed to delete resource");
+            }
+        } catch (err) {
+            console.error("Error deleting resource:", err);
+            alert("Something went wrong while deleting the resource.");
+        }
+    };
+
+    const handleDeleteQuiz = async (assessmentId) => {
+        if (!window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) return;
+
+        try {
+            const token = localStorage.getItem("authToken");
+            const res = await fetch(`/api/quizzes/${assessmentId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -152,16 +226,17 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
             });
 
             if (res.ok) {
+                // Remove the deleted quiz from local state
                 const updatedLectures = localLectures.map((lec) => ({
                     ...lec,
-                    resources: lec.resources.filter((r) => r.resource_id !== resourceId),
+                    assessments: lec.assessments.filter((q) => q.assessment_id !== assessmentId),
                 }));
                 setLectures(updatedLectures);
             } else {
-                console.error("Failed to delete resource");
+                console.error("Failed to delete quiz");
             }
         } catch (err) {
-            console.error("Error deleting resource:", err);
+            console.error("Error deleting quiz:", err);
         }
     };
 
@@ -172,40 +247,57 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
             ) : (
                 localLectures.map((lec, i) => (
                     <div key={lec.lecture_id} className={`accordion-card ${openIndex === i ? "active" : ""}`}>
-
                         {/* --- LECTURE HEADER --- */}
                         <div className="accordion-header">
                             <div className="accordion-title-container d-flex align-items-center w-100">
                                 <span className="accordion-title flex-grow-1 cursor-pointer" onClick={() => toggleAccordion(i)}>
                                     {isTrainerView && (
                                         <span
-                                            className={`badge ms-2 me-2 p-1 ${lec.is_visible ? 'bg-success' : 'bg-danger'}`}
+                                            className={`badge ms-2 me-2 p-1 ${lec.is_visible ? "bg-success" : "bg-danger"}`}
                                             onClick={(e) => { e.stopPropagation(); handleMakeHiddenClick(i); }}
                                         >
-                                            {lec.is_visible ? 'Visible' : 'Hidden'}
+                                            {lec.is_visible ? "Visible" : "Hidden"}
                                         </span>
                                     )}
                                     {lec.title}
                                 </span>
 
-                                {/* Trainer-Only Lecture Kebab */}
+                                {/* Trainer-Only Lecture Menu */}
                                 {isTrainerView && (
                                     <div ref={(el) => (lectureMenuRefs.current[i] = el)} className="position-relative me-2">
-                                        <div className="kebab-menu-button cursor-pointer p-1" onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
-                                            setShowQuizMenuId(null);
-                                        }}>
+                                        <div
+                                            className="kebab-menu-button cursor-pointer p-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowLectureMenuIndex(showLectureMenuIndex === i ? -1 : i);
+                                                setShowQuizMenuId(null);
+                                            }}
+                                        >
                                             <MoreVertical size={18} />
                                         </div>
+
                                         {showLectureMenuIndex === i && (
                                             <ul className="dropdown-menu show position-absolute end-0 shadow-sm">
-                                                <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/lectures/${lec.lecture_id}/edit`)}>
+                                                <li
+                                                    className="dropdown-item cursor-pointer"
+                                                    onClick={() =>
+                                                        navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/lectures/${lec.lecture_id}/edit`)
+                                                    }
+                                                >
                                                     <Edit size={14} className="me-2" /> Edit Lecture
                                                 </li>
-                                                <li className={`dropdown-item cursor-pointer ${!lec.is_visible ? 'text-success' : 'text-danger'}`} onClick={() => handleMakeHiddenClick(i)}>
+                                                <li
+                                                    className={`dropdown-item cursor-pointer ${!lec.is_visible ? "text-success" : "text-danger"}`}
+                                                    onClick={() => handleMakeHiddenClick(i)}
+                                                >
                                                     {!lec.is_visible ? <Eye size={14} className="me-2" /> : <EyeOff size={14} className="me-2" />}
                                                     {!lec.is_visible ? "Make Visible" : "Make Hidden"}
+                                                </li>
+                                                <li
+                                                    className="dropdown-item cursor-pointer text-danger"
+                                                    onClick={() => handleDeleteLecture(lec.lecture_id, lec.title)}
+                                                >
+                                                    <Trash2 size={14} className="me-2" /> Delete Lecture
                                                 </li>
                                             </ul>
                                         )}
@@ -222,20 +314,13 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                         {openIndex === i && (
                             <div className="accordion-content p-3">
                                 {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
-
                                 {/* Resources Section */}
                                 <h6 className="fw-bold mb-2">Resources</h6>
-
                                 <div className="resources-container">
                                     {lec.resources?.length > 0 ? (
                                         lec.resources.map((res) => {
-                                            const isLink =
-                                                res.file_url.startsWith("http://") ||
-                                                res.file_url.startsWith("https://");
-
-                                            const resourceUrl = isLink
-                                                ? res.file_url
-                                                : `${window.location.origin}/uploads/lectures/${res.file_url}`;
+                                            const isLink = res.file_url.startsWith("http://") || res.file_url.startsWith("https://");
+                                            const resourceUrl = isLink ? res.file_url : `${window.location.origin}/uploads/lectures/${res.file_url}`;
 
                                             return (
                                                 <div
@@ -260,7 +345,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                             <button
                                                                 className="btn btn-sm btn-primary"
                                                                 onClick={async (e) => {
-                                                                    e.stopPropagation(); // Prevent triggering <a> click
+                                                                    e.stopPropagation();
                                                                     await handleRenameResource(res.resource_id, tempDisplayName);
                                                                 }}
                                                             >
@@ -280,11 +365,7 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                     {res.is_visible ? "Visible" : "Hidden"}
                                                                 </span>
                                                             )}
-                                                            {isLink ? (
-                                                                <Link size={25} className="me-2 text-primary flex-shrink-0" />
-                                                            ) : (
-                                                                <FileText size={25} className="me-2 text-primary flex-shrink-0" />
-                                                            )}
+                                                            {isLink ? <Link size={25} className="me-2 text-primary flex-shrink-0" /> : <FileText size={25} className="me-2 text-primary flex-shrink-0" />}
                                                             <span className="text-truncate fw-medium" style={{ maxWidth: "calc(100% - 50px)" }}>
                                                                 {res.display_name || res.file_url}
                                                             </span>
@@ -416,6 +497,9 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                                                                 <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
                                                                     <ShieldAlert size={14} className="me-2 text-danger" /> Quiz Results
                                                                 </li>
+                                                                <li className="dropdown-item cursor-pointer text-danger" onClick={() => handleDeleteQuiz(quiz.assessment_id)}>
+                                                                    <Trash2 size={14} className="me-2" /> Delete Quiz
+                                                                </li>
                                                             </ul>
                                                         )}
                                                     </div>
@@ -428,7 +512,8 @@ export default function ModuleAccordion({ isTrainerView, userRole, lectures = []
                         )}
                     </div>
                 ))
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

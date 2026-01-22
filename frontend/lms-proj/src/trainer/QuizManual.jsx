@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "./QuizManual.css";
+import logo from "../image/nothing.svg";
 
 function useUnsavedQuizPrompt(quiz, isSaved) {
   const navigate = useNavigate();
@@ -234,7 +235,7 @@ function QuizManual() {
         {sectionQuestions.map((q, i) => (
           <div className="card shadow-sm mb-3" key={q.question_id}>
             <div className="card-body">
-              <h5 className="card-title">Q{i + 1}: {q.question_text}</h5>
+              <h5 className="card-title fw-bold">Q{i + 1}: {q.question_text}</h5>
               {quiz.quizType === "Multiple Choice" && (
                 <ul className="list-group list-group-flush mb-2">
                   {Object.entries(q.options).map(([k, v]) => (
@@ -244,8 +245,8 @@ function QuizManual() {
               )}
               <p className="text-success mb-1"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
               {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
-                <small className="fw-bold d-block">Explanation:</small>
-                <small>{q.explanation}</small>
+                <small className="text-muted d-block fw-bold">Explanation:</small>
+                <small className="text-dark">{q.explanation}</small>
               </div>}
             </div>
           </div>
@@ -255,142 +256,160 @@ function QuizManual() {
   };
 
   return (
-    <div className="manual-container-full">
-      {/* LEFT PANEL */}
-      <div className="manual-left p-4 shadow-sm rounded">
-        <h3 className="mb-4">Manual Quiz Input</h3>
+    <div className="module-container w-100 px-0 py-4">
+      <div className="container" style={{ maxWidth: "1400px" }}>
+        <div className="row">
+          {/* LEFT PANEL */}
+          <div className="col-12 col-lg-6" style={{ maxHeight: "100vh", overflowY: "auto" }}>
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
+              <h3 className="section-title">📘 Manual Quiz Input</h3>
 
-        {/* Quiz Title */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Quiz Title</label>
-          <input
-            type="text"
-            className="form-control"
-            value={quiz.title}
-            onChange={(e) => setQuiz(prev => ({ ...prev, title: e.target.value }))}
-          />
-        </div>
+              {/* Quiz Title */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Quiz Title</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={quiz.title}
+                  onChange={(e) => setQuiz(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
 
-        {/* Quiz Type */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Quiz Type</label>
-          {["Multiple Choice", "Identification"].map(type => (
-            <div className="form-check" key={type}>
-              <input
-                className="form-check-input"
-                type="radio"
-                value={type}
-                checked={quiz.quizType === type}
-                onChange={e => setQuiz(prev => ({ ...prev, quizType: e.target.value }))}
-              />
-              <label className="form-check-label">{type}</label>
+              {/* Quiz Type */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Quiz Type</label>
+                {["Multiple Choice", "Identification"].map(type => (
+                  <div className="form-check" key={type}>
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      value={type}
+                      checked={quiz.quizType === type}
+                      onChange={e => setQuiz(prev => ({ ...prev, quizType: e.target.value }))}
+                    />
+                    <label className="form-check-label">{type}</label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Assessment Type */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Assessment Type</label>
+                <select
+                  className="form-select"
+                  value={assessmentType}
+                  onChange={e => setAssessmentType(e.target.value)}
+                >
+                  <option value="">-- Select Assessment Type --</option>
+                  {assessmentTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Course / Module / Lecture */}
+              <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
+                <label className="form-label fw-bold">Target Placement</label>
+                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
+                  <option value="">-- Select Course --</option>
+                  {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
+                </select>
+                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse}>
+                  <option value="">-- Select Module --</option>
+                  {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
+                </select>
+                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule}>
+                  <option value="">-- Select Lecture --</option>
+                  {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
+                </select>
+              </div>
+
+              {/* Question Input */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Question</label>
+                <textarea
+                  className="form-control mb-2"
+                  rows={4}
+                  value={newQuestion.question_text}
+                  onChange={(e) => setNewQuestion(prev => ({ ...prev, question_text: e.target.value }))}
+                />
+              </div>
+
+              {/* Options */}
+              {quiz.quizType === "Multiple Choice" && (
+                <div className="mb-3">
+                  {["a", "b", "c", "d"].map(key => (
+                    <input
+                      key={key}
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder={`Option ${key.toUpperCase()}`}
+                      value={newQuestion.options[key]}
+                      onChange={e => handleOptionChange(key, e.target.value)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Correct Answer */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Correct Answer</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={newQuestion.correct_answer}
+                  onChange={e => setNewQuestion(prev => ({ ...prev, correct_answer: e.target.value }))}
+                />
+              </div>
+
+              {/* Explanation */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Explanation (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={newQuestion.explanation}
+                  onChange={e => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                />
+              </div>
+
+              <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
+                + Add Question
+              </button>
             </div>
-          ))}
-        </div>
-
-        {/* Assessment Type */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Assessment Type</label>
-          <select
-            className="form-select"
-            value={assessmentType}
-            onChange={e => setAssessmentType(e.target.value)}
-          >
-            <option value="">-- Select Assessment Type --</option>
-            {assessmentTypes.map(type => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-
-
-        {/* Course / Module / Lecture */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Target Placement</label>
-          <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
-            <option value="">-- Select Course --</option>
-            {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
-          </select>
-          <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse}>
-            <option value="">-- Select Module --</option>
-            {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
-          </select>
-          <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule}>
-            <option value="">-- Select Lecture --</option>
-            {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
-          </select>
-        </div>
-
-        {/* Question Input */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Question</label>
-          <textarea
-            className="form-control mb-2"
-            rows={4}
-            value={newQuestion.question_text}
-            onChange={(e) => setNewQuestion(prev => ({ ...prev, question_text: e.target.value }))}
-          />
-        </div>
-
-        {/* Options */}
-        {quiz.quizType === "Multiple Choice" && (
-          <div className="mb-3">
-            {["a", "b", "c", "d"].map(key => (
-              <input
-                key={key}
-                type="text"
-                className="form-control mb-2"
-                placeholder={`Option ${key.toUpperCase()}`}
-                value={newQuestion.options[key]}
-                onChange={e => handleOptionChange(key, e.target.value)}
-              />
-            ))}
           </div>
-        )}
 
-        {/* Correct Answer */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Correct Answer</label>
-          <input
-            type="text"
-            className="form-control"
-            value={newQuestion.correct_answer}
-            onChange={e => setNewQuestion(prev => ({ ...prev, correct_answer: e.target.value }))}
-          />
-        </div>
+          {/* RIGHT PANEL */}
+          <div className="col-12 col-lg-6 d-flex">
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}>
+              <h3 className="section-title">Generated Quiz</h3>
+              {(!quiz || quiz?.questions?.length === 0) && (
+                <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                  <img
+                    src={logo}
+                    alt="Logo"
+                    style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
+                  />
+                  <p className="text-muted text-center mb-0">
+                    No quiz generated yet.
+                  </p>
+                </div>
+              )}
+              {["General"].map(section => renderQuizSection(section))}
 
-        {/* Explanation */}
-        <div className="mb-3">
-          <label className="form-label fw-bold">Explanation (Optional)</label>
-          <textarea
-            className="form-control"
-            rows={3}
-            value={newQuestion.explanation}
-            onChange={e => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
-          />
-        </div>
-
-        <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
-          + Add Question
-        </button>
-      </div>
-
-      {/* RIGHT PANEL */}
-      <div className="manual-right p-4 shadow-sm rounded">
-        <h3 className="mb-3">Quiz Preview</h3>
-        {quiz.questions.length === 0 && <p className="text-muted">No questions added yet.</p>}
-        {["General"].map(section => renderQuizSection(section))}
-
-        {quiz.questions.length > 0 && (
-          <div className="d-flex justify-content-between mt-4">
-            <button className="btn btn-success" onClick={handleSaveQuiz} disabled={saving}>
-              {saving ? "Saving..." : "Save & Review"}
-            </button>
-            <button className="btn btn-danger" onClick={handleDiscardQuiz}>Discard Quiz</button>
+              {quiz.questions.length > 0 && (
+                <div className="d-flex justify-content-center gap-3">
+                  <button className="btn btn-success" style={{ width: "220px" }} onClick={handleSaveQuiz} disabled={saving}>
+                    {saving ? "Saving..." : "Save & Review"}
+                  </button>
+                  <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>Discard Quiz</button>
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

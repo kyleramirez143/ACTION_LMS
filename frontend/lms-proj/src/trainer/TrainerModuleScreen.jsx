@@ -93,49 +93,87 @@ export default function TrainerModuleScreen() {
   };
 
   return (
-    <div className="module-container px-4 py-0">
-      <div className="module-left">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="title-back-row p-0 m-0">
-            <button
-              type="button"
-              className="back-btn"
-              onClick={() => navigate(`/${course_id}/modules`)}
-              aria-label="Go back"
-            >
-              <ArrowLeft size={20} strokeWidth={2.2} />
-            </button>
-            <h3 className="mb-0">{moduleTitle}</h3>
+    <div className="module-container w-100 px-0 py-4">
+      <div className="container" style={{ maxWidth: "1400px" }}>
+        {/* ================= BREADCRUMBS ================= */}
+        <nav
+          style={{
+            "--bs-breadcrumb-divider": "'>'",
+            paddingLeft: 0,
+          }}
+          aria-label="breadcrumb"
+        >
+          <ol className="breadcrumb mb-2" style={{ backgroundColor: "transparent" }}>
+            <li className="breadcrumb-item">
+              <span
+                onClick={() => navigate("/courses")}
+                style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
+              >
+                Courses
+              </span>
+            </li>
+            <li className="breadcrumb-item">
+              <span
+                onClick={() => navigate(`/${course_id}/modules`)}
+                style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
+              >
+                Modules
+              </span>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              <span style={{ fontWeight: 500, color: "#1E1E1E" }}>
+                {moduleTitle || "Loading..."}
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        <div className="row">
+          {/* Left column: Module & Lectures (8) */}
+          <div className="col-12 col-lg-8 ">
+            <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0}}>
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="mb-0">{moduleTitle}</h3>
+                {userRole === "Trainer" && (
+                  <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
+                    Add Lecture
+                  </button>
+                )}
+              </div>
+
+              <p className="text-muted">{moduleDescription}</p>
+
+              {loading ? (
+                <p>Loading lectures...</p>
+              ) : error ? (
+                <p className="text-danger">{error}</p>
+              ) : lectures.length === 0 ? (
+                <p>
+                  {userRole === "Trainer"
+                    ? 'No lectures yet. Click "Add Lecture" to create one.'
+                    : "No lectures available yet."}
+                </p>
+              ) : (
+                <ModuleAccordion
+                  isTrainerView={userRole === "Trainer"}
+                  userRole={userRole}
+                  lectures={lectures}
+                />
+              )}
+            </div>
           </div>
-          {userRole === "Trainer" && (
-            <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
-              Add Lecture
-            </button>
-          )}
+
+          {/* Right column: Upcoming Panel (4) */}
+          <div className="col-12 col-lg-4 d-flex">
+            <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0}}>
+              <div className="upcoming-title mb-2">Upcoming</div>
+              <UpcomingPanel moduleId={module_id} />
+            </div>
+          </div>
         </div>
-
-        <p className="text-secondary">{moduleDescription}</p>
-
-        {loading ? (
-          <p>Loading lectures...</p>
-        ) : error ? (
-          <p className="text-danger">{error}</p>
-        ) : lectures.length === 0 ? (
-          <p>
-            {userRole === "Trainer"
-              ? 'No lectures yet. Click "Add Lecture" to create one.'
-              : "No lectures available yet."}
-          </p>
-        ) : (
-          <ModuleAccordion isTrainerView={userRole === "Trainer"} userRole={userRole} lectures={lectures} />
-        )}
       </div>
-
-        <div className="module-right">
-          <div className="upcoming-title">Upcoming</div>
-          <UpcomingPanel moduleId={module_id} />
-        </div>
-
     </div>
+
   );
 }

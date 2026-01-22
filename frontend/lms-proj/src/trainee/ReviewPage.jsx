@@ -56,21 +56,39 @@ export default function ReviewPage() {
   };
 
   return (
-    <div className="container-fluid py-3">
-      {/* Header */}
-      <div className="d-flex align-items-center mb-3">
-        <button className="btn btn-light border me-2" onClick={() => navigate(`/trainee/assessment`)}>
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="m-0 h4">{readableTitle} Review</h2>
-      </div>
+    <div className="module-container w-100 px-0 py-4">
+      <div className="container" style={{ maxWidth: "1400px" }}>
+        {/* Header */}
+        <nav
+          aria-label="breadcrumb"
+          style={{ "--bs-breadcrumb-divider": "'>'" }}
+          className="mb-3"
+        >
+          <ol className="breadcrumb align-items-center mb-0">
+            <li className="breadcrumb-item">
+              <span
+                role="button"
+                onClick={() => navigate(`/trainee/assessment`)}
+                className="text-decoration-none"
+                style={{ cursor: "pointer" }}
+              >
+                Assessments
+              </span>
+            </li>
 
-      <div className="row g-3">
-        {/* LEFT SECTION */}
-        <div className="col-12 col-md-9">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
+            <li className="breadcrumb-item active" aria-current="page">
+              {readableTitle} Review
+            </li>
+          </ol>
+        </nav>
+
+
+        <div className="row">
+          {/* LEFT SECTION */}
+          <div className="col-12 col-lg-9">
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
               <div className="d-flex justify-content-between mb-3 align-items-center">
+                <h3 className="section-title mb-0">Please Palagay here Title</h3>
                 <span className="badge bg-primary px-3 py-2">Question {currentQuestion} of {totalQuestions}</span>
                 {currentQ.isCorrect ?
                   <span className="badge bg-success px-3 py-2">✓ Correct Answer</span> :
@@ -174,40 +192,40 @@ export default function ReviewPage() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* RIGHT SECTION: Navigation */}
-        <div className="col-12 col-md-3">
-          <div className="card shadow-sm border-0">
-            <div className="card-body">
-              <h6 className="fw-bold mb-3 border-bottom pb-2">Question Navigator</h6>
-              <div className="d-flex flex-wrap gap-2">
-                {quizData.map((q, i) => {
-                  const num = i + 1;
-                  let btnStyle = "btn-sm d-flex align-items-center justify-content-center ";
+          {/* RIGHT SECTION: Navigation */}
+          <div className="col-12 col-md-3">
+            <div className="card shadow-sm border-0">
+              <div className="card-body">
+                <h6 className="fw-bold mb-3 border-bottom pb-2">Question Navigator</h6>
+                <div className="d-flex flex-wrap gap-2">
+                  {quizData.map((q, i) => {
+                    const num = i + 1;
+                    let btnStyle = "btn-sm d-flex align-items-center justify-content-center ";
 
-                  if (num === currentQuestion) {
-                    btnStyle += q.isCorrect ? "btn btn-success" : "btn btn-danger";
-                  } else {
-                    btnStyle += q.isCorrect ? "btn btn-outline-success" : "btn btn-outline-danger";
-                  }
+                    if (num === currentQuestion) {
+                      btnStyle += q.isCorrect ? "btn btn-success" : "btn btn-danger";
+                    } else {
+                      btnStyle += q.isCorrect ? "btn btn-outline-success" : "btn btn-outline-danger";
+                    }
 
-                  return (
-                    <button
-                      key={num}
-                      onClick={() => setCurrentQuestion(num)}
-                      className={btnStyle}
-                      style={{ width: '38px', height: '38px', fontWeight: '600' }}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={num}
+                        onClick={() => setCurrentQuestion(num)}
+                        className={btnStyle}
+                        style={{ width: '38px', height: '38px', fontWeight: '600' }}
+                      >
+                        {num}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

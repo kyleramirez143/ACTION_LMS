@@ -13,9 +13,9 @@
 
 /* ================= MAIN LAYOUT ================= */
 .module-container {
-    flex: 1;
+    /* flex: 1;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; */
     gap: 2.3rem;
     padding: 2.4rem 3rem;
     box-sizing: border-box;
@@ -48,7 +48,7 @@
 }
 
 .accordion-card {
-    border: 1px solid #dee2e6;
+    margin-bottom: 5px;
     border-radius: 12px;
     background-color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
