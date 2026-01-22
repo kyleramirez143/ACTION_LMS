@@ -82,17 +82,22 @@ export default function ReviewPage() {
           </ol>
         </nav>
 
-
         <div className="row">
           {/* LEFT SECTION */}
           <div className="col-12 col-lg-9">
-            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "500px", margin: 0, width: "100%" }}>
               <div className="d-flex justify-content-between mb-3 align-items-center">
-                <h3 className="section-title mb-0">Please Palagay here Title</h3>
-                <span className="badge bg-primary px-3 py-2">Question {currentQuestion} of {totalQuestions}</span>
+                {/* LEFT: Title + Question Count */}
+                <div className="d-flex align-items-center gap-3">
+                  <h3 className="section-title mb-0">Please Palagay here Title</h3>
+
+                  <span className="badge px-3 py-2" style={{ backgroundColor: "#0047A7" }}>
+                    Question {currentQuestion} of {totalQuestions}
+                  </span>
+                </div>
                 {currentQ.isCorrect ?
-                  <span className="badge bg-success px-3 py-2">✓ Correct Answer</span> :
-                  <span className="badge bg-danger px-3 py-2">✗ Incorrect Answer</span>
+                  <span className="badge bg-success px-3 py-2"><i class="bi bi-check-lg"></i> Correct Answer</span> :
+                  <span className="badge bg-danger px-3 py-2"><i class="bi bi-x-lg"></i> Incorrect Answer</span>
                 }
               </div>
 
@@ -141,11 +146,11 @@ export default function ReviewPage() {
                           </div>
                           <div className="d-flex gap-2">
                             {isCorrectAnswer && (
-                              <span className="badge bg-success border border-white">Correct</span>
+                              <span className="badge bg-success border border-white"></span>
                             )}
                             {isUserChoice && (
                               <span className={`badge ${currentQ.isCorrect ? 'bg-success' : 'bg-danger'} border border-white`}>
-                                {currentQ.isCorrect ? "Your Choice" : "Your Answer"}
+                                {/* {currentQ.isCorrect ? "Your Choice" : "Your Answer"} */}
                               </span>
                             )}
                           </div>
@@ -174,7 +179,7 @@ export default function ReviewPage() {
 
               {/* Explanation Section */}
               {currentQ.explanation && (
-                <div className="mt-4 pt-3 border-top">
+                <div className="pt-3 border-top">
                   <button
                     className="btn btn-sm btn-outline-secondary mb-2"
                     onClick={() => toggleExplanation(currentQuestion)}
@@ -194,27 +199,60 @@ export default function ReviewPage() {
           </div>
 
           {/* RIGHT SECTION: Navigation */}
-          <div className="col-12 col-md-3">
-            <div className="card shadow-sm border-0">
-              <div className="card-body">
-                <h6 className="fw-bold mb-3 border-bottom pb-2">Question Navigator</h6>
-                <div className="d-flex flex-wrap gap-2">
+          <div className="col-12 col-lg-3 d-flex">
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{
+              minHeight: "500px",
+              overflowY: "auto",
+              margin: 0,
+              maxHeight: "100vh",
+            }}>
+              <h5 className="fw-bold mb-3 border-bottom pb-2 text-center">Question Navigator</h5>
+              <div className="d-flex flex-wrap gap-2">
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "8px", // space between buttons
+                    justifyContent: "center", // center the buttons in each row
+                    maxWidth: "calc(5 * 38px + 4 * 8px)", // 5 buttons + 4 gaps
+                    margin: "0 auto", // optional: center the whole container
+                  }}
+                >
                   {quizData.map((q, i) => {
                     const num = i + 1;
-                    let btnStyle = "btn-sm d-flex align-items-center justify-content-center ";
 
+                    // Base style for all buttons
+                    const baseStyle = {
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      fontWeight: 600,
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    };
+
+                    // Determine color logic
+                    let colorStyle = {};
                     if (num === currentQuestion) {
-                      btnStyle += q.isCorrect ? "btn btn-success" : "btn btn-danger";
+                      // Filled for current
+                      colorStyle = q.isCorrect
+                        ? { backgroundColor: "#198754", color: "#fff", border: "none" } // green filled
+                        : { backgroundColor: "#dc3545", color: "#fff", border: "none" }; // red filled
                     } else {
-                      btnStyle += q.isCorrect ? "btn btn-outline-success" : "btn btn-outline-danger";
+                      // Outline for others
+                      colorStyle = q.isCorrect
+                        ? { backgroundColor: "transparent", color: "#198754", border: "2px solid #198754" } // green outline
+                        : { backgroundColor: "transparent", color: "#dc3545", border: "2px solid #dc3545" }; // red outline
                     }
 
                     return (
                       <button
                         key={num}
                         onClick={() => setCurrentQuestion(num)}
-                        className={btnStyle}
-                        style={{ width: '38px', height: '38px', fontWeight: '600' }}
+                        className="icon-btn d-flex align-items-center justify-content-center"
+                        style={{ ...baseStyle, ...colorStyle }}
                       >
                         {num}
                       </button>
@@ -225,7 +263,7 @@ export default function ReviewPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div >
     </div >
   );
 }

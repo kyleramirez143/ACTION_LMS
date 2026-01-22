@@ -52,21 +52,29 @@ const QuizPreview = () => {
     return (
         <div className="module-container w-100 px-0 py-4">
             <div className="container" style={{ maxWidth: "1400px" }}>
-                <div className="row">
-                    {/* LEFT PANEL */}
-                    <div className="col-12 col-lg-8" style={{ height: "100vh", overflowY: "auto" }}>
-                        <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}></div>
-                        <div className="quiz-preview-header d-flex align-items-center mb-4">
-                            <FaArrowLeft
-                                className="back-icon me-3"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => navigate(-1)}
-                            />
-                            <h2 className="mb-0">{quiz.title}</h2>
-                        </div>
-                        
+                <nav aria-label="breadcrumb" className="mb-3">
+                    <ol className="breadcrumb mb-0 d-flex align-items-center">
+                        {/* Lectures breadcrumb */}
+                        <li className="breadcrumb-item" style={{ cursor: "pointer", color: "#6a6a6a" }} onClick={() => navigate(-1)}>
+                            Lectures
+                        </li>
 
-                        <hr />
+                        {/* Separator */}
+                        <li className="breadcrumb-separator mx-2"> &gt; </li>
+
+                        {/* Current Quiz Title */}
+                        <li className="breadcrumb-item active text-muted" aria-current="page">
+                            {quiz.title}
+                        </li>
+                    </ol>
+                </nav>
+
+                {/* LEFT PANEL */}
+                <div className="col-12 col-lg-12">
+                    <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "500px", margin: 0, maxHeight: "100vh", }}>
+                        <h2 className="section-title">{quiz.title}</h2>
+
+                        <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
                         {/* Quiz details */}
                         <div className="quiz-details mb-2">
@@ -103,56 +111,56 @@ const QuizPreview = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <hr />
+                        <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
-                    {/* Quiz Instructions */}
-                    <div className="quiz-preview-center">
-                        <h3>Instructions</h3>
-                        {isExpired && (
-                            <div className="alert alert-danger mt-3">
-                                This quiz is already past its due date and can no longer be taken.
-                            </div>
-                        )}
-                        {quiz.description ? (
-                            <ol>
-                                {quiz.description.split("\n").map((line, idx) => (
-                                    <li key={idx}>{line}</li>
-                                ))}
-                            </ol>
-                        ) : (
-                            <p>No instructions provided.</p>
-                        )}
+                        {/* Quiz Instructions */}
+                        <div className="quiz-preview-center">
+                            <h5 className="fw-bold mt-2">Instructions</h5>
+                            {isExpired && (
+                                <div className="alert alert-danger mt-3">
+                                    This quiz is already past its due date and can no longer be taken.
+                                </div>
+                            )}
+                            {quiz.description ? (
+                                <ol>
+                                    {quiz.description.split("\n").map((line, idx) => (
+                                        <li key={idx}>{line}</li>
+                                    ))}
+                                </ol>
+                            ) : (
+                                <p>No instructions provided.</p>
+                            )}
 
-                        {quiz.attempts_taken >= quiz.attempts_allowed ? (
-                            <div className="alert alert-danger mt-4">
-                                You have reached the maximum number of attempts allowed for this quiz.
-                            </div>
-                        ) : null}
+                            {quiz.attempts_taken >= quiz.attempts_allowed ? (
+                                <div className="alert alert-danger mt-4">
+                                    You have reached the maximum number of attempts allowed for this quiz.
+                                </div>
+                            ) : null}
 
-                        <button
-                            className="btn btn-primary mt-4 w-100"
-                            disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
-                            onClick={() => {
-                                if (quiz.screen_monitoring) {
-                                    navigate(`/quiz/${quiz.assessment_id}/permission`);
-                                    console.log("Permission: ", quiz.screen_monitoring);
-                                } else {
-                                    navigate(`/quiz/${quiz.assessment_id}/start`, {
-                                        state: { screenMonitoring: false }
-                                    });
-                                }
-                            }}
-                        >
-                            {console.log(quiz.screen_monitoring)}
-                            {isExpired
-                                ? "Quiz Expired"
-                                : quiz.attempts_taken >= quiz.attempts_allowed
-                                    ? "Limit Reached"
-                                    : "Take Quiz"}
-                        </button>
+                            <button
+                                className="btn btn-primary mt-4 w-100"
+                                disabled={quiz.attempts_taken >= quiz.attempts_allowed || isExpired}
+                                onClick={() => {
+                                    if (quiz.screen_monitoring) {
+                                        navigate(`/quiz/${quiz.assessment_id}/permission`);
+                                        console.log("Permission: ", quiz.screen_monitoring);
+                                    } else {
+                                        navigate(`/quiz/${quiz.assessment_id}/start`, {
+                                            state: { screenMonitoring: false }
+                                        });
+                                    }
+                                }}
+                            >
+                                {console.log(quiz.screen_monitoring)}
+                                {isExpired
+                                    ? "Quiz Expired"
+                                    : quiz.attempts_taken >= quiz.attempts_allowed
+                                        ? "Limit Reached"
+                                        : "Take Quiz"}
+                            </button>
 
+                        </div>
                     </div>
                 </div>
             </div>

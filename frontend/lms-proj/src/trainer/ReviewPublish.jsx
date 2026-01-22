@@ -95,6 +95,7 @@ const ReviewPublish = () => {
           scoreVisibility: data.quiz.show_score ?? false,
           includeExplanationIfWrong: data.quiz.show_explanations ?? true,
           isPublished: data.quiz.is_published ?? false,
+          passingScore: data.quiz.passing_score,
         });
 
         setLoading(false);
@@ -521,6 +522,11 @@ const ReviewPublish = () => {
               <div className="mb-3">
                 <label className="form-label">Number of Attempts</label>
                 <input type="number" className="form-control" value={settings.attempts} min={1} onChange={(e) => handleChange("attempts", Number(e.target.value))} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">{t("quiz.passing_score")}</label>
+                <input type="number" className="form-control" value={settings.passingScore} min={1} onChange={(e) => handleChange("passingScore", Number(e.target.value))} />
               </div>
 
               <div className="mb-3">
