@@ -168,9 +168,9 @@ function ModuleTable() {
     // Dynamic Title Logic
     const currentBatch = batches.find(b => String(b.curriculum_id) === String(selectedCurriculumId));
     const dynamicTitle = currentBatch
-        ? `${currentBatch.name} ${currentBatch.location} - Module Period`
-        : "Module Management";
-
+        ? `${currentBatch.name} ${currentBatch.location} - ${t("module_management.module_period")}`
+    : t("module_management.title_default");
+    
     return (
         <div className="user-role-card">
             <div className="d-flex justify-content-between align-items-center mb-4">

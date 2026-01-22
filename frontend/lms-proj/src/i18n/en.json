@@ -176,7 +176,9 @@
         "cancel": "Cancel",
         "no_data": "No data available for the selected batch.",
         "delete_confirmation": "Delete {{count}} modules?",
-        "generic_error": "Something went wrong. Please try again."
+        "generic_error": "Something went wrong. Please try again.",
+        "title_default": "Module Management",
+        "module_period": "Module Period"
     },
     "module": {
         "loading": "Loading module data...",
@@ -641,7 +643,9 @@
         "deleted_success": "Batch deleted successfully!",
         "delete_failed": "Failed to delete batch",
         "bulk_deleted": "Batches deleted successfully",
-        "bulk_delete_failed": "Error deleting batches"
+        "bulk_delete_failed": "Error deleting batches",
+        "manila": "Manila",
+        "cebu": "Cebu"
     },
     "checkpoint": {
         "trainee_list": "Trainee List",
@@ -675,7 +679,8 @@
         "trainee_name": "Trainee Name",
         "bpi": "BPI",
         "sss": "SSS",
-        "tin": "TIN"
+        "tin": "TIN",
+        "export_csv": "Export CSV"
     },
     "module_period": {
         "edit_period": "Edit Module Period",

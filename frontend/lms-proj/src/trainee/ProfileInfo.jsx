@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { FaEdit } from 'react-icons/fa';
+import { Link } from "react-router-dom";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "./ProfileInfo.css";
 import { Pencil, Check, X } from 'lucide-react';
 import { useTranslation } from "react-i18next";
@@ -123,7 +126,6 @@ export default function ProfileInfo() {
     <div className="checkpoint-container">
 
       {/* SECTION 1: User Information Card */}
-      {/* SECTION 1: User Information Card */}
       <div className="checkpoint-card user-info-card">
         <div className="user-info-header">
           <div className="profile-picture">
@@ -174,11 +176,16 @@ export default function ProfileInfo() {
       {/* SECTION 2: Onboarding Requirements */}
       {userProfile.role === "Trainee" && (
         <div className="checkpoint-card">
-          <div className="card-header-flex">
-            <h3 className="card-title">{t("profile_info.onboarding_requirements")}</h3>
+          <div className="card-header-flex d-flex justify-content-between align-items-center mb-3">
+            <h3 className="card-title mb-0">{t("profile_info.onboarding_requirements")}</h3>
+            
             {!isEditing && hasData && (
-              <button className="btn-edit" onClick={() => setIsEditing(true)}>
-                {t("profile_info.edit")}
+              <button 
+                className="icon-btn" 
+                onClick={() => setIsEditing(true)}
+                title={t("profile_info.edit")}
+              >
+                <i className="bi bi-pencil-fill"></i>
               </button>
             )}
           </div>
@@ -191,8 +198,8 @@ export default function ProfileInfo() {
               </button>
             </div>
           ) : (
-            <div className="onboarding-table-wrapper">
-              <table className="onboarding-table">
+            <div className="table-responsive">
+              <table className="onboarding-table align-middle">
                 <thead>
                   <tr>
                     <th>{t("profile_info.requirement")}</th>
@@ -233,7 +240,7 @@ export default function ProfileInfo() {
                   ].map((item) => (
                     <tr key={item.field}>
                       <td>{item.label}</td>
-                      <td>
+                      <td className="text-left">
                         {isEditing ? (
                           <select
                             className="table-select"
@@ -244,7 +251,12 @@ export default function ProfileInfo() {
                             <option value="true">{item.yes}</option>
                           </select>
                         ) : (
-                          onboarding[item.field] ? "✔" : "X"
+                          /* Removed the extra curly braces here */
+                          onboarding[item.field] ? (
+                            <FaCheckCircle style={{ color: "#28a745", fontSize: "1.2rem" }} title="Completed" />
+                          ) : (
+                            <FaTimesCircle style={{ color: "#dc3545", fontSize: "1.2rem" }} title="Pending" />
+                          )
                         )}
                       </td>
                     </tr>
