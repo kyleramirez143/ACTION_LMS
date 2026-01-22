@@ -231,8 +231,12 @@ const CheckpointView = () => {
                     <td className="status-cell text-center"><StatusIcon value={user.passport_ok} /></td>
                     <td className="status-cell text-center"><StatusIcon value={user.imf_awareness_ok} /></td>
                     <td className="text-center">
-                      <button className="edit-btn-action" onClick={() => openEditModal(user)}>
-                        <FaEdit />
+                     <button 
+                        className="icon-btn d-inline-flex align-items-center justify-content-center" 
+                        onClick={() => openEditModal(user)} 
+                        title="Edit Onboarding"
+                      >
+                        <i className="bi bi-pencil-fill"></i>
                       </button>
                     </td>
                   </tr>

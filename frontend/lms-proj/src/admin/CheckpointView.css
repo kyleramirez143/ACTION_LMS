@@ -58,31 +58,6 @@ updated checkpoint.css
   color: #000000 !important; /* This forces black text on data */
 }
 
-.edit-btn-action {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #2563eb;
-}
-
-
-.edit-btn-action:hover {
-  background-color: #0047AB !important; /* Blue background */
-  color: #ffffff !important;           /* White icon */
-  border-color: #0047AB !important;
-  transform: scale(1.1);               /* Subtle grow effect */
-  box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);
-}
-
-
-/* Ensure the icon itself doesn't inherit table text color */
-.edit-btn-action i,
-.edit-btn-action svg {
-  color: inherit !important;
-  display: block;
-}
-
-
 /* ============================================================
    3. MODAL OVERLAY & CONTENT
    ============================================================ */
