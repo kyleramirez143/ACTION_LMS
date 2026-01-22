@@ -98,11 +98,11 @@ export default function TraineeAssessment() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredResults = normalizedSearch
     ? assessmentData.filter(
-        (r) =>
-          r.title.toLowerCase().includes(normalizedSearch) ||
-          r.status.toLowerCase().includes(normalizedSearch) ||
-          r.feedback.toLowerCase().includes(normalizedSearch)
-      )
+      (r) =>
+        r.title.toLowerCase().includes(normalizedSearch) ||
+        r.status.toLowerCase().includes(normalizedSearch) ||
+        r.feedback.toLowerCase().includes(normalizedSearch)
+    )
     : assessmentData;
 
   const totalPages = Math.max(1, Math.ceil(filteredResults.length / itemsPerPage));
@@ -138,23 +138,23 @@ export default function TraineeAssessment() {
   return (
     <div className="assessment-wrapper">
       <div className="assessment-content">
-        {/* HEADER */}
-        <div className="title-back-row">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => navigate(-1)}
-            aria-label={t("assessment.back")}
-          >
-            <ArrowLeft size={20} strokeWidth={2.2} />
-          </button>
-          <h2 className="page-title">{t("assessment.title")}</h2>
-        </div>
-
         {/* ===== Dashboard Table ===== */}
         <div className="white-card">
+          {/* HEADER */}
+          <div className="title-back-row">
+            <button
+              type="button"
+              className="back-btn"
+              onClick={() => navigate(-1)}
+              aria-label={t("assessment.back")}
+            >
+              <ArrowLeft size={20} strokeWidth={2.2} />
+            </button>
+            <h2 className="page-title">{t("assessment.title")}</h2>
+          </div>
+
           {/* SEARCH */}
-          <div className="filter-controls">
+          {/* <div className="filter-controls">
             <div className="search-box">
               <Search size={20} className="search-icon" />
               <input
@@ -164,7 +164,7 @@ export default function TraineeAssessment() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="results-table-scroll">
             <table className="results-table">
@@ -200,8 +200,9 @@ export default function TraineeAssessment() {
                       <td>{r.module}</td>
                       <td>
                         <button
-                          className="title-link text-primary text-decoration-underline"
+                          className={`title-link ${r.show_score ? "text-primary text-decoration-underline" : ""} `}
                           type="button"
+                          disabled={!r.show_score}
                           onClick={() =>
                             openAssessment(r.assessment_id, r.attempt_id)
                           }
@@ -238,9 +239,8 @@ export default function TraineeAssessment() {
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li
                     key={i}
-                    className={`page-item ${
-                      currentPage === i + 1 ? "active" : ""
-                    }`}
+                    className={`page-item ${currentPage === i + 1 ? "active" : ""
+                      }`}
                   >
                     <button
                       className="page-link"

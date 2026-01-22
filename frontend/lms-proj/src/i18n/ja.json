@@ -368,7 +368,8 @@
         "take_quiz": "テストを受ける",
         "expired": "期限切れ",
         "limit_reached": "上限到達",
-        "add_choice": "選択肢を追加"
+        "add_choice": "選択肢を追加",
+        "passing_score": "合格点"
     },
     "proctor": {
         "quiz_result": "クイズ結果",

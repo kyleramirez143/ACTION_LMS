@@ -15,6 +15,7 @@ export default function ReviewPage() {
     : t("review.assessment");
 
   const [quizData, setQuizData] = useState([]);
+  const [quizTitle, setQuizTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [showExplanations, setShowExplanations] = useState({});
@@ -34,7 +35,8 @@ export default function ReviewPage() {
         });
 
         const data = await res.json();
-        setQuizData(data);
+        setQuizTitle(data.assessment.title);
+        setQuizData(data.questions);
       } catch (err) {
         console.error("Review fetch error:", err);
       } finally {
@@ -61,7 +63,7 @@ export default function ReviewPage() {
         <button className="btn btn-light border me-2" onClick={() => navigate(`/trainee/assessment`)}>
           <ArrowLeft size={20} />
         </button>
-        <h2 className="m-0 h4">{readableTitle} {t("review.title")}</h2>
+        <h2 className="m-0 h4">{quizTitle || readableTitle} {t("review.title")}</h2>
       </div>
 
       <div className="row g-3">

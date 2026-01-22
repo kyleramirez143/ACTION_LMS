@@ -382,7 +382,8 @@
         "take_quiz": "Take Quiz",
         "expired": "Quiz Expired",
         "limit_reached": "Limit Reached",
-        "add_choice": "Add Choice"
+        "add_choice": "Add Choice",
+        "passing_score": "Passing Score"
     },
     "proctor": {
         "quiz_result": "Quiz Result",
