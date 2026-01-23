@@ -371,6 +371,7 @@ const QuizPage = () => {
         {isUploading && (
           <div className="alert alert-info mt-3">{t("quiz.submitting")}</div>
         )}
+      </div>
     </div>
   );
 };
