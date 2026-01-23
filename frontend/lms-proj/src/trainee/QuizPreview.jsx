@@ -53,21 +53,29 @@ const QuizPreview = () => {
     return (
         <div className="module-container w-100 px-0 py-4">
             <div className="container" style={{ maxWidth: "1400px" }}>
-                <div className="row">
-                    {/* LEFT PANEL */}
-                    <div className="col-12 col-lg-8" style={{ height: "100vh", overflowY: "auto" }}>
-                        <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}></div>
-                        <div className="quiz-preview-header d-flex align-items-center mb-4">
-                            <FaArrowLeft
-                                className="back-icon me-3"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => navigate(-1)}
-                            />
-                            <h2 className="mb-0">{quiz.title}</h2>
-                        </div>
+                <nav aria-label="breadcrumb" className="mb-3">
+                    <ol className="breadcrumb mb-0 d-flex align-items-center">
+                        {/* Lectures breadcrumb */}
+                        <li className="breadcrumb-item" style={{ cursor: "pointer", color: "#6a6a6a" }} onClick={() => navigate(-1)}>
+                            Lectures
+                        </li>
 
+                        {/* Separator */}
+                        <li className="breadcrumb-separator mx-2"> &gt; </li>
 
-                        <hr />
+                        {/* Current Quiz Title */}
+                        <li className="breadcrumb-item active text-muted" aria-current="page">
+                            {quiz.title}
+                        </li>
+                    </ol>
+                </nav>
+
+                {/* LEFT PANEL */}
+                <div className="col-12 col-lg-12">
+                    <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "500px", margin: 0, maxHeight: "100vh", }}>
+                        <h2 className="section-title">{quiz.title}</h2>
+
+                        <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
                         {/* Quiz Details */}
                         <div className="quiz-details mb-2">
@@ -124,9 +132,11 @@ const QuizPreview = () => {
                             </div>
                         </div>
 
+                        <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
+
                         {/* Quiz Instructions */}
                         <div className="quiz-preview-center">
-                            <h3>{t("quiz.instructions")}</h3>
+                            <h5 className="fw-bold mt-2">{t("quiz.instructions")}</h5>
                             {isExpired && (
                                 <div className="alert alert-danger mt-3">
                                     {t("quiz.expired_message")}
@@ -154,24 +164,27 @@ const QuizPreview = () => {
                                 onClick={() => {
                                     if (quiz.screen_monitoring) {
                                         navigate(`/quiz/${quiz.assessment_id}/permission`);
+                                        console.log("Permission: ", quiz.screen_monitoring);
                                     } else {
                                         navigate(`/quiz/${quiz.assessment_id}/start`, {
-                                            state: { screenMonitoring: false },
+                                            state: { screenMonitoring: false }
                                         });
                                     }
                                 }}
                             >
+                                {console.log(quiz.screen_monitoring)}
                                 {isExpired
                                     ? t("quiz_preview.expired")
                                     : quiz.attempts_taken >= quiz.attempts_allowed
                                         ? t("quiz_preview.limit_reached")
                                         : t("quiz_preview.take_quiz")}
                             </button>
+
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     );
 };
 
