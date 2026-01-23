@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 import "./ReviewPublish.css";
 
 const ReviewPublish = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { assessment_id, course_id, module_id } = useParams();
   const [quiz, setQuiz] = useState(null);
   const [originalQuestions, setOriginalQuestions] = useState([]);
@@ -527,7 +527,7 @@ const ReviewPublish = () => {
               </div>
 
               <div className="mb-3">
-                <label className="form-label">{t("quiz.passing_score")}</label>
+                <label className="form-label">Passing Score</label>
                 <input type="number" className="form-control" value={settings.passingScore} min={1} onChange={(e) => handleChange("passingScore", Number(e.target.value))} />
               </div>
 
