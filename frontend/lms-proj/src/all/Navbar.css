@@ -52,7 +52,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 }
 
 .navbar-wrapper + * {
-  padding-top: calc(var(--navbar-height) + var(--search-height));
+  padding-top: 100px;
 }
 
 /* ================= LOGO ================= */
