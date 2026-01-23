@@ -35,6 +35,8 @@ export default function ModuleAccordion({
     const quizMenuRefs = useRef({});
     const resourceMenuRefs = useRef({});
     const navigate = useNavigate();
+    const contentRefs = useRef({});
+    const [heights, setHeights] = useState({});
 
     // Filter lectures based on role
     useEffect(() => {
@@ -49,6 +51,15 @@ export default function ModuleAccordion({
                 }));
         setLectures(filteredLectures);
     }, [lectures, isTrainerView]);
+
+    useEffect(() => {
+        const newHeights = {};
+        Object.keys(contentRefs.current).forEach((key) => {
+            const el = contentRefs.current[key];
+            if (el) newHeights[key] = el.scrollHeight;
+        });
+        setHeights(newHeights);
+    }, [localLectures, openIndex]);
 
     // Close menus on outside click
     useEffect(() => {
@@ -311,7 +322,15 @@ export default function ModuleAccordion({
                         </div>
 
                         {/* --- ACCORDION CONTENT --- */}
-                        {openIndex === i && (
+                        <div
+                            ref={(el) => (contentRefs.current[i] = el)}
+                            className="accordion-content-wrapper"
+                            style={{
+                                maxHeight: openIndex === i ? `${heights[i] || 0}px` : "0px",
+                                overflow: "hidden",
+                                transition: "max-height 0.35s ease",
+                            }}
+                        >
                             <div className="accordion-content p-3">
                                 {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
                                 {/* Resources Section */}
@@ -509,7 +528,7 @@ export default function ModuleAccordion({
                                     ) : <p className="small text-muted">No quizzes available yet.</p>}
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 ))
             )

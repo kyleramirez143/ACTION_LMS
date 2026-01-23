@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import "./ReviewPublish.css";
 
 const ReviewPublish = () => {
+  const { t } = useTranslation();
   const { assessment_id, course_id, module_id } = useParams();
   const [quiz, setQuiz] = useState(null);
   const [originalQuestions, setOriginalQuestions] = useState([]);
