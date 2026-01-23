@@ -1,185 +1,351 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { FaEdit, FaCheckCircle, FaTimesCircle, FaDownload } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "react-router-dom";
+import noDataImg from "../image/no-data.svg";
 import "./CheckpointView.css";
-import { FaEdit } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+
+
+const backendURL = "http://localhost:5000";
+
 
 const CheckpointView = () => {
-  const location = useLocation();
-  const { batchId, batchName } = location.state || {};
+  const { t } = useTranslation();
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const batchId = state?.batchId;
 
+
+  const [batchInfo, setBatchInfo] = useState({ name: "", location: "" });
   const [rows, setRows] = useState([]);
-  const [editRowIndex, setEditRowIndex] = useState(null);
-  const [editData, setEditData] = useState({});
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [isAddMode, setIsAddMode] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [saving, setSaving] = useState(false);
 
-  // Fetch trainees for the selected batch
-  useEffect(() => {
+
+  const fetchData = useCallback(async () => {
     if (!batchId) return;
-    const fetchTrainees = async () => {
-      const token = localStorage.getItem("authToken");
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/checkpoints/${batchId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error("Failed to fetch checkpoint data");
+    const token = localStorage.getItem("authToken");
+   
+    try {
+      setLoading(true);
 
-        const data = await res.json();
-        setRows(data.employees || []);
-      } catch (err) {
-        console.error(err);
+
+      const batchRes = await fetch(`${backendURL}/api/batches/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (batchRes.ok) {
+        const bData = await batchRes.json();
+        setBatchInfo({ name: bData.name, location: bData.location });
       }
-    };
-    fetchTrainees();
+
+
+      const traineeRes = await fetch(`${backendURL}/api/checkpoints/batch/${batchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+     
+      if (!traineeRes.ok) throw new Error("Failed to fetch batch trainees");
+      const traineeData = await traineeRes.json();
+      setRows(Array.isArray(traineeData) ? traineeData : []);
+
+
+    } catch (err) {
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [batchId]);
 
-  // Modal functions (unchanged)
-  const openModal = (index) => {
-    setEditRowIndex(index);
-    setEditData({ ...rows[index] });
-    setIsAddMode(false);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+
+  const openEditModal = (trainee) => {
+    setEditData({ ...trainee });
     setShowModal(true);
   };
 
-  const openAddModal = () => {
-    setEditData({
-      name: "",
-      bpi: "",
-      sss: "",
-      tin: "",
-      pagibig: "",
-      philhealth: "",
-      uaf: "",
-      officePC: "",
-      personalPC: "",
-      passport: "",
-      imsAwareness: "",
-    });
-    setIsAddMode(true);
-    setShowModal(true);
-  };
-
-  const closeModal = () => setShowModal(false);
 
   const handleFieldChange = (field, value) => {
-    setEditData({ ...editData, [field]: value });
+    const val = value === "true" ? true : value === "false" ? false : value;
+    setEditData((prev) => ({ ...prev, [field]: val }));
   };
 
-  const handleSave = () => {
-    if (isAddMode) setRows([...rows, editData]);
-    else {
-      const updated = [...rows];
-      updated[editRowIndex] = editData;
-      setRows(updated);
-    }
-    closeModal();
+  const handleExportCSV = () => {
+    if (rows.length === 0) return;
+
+    // Define headers
+    const headers = [
+      "Trainee Name", "BPI", "SSS", "TIN", "Pag-IBIG", "PhilHealth", 
+      "UAF IMS", "Telework Office", "Telework Personal", "Passport", "IMF UAF"
+    ];
+
+    // Map rows to CSV format
+    const csvRows = rows.map(user => [
+      `"${user.first_name} ${user.last_name}"`,
+      `"${user.bpi_account_no || ""}"`,
+      `"${user.sss_no || ""}"`,
+      `"${user.tin_no || ""}"`,
+      `"${user.pagibig_no || ""}"`,
+      `"${user.philhealth_no || ""}"`,
+      user.uaf_ims ? "Completed" : "Pending",
+      user.office_pc_telework ? "Approved" : "Pending",
+      user.personal_pc_telework ? "Approved" : "Pending",
+      user.passport_ok ? "OK" : "None",
+      user.imf_awareness_ok ? "Done" : "Pending"
+    ].join(","));
+
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Batch_${batchInfo.name || "Export"}_Checkpoints.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("authToken");
+    setSaving(true);
+   
+    try {
+      const res = await fetch(`${backendURL}/api/checkpoints/${editData.user_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editData),
+      });
+
+
+      if (res.ok) {
+        await fetchData();
+        setShowModal(false);
+      } else {
+        alert("Update failed.");
+      }
+    } catch (err) {
+      console.error("Save Error:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
+  const StatusIcon = ({ value }) => (
+    value ? <FaCheckCircle className="text-success" /> : <FaTimesCircle className="text-danger" />
+  );
+
+
+  if (!batchId) return <div className="p-5 text-center">{t("checkpoint.no_batch_selected")}</div>;
+
 
   return (
-    <div className="user-role-card">
-      {/* Table */}
-      <div className="checkpoint-header">
-        <h3 className="section-title">
-          {batchName ? `${batchName} : Checkpoint` : "Trainee Onboarding Checkpoint"}
-        </h3>
-        <button className="add-employee-btn" onClick={openAddModal}>+ Trainee</button>
-      </div>
-      <table className="checkpoint-table">
-        <thead>
-          <tr>
-            <th className="name-col">NAME</th>
-            <th className="header-green">BPI</th>
-            <th className="header-purple">SSS #</th>
-            <th className="header-purple">TIN #</th>
-            <th className="header-purple">PAGIBIG #</th>
-            <th className="header-purple">PHILHEALTH #</th>
-            <th className="header-orange">UAF (IMS)</th>
-            <th className="header-orange">Office PC</th>
-            <th className="header-orange">Personal PC</th>
-            <th className="header-yellow">Passport</th>
-            <th className="header-green">IMS Awareness</th>
-            <th>Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 ? (
-            <tr>
-              <td colSpan="12" className="text-center py-5 text-muted">
-                No trainees found for this batch.
-              </td>
-            </tr>
-          ) : (
-            rows.map((row, idx) => (
-              <tr key={idx}>
-                <td className="name-col">{row.name}</td>
-                <td className="payroll-cell">{row.bpi}</td>
-                <td className="hr-cell">{row.sss}</td>
-                <td className="hr-cell">{row.tin}</td>
-                <td className="hr-cell">{row.pagibig}</td>
-                <td className="hr-cell">{row.philhealth}</td>
-                <td className="telework-cell">{row.uaf}</td>
-                <td className="telework-cell">{row.officePC}</td>
-                <td className="telework-cell">{row.personalPC}</td>
-                <td className="passport-cell">{row.passport}</td>
-                <td className="ims-cell status-ok">{row.imsAwareness}</td>
-                <td>
-                  <button className="edit-btn" onClick={() => openModal(idx)}>
-                    <FaEdit />
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+    <div className="checkpoint-container">
+      <nav className="breadcrumb-nav">
+        <span 
+          className="breadcrumb-link" 
+          onClick={() => navigate("/admin/batch-management")}
+        >
+          {t("checkpoint.batches")}
+        </span>
+        <span className="breadcrumb-separator">&gt;</span> 
+        <span className="breadcrumb-current">
+          {batchInfo.name ? `${batchInfo.name} - ${batchInfo.location}` : t("checkpoint.loading")}
+        </span>
+      </nav>
+      <div className="checkpoint-card">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="checkpoint-title">
+            {t("checkpoint.trainee_list")}
+          </h2>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content fixed-modal">
-            <h3>{isAddMode ? "Add Trainee" : "Edit Trainee"}</h3>
-
-            <div className="two-column-form">
-              <div className="form-column">
-                <label>Name</label>
-                <input value={editData.name} onChange={(e) => handleFieldChange("name", e.target.value)} />
-                <label>BPI</label>
-                <input value={editData.bpi} onChange={(e) => handleFieldChange("bpi", e.target.value)} />
-                <label>SSS #</label>
-                <input value={editData.sss} onChange={(e) => handleFieldChange("sss", e.target.value)} />
-                <label>TIN #</label>
-                <input value={editData.tin} onChange={(e) => handleFieldChange("tin", e.target.value)} />
-                <label>PAGIBIG #</label>
-                <input value={editData.pagibig} onChange={(e) => handleFieldChange("pagibig", e.target.value)} />
-              </div>
-              <div className="form-column">
-                <label>PHILHEALTH #</label>
-                <input value={editData.philhealth} onChange={(e) => handleFieldChange("philhealth", e.target.value)} />
-                <label>UAF (IMS)</label>
-                <input value={editData.uaf} onChange={(e) => handleFieldChange("uaf", e.target.value)} />
-                <label>Office PC</label>
-                <input value={editData.officePC} onChange={(e) => handleFieldChange("officePC", e.target.value)} />
-                <label>Personal PC</label>
-                <input value={editData.personalPC} onChange={(e) => handleFieldChange("personalPC", e.target.value)} />
-                <label>Passport</label>
-                <input value={editData.passport} onChange={(e) => handleFieldChange("passport", e.target.value)} />
-                <label>IMS Awareness</label>
-                <input value={editData.imsAwareness} onChange={(e) => handleFieldChange("imsAwareness", e.target.value)} />
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-primary" onClick={handleSave}>
-                {isAddMode ? "Add Trainee" : "Save Changes"}
-              </button>
-              <button className="btn btn-outline-primary" onClick={closeModal}>Cancel</button>
-            </div>
-          </div>
+          <button 
+            className="btn btn-success rounded-pill" 
+            onClick={handleExportCSV}
+            disabled={rows.length === 0}
+          >
+            <i className="bi bi-file-earmark-spreadsheet me-2"></i>
+            {t("checkpoint.export_csv")}
+          </button>
         </div>
-      )}
+
+
+        <div className="table-responsive">
+          <table className="table align-middle" style={{ tableLayout: 'fixed', width: '100%' }}>
+            <thead className="table-light">
+              <tr>
+                <th className="text-center">{t("checkpoint.trainee_name")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.bpi")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.sss")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.tin")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.pagibig")}</th>
+                <th className="text-center header-purple text-dark">{t("checkpoint.philhealth")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.uaf_ims")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_office")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.telework_personal")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.passport")}</th>
+                <th className="text-center header-orange text-dark">{t("checkpoint.imf_uaf")}</th>
+                <th className="text-center">{t("checkpoint.action")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan="11" className="text-center py-5">{t("checkpoint.loading")}</td></tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center">
+                      <img 
+                        src={noDataImg} 
+                        alt="No data" 
+                        style={{ width: '200px', marginBottom: '1rem' }} 
+                      />
+                      <span>{t("checkpoint.no_trainees")}</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                rows.map((user) => (
+                  <tr key={user.user_id}>
+                    <td className="name-col text-center">
+                      {user.first_name} {user.last_name}
+                    </td>
+                    <td className="text-center">{user.bpi_account_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.sss_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.tin_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.pagibig_no || <span className="null-val">---</span>}</td>
+                    <td className="text-center">{user.philhealth_no || <span className="null-val">---</span>}</td>
+                    <td className="status-cell text-center"><StatusIcon value={user.uaf_ims} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.office_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.personal_pc_telework} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.passport_ok} /></td>
+                    <td className="status-cell text-center"><StatusIcon value={user.imf_awareness_ok} /></td>
+                    <td className="text-center">
+                     <button 
+                        className="icon-btn d-inline-flex align-items-center justify-content-center" 
+                        onClick={() => openEditModal(user)} 
+                        title="Edit Onboarding"
+                      >
+                        <i className="bi bi-pencil-fill"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+{showModal && (
+  <div className="modal-overlay">
+    <div className="modal-content admin-modal">
+      <div className="modal-header-section">
+        <h3 className="modal-title">{t("checkpoint.edit_onboarding_details")}</h3>
+        <p className="modal-subtitle">{editData.first_name} {editData.last_name}</p>
+      </div>
+     
+      <div className="modal-body">
+  <div className="modal-two-column-layout">
+   
+    {/* LEFT SIDE: Government & Financials */}
+    <div className="modal-left-side">
+      <div className="modal-section-title">{t("checkpoint.government_financials")}</div>
+      <div className="form-group">
+        <label>{t("checkpoint.bpi_account")}</label>
+        <input type="text" placeholder="0000-0000-00" value={editData.bpi_account_no || ""} onChange={(e) => handleFieldChange("bpi_account_no", e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.sss_number")}</label>
+        <input type="text" placeholder="00-0000000-0" value={editData.sss_no || ""} onChange={(e) => handleFieldChange("sss_no", e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.tin_number")}</label>
+        <input type="text" placeholder="000-000-000" value={editData.tin_no || ""} onChange={(e) => handleFieldChange("tin_no", e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.pagibig")}</label>
+        <input type="text" placeholder="0000-0000-0000" value={editData.pagibig_no || ""} onChange={(e) => handleFieldChange("pagibig_no", e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.philhealth")}</label>
+        <input type="text" placeholder="00-000000000-0" value={editData.philhealth_no || ""} onChange={(e) => handleFieldChange("philhealth_no", e.target.value)} />
+      </div>
+    </div>
+
+
+    {/* VERTICAL DIVIDER (Optional) */}
+    <div className="modal-divider"></div>
+
+
+    {/* RIGHT SIDE: Dropdown Checklist */}
+    <div className="modal-right-side">
+      <div className="modal-section-title">{t("checkpoint.requirement_checklist")}</div>
+      <div className="form-group">
+        <label>{t("checkpoint.uaf_ims")}</label>
+        <select className={editData.uaf_ims ? "select-completed" : "select-pending"} value={String(editData.uaf_ims)} onChange={(e) => handleFieldChange("uaf_ims", e.target.value === "true")}>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.completed")}</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.telework_office")}</label>
+        <select className={editData.office_pc_telework ? "select-completed" : "select-pending"} value={String(editData.office_pc_telework)} onChange={(e) => handleFieldChange("office_pc_telework", e.target.value === "true")}>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.approved")}</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.telework_personal")}</label>
+        <select className={editData.personal_pc_telework ? "select-completed" : "select-pending"} value={String(editData.personal_pc_telework)} onChange={(e) => handleFieldChange("personal_pc_telework", e.target.value === "true")}>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.approved")}</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.passport")}</label>
+        <select className={editData.passport_ok ? "select-completed" : "select-pending"} value={String(editData.passport_ok)} onChange={(e) => handleFieldChange("passport_ok", e.target.value === "true")}>
+          <option value="false">{t("checkpoint.none")}</option>
+          <option value="true">{t("checkpoint.ok")}</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label>{t("checkpoint.imf_uaf")}</label>
+        <select className={editData.imf_awareness_ok ? "select-completed" : "select-pending"} value={String(editData.imf_awareness_ok)} onChange={(e) => handleFieldChange("imf_awareness_ok", e.target.value === "true")}>
+          <option value="false">{t("checkpoint.pending")}</option>
+          <option value="true">{t("checkpoint.done")}</option>
+        </select>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+
+      <div className="modal-footer">
+        <button className="btn-save-modern" onClick={handleSave} disabled={saving}>
+          {saving ? t("checkpoint.saving_changes") : t("checkpoint.save")}
+        </button>
+        <button className="btn-cancel-modern" onClick={() => setShowModal(false)}> {t("checkpoint.cancel")}</button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
+
 
 export default CheckpointView;

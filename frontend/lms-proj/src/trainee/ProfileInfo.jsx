@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { FaEdit } from 'react-icons/fa';
+import { Link } from "react-router-dom";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "./ProfileInfo.css";
-
 import { Pencil, Check, X } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 const backendURL = "http://localhost:5000";
 
-function ProfileInfo() {
+export default function ProfileInfo() {
+  const { t } = useTranslation(); // <-- translation hook
   const navigate = useNavigate();
-  const token = localStorage.getItem("authToken"); // The correct key name
+  const token = localStorage.getItem("authToken");
 
   const [userProfile, setUserProfile] = useState(null);
   const [onboarding, setOnboarding] = useState(null);
@@ -17,7 +21,6 @@ function ProfileInfo() {
   const [isEditing, setIsEditing] = useState(false);
   const [hasData, setHasData] = useState(false);
 
-  // 1. Auth Guard (Runs once on mount)
   useEffect(() => {
     if (!token) return navigate("/login");
     try {
@@ -29,7 +32,6 @@ function ProfileInfo() {
     }
   }, [token, navigate]);
 
-  // 2. Data Fetching logic
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!token) return;
@@ -37,14 +39,12 @@ function ProfileInfo() {
         const decoded = jwtDecode(token);
         const userId = decoded.id;
 
-        // Fetch User Info
         const resUser = await fetch(`${backendURL}/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userData = await resUser.json();
         setUserProfile(userData);
 
-        // Fetch Onboarding
         const resOnboarding = await fetch(`${backendURL}/api/checkpoints/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -71,13 +71,12 @@ function ProfileInfo() {
   }, [token]);
 
   const handleChange = (field, value) => {
-    // Converts "true"/"false" strings from select back to Boolean
     const val = value === "true" ? true : value === "false" ? false : value;
     setOnboarding((prev) => ({ ...prev, [field]: val }));
   };
 
   const handleSave = async () => {
-    if (!token) return alert("Session expired.");
+    if (!token) return alert(t("profile_info.session_expired"));
     setSaving(true);
 
     try {
@@ -99,18 +98,10 @@ function ProfileInfo() {
         });
       };
 
-      // Use the 'hasData' state to decide initial method
-      let res = await sendRequest(
-        !hasData ? postUrl : putUrl,
-        !hasData ? "POST" : "PUT"
-      );
+      let res = await sendRequest(!hasData ? postUrl : putUrl, !hasData ? "POST" : "PUT");
 
-      // FAIL-SAFE: If out of sync, try the opposite
       if (res.status === 404) {
-        res = await sendRequest(
-          !hasData ? putUrl : postUrl,
-          !hasData ? "PUT" : "POST"
-        );
+        res = await sendRequest(!hasData ? putUrl : postUrl, !hasData ? "PUT" : "POST");
       }
 
       if (res.ok) {
@@ -118,10 +109,10 @@ function ProfileInfo() {
         setOnboarding(data.onboarding || data);
         setHasData(true);
         setIsEditing(false);
-        alert("Information saved successfully!");
+        alert(t("profile_info.saved_success"));
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert(`Error: ${errData.message || "Server error"}`);
+        alert(`${t("profile_info.error")}: ${errData.message || t("profile_info.server_error")}`);
       }
     } catch (err) {
       console.error("Save Error:", err);
@@ -130,31 +121,19 @@ function ProfileInfo() {
     }
   };
 
-  if (!userProfile || !onboarding) return <div className="loading">Loading profile...</div>;
+  if (!userProfile || !onboarding) return <div className="loading">{t("profile_info.loading")}</div>;
 
   return (
-    <>
-      <div
-        className="user-role-card"
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "40px",
-          padding: "30px",
-          alignItems: "flex-start",
-          marginBottom: "0.5px",   // small space below the card
-          backgroundColor: "#fff", // optional: white background
-        }}
-      >
-        {/* SECTION 1: User Information Card */}
-        {/* SECTION 1: User Information Card */}
-        {/* <div className="checkpoint-card user-info-card"> */}
+    <div className="checkpoint-container">
+
+      {/* SECTION 1: User Information Card */}
+      <div className="checkpoint-card user-info-card">
         <div className="user-info-header">
           <div className="profile-picture">
             {userProfile.profile_picture ? (
               <img
                 src={`${backendURL}/${userProfile.profile_picture}`}
-                alt="Profile"
+                alt={t("profile_info.profile_picture")}
                 className="profile-img"
               />
             ) : (
@@ -166,122 +145,142 @@ function ProfileInfo() {
             {userProfile.first_name} {userProfile.last_name}
           </h2>
 
-          {/* Status Badge under the name */}
           <div className={`status-badge ${userProfile.is_active ? "active" : "inactive"}`}>
-            {userProfile.is_active ? "● Active" : "● Inactive"}
+            {userProfile.is_active ? t("profile_info.active") : t("profile_info.inactive")}
           </div>
         </div>
 
         <div className="user-info-box">
-          <h5 className="section-title py-1" style={{ borderBottom: "1px solid #eee" }}>User Information</h5>
+          <h4 className="user-info-title">{t("profile_info.user_information")}</h4>
 
           <div className="user-info-grid">
             <div>
-              <p className="text-muted">First Name:</p>
+              <label>{t("profile_info.first_name")}:</label>
               <p>{userProfile.first_name}</p>
             </div>
-
             <div>
-              <p className="text-muted">Email:</p>
+              <label>{t("profile_info.email")}:</label>
               <p>{userProfile.email}</p>
             </div>
-
             <div>
-              <p className="text-muted">Last Name:</p>
+              <label>{t("profile_info.last_name")}:</label>
               <p>{userProfile.last_name}</p>
             </div>
-
             <div>
-              <p className="text-muted">Role:</p>
+              <label>{t("profile_info.role")}:</label>
               <p className="role-text">{userProfile.role}</p>
             </div>
           </div>
         </div>
       </div>
 
-
       {/* SECTION 2: Onboarding Requirements */}
-      {
-        userProfile.role === "Trainee" && (
-          <div className="user-role-card">
-            <div className="card-header-flex">
-              <h3 className="section-title">Onboarding Requirements</h3>
-              {!isEditing && hasData && (
-                <button className="btn-edit" onClick={() => setIsEditing(true)}>Edit</button>
-              )}
-            </div>
+      {userProfile.role === "Trainee" && (
+        <div className="checkpoint-card">
+          <div className="card-header-flex d-flex justify-content-between align-items-center mb-3">
+            <h3 className="card-title mb-0">{t("profile_info.onboarding_requirements")}</h3>
 
-            {!hasData && !isEditing ? (
-              <div className="empty-state">
-                <p>No onboarding details found.</p>
-                <button className="btn-add" onClick={() => setIsEditing(true)}>+ Add Details</button>
-              </div>
-            ) : (
-              <div className="onboarding-table-wrapper">
-                <table className="onboarding-table">
-                  <thead>
-                    <tr><th>Requirement</th><th>Details</th></tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { label: "BPI Account", field: "bpi_account_no" },
-                      { label: "SSS Number", field: "sss_no" },
-                      { label: "TIN Number", field: "tin_no" },
-                      { label: "Pag-IBIG Number", field: "pagibig_no" },
-                      { label: "PhilHealth Number", field: "philhealth_no" },
-                    ].map((item) => (
-                      <tr key={item.field}>
-                        <td>{item.label}</td>
-                        <td>
-                          {isEditing ? (
-                            <input type="text" className="form-control" value={onboarding[item.field] || ""} onChange={(e) => handleChange(item.field, e.target.value)} />
-                          ) : (
-                            onboarding[item.field] || "---"
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {[
-                      { label: "UAF (IMS) Status", field: "uaf_ims", yes: "Completed", no: "Not Completed" },
-                      { label: "Office PC Telework", field: "office_pc_telework", yes: "Approved", no: "Pending" },
-                      { label: "Personal PC Telework", field: "personal_pc_telework", yes: "Approved", no: "Pending" },
-                      { label: "Passport Status", field: "passport_ok", yes: "Ok", no: "None" },
-                      { label: "IMF Awareness Status", field: "imf_awareness_ok", yes: "Completed", no: "Not Completed" },
-                    ].map((item) => (
-                      <tr key={item.field}>
-                        <td>{item.label}</td>
-                        <td>
-                          {isEditing ? (
-                            <select className="form-control" value={String(onboarding[item.field])} onChange={(e) => handleChange(item.field, e.target.value)}>
-                              <option value="false">{item.no}</option>
-                              <option value="true">{item.yes}</option>
-                            </select>
-                          ) : (
-                            onboarding[item.field] ? "✔" : "X"
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {isEditing && (
-                  <div className="table-actions">
-                    <button className="btn-save" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</button>
-                    <button className="btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
-                  </div>
-                )}
-              </div>
+            {!isEditing && hasData && (
+              <button
+                className="icon-btn"
+                onClick={() => setIsEditing(true)}
+                title={t("profile_info.edit")}
+              >
+                <i className="bi bi-pencil-fill"></i>
+              </button>
             )}
           </div>
 
-        )
+          {!hasData && !isEditing ? (
+            <div className="empty-state">
+              <p>{t("profile_info.no_onboarding")}</p>
+              <button className="btn-add" onClick={() => setIsEditing(true)}>
+                + {t("profile_info.add_details")}
+              </button>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="onboarding-table align-middle">
+                <thead>
+                  <tr>
+                    <th>{t("profile_info.requirement")}</th>
+                    <th>{t("profile_info.details")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: t("profile_info.bpi_account"), field: "bpi_account_no" },
+                    { label: t("profile_info.sss_number"), field: "sss_no" },
+                    { label: t("profile_info.tin_number"), field: "tin_no" },
+                    { label: t("profile_info.pagibig_number"), field: "pagibig_no" },
+                    { label: t("profile_info.philhealth_number"), field: "philhealth_no" },
+                  ].map((item) => (
+                    <tr key={item.field}>
+                      <td>{item.label}</td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            className="table-input"
+                            value={onboarding[item.field] || ""}
+                            onChange={(e) => handleChange(item.field, e.target.value)}
+                          />
+                        ) : (
+                          onboarding[item.field] || "---"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+
+                  {[
+                    { label: t("profile_info.uaf_status"), field: "uaf_ims", yes: t("profile_info.completed"), no: t("profile_info.not_completed") },
+                    { label: t("profile_info.office_pc_telework"), field: "office_pc_telework", yes: t("profile_info.approved"), no: t("profile_info.pending") },
+                    { label: t("profile_info.personal_pc_telework"), field: "personal_pc_telework", yes: t("profile_info.approved"), no: t("profile_info.pending") },
+                    { label: t("profile_info.passport_status"), field: "passport_ok", yes: t("profile_info.ok"), no: t("profile_info.none") },
+                    { label: t("profile_info.imf_awareness_status"), field: "imf_awareness_ok", yes: t("profile_info.completed"), no: t("profile_info.not_completed") },
+                  ].map((item) => (
+                    <tr key={item.field}>
+                      <td>{item.label}</td>
+                      <td className="text-left">
+                        {isEditing ? (
+                          <select
+                            className="table-select"
+                            value={String(onboarding[item.field])}
+                            onChange={(e) => handleChange(item.field, e.target.value)}
+                          >
+                            <option value="false">{item.no}</option>
+                            <option value="true">{item.yes}</option>
+                          </select>
+                        ) : (
+                          /* Removed the extra curly braces here */
+                          onboarding[item.field] ? (
+                            <FaCheckCircle style={{ color: "#28a745", fontSize: "1.2rem" }} title="Completed" />
+                          ) : (
+                            <FaTimesCircle style={{ color: "#dc3545", fontSize: "1.2rem" }} title="Pending" />
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {isEditing && (
+                <div className="table-actions">
+                  <button className="btn-save" onClick={handleSave} disabled={saving}>
+                    {saving ? t("profile_info.saving") : t("profile_info.save_changes")}
+                  </button>
+                  <button className="btn-cancel" onClick={() => setIsEditing(false)}>
+                    {t("profile_info.cancel")}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+      )
       }
-    </>
+    </div>
   );
 }
-
-
-
-export default ProfileInfo;

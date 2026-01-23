@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import defaultImage from "../image/logo.png";
 import { ArrowLeft } from "lucide-react";
+
+import defaultImage from "../image/logo.png";
+import moduleImage from "../image/module.svg"; // <-- added
 
 const getInitialModules = (modulesFromApi) => {
     return modulesFromApi.map((module) => ({
@@ -104,10 +106,8 @@ export default function ModuleManagement() {
 
     const handleToggleVisibility = async (e, moduleId, isVisible) => {
         e.stopPropagation();
-        setModulesData((prev) =>
-            prev.map((m) =>
-                m.module_id === moduleId ? { ...m, is_visible: isVisible } : m
-            )
+        setModulesData(prev =>
+            prev.map(m => m.module_id === moduleId ? { ...m, is_visible: isVisible } : m)
         );
 
         try {
@@ -122,19 +122,15 @@ export default function ModuleManagement() {
             if (!res.ok) {
                 const error = await res.json();
                 alert(`Failed to update module: ${error.error || "Server error"}`);
-                setModulesData((prev) =>
-                    prev.map((m) =>
-                        m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m
-                    )
+                setModulesData(prev =>
+                    prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
                 );
             }
         } catch (err) {
             console.error(err);
             alert("Network error. Visibility change failed.");
-            setModulesData((prev) =>
-                prev.map((m) =>
-                    m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m
-                )
+            setModulesData(prev =>
+                prev.map(m => m.module_id === moduleId ? { ...m, is_visible: !isVisible } : m)
             );
         }
     };
@@ -219,7 +215,25 @@ export default function ModuleManagement() {
 
             {/* ---------------- Modules Grid ---------------- */}
             {modulesData.length === 0 ? (
-                <p className="text-center text-muted py-4">No modules found.</p>
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                    <img
+                        src={moduleImage}
+                        alt="No modules"
+                        style={{ maxWidth: "220px", opacity: 0.9 }}
+                        className="mb-3"
+                    />
+                    <p className="text-center text-muted mb-0">
+                        {t("module_management.no_modules_found")}
+                    </p>
+                    {/* {userRole === "Trainer" && (
+                        <button
+                            className="btn btn-outline-primary mt-3"
+                            onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
+                        >
+                            Add your first module
+                        </button>
+                    )} */}
+                </div>
             ) : (
                 <>
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
@@ -229,16 +243,9 @@ export default function ModuleManagement() {
                                     {/* STATUS BADGE */}
                                     {userRole === "Trainer" && (
                                         <span
-                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? "bg-success" : "bg-danger"
-                                                }`}
-                                            style={{ fontSize: "0.75rem", zIndex: 10 }}
-                                            onClick={(e) =>
-                                                handleToggleVisibility(
-                                                    e,
-                                                    module.module_id,
-                                                    !module.is_visible
-                                                )
-                                            }
+                                            className={`position-absolute top-0 start-0 m-2 px-2 py-1 rounded text-white fw-bold ${module.is_visible ? 'bg-success' : 'bg-danger'}`}
+                                            style={{ fontSize: '0.75rem', zIndex: 10 }}
+                                            onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >
                                             {module.is_visible ? "Visible" : "Hidden"}
                                         </span>

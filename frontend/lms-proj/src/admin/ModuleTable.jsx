@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import "./UserRoleTable.css";
 import logo from "../image/courses.svg";
 
 function ModuleTable() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
-
+    const { t } = useTranslation();
+    // --- State Management ---
     const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
     const [periods, setPeriods] = useState([]);
     const [batches, setBatches] = useState([]);
@@ -132,7 +135,7 @@ function ModuleTable() {
                 setEditingId(null);
                 fetchPeriods();
             } else {
-                alert("Failed to update module.");
+                alert(t("module_management.update_failed"));
             }
         } catch (err) {
             console.error("Update error:", err);
@@ -144,8 +147,8 @@ function ModuleTable() {
     const noBatchesExist = batches.length === 0;
 
     const dynamicTitle = currentBatch
-        ? `${currentBatch.name} ${currentBatch.location} - Module Period`
-        : "Module Management";
+        ? `${currentBatch.name} ${currentBatch.location} - ${t("quarters.quarter")}`
+    : t("quarters.title_default");
 
     // --- Render ---
     if (noBatchesExist) {
@@ -153,10 +156,10 @@ function ModuleTable() {
         return (
             <div className="user-role-card text-center py-5 text-muted">
                 <img src={logo} alt="Logo" className="img-fluid mb-3" style={{ maxWidth: "200px" }} />
-                <h3 className="mb-2">No batches or periods yet</h3>
-                <p className="mb-3">Start creating batches and assigning periods.</p>
+                <h3 className="mb-2">{t("quarters.no_batches_yet")}</h3>
+                <p className="mb-3">{t("quarters.start_create")}</p>
                 <button className="btn btn-primary" onClick={() => navigate("/admin/set-module-date")}>
-                    <i className="bi bi-plus-circle-fill"></i> Set Module Period
+                    <i className="bi bi-plus-circle-fill"></i> {t("quarters.set_quarter")}
                 </button>
             </div>
         );
@@ -170,7 +173,7 @@ function ModuleTable() {
                 <div className="d-flex gap-2">
                     <Link to="/admin/set-module-date">
                         <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-calendar2-plus-fill"></i> Set Module Period
+                            <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
                         </button>
                     </Link>
                     {hasPeriods && (
@@ -179,7 +182,7 @@ function ModuleTable() {
                             onClick={handleBulkDelete}
                             disabled={selectedModules.length === 0}
                         >
-                            <i className="bi bi-trash3-fill"></i> Delete ({selectedModules.length})
+                            <i className="bi bi-trash3-fill"></i> {t("module_management.delete_modules", { count: selectedModules.length })}
                         </button>
                     )}
                 </div>
@@ -188,15 +191,17 @@ function ModuleTable() {
             {/* Filters */}
             <div className="d-flex gap-3 mb-3 flex-wrap">
                 <div>
-                    <label className="me-2">Filter by Batch:</label>
-                    <select
-                        className="form-select w-auto d-inline-block"
+                    <label className="me-2">{t("module_management.filter_by_batch")}</label>
+                    <select className="form-select w-auto d-inline-block"
                         value={selectedCurriculumId}
-                        onChange={(e) => setSelectedCurriculumId(e.target.value)}
-                    >
-                        {batches.map((b) => (
-                            <option key={b.batch_id} value={b.curriculum_id || "null"} disabled={!b.curriculum_id}>
-                                {b.name} {b.location} {!b.curriculum_id ? "No Curriculum" : ""}
+                        onChange={(e) => setSelectedCurriculumId(e.target.value)}>
+                        {batches.map(b => (
+                            <option
+                                key={b.batch_id}
+                                value={b.curriculum_id || "null"}
+                                disabled={!b.curriculum_id}
+                            >
+                                {b.name} {b.location} {!b.curriculum_id ? t("module_management.no_curriculum") : ""}
                             </option>
                         ))}
                     </select>
@@ -216,10 +221,10 @@ function ModuleTable() {
                 <table className="table align-middle">
                     <thead className="table-light">
                         <tr>
-                            <th className="text-center">Module</th>
-                            <th className="text-center">Start Date</th>
-                            <th className="text-center">End Date</th>
-                            <th className="text-center">Action</th>
+                            <th className="text-center">{t("module_management.table_module")}</th>
+                            <th className="text-center">{t("module_management.table_start_date")}</th>
+                            <th className="text-center">{t("module_management.table_end_date")}</th>
+                            <th className="text-center">{t("module_management.table_action")}</th>
                             <th className="text-center">
                                 <input
                                     type="checkbox"
@@ -276,15 +281,15 @@ function ModuleTable() {
                                             <div className="d-flex justify-content-center gap-2">
                                                 {isEditing ? (
                                                     <>
-                                                        <button className="icon-btn" onClick={() => handleSave(period.quarter_id)} title="Save">
+                                                        <button className="icon-btn" onClick={() => handleSave(period.quarter_id)} title={t("module_management.save")}>
                                                             <i className="bi bi-check-square-fill"></i>
                                                         </button>
-                                                        <button className="icon-btn" onClick={handleCancel} title="Cancel">
+                                                        <button className="icon-btn" onClick={handleCancel} title={t("module_management.cancel")}>
                                                             <i className="bi bi-x-square-fill"></i>
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <button className="icon-btn" onClick={() => handleEditClick(period)} title="Edit">
+                                                    <button className="icon-btn" onClick={() => handleEditClick(period)} title={t("module_management.edit")}>
                                                         <i className="bi bi-pencil-fill"></i>
                                                     </button>
                                                 )}
@@ -307,8 +312,8 @@ function ModuleTable() {
                                     <>
                                         <img src={logo} alt="Logo" className="img-fluid mb-3"
                                             style={{ maxWidth: "200px" }} />
-                                        <h3 className="mb-2">No Periods yet.</h3>
-                                        <p className="mb-0">This batch does not have any assigned period yet.</p>
+                                        <h3 className="mb-2">{t("quarters.no_periods")}</h3>
+                                        <p className="mb-0">{t("quarters.no_assigned")}</p>
                                     </>
                                 </td>
                             </tr>

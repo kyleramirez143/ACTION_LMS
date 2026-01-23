@@ -11,6 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
 import NotificationView from "./all/NotificationView.jsx";
+
+//Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
 
 // Admin Pages
@@ -81,6 +83,11 @@ function AppContent() {
             {/* Public */}
             <Route path="/" element={<LoginPage />} />
             <Route path="/all/notificationview" element={<NotificationView />} />
+
+            {/* Checkpoint View */}
+            <Route path="/admin/checkpointview" element={<CheckpointView />} />
+
+            {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
 
             {/* Calendar - Unified */}
@@ -110,6 +117,8 @@ function AppContent() {
             <Route path="/trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit" element={<AddLecture />} />
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
+            <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+            
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -135,7 +144,7 @@ function AppContent() {
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
             <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
-            <Route path="/quiz/:assessment_id" element={<QuizPreview />} />
+            <Route path="/:course_id/modules/:module_id/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
 

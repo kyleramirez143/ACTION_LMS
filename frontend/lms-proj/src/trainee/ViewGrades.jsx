@@ -1,201 +1,238 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./ViewGrades.css";
 
-/* ========================
-   TABS
-======================== */
-const TABS = [
-  "Skill Checks",
-  "Practice Exam",
-  "Mock Exam",
-  "Course-end",
-  "Vocabulary Test",
-  "Lesson Test",
-  "Kanji Homework",
-  "Kanji Test",
-  "Oral Exam",
+const TABS = ["summary_of_grades", "philnits", "nihongo"];
+
+const SUMMARY_DATA = [
+  { code: "M1-1", category: "attendance", weight: "5%", criteria: "90.00", rating: "98.21", assessment: "pass", rank: "12", remarks: "" },
+  { code: "M1-2", category: "philnits_gen_it", weight: "55%", criteria: "61.00", rating: "63.45", assessment: "pass", rank: "10", remarks: "" },
+  { code: "M1-3", category: "nihongo", weight: "40%", criteria: "66.00", rating: "83.97", assessment: "pass", rank: "9", remarks: "" },
+  { code: "", category: "overall", weight: "100%", criteria: "64.45", rating: "73.40", assessment: "pass", rank: "10", remarks: "PASSED", overall: true },
 ];
 
-/* ========================
-   MOCK DATA
-======================== */
-const DATA = {
-  "Skill Checks": [
-    { title: "P1 - 1 Basic Theory", due: "12/19/2025 · 3:00 PM", score: "14/20" },
-    { title: "P1 - 2 Data Structure", due: "12/19/2025 · 3:00 PM", score: "11/20", alert: true },
-    { title: "P1 - 3 Algorithm", due: "12/19/2025 · 3:00 PM", score: "16/20" },
-  ],
+const PHILNITS_DATA = [
+  { item: "skill_checks", criteria: 70, rating: 74.36 },
+  { item: "course_end_exams", criteria: 70, rating: 86.33 },
+  { item: "practice_exam_1", criteria: 50, rating: 50.0 },
+  { item: "mock_exam_1_a", criteria: 60, rating: 60.0 },
+  { item: "mock_exam_1_b", criteria: 60, rating: 55.0 },
+];
 
-  "Practice Exam": [
-    { title: "PhilNITS Practice Exam 1", due: "12/19/2025 · 3:00 PM", score: "48/60" },
-    { title: "PhilNITS Practice Exam 2", due: "12/19/2025 · 3:00 PM", score: "35/60", alert: true },
-  ],
+const NIHONGO_COMBINED = [
+  { category: "attendance", criteria: 90, rating: 100 },
+  { category: "homework", criteria: 70, rating: 98 },
+  { category: "work_etiquette", criteria: 70, rating: 97 },
+  { category: "n5m1", criteria: 50, rating: 62 },
+  { category: "oral_1", criteria: 70, rating: 96 },
+];
 
-  "Mock Exam": [
-    { title: "Mock Exam 1", due: "01/05/2026 · 1:00 PM", score: "52/60" },
-    { title: "Mock Exam 2", due: "01/05/2026 · 1:00 PM", score: "52/60" },
-  ],
-
-  "Course-end": [
-    { title: "Course-end P1 Basic Theory", due: "01/30/2026 · 5:00 PM", score: "85/100" },
-  ],
-
-  "Vocab Test": [
-    { title: "Vocabulary Lesson 2", due: "01/10/2026 · 10:00 AM", score: "18/20" },
-  ],
-
-  "Lesson Test": [
-    { title: "Lesson 2", due: "01/12/2026 · 3:00 PM", score: "9/10" },
-  ],
-
-  "Kanji Homework": [
-    { title: "Kanji Lesson 1", due: "01/08/2026 · 11:59 PM", score: "20/20" },
-  ],
-
-  "Kanji Test": [
-    { title: "Kanji Lesson 1 - 3", due: "01/15/2026 · 9:00 AM", score: "17/20" },
-  ],
-
-  "Oral Exam": [
-    { title: "Oral Exam 1", due: "01/20/2026 · 2:00 PM", score: "28/30" },
-  ],
+const NIHONGO_QUIZZES = {
+  criteria: 70,
+  weeks: [88, 83, 75, 85, 87, 83],
 };
 
 const GradeView = () => {
-  const [activeTab, setActiveTab] = useState("Skill Checks");
-  const [page, setPage] = useState(1);
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("summary_of_grades");
+  const [selectedQuarter, setSelectedQuarter] = useState("");
 
-  const rows = DATA[activeTab] || [];
-
-  /* ========================
-     PRINT HANDLER
-  ======================== */
-  const handlePrint = () => {
-    window.print();
-  };
-
-  /* ========================
-     TOTAL COMPUTATION
-  ======================== */
-  const calculateTotal = () => {
-    if (rows.length === 0) return 0;
-
-    let totalPercent = 0;
-    rows.forEach(row => {
-      if (!row.score) return;
-      const [scored, max] = row.score.split("/").map(Number);
-      totalPercent += (scored / max) * 100;
-    });
-
-    return Math.round(totalPercent / rows.length);
-  };
-
-  const totalPercent = calculateTotal();
-  const isPass = totalPercent >= 75;
+  const handlePrint = () => window.print();
 
   return (
     <div className="gradeview-container">
-       <h3 className="gradeview-title">Grades — {activeTab}</h3>
-      {/* Filters + Print */}
+      <h3 className="gradeview-title">{t('grades.quarterly_evaluation')} — {t(`grades.tabs.${activeTab}`)}</h3>
+
+      {/* FILTER + PRINT */}
       <div className="row align-items-center mb-3 no-print">
         <div className="col-md-9 d-flex align-items-center gap-2">
-          <span className="filter-label">Filter by:</span>
-
-          <select className="form-select form-select-sm w-auto">
-            <option disabled selected>Module</option>
-            <option>Module 1</option>
-            <option>Module 2</option>
-          </select>
-
-          <select className="form-select form-select-sm w-auto">
-            <option disabled selected>Course</option>
-            <option>PhilNITS</option>
-            <option>Nihongo</option>
+          <span className="filter-label">{t('grades.filter_by')}:</span>
+          <select
+            className="form-select form-select-sm w-auto"
+            value={selectedQuarter}
+            onChange={(e) => setSelectedQuarter(e.target.value)}
+          >
+            <option value="">{t('grades.quarter')}</option>
+            <option value="q1">{t('grades.quarter_1')}</option>
+            <option value="q2">{t('grades.quarter_2')}</option>
+            <option value="q3">{t('grades.quarter_3')}</option>
+            <option value="q4">{t('grades.quarter_4')}</option>
           </select>
         </div>
-
         <div className="col-md-3 text-end">
           <button className="btn btn-primary rounded-pill" onClick={handlePrint}>
-            Print Grades
+            {t('grades.print_grades')}
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="gradeview-tabs no-print">
-        {TABS.map(tab => (
+      {/* TABS */}
+      <div className="gradeview-tabs no-print mb-3">
+        {TABS.map((tab) => (
           <button
             key={tab}
             className={`gradeview-tab ${activeTab === tab ? "active" : ""}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab}
+            {t(`grades.tabs.${tab}`)}
           </button>
         ))}
       </div>
 
-      {/* Printable Area */}
       <div className="print-area">
 
-        <div className="table-responsive gradeview-table-wrapper shadow-sm">
-          <table className="table gradeview-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th className="due-col">Due date</th>
-                <th className="score-col">Score</th>
-              </tr>
-            </thead>
+        {/* SUMMARY */}
+        {activeTab === "summary_of_grades" && (
+          <>
+            <div className="table-responsive shadow-sm">
+              <h5 className="fw-bold mb-2">{t('grades.summary_of_grades')}</h5>
+              <table className="table gradeview-table">
+                <thead>
+                  <tr className="text-center">
+                    <th>{t('grades.code')}</th>
+                    <th>{t('grades.category')}</th>
+                    <th>{t('grades.weight')}</th>
+                    <th>{t('grades.criteria')}</th>
+                    <th>{t('grades.rating')}</th>
+                    <th>{t('grades.assessment')}</th>
+                    <th>{t('grades.rank')}</th>
+                    <th>{t('grades.remarks')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {SUMMARY_DATA.map((row, i) => (
+                    <tr key={i} className={`${row.overall ? "overall-row" : ""} text-center`}>
+                      <td>{row.code}</td>
+                      <td className={row.overall ? "fw-bold" : ""}>{t(`grades.${row.category}`)}</td>
+                      <td className={row.overall ? "fw-bold" : ""}>{row.weight}</td>
+                      <td>{row.criteria}</td>
+                      <td>{row.rating}</td>
+                      <td className="text-success fw-semibold">{t(`grades.${row.assessment}`)}</td>
+                      <td>{row.rank}</td>
+                      <td className="fw-bold text-success">{row.remarks}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-            <tbody>
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan="3" className="text-center text-muted py-4">
-                    No records available
-                  </td>
+            {/* DETAILS */}
+            <div className="table-responsive shadow-sm mt-4">
+              <h6 className="fw-bold mb-2">{t('grades.details')}</h6>
+              <table className="table gradeview-table">
+                <thead>
+                  <tr className="text-center">
+                    <th>{t('grades.attendance')}</th>
+                    <th>{t('grades.days_absent')}</th>
+                    <th>{t('grades.times_late')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="overall-row text-center">
+                    <td className="fw-semibold">{t('grades.attendance')}</td>
+                    <td>1</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* PHILNITS */}
+        {activeTab === "philnits" && (
+          <div className="table-responsive shadow-sm">
+            <h5 className="fw-bold mb-3">{t('grades.philnits_evaluation')}</h5>
+            <table className="table gradeview-table">
+              <thead>
+                <tr className="text-center">
+                  <th>{t('grades.criteria')}</th>
+                  <th>{t('grades.passing')}</th>
+                  <th>{t('grades.rating')}</th>
+                  <th>{t('grades.assessment')}</th>
                 </tr>
-              )}
+              </thead>
+              <tbody>
+                {PHILNITS_DATA.map((row, i) => (
+                  <tr key={i} className="text-center">
+                    <td>{t(`grades.${row.item}`)}</td>
+                    <td>{row.criteria}</td>
+                    <td>{row.rating.toFixed(2)}</td>
+                    <td className={row.rating >= row.criteria ? "text-success" : "text-danger"}>
+                      {row.rating >= row.criteria ? t('grades.pass') : t('grades.fail')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              {rows.map((row, index) => (
-                <tr key={index}>
-                  <td className={row.alert ? "text-danger" : ""}>{row.title}</td>
-                  <td className={row.alert ? "text-danger" : ""}>{row.due}</td>
-                  <td>{row.score}</td>
-                </tr>
-              ))}
+        {/* NIHONGO */}
+        {activeTab === "nihongo" && (
+          <>
+            <h5 className="fw-bold mb-3">{t('grades.nihongo_evaluation')}</h5>
 
-              {rows.length > 0 && (
-                <tr className="gradeview-total-row">
-                  <td colSpan="2">Total (%)</td>
-                  <td className={isPass ? "text-success" : "text-danger"}>
-                    {totalPercent}%
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            <div className="table-responsive shadow-sm mb-4">
+              <table className="table gradeview-table">
+                <thead>
+                  <tr className="text-center">
+                    <th>{t('grades.category')}</th>
+                    <th>{t('grades.criteria')}</th>
+                    <th>{t('grades.rating')}</th>
+                    <th>{t('grades.assessment')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {NIHONGO_COMBINED.map((row, i) => (
+                    <tr key={i} className="text-center">
+                      <td>{t(`grades.${row.category}`)}</td>
+                      <td>{row.criteria}</td>
+                      <td>{row.rating}</td>
+                      <td className={row.rating >= row.criteria ? "text-success" : "text-danger"}>
+                        {row.rating >= row.criteria ? t('grades.pass') : t('grades.fail')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-      {/* Pagination */}
-      <div className="pagination-wrapper no-print">
-        <ul className="pagination custom-pagination">
-          <li className="page-item">
-            <button className="page-link nav-btn">‹</button>
-          </li>
-
-          {[1, 2, 3, 4, 5].map(p => (
-            <li key={p} className={`page-item ${page === p ? "active" : ""}`}>
-              <button className="page-link" onClick={() => setPage(p)}>
-                {p}
-              </button>
-            </li>
-          ))}
-
-          <li className="page-item">
-            <button className="page-link nav-btn">›</button>
-          </li>
-        </ul>
+            <div className="table-responsive shadow-sm">
+              <h6 className="fw-bold mb-2 text-center">{t('grades.quizzes')}</h6>
+              <table className="table gradeview-table">
+                <thead>
+                  <tr className="text-center">
+                    <th>{t('grades.criteria')}</th>
+                    {NIHONGO_QUIZZES.weeks.map((_, idx) => (
+                      <th key={idx}>{t('grades.week')} {idx + 1}</th>
+                    ))}
+                    <th>{t('grades.assessment')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="overall-row text-center">
+                    <td>{NIHONGO_QUIZZES.criteria}</td>
+                    {NIHONGO_QUIZZES.weeks.map((score, idx) => (
+                      <td key={idx} className={score >= NIHONGO_QUIZZES.criteria ? "text-success" : "text-danger"}>
+                        {score}
+                      </td>
+                    ))}
+                    <td className={
+                      NIHONGO_QUIZZES.weeks.reduce((a, b) => a + b, 0) / NIHONGO_QUIZZES.weeks.length >= NIHONGO_QUIZZES.criteria
+                        ? "text-success fw-bold"
+                        : "text-danger fw-bold"
+                    }>
+                      {NIHONGO_QUIZZES.weeks.reduce((a, b) => a + b, 0) / NIHONGO_QUIZZES.weeks.length >= NIHONGO_QUIZZES.criteria
+                        ? t('grades.pass')
+                        : t('grades.fail')}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

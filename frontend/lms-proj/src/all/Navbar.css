@@ -1,25 +1,43 @@
+/* ================= VARIABLES ================= */
 :root {
   --primary-blue: #0047AB;
+  --primary-blue-hover: #003580;
   --white: #FFFFFF;
   --light-gray: #D9D9D9;
   --dark-gray: #333333;
+  --transition-fast: 0.2s ease-in-out;
+  --navbar-height: 70px;
+  --search-height: 50px;
+  --border-radius: 40px;
+  --side-panel-width: 320px;
+}
+
+/* ================= GLOBAL STYLES ================= */
+a, .nav-link {
+  color: var(--dark-gray);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover, .nav-link:hover, .curriculum-link:hover {
+  color: var(--primary-blue);
 }
 
 /* ================= NAVBAR ================= */
 .navbar {
   background-color: var(--white);
-  height: 70px;
+  height: var(--navbar-height);
   padding: 0 1.25rem;
   border-bottom: 1px solid var(--light-gray);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 2000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 2000;
 }
 
-/* Remove unwanted after elements */
 .navbar *::after {
   content: none !important;
 }
@@ -47,9 +65,8 @@
   z-index: 2000;
 }
 
-.navbar-wrapper+* {
-  padding-top: 100px;
-  /* navbar + search bar */
+.navbar-wrapper + * {
+  padding-top: calc(var(--navbar-height) + var(--search-height));
 }
 
 /* ================= LOGO ================= */
@@ -59,25 +76,18 @@
   object-fit: contain;
 }
 
-/* ================= NAV LINKS ================= */
-.navbar a,
-.navbar .nav-link {
-  color: var(--dark-gray);
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.navbar a:hover,
-.navbar .nav-link:hover {
-  color: var(--primary-blue);
-}
-
-/* ================= BELL ICON ================= */
-.bell-icon {
+/* ================= ICONS ================= */
+.bell-icon,
+.hamburger-icon {
   font-size: 28px;
   color: var(--dark-gray);
   cursor: pointer;
-  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.bell-icon:hover,
+.hamburger-icon:hover {
+  color: var(--primary-blue);
 }
 
 /* ================= PROFILE CIRCLE ================= */
@@ -85,12 +95,12 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: var(--white);
   border: 1px solid var(--dark-gray);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--white);
 }
 
 .trainee-circle img {
@@ -114,33 +124,40 @@
 .search-input {
   flex: 1;
   min-width: 200px;
-  height: 50px;
-  background-color: var(--white);
-  border-radius: 40px;
+  height: var(--search-height);
   padding: 0 20px;
+  border-radius: var(--border-radius);
   border: none;
   font-size: 1rem;
+  background-color: var(--white);
+  transition: box-shadow var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.2);
+}
+
+.search-button {
+  min-width: 150px;
+  height: var(--search-height);
+  border-radius: var(--border-radius);
+  border: none;
+  color: var(--primary-blue);
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--white);
+  transition: background-color var(--transition-fast);
+}
+
+.search-button:hover {
+  background-color: var(--light-gray);
 }
 
 .search-bar-section>div {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.search-button {
-  height: 50px;
-  min-width: 150px;
-  background-color: var(--white);
-  border-radius: 40px;
-  border: none;
-  color: var(--primary-blue);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.search-button:hover {
-  background-color: var(--light-gray);
 }
 
 /* ================= DROPDOWNS ================= */
@@ -150,11 +167,10 @@
 
 .nav-item .dropdown-toggle::after {
   display: none;
-  /* remove caret */
 }
 
-.dropdown-menu.show {
-  min-width: 320px;
+.nav-item .dropdown-menu {
+  min-width: 200px;
   max-width: 400px;
   padding: 0.75rem 1rem;
 }
@@ -164,26 +180,26 @@
   position: absolute;
   top: 35px;
   right: 0;
-  width: 300px;
+  width: var(--side-panel-width);
   max-height: 400px;
   overflow-y: auto;
   background-color: var(--white);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 1000;
 }
 
 .notification-popout ul {
+  list-style: none;
   padding-left: 0;
   margin-bottom: 0;
-  list-style: none;
 }
 
 .notification-item {
   padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .notification-item:hover {
@@ -200,22 +216,16 @@
   font-weight: 600;
 }
 
-/* ================= MOBILE ================= */
-.hamburger-icon {
-  font-size: 28px;
-  cursor: pointer;
-}
-
-/* Side Panel */
+/* ================= SIDE PANEL ================= */
 .side-panel {
   position: fixed;
-  top: 140px;
-  right: -320px;
-  width: 320px;
-  height: calc(100vh - 140px);
+  top: calc(var(--navbar-height) + var(--search-height));
+  right: calc(-1 * var(--side-panel-width));
+  width: var(--side-panel-width);
+  height: calc(100vh - (var(--navbar-height) + var(--search-height)));
   background-color: var(--white);
   padding: 24px;
-  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 0 10px rgba(0,0,0,0.1);
   transition: right 0.35s ease;
   z-index: 3000;
   overflow-y: auto;
@@ -244,68 +254,77 @@
 
 .side-overlay {
   position: fixed;
-  top: 140px;
+  top: calc(var(--navbar-height) + var(--search-height));
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0,0,0,0.4);
   z-index: 2500;
+}
+
+/* ================= CURRICULUM LINKS ================= */
+.curriculum-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--dark-gray);
+  cursor: pointer;
+  transition: color var(--transition-fast);
 }
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 991px) {
-  .d-lg-flex {
-    display: none !important;
-  }
-
-  .d-lg-none {
-    display: flex !important;
-  }
-
-  .side-panel,
-  .side-overlay {
-    display: block;
-  }
+  .d-lg-flex { display: none !important; }
+  .d-lg-none { display: flex !important; }
 
   .search-bar-section {
     flex-direction: column;
     gap: 10px;
   }
 
-  .search-bar-section input {
-    width: 100%;
-  }
-
+  .search-bar-section input,
   .search-bar-section .d-flex {
     width: 100%;
     justify-content: space-between;
     flex-wrap: wrap;
   }
+
+  .side-panel,
+  .side-overlay { display: block; }
 }
 
 @media (min-width: 992px) {
 
   .side-panel,
-  .side-overlay {
-    display: none;
-  }
+  .side-overlay { display: none; }
 }
 
-/* ================= CURRICULUM / CHILD LINKS ================= */
-.curriculum-link {
-  display: inline-block;
-  padding: 0.5rem 1rem;
+.lang-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
   font-size: 1rem;
-  line-height: 1.5;
-  color: #000;
+  font-weight: 500;
+  color: var(--dark-gray);
   cursor: pointer;
+  transition: color 0.2s ease-in-out;
 }
 
-.curriculum-link:hover {
+.lang-btn:focus {
+  outline: none;
+}
+
+/* ACTIVE COLOR */
+.lang-btn.active {
   color: var(--primary-blue);
-  text-decoration: none;
 }
 
+
+.lang-btn:focus {
+  outline: none;      /* remove focus outline */
+}
 .nav-item .dropdown-menu {
   min-width: 200px;
 }

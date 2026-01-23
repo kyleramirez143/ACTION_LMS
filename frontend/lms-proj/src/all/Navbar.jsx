@@ -6,39 +6,41 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { navLinks } from "../config/navConfig";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
   // ================= HOOKS (top level) =================
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef(null);
+  const { t, i18n } = useTranslation();
+  const [lang, setLang] = useState(i18n.language);
 
   const [notifications] = useState([
-    {
-      id: 1,
-      title: "Mary Ann hasn't submitted Module 1 grades",
-      type: "Reminder",
-      date: "Dec 19, 2025 · 3:00 PM",
-      icon: "bi-exclamation-circle-fill text-warning",
-    },
-    {
-      id: 2,
-      title: "Batch “Batch A” completed Module 2",
-      type: "Update",
-      date: "Dec 19, 2025 · 2:45 PM",
-      icon: "bi-check-circle-fill text-success",
-    },
-    {
-      id: 3,
-      title: "New course request: Advanced Soft Skills",
-      type: "Action Required",
-      date: "Dec 19, 2025 · 2:30 PM",
-      icon: "bi-flag-fill text-danger",
-    },
+    { id: 1, titleKey: "notif.1_title", typeKey: "notif.1_type", date: "Dec 19, 2025 · 3:00 PM", icon: "bi-exclamation-circle-fill text-warning" },
+    { id: 2, titleKey: "notif.2_title", typeKey: "notif.2_type", date: "Dec 19, 2025 · 2:45 PM", icon: "bi-check-circle-fill text-success" },
+    { id: 3, titleKey: "notif.3_title", typeKey: "notif.3_type", date: "Dec 19, 2025 · 2:30 PM", icon: "bi-flag-fill text-danger" },
   ]);
 
   const { hasRole, logout, loading } = useAuth();
   const navigate = useNavigate();
+
+  // ================= LANGUAGE BUTTON =================
+
+  const isJapanese = lang === "ja";
+
+  const toggleLanguage = () => {
+    const newLang = isJapanese ? "en" : "ja";
+    i18n.changeLanguage(newLang);
+    setLang(newLang); // updates button text immediately
+    localStorage.setItem("lang", newLang);
+  };
+
+  // Ensure language updates if user reloads
+  useEffect(() => {
+    setLang(i18n.language);
+  }, [i18n.language]);
+
 
   // ================= LOGIC =================
   const logoutUser = () => {
@@ -89,9 +91,9 @@ const Navbar = () => {
           >
             <i className={`bi ${notif.icon} fs-4 mt-1`} />
             <div>
-              <div>{notif.title}</div>
+              <div>{t(notif.titleKey)}</div>
               <small className="text-muted">
-                {notif.type} · {notif.date}
+                {t(notif.typeKey)} · {notif.date}
               </small>
             </div>
           </li>
@@ -103,15 +105,14 @@ const Navbar = () => {
           className="text-primary fw-semibold"
           onClick={() => setNotifOpen(false)}
         >
-          View All Notifications
+          {t("navbar.view_all_notifications")}
         </Link>
       </div>
     </div>
   );
 
-  if (loading) return null; // early return after hooks
+  if (loading) return null;
 
-  // Profile image placeholder (replace with userProfile?.profile_picture)
   const profileImageUrl = null;
 
   return (
@@ -122,6 +123,14 @@ const Navbar = () => {
 
         {/* MOBILE ICONS */}
         <div className="d-lg-none d-flex align-items-center gap-3">
+          {/* 🌐 LANGUAGE BUTTON (MOBILE) */}
+          <button
+            className="lang-btn"
+            onClick={toggleLanguage}
+          >
+            {isJapanese ? "日本語" : "ENG"}
+          </button>
+
           <div className="position-relative" ref={notifRef}>
             <i
               className="bi bi-bell bell-icon"
@@ -142,22 +151,20 @@ const Navbar = () => {
             link.children && link.children.length > 0 ? (
               <Dropdown key={index} className="nav-link fw-semibold text-dark">
                 <Dropdown.Toggle
+                  key={link.path}
                   variant="link"
                   className="nav-link fw-semibold text-dark"
                 >
-                  {link.name}
+                  {t(link.translationKey)}
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="shadow">
                   {link.children.map((child) => (
                     <Dropdown.Item
+                      as={Link}
                       key={child.path}
-                      as={NavLink}
                       to={child.path}
-                      className={({ isActive }) =>
-                        isActive ? "text-primary fw-semibold" : ""
-                      }
                     >
-                      {child.name}
+                      {t(child.translationKey)}
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
@@ -170,10 +177,19 @@ const Navbar = () => {
                   `nav-link fw-semibold ${isActive ? "text-primary" : "text-dark"}`
                 }
               >
-                {link.name}
+                {t(link.translationKey)}
               </NavLink>
             )
           )}
+
+          {/* 🌐 LANGUAGE BUTTON (DESKTOP) */}
+          <button
+            className={`lang-btn ${isJapanese ? "active" : ""}`}
+            onClick={toggleLanguage}
+          >
+            {isJapanese ? "日本語" : "ENG"}
+          </button>
+
 
           {/* NOTIFICATIONS */}
           <div className="position-relative" ref={notifRef}>
@@ -186,19 +202,14 @@ const Navbar = () => {
 
           {/* PROFILE DROPDOWN */}
           <div className="d-flex align-items-center gap-2">
-            <div className="trainee-circle">
-              {profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <div className="bg-secondary text-white d-flex align-items-center justify-content-center w-100 h-100">
-                  <i className="bi bi-person"></i>
-                </div>
-              )}
-            </div>
+            {profileImageUrl && (
+              <img
+                src={profileImageUrl}
+                alt="Profile"
+                className="trainee-image"
+              />
+            )}
+
 
             <Dropdown align="end">
               <Dropdown.Toggle
@@ -208,22 +219,24 @@ const Navbar = () => {
               />
               <Dropdown.Menu className="mt-2 shadow">
                 <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
-                  Profile
+                  {t("navbar.profile")}
                 </Dropdown.Item>
 
+
                 <Dropdown.Divider />
+
                 <Dropdown.Item as={Link} to="/admin/profile">
-                  Account Settings
+                  {t("navbar.account_settings")}
                 </Dropdown.Item>
                 <Dropdown.Item as={Link} to="/settings-privacy">
-                  Privacy Settings
+                  {t("navbar.privacy_settings")}
                 </Dropdown.Item>
 
                 <Dropdown.Divider />
+
                 <Dropdown.Item as={Link} to="all/helpandsupport">
-                  Help & Support
+                  {t("navbar.help_support")}
                 </Dropdown.Item>
-                
 
                 <Dropdown.Item
                   as={Link}
@@ -231,7 +244,7 @@ const Navbar = () => {
                   className="text-danger"
                   onClick={logoutUser}
                 >
-                  Sign Out
+                  {t("navbar.sign_out")}
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
@@ -241,34 +254,44 @@ const Navbar = () => {
 
       {/* ================= MOBILE SIDE PANEL ================= */}
       <div className={`side-panel ${menuOpen ? "open" : ""}`}>
+        {/* 🌐 LANGUAGE BUTTON (SIDE PANEL) */}
+        <button
+          className={`lang-btn ${isJapanese ? "active" : ""}`}
+          onClick={toggleLanguage}
+        >
+          {isJapanese ? "日本語" : "ENG"}
+        </button>
+
+
+
         {visibleLinks.map((link) => (
           <NavLink
-            key={link.path}
+            key={`${link.name}-${link.path}`}
             to={link.path}
             className="nav-link mb-3"
             onClick={() => setMenuOpen(false)}
           >
-            {link.name}
+            {t(link.translationKey)}
           </NavLink>
         ))}
 
         <hr />
 
         <Link to="/trainee/ProfileInfo" onClick={() => setMenuOpen(false)}>
-          Profile
+          {t("navbar.profile")}
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
-          Account Setting
+          {t("navbar.account_settings")}
         </Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>
-          Privacy Setting
+          {t("navbar.privacy_settings")}
         </Link>
         <Link to="all/helpandsupport" onClick={() => setMenuOpen(false)}>
-          Help & Support
+          {t("navbar.help_support")}
         </Link>
 
         <button className="logout-btn" onClick={logoutUser}>
-          Sign Out
+          {t("navbar.sign_out")}
         </button>
       </div>
 

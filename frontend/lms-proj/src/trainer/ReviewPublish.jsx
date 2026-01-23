@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-// import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import "./ReviewPublish.css";
 
 const ReviewPublish = () => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   const { assessment_id, course_id, module_id } = useParams();
   const [quiz, setQuiz] = useState(null);
   const [originalQuestions, setOriginalQuestions] = useState([]);
@@ -231,7 +231,7 @@ const ReviewPublish = () => {
       setEditingQuestionIndex(null);
     } catch (err) {
       console.error("Save question error:", err);
-      alert("Failed to save question.");
+      alert(t("quiz.save_question_failed"));
     }
   };
 
@@ -284,7 +284,7 @@ const ReviewPublish = () => {
       setEditingQuestionIndex((prevQuestions) => (quiz.questions ? quiz.questions.length : 0));
     } catch (err) {
       console.error("Add question error:", err);
-      alert("Failed to add question.");
+      alert(t("quiz.add_question_failed"));
     }
   };
 
@@ -308,7 +308,7 @@ const ReviewPublish = () => {
       setEditingQuestionIndex(null);
     } catch (err) {
       console.error("Delete question error:", err);
-      alert("Failed to delete question.");
+      alert(t("quiz.delete_question_failed"));
     }
   };
 
@@ -340,11 +340,11 @@ const ReviewPublish = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save quiz");
-      alert("Quiz saved successfully!");
+      alert(t("quiz.quiz_saved_success"));
       navigate(`/${course_id}/modules/${module_id}/lectures`);
     } catch (err) {
       console.error(err);
-      alert("Failed to save quiz.");
+      alert(t("quiz.save_failed"));
     }
   };
 
@@ -403,7 +403,7 @@ const ReviewPublish = () => {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <h5 className="fw-bold mb-0">
                     {q.section && isNihongo && <span className="badge bg-secondary me-2">{q.section}</span>}
-                    Q{index + 1}: <span className="ms-2">{q.question_text}</span>
+                    {t("quiz.q_prefix")}{index + 1}: <span className="ms-2">{q.question_text}</span>
                   </h5>
                   <button className="icon-btn" onClick={() => setEditingQuestionIndex(index)}>
                     <i className="bi bi-pencil-fill" style={{ color: "#0047AB", fontSize: "1.1rem" }}></i>
@@ -443,7 +443,7 @@ const ReviewPublish = () => {
                   className="btn btn-outline-success p-1"
                   onClick={() => handleAddChoice(index)}
                 >
-                  + Add Choice
+                  + {t("quiz.add_choice")}
                 </button>
               </div>
             )}
@@ -453,7 +453,7 @@ const ReviewPublish = () => {
         {/* --- ANSWER --- */}
         {q.correct_answer && !isEditing && (
           <p className="text-success mb-1 mt-2" style={{ marginLeft: "1rem" }}>
-            <strong>Answer:</strong> {q.correct_answer.toUpperCase()}
+            <strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}
           </p>
         )}
 
@@ -463,13 +463,13 @@ const ReviewPublish = () => {
             padding: "0.75rem 1rem",  // top/bottom 0.75rem, left/right 1rem
             margin: "0.5rem 0.5rem",  // top/bottom 0.5rem, left/right 0.5rem
           }}>
-            <p className="fw-bold">Explanation:</p>
+            <p className="fw-bold">{t("quiz.explanation")}</p>
             <p className="text-muted">{q.explanation}</p>
           </div>
         )}
         {isEditing && (
           <div className="mb-2 mt-2" style={{ marginLeft: "1rem", marginRight: "1rem" }}>
-            <label>Explanation:</label>
+            <label>{t("quiz.explanation")}:</label>
             <textarea
               className="form-control"
               rows={2}
@@ -490,14 +490,14 @@ const ReviewPublish = () => {
           <div className="col-12 col-lg-8" style={{ height: "100vh", overflowY: "auto" }}>
             <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}>
               <div className="d-flex align-items-center justify-content-between mb-3">
-                <h3 className="section-title mb-0">Review and Publish</h3>
+                <h3 className="section-title mb-0">{t("quiz.review_publish")}</h3>
                 <button className="btn btn-primary" onClick={handleAddQuestion}>
-                  + Add Question
+                  + {t("quiz.add_question")}
                 </button>
               </div>
 
               {quiz.questions.length === 0 ? (
-                <div className="alert alert-info">No questions yet. Use "Add Question" to begin.</div>
+                <div className="alert alert-info">{t("quiz.no_questions_yet1")}</div>
               ) : (
                 quiz.questions.map((q, i) => renderQuestion(q, i))
               )}
@@ -514,15 +514,15 @@ const ReviewPublish = () => {
               maxHeight: "100vh",
             }}
             >
-              <h5 className="fw-semibold mb-3">Quiz Settings & Options</h5>
+              <h5 className="fw-semibold mb-3">{t("quiz.settings_options")}</h5>
 
               <div className="mb-3">
-                <label className="form-label">Quiz Title</label>
+                <label className="form-label">{t("quiz.title_label")}</label>
                 <input type="text" className="form-control" value={settings.title} onChange={(e) => handleChange("title", e.target.value)} />
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Number of Attempts</label>
+                <label className="form-label">{t("quiz.num_attempts")}</label>
                 <input type="number" className="form-control" value={settings.attempts} min={1} onChange={(e) => handleChange("attempts", Number(e.target.value))} />
               </div>
 
@@ -532,12 +532,12 @@ const ReviewPublish = () => {
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Time Limit (minutes)</label>
+                <label className="form-label">{t("quiz.time_limit")}</label>
                 <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={(e) => handleChange("timeLimit", Number(e.target.value))} />
               </div>
 
               <div className="mb-3">
-                <label className="form-label fw-semibold">Due Date</label>
+                <label className="form-label fw-semibold">{t("quiz.due_date")}</label>
                 <div className="input-group">
                   <input
                     type="datetime-local"
@@ -564,49 +564,49 @@ const ReviewPublish = () => {
                     }}
                   />
                   <label className="form-check-label" htmlFor="noDueDateCheck">
-                    This quiz has no due date
+                    {t("quiz.no_due_date")}
                   </label>
                 </div>
 
                 <div className="form-text">
-                  Leave unchecked to set a deadline. Check to allow unlimited time.
+                  {t("quiz.due_date_description")}
                 </div>
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Instructions</label>
+                <label className="form-label">{t("quiz.instructions")}</label>
                 <textarea className="form-control" placeholder="No need to include numbering. Just press enter per instruction." rows={5} value={settings.description} onChange={(e) => handleChange("description", e.target.value)} />
               </div>
 
               {/* Checkboxes */}
               <div className="form-check mb-2">
                 <input className="form-check-input" type="checkbox" checked={settings.screenMonitoring} onChange={() => handleChange("screenMonitoring", !settings.screenMonitoring)} />
-                <label className="form-check-label">Screen Monitoring</label>
+                <label className="form-check-label">{t("quiz.screen_monitoring")}</label>
               </div>
 
               <div className="form-check mb-2">
                 <input className="form-check-input" type="checkbox" checked={settings.randomization} onChange={() => handleChange("randomization", !settings.randomization)} />
-                <label className="form-check-label">Shuffle Questions</label>
+                <label className="form-check-label">{t("quiz.shuffle_questions")}</label>
               </div>
 
               <div className="form-check mb-2">
                 <input className="form-check-input" type="checkbox" checked={settings.scoreVisibility} onChange={() => handleChange("scoreVisibility", !settings.scoreVisibility)} />
-                <label className="form-check-label">Score Visibility</label>
+                <label className="form-check-label">{t("quiz.score_visibility")}</label>
               </div>
 
               <div className="form-check mb-2">
                 <input className="form-check-input" type="checkbox" checked={settings.includeExplanationIfWrong} onChange={() => handleChange("includeExplanationIfWrong", !settings.includeExplanationIfWrong)} />
-                <label className="form-check-label">Include Explanation if Wrong</label>
+                <label className="form-check-label">{t("quiz.include_explanation_if_wrong")}</label>
               </div>
 
               <div className="form-check form-switch mb-2">
                 <input className="form-check-input" type="checkbox" checked={settings.isPublished} onChange={() => handleChange("isPublished", !settings.isPublished)} />
-                <label className="form-check-label">{settings.isPublished ? "Quiz Visible to Trainees" : "Quiz Hidden from Trainees"}</label>
+                <label className="form-check-label">{settings.isPublished ? t("quiz.quiz_visible") : t("quiz.quiz_hidden")}</label>
               </div>
 
               <div className="d-flex justify-content-center gap-2 mt-4">
-                <button className="btn btn-primary w-50" onClick={handlePublish}>Save</button>
-                <button className="btn btn-outline-secondary w-50" onClick={handleCancel}>Cancel</button>
+                <button className="btn btn-primary w-50" onClick={handlePublish}>{t("quiz.save")} </button>
+                <button className="btn btn-outline-secondary w-50" onClick={handleCancel}>{t("quiz.cancel")}</button>
               </div>
             </div>
           </div>

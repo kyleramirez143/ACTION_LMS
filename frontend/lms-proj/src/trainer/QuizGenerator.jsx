@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { usePrompt } from "../hooks/usePrompt";
+import { useTranslation } from "react-i18next";
 import "./QuizGenerator.css";
 import logo from "../image/nothing.svg";
 
 function useUnsavedQuizPrompt(quiz, isSaved) {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // --- Handle browser refresh/close ---
     useEffect(() => {
@@ -25,7 +27,7 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
         if (quiz && !isSaved) {
             const target = e.target?.getAttribute("href") || "";
             if (!target.includes("/quizzes/")) {
-                if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+                if (!window.confirm(t("quiz.unsaved_prompt"))) {
                     e.preventDefault();
                 }
             }
@@ -46,6 +48,7 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
 }
 
 function QuizGenerator() {
+    const { t } = useTranslation();
     const [file, setFile] = useState(null);
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -58,15 +61,15 @@ function QuizGenerator() {
     const [modules, setModules] = useState([]);
     const [lectures, setLectures] = useState([]);
     const [assessmentTypes, setAssessmentTypes] = useState([
-        "Skill Check",
-        "Course-End Exam",
-        "Mock Exam",
-        "Practice Exam",
-        "Oral Exam",
-        "Daily Quiz",
-        "Homework",
-        "Exercises",
-        "Activity"
+        { value: "Skill Check", label: t("quiz.assessment.Skill Check") },
+        { value: "Course-End Exam", label: t("quiz.assessment.Course-End Exam") },
+        { value: "Mock Exam", label: t("quiz.assessment.Mock Exam") },
+        { value: "Practice Exam", label: t("quiz.assessment.Practice Exam") },
+        { value: "Oral Exam", label: t("quiz.assessment.Oral Exam") },
+        { value: "Daily Quiz", label: t("quiz.assessment.Daily Quiz") },
+        { value: "Homework", label: t("quiz.assessment.Homework") },
+        { value: "Exercises", label: t("quiz.assessment.Exercises") },
+        { value: "Activity", label: t("quiz.assessment.Activity") },
     ]);
 
     const [quizTitle, setQuizTitle] = useState("");
@@ -131,7 +134,7 @@ function QuizGenerator() {
     // --- GENERATE QUIZ ---
     const handleUpload = async () => {
         if (!file || questionQty <= 0 || !selectedLecture) {
-            alert("Please complete all fields (PDF, Quantity, and Target Lecture)!");
+            alert(t("quiz.complete_all_fields"));
             return;
         }
 
@@ -148,12 +151,12 @@ function QuizGenerator() {
                 body: formData,
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!res.ok) throw new Error("Upload failed.");
+            if (!res.ok) throw new Error(t("quiz.upload_failed"));
             const data = await res.json();
             setQuiz({ ...data });
             console.log(data);
         } catch (err) {
-            alert("Error generating quiz.");
+            alert(t("quiz.error_generating"));
             console.log("Error: ", err);
         } finally {
             setLoading(false);
@@ -163,7 +166,7 @@ function QuizGenerator() {
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
     const handleReviewPublish = async () => {
         if (!quiz || !selectedLecture || !quizType) {
-            alert("Please select a quiz type before saving.");
+            alert(t("quiz.select_type"));
             return;
         }
 
@@ -181,10 +184,12 @@ function QuizGenerator() {
 
                 })
             });
-            if (!res.ok) throw new Error("Failed to save");
+            if (!res.ok) throw new Error(t("quiz.save_failed"));
             const { assessmentId } = await res.json();
             setIsSaved(true); // mark quiz as saved
 
+            console.log(selectedCourse);
+            console.log(selectedModule);
             // Navigate to Review & Publish page
             navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
 
@@ -193,7 +198,9 @@ function QuizGenerator() {
 
         } catch (err) {
             console.error("Error saving and navigating:", err);
-            alert("Failed to go to Review & Publish page.");
+            console.log(selectedCourse);
+            console.log(selectedModule);
+            alert(t("quiz.review_publish_failed"));
         } finally {
             setSaving(false);
         }
@@ -210,7 +217,7 @@ function QuizGenerator() {
             });
             resetForm();
         } catch {
-            console.error("Discard failed");
+            console.error(t("quiz.discard_failed"));
         }
     };
 
@@ -247,9 +254,9 @@ function QuizGenerator() {
                                     ))}
                                 </ul>
                             )}
-                            {q.correct_answer && <p className="text-success mb-1"><strong>Answer:</strong> {q.correct_answer}</p>}
+                            {q.correct_answer && <p className="text-success mb-1"><strong>{t("quiz.answer")}</strong> {q.correct_answer}</p>}
                             {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
-                                <small className="text-muted d-block fw-bold">Explanation:</small>
+                                <small className="text-muted d-block fw-bold">{t("quiz.explanation")}</small>
                                 <small className="text-dark">{q.explanation}</small>
                             </div>}
                         </div>
@@ -267,7 +274,7 @@ function QuizGenerator() {
                     <div className="col-12 col-lg-6" style={{ maxHeight: "100vh", overflowY: "auto" }}>
                         <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
                             {/* Header */}
-                            <h3 className="section-title">📘 AI Quiz Generator</h3>
+                            <h3 className="section-title">{t("quiz.generator_title")}</h3>
 
                             {/* PDF Upload */}
                             <div className="assessment-page mb-3">
@@ -283,7 +290,7 @@ function QuizGenerator() {
                                     onDrop={handleDrop}
                                 >
                                     <i className="bi bi-upload upload-icon"></i>
-                                    <span className="fw-semibold text-primary mb-1">Upload PDF</span>
+                                    <span className="fw-semibold text-primary mb-1">{t("quiz.upload_pdf")}</span>
                                     {file && <span className="uploaded-file mt-2">{file.name}</span>}
                                     <input
                                         type="file"
@@ -298,43 +305,43 @@ function QuizGenerator() {
 
                             {/* Quiz Title */}
                             <div className="mb-3">
-                                <label className="form-label fw-bold">Quiz Title</label>
+                                <label className="form-label fw-bold">{t("quiz.title_label")}</label>
                                 <input
                                     type="text"
                                     className="form-control"
                                     value={quizTitle}
                                     onChange={(e) => setQuizTitle(e.target.value)}
                                     disabled={!!quiz}
-                                    placeholder="Enter quiz title"
+                                    placeholder={t("quiz.title_placeholder")}
                                 />
                             </div>
 
                             {/* Quiz Type */}
                             <div className="mb-3">
-                                <label className="form-label fw-bold">Choose Quiz Type</label>
+                                <label className="form-label fw-bold">{t("quiz.type_label")}</label>
                                 {["Multiple Choice", "Identification", "Nihongo"].map(type => (
 
                                     <div className="form-check" key={type}>
                                         <input className="form-check-input" type="radio" name="quizType"
                                             checked={quizType === type} onChange={() => setQuizType(type)} disabled={!!quiz} />
-                                        <label className="form-check-label">{type}</label>
+                                        <label className="form-check-label">{t(`quiz.type.${type}`)}</label>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Assessment Type */}
                             <div className="mb-3">
-                                <label className="form-label fw-bold">Assessment Type</label>
+                                <label className="form-label fw-bold">{t("quiz.assessment_type_label")}</label>
                                 <select
                                     className="form-select"
                                     value={assessmentType}
                                     onChange={e => setAssessmentType(e.target.value)}
                                     disabled={!!quiz} // disable only after quiz exists
                                 >
-                                    <option value="">-- Select Assessment Type --</option>
+                                    <option value="">{t("quiz.select_assessment_type")}</option>
                                     {assessmentTypes.map(type => (
-                                        <option key={type} value={type}>
-                                            {type}
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
                                         </option>
                                     ))}
                                 </select>
@@ -342,30 +349,30 @@ function QuizGenerator() {
 
                             {/* Question Quantity */}
                             <div className="mb-3">
-                                <label className="form-label fw-bold">Set Question Quantity</label>
+                                <label className="form-label fw-bold">{t("quiz.question_qty_label")}</label>
                                 <input type="number" className="form-control" value={questionQty} min={1} onChange={(e) => setQuestionQty(e.target.value)} disabled={!!quiz} />
                             </div>
 
                             {/* Target Placement */}
                             <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
-                                <label className="form-label fw-bold text-primary">Target Placement</label>
+                                <label className="form-label fw-bold text-primary">{t("quiz.target_placement")}</label>
                                 <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={!!quiz}>
-                                    <option value="">-- Select Course --</option>
+                                    <option value="">{t("quiz.select_course")}</option>
                                     {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
                                 </select>
                                 <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || !!quiz}>
-                                    <option value="">-- Select Module --</option>
+                                    <option value="">{t("quiz.select_module")}</option>
                                     {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
                                 </select>
                                 <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || !!quiz}>
-                                    <option value="">-- Select Lecture --</option>
+                                    <option value="">{t("quiz.select_lecture")}</option>
                                     {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
                                 </select>
                             </div>
 
                             {/* Generate Quiz */}
                             <button className="btn btn-primary w-100" onClick={handleUpload} disabled={loading || !!quiz} >
-                                {loading ? "Generating..." : "Generate Quiz"}
+                                {loading ? t("quiz.generating") : t("quiz.generate_quiz")}
                             </button>
                         </div>
                     </div>
@@ -379,7 +386,7 @@ function QuizGenerator() {
                             maxHeight: "100vh",
                         }}
                         >
-                            <h3 className="section-title mb-2">Generated Quiz</h3>
+                            <h3 className="section-title mb-2">{t("quiz.generated_quiz")}</h3>
                             {!quiz ? (
                                 <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
                                     <img
@@ -388,7 +395,7 @@ function QuizGenerator() {
                                         style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
                                     />
                                     <p className="text-muted text-center mb-0">
-                                        No quiz generated yet.
+                                        {t("quiz.no_quiz_yet")}
                                     </p>
                                 </div>
                             ) : (
@@ -417,12 +424,12 @@ function QuizGenerator() {
                                                         )}
 
                                                         <p className="text-success mb-1">
-                                                            <strong>Answer:</strong> {q.correct_answer}
+                                                            <strong>{t("quiz.answer")}</strong> {q.correct_answer}
                                                         </p>
 
                                                         {q.explanation && (
                                                             <div className="p-2 bg-light rounded border">
-                                                                <p className="fw-bold">Explanation:</p>
+                                                                <p className="fw-bold">{t("quiz.explanation")}</p>
                                                                 <p className="text-muted">{q.explanation}</p>
                                                             </div>
                                                         )}
@@ -433,9 +440,9 @@ function QuizGenerator() {
                                     )}
                                     <div className="d-flex justify-content-center gap-3">
                                         <button className="btn btn-success" style={{ width: "220px" }} onClick={handleReviewPublish} disabled={!quiz || saving}>
-                                            {saving ? "Saving..." : "Review & Publish"}
+                                              {saving ? t("quiz.saving") : t("quiz.review_publish")}
                                         </button>
-                                        <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>Discard Quiz</button>
+                                        <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>{t("quiz.discard")}</button>
                                     </div>
                                 </>
                             )}

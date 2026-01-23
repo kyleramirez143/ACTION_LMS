@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 
 function AddUser() {
     const navigate = useNavigate();
     const { id: userId } = useParams();
     const isEditMode = !!userId;
     const token = localStorage.getItem("authToken");
+    const { t } = useTranslation();
 
     // --- State Management ---
     const [formData, setFormData] = useState({
@@ -71,7 +73,7 @@ function AddUser() {
                 const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error("Failed to fetch user data for editing.");
+                if (!res.ok) throw new Error(t("user.errorLoadingData"));
                 const data = await res.json();
 
                 // Map batch name to batch ID
@@ -91,7 +93,7 @@ function AddUser() {
                 });
             } catch (err) {
                 console.error("Edit fetch error:", err);
-                alert("Error loading user data: " + err.message);
+                alert(`${t("user.errorLoadingData")}: ${err.message}`);
                 navigate("/admin/userroles");
             } finally {
                 setIsLoadingData(false);
@@ -125,7 +127,7 @@ function AddUser() {
 
         try {
             if (isEditMode && String(jwtDecode(token).id) === String(userId)) {
-                alert("Self-editing of roles/status is restricted via this administrative form.");
+                alert(t("user.selfEditRestricted"));
                 return;
             }
         } catch (error) {
@@ -152,23 +154,23 @@ function AddUser() {
                 throw new Error(errorMessage);
             }
 
-            alert(`User ${isEditMode ? "updated" : "added"} successfully!`);
+            alert(isEditMode ? t("user.updated") : t("user.added"));
             navigate("/admin/user-management");
 
         } catch (err) {
             console.error("Fetch error:", err);
-            alert(`Operation failed: ${err.message}`);
+            alert(`${t("user.operationFailed")}: ${err.message}`);
         }
     };
 
-    const formTitle = isEditMode ? "Edit User" : "Add New User";
-    const submitButtonText = isEditMode ? "Save Changes" : "Add User";
+    const formTitle = isEditMode ? t("user.editUser") : t("user.addUser");
+    const submitButtonText = isEditMode ? t("user.saveChanges") : t("user.addUser");
 
     if (isEditMode && isLoadingData) {
         return (
             <div style={styles.page}>
                 <div style={styles.card}>
-                    <h3 style={styles.title}>Loading User Data...</h3>
+                    <h3 style={styles.title}>{t("user.loading")}</h3>
                 </div>
             </div>
         );
@@ -183,13 +185,13 @@ function AddUser() {
                 <form onSubmit={handleSubmit}>
                     {/* First Name */}
                     <div className="mb-3 row">
-                        <label className="col-sm-2 col-form-label">First Name</label>
+                        <label className="col-sm-2 col-form-label">{t("user.firstName")}</label>
                         <div className="col-sm-8">
                             <input
                                 type="text"
                                 className="form-control"
                                 name="first_name"
-                                placeholder="Enter First Name"
+                                placeholder={t("user.enterFirstName")}
                                 value={formData.first_name}
                                 onChange={handleChange}
                                 required
@@ -199,13 +201,13 @@ function AddUser() {
 
                     {/* Last Name */}
                     <div className="mb-3 row">
-                        <label className="col-sm-2 col-form-label">Last Name</label>
+                        <label className="col-sm-2 col-form-label">{t("user.lastName")}</label>
                         <div className="col-sm-8">
                             <input
                                 type="text"
                                 className="form-control"
                                 name="last_name"
-                                placeholder="Enter Last Name"
+                                placeholder={t("user.enterLastName")}
                                 value={formData.last_name}
                                 onChange={handleChange}
                                 required
@@ -215,13 +217,13 @@ function AddUser() {
 
                     {/* Email */}
                     <div className="mb-3 row">
-                        <label className="col-sm-2 col-form-label">Email</label>
+                         <label className="col-sm-2 col-form-label">{t("user.email")}</label>
                         <div className="col-sm-8">
                             <input
                                 type="email"
                                 className="form-control"
                                 name="email"
-                                placeholder="Enter Email"
+                                placeholder={t("user.enterEmail")}
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
@@ -231,7 +233,7 @@ function AddUser() {
 
                     {/* User Level (Role) */}
                     <div className="mb-3 row">
-                        <label className="col-sm-2 col-form-label">User Level</label>
+                        <label className="col-sm-2 col-form-label">{t("user.userLevel")}</label>
                         <div className="col-sm-8">
                             <select
                                 className="form-control"
@@ -240,9 +242,9 @@ function AddUser() {
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="Admin">Admin</option>
-                                <option value="Trainer">Trainer</option>
-                                <option value="Trainee">Trainee</option>
+                                <option value="Admin">{t("user.roleAdmin")}</option>
+                                <option value="Trainer">{t("user.roleTrainer")}</option>
+                                <option value="Trainee">{t("user.roleTrainee")}</option>
                             </select>
                         </div>
                     </div>
@@ -250,7 +252,7 @@ function AddUser() {
                     {/* Batch dropdown (only for Trainee) */}
                     {formData.role === "Trainee" && (
                         <div className="mb-3 row">
-                            <label className="col-sm-2 col-form-label">Batch</label>
+                            <label className="col-sm-2 col-form-label">{t("user.batch")}</label>
                             <div className="col-sm-8">
                                 <select
                                     className="form-control"
@@ -259,7 +261,7 @@ function AddUser() {
                                     onChange={handleChange}
                                     required
                                 >
-                                    <option value="">Select Batch</option>
+                                    <option value="">{t("user.selectBatch")}</option>
                                     {batches.map((b) => (
                                         <option key={b.batch_id} value={b.batch_id}>
                                             {b.name} {b.location}
@@ -273,7 +275,7 @@ function AddUser() {
                     {/* Status Toggle (Edit Mode only) */}
                     {isEditMode && (
                         <div className="mb-3 row">
-                            <label className="col-sm-2 col-form-label">Status</label>
+                            <label className="col-sm-2 col-form-label">{t("user.status")}</label>
                             <div className="col-sm-8 d-flex align-items-center">
                                 <div className="form-check form-switch">
                                     <input
@@ -285,7 +287,7 @@ function AddUser() {
                                         onChange={handleStatusChange}
                                     />
                                     <label className="form-check-label" htmlFor="is_active_switch">
-                                        {formData.is_active ? 'Active' : 'Inactive'}
+                                        {formData.is_active ? t("user.active") : t("user.inactive")}
                                     </label>
                                 </div>
                             </div>
@@ -303,7 +305,7 @@ function AddUser() {
                             style={styles.btn}
                             onClick={() => navigate(-1)}
                         >
-                            Cancel
+                            {t("user.cancel")}
                         </button>
                     </div>
                 </form>

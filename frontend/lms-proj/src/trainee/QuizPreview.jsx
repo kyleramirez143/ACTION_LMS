@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "./QuizPreview.css";
 
 const QuizPreview = () => {
+    const { t } = useTranslation();
     const { assessment_id } = useParams();
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
@@ -30,11 +32,10 @@ const QuizPreview = () => {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.error || "Failed to load quiz");
+                    throw new Error(data.error || t("quiz_preview.load_failed"));
                 }
 
                 setQuiz(data.quiz);
-                console.log(data.quiz);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -43,11 +44,11 @@ const QuizPreview = () => {
         };
 
         if (assessment_id) fetchQuiz();
-    }, [assessment_id, token]);
+    }, [assessment_id, token, t]);
 
-    if (loading) return <p className="quiz-loading">Loading quiz...</p>;
+    if (loading) return <p className="quiz-loading">{t("quiz_preview.loading")}</p>;
     if (error) return <p className="quiz-error">{error}</p>;
-    if (!quiz) return <p className="quiz-error">Quiz not found.</p>;
+    if (!quiz) return <p className="quiz-error">{t("quiz_preview.not_found")}</p>;
 
     return (
         <div className="module-container w-100 px-0 py-4">
@@ -76,37 +77,56 @@ const QuizPreview = () => {
 
                         <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
-                        {/* Quiz details */}
+                        {/* Quiz Details */}
                         <div className="quiz-details mb-2">
                             <div className="row">
                                 <div className="col-6">
-                                    <strong>Due Date:</strong>
-                                    <p className="text-danger">{quiz.due_date ? new Date(quiz.due_date).toLocaleString() : "No due date set"}</p>
+                                    <strong>{t("quiz_preview.due_date")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.due_date
+                                            ? new Date(quiz.due_date).toLocaleString()
+                                            : t("quiz_preview.no_due_date")}
+                                    </p>
                                 </div>
+
                                 <div className="col-6">
-                                    <strong>Points:</strong>
-                                    <p className="text-danger">{quiz.totalPoints || "Not specified"}</p>
+                                    <strong>{t("quiz_preview.points")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.totalPoints || t("quiz_preview.not_specified")}
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="row">
                                 <div className="col-6">
-                                    <strong>Questions:</strong>
-                                    <p className="text-danger">{(quiz.questions || []).length} Questions</p>
+                                    <strong>{t("quiz_preview.questions")}:</strong>
+                                    <p className="text-danger">
+                                        {(quiz.questions || []).length} {t("quiz_preview.questions_label")}
+                                    </p>
                                 </div>
+
                                 <div className="col-6">
-                                    <strong>Time Limit:</strong>
-                                    <p className="text-danger">{quiz.time_limit ? `${quiz.time_limit} minutes` : "No time limit"}</p>
+                                    <strong>{t("quiz_preview.time_limit")}:</strong>
+                                    <p className="text-danger">
+                                        {quiz.time_limit
+                                            ? t("quiz_preview.minutes", { count: quiz.time_limit })
+                                            : t("quiz_preview.no_time_limit")}
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="row">
                                 <div className="col-12">
-                                    <strong>Attempts: </strong>
-                                    <p className={
-                                        quiz.attempts_taken >= quiz.attempts_allowed || isExpired
-                                            ? "text-danger fw-bold"
-                                            : "text-success"
-                                    }>
-                                        {quiz.attempts_taken} / {quiz.attempts_allowed} attempts used
+                                    <strong>{t("quiz_preview.attempts")}:</strong>
+                                    <p
+                                        className={
+                                            quiz.attempts_taken >= quiz.attempts_allowed || isExpired
+                                                ? "text-danger fw-bold"
+                                                : "text-success"
+                                        }
+                                    >
+                                        {quiz.attempts_taken} / {quiz.attempts_allowed}{" "}
+                                        {t("quiz_preview.attempts_used")}
                                     </p>
                                 </div>
                             </div>
@@ -116,10 +136,10 @@ const QuizPreview = () => {
 
                         {/* Quiz Instructions */}
                         <div className="quiz-preview-center">
-                            <h5 className="fw-bold mt-2">Instructions</h5>
+                            <h5 className="fw-bold mt-2">{t("quiz.instructions")}</h5>
                             {isExpired && (
                                 <div className="alert alert-danger mt-3">
-                                    This quiz is already past its due date and can no longer be taken.
+                                    {t("quiz.expired_message")}
                                 </div>
                             )}
                             {quiz.description ? (
@@ -129,12 +149,12 @@ const QuizPreview = () => {
                                     ))}
                                 </ol>
                             ) : (
-                                <p>No instructions provided.</p>
+                                <p>{t("quiz.no_instructions")}</p>
                             )}
 
                             {quiz.attempts_taken >= quiz.attempts_allowed ? (
                                 <div className="alert alert-danger mt-4">
-                                    You have reached the maximum number of attempts allowed for this quiz.
+                                    {t("quiz.attempt_limit_reached")}
                                 </div>
                             ) : null}
 
@@ -154,17 +174,17 @@ const QuizPreview = () => {
                             >
                                 {console.log(quiz.screen_monitoring)}
                                 {isExpired
-                                    ? "Quiz Expired"
+                                    ? t("quiz_preview.expired")
                                     : quiz.attempts_taken >= quiz.attempts_allowed
-                                        ? "Limit Reached"
-                                        : "Take Quiz"}
+                                        ? t("quiz_preview.limit_reached")
+                                        : t("quiz_preview.take_quiz")}
                             </button>
 
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     );
 };
 

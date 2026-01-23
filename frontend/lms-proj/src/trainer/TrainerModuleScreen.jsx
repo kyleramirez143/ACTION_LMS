@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
+
 import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
 import { ArrowLeft } from "lucide-react";
 
 export default function TrainerModuleScreen() {
+  const { t } = useTranslation();
   const { course_id, module_id } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
@@ -109,7 +112,7 @@ export default function TrainerModuleScreen() {
                 onClick={() => navigate("/courses")}
                 style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
               >
-                Courses
+                {t("lecture.courses")}
               </span>
             </li>
             <li className="breadcrumb-item">
@@ -117,7 +120,7 @@ export default function TrainerModuleScreen() {
                 onClick={() => navigate(`/${course_id}/modules`)}
                 style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
               >
-                Modules
+                {t("lecture.modules")}
               </span>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
@@ -137,7 +140,7 @@ export default function TrainerModuleScreen() {
                 <h3 className="mb-0">{moduleTitle}</h3>
                 {userRole === "Trainer" && (
                   <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
-                    Add Lecture
+                    {t("lecture.add")}
                   </button>
                 )}
               </div>
@@ -145,14 +148,14 @@ export default function TrainerModuleScreen() {
               <p className="text-muted">{moduleDescription}</p>
 
               {loading ? (
-                <p>Loading lectures...</p>
+                <p>{t("lecture.loading")}</p>
               ) : error ? (
                 <p className="text-danger">{error}</p>
               ) : lectures.length === 0 ? (
                 <p>
                   {userRole === "Trainer"
-                    ? 'No lectures yet. Click "Add Lecture" to create one.'
-                    : "No lectures available yet."}
+                    ? t("lecture.empty_trainer")
+                    : t("lecture.empty_trainee")}
                 </p>
               ) : (
                 <ModuleAccordion
@@ -167,7 +170,7 @@ export default function TrainerModuleScreen() {
           {/* Right column: Upcoming Panel (4) */}
           <div className="col-12 col-lg-4 d-flex">
             <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0}}>
-              <div className="upcoming-title mb-2">Upcoming</div>
+              <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
               <UpcomingPanel moduleId={module_id} />
             </div>
           </div>

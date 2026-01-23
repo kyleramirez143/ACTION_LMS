@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FileText, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function LectureForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { course_id, module_id, lecture_id } = useParams();
   const isEditMode = !!lecture_id;
@@ -19,6 +21,7 @@ export default function LectureForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const RESOURCE_TYPES = ["PDF", "Video", "Image", "Link"];
+
 
   // --- Auth Check ---
   useEffect(() => {
@@ -63,12 +66,12 @@ export default function LectureForm() {
             end_date: result.lecture.end_date ? result.lecture.end_date.split("T")[0] : ""
           });
         } else {
-          alert(result.error || "Lecture not found.");
+          alert(t("lecture.not_found"));
           navigate(`/${course_id}/modules/${module_id}/lectures`);
         }
       } catch (err) {
         console.error(err);
-        alert("Failed to load lecture data.");
+        alert(t("lecture.failed_load"));
       } finally {
         setLoading(false);
       }
@@ -79,7 +82,7 @@ export default function LectureForm() {
   // --- Resource Handlers ---
   const handleAddNewResourceField = () => {
     if (existingResources.length + newResources.length >= 5) {
-      alert("Maximum of 5 resources allowed per lecture.");
+      alert(t("lecture.max_resources"));
       return;
     }
     setNewResources([...newResources, { type: "PDF", value: null }]);
@@ -130,7 +133,7 @@ export default function LectureForm() {
 
   const handleDeleteExistingResource = (resourceId) => {
     const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this resource file?"
+     t("resource.confirm_delete")
     );
 
     if (!confirmed) return;
@@ -228,7 +231,7 @@ export default function LectureForm() {
 
   const handleSubmitAll = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return alert("Lecture title is required");
+    if (!title.trim()) return alert(t("lecture.title_required"));
 
     setIsSubmitting(true);
     let targetLectureId = lecture_id;
@@ -268,7 +271,9 @@ export default function LectureForm() {
       // 6️⃣ Reset new resources form fields
       setNewResources([{ type: "PDF", value: null }]);
 
-      alert(`Lecture ${isEditMode ? "updated" : "created"} successfully!`);
+      const action = isEditMode ? t("lecture.update_btn") : t("lecture.create_btn");
+      alert(t("lecture.success_message", { action }));
+
       navigate(`/${course_id}/modules/${module_id}/lectures`);
     } catch (err) {
       console.error(err);
@@ -287,7 +292,7 @@ export default function LectureForm() {
 
   // --- Delete Lecture ---
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to permanently delete the lecture: ${title}?`)) return;
+    if (!window.confirm(t("lecture.confirm_delete", { title }))) return;
 
     setIsSubmitting(true);
     try {
@@ -296,7 +301,7 @@ export default function LectureForm() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        alert("Lecture deleted successfully!");
+        alert(t("lecture.deleted_success"));
         navigate(`/${course_id}/modules/${module_id}/lectures`);
       } else {
         const data = await res.json();
@@ -304,7 +309,7 @@ export default function LectureForm() {
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong during deletion.");
+      alert(t("module.delete_error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -314,17 +319,17 @@ export default function LectureForm() {
     navigate(`/${course_id}/modules/${module_id}/lectures`);
   };
 
-  if (loading) return <p className="text-center py-5">Loading lecture data...</p>;
+  if (loading) return <p className="text-center py-5">{t("lecture.loading")}</p>; // 🔹 translated
 
   // --- Render ---
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h3 style={styles.title}>{isEditMode ? "Edit Lecture" : "Add New Lecture"}</h3>
+        <h3 style={styles.title}>{isEditMode ? t("lecture.edit_title") : t("lecture.add_title")}</h3>
         <form onSubmit={handleSubmitAll}>
           {/* Lecture Title */}
           <div className="mb-3">
-            <label className="form-label">Lecture Title</label>
+            <label className="form-label">{t("lecture.label_title")}</label>
             <input
               type="text"
               className="form-control"
@@ -337,7 +342,7 @@ export default function LectureForm() {
 
           {/* Lecture Description */}
           <div className="mb-3">
-            <label className="form-label">Lecture Description</label>
+            <label className="form-label">{t("lecture.label_description")}</label>
             <textarea
               className="form-control"
               rows="3"
@@ -375,12 +380,11 @@ export default function LectureForm() {
 
           {/* --- RESOURCES SECTION --- */}
           <div className="mb-4 pt-3 border-top">
-            <label className="form-label d-block fw-bold">Manage Resources (Max 5 Files)</label>
-
+            <label className="form-label d-block fw-bold">{t("lecture.resources_title")}</label>
             {/* Existing Resources */}
             {existingResources.length > 0 && (
               <div className="card p-3 mb-3 bg-light">
-                <h6 className="card-title text-muted small">Existing Files:</h6>
+                <h6 className="card-title text-muted small">{t("resource.existing")}</h6>
                 {existingResources.map(res => (
                   <div
                     key={res.resource_id}
@@ -409,7 +413,7 @@ export default function LectureForm() {
               </div>
             )}
 
-            <h6 className="mt-3 small fw-bold">Add New Resources:</h6>
+            <h6 className="mt-3 small fw-bold">{t("resource.add_new")}</h6>
             {newResources.map((res, index) => {
               const isLast = index === newResources.length - 1;
               return (
@@ -421,16 +425,16 @@ export default function LectureForm() {
 
                   {/* Dynamic Input */}
                   {res.type === "Link" ? (
-                    <input type="text" className="form-control form-control-sm" placeholder="Enter URL" value={res.value || ""} onChange={(e) => handleResourceValueChange(index, e.target.value)} disabled={isSubmitting} />
+                    <input type="text" className="form-control form-control-sm" placeholder={t("resource.enter_url")} value={res.value || ""} onChange={(e) => handleResourceValueChange(index, e.target.value)} disabled={isSubmitting} />
                   ) : (
                     <input type="file" className="form-control form-control-sm" onChange={(e) => handleResourceValueChange(index, e.target.files[0])} disabled={isSubmitting} />
                   )}
 
                   {/* Add/Remove Button */}
                   {isLast ? (
-                    <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddNewResourceField} disabled={isSubmitting || existingResources.length + newResources.length >= 5}>Add</button>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddNewResourceField} disabled={isSubmitting || existingResources.length + newResources.length >= 5}>{t("resource.add")}</button>
                   ) : (
-                    <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleRemoveResourceField(index)} disabled={isSubmitting}>Remove</button>
+                    <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleRemoveResourceField(index)} disabled={isSubmitting}>{t("resource.remove")}</button>
                   )}
                 </div>
               );
@@ -439,9 +443,12 @@ export default function LectureForm() {
 
           {/* Action Buttons */}
           <div className="d-flex justify-content-end pt-4 border-top">
-            <button type="button" className="btn btn-outline-secondary rounded-pill me-2" style={styles.btn} onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+            {isEditMode && (
+              <button type="button" className="btn btn-danger rounded-pill me-auto" style={styles.btn} onClick={handleDelete} disabled={isSubmitting}>{t("lecture.delete")}</button>
+            )}
+            <button type="button" className="btn btn-outline-secondary rounded-pill me-2" style={styles.btn} onClick={handleCancel} disabled={isSubmitting}>{t("lecture.cancel")}</button>
             <button type="submit" className="btn btn-primary rounded-pill" style={styles.btn} disabled={isSubmitting || (!isEditMode && !title.trim())}>
-              {isSubmitting ? "Processing..." : isEditMode ? "Update Lecture" : "Create Lecture"}
+              {isSubmitting ? t("lecture.processing") : isEditMode ? t("lecture.update_btn") : t("lecture.create_btn")}
             </button>
           </div>
         </form >

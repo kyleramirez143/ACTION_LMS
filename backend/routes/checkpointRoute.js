@@ -1,13 +1,19 @@
 import { Router } from "express";
-import { addCheckpoint, getCheckpoint, updateCheckpoint } from "../controllers/checkpointController.js";
+import { 
+    addCheckpoint, 
+    getCheckpoint, 
+    updateCheckpoint, 
+    getCheckpointsByBatch // ✅ Import the new function
+} from "../controllers/checkpointController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-// Static route FIRST
 router.post("/add", protect, addCheckpoint);
 
-// Parameter routes LAST
+// ✅ NEW ROUTE: Fetch list by batch
+router.get("/batch/:batchId", protect, getCheckpointsByBatch);
+
 router.get("/:userId", protect, getCheckpoint);
 router.put("/:userId", protect, updateCheckpoint);
 

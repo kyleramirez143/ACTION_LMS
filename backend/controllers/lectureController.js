@@ -2,6 +2,8 @@
 
 import { Op } from "sequelize";
 import db from "../models/index.cjs";
+import fs from "fs";
+import path from "path";
 
 // import { v4 as uuidv4 } from "uuid";
 
@@ -79,6 +81,7 @@ export const uploadLectureFile = async (req, res) => {
                     file_url: file.filename,
                     display_name: file.originalname,
                     content_type: file.mimetype,
+                    is_visible: true,
                 });
 
                 await LectureResource.create({
@@ -289,7 +292,7 @@ export const deleteResources = async (req, res) => {
 
         await sequelize.transaction(async (t) => {
             await LectureResource.destroy({
-                where: { resources_id: resource_ids },
+                where: { resource_id: resource_ids },
                 transaction: t
             });
 

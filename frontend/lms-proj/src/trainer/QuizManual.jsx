@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import "./QuizManual.css";
 import logo from "../image/nothing.svg";
 
 function useUnsavedQuizPrompt(quiz, isSaved) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // --- Handle browser refresh/close ---
@@ -24,7 +26,7 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
     if (quiz && !isSaved) {
       const target = e.target?.getAttribute("href") || "";
       if (!target.includes("/quizzes/")) {
-        if (!window.confirm("You have an unsaved quiz. Are you sure you want to leave?")) {
+        if (!window.confirm(t("quiz.unsaved_prompt"))) {
           e.preventDefault();
         }
       }
@@ -45,6 +47,7 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
 }
 
 function QuizManual() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
 
@@ -58,15 +61,15 @@ function QuizManual() {
   const [modules, setModules] = useState([]);
   const [lectures, setLectures] = useState([]);
   const [assessmentTypes, setAssessmentTypes] = useState([
-    "Skill Check",
-    "Course-End Exam",
-    "Mock Exam",
-    "Practice Exam",
-    "Oral Exam",
-    "Daily Quiz",
-    "Homework",
-    "Exercises",
-    "Activity"
+    { value: "Skill Check", label: t("quiz.assessment.Skill Check") },
+    { value: "Course-End Exam", label: t("quiz.assessment.Course-End Exam") },
+    { value: "Mock Exam", label: t("quiz.assessment.Mock Exam") },
+    { value: "Practice Exam", label: t("quiz.assessment.Practice Exam") },
+    { value: "Oral Exam", label: t("quiz.assessment.Oral Exam") },
+    { value: "Daily Quiz", label: t("quiz.assessment.Daily Quiz") },
+    { value: "Homework", label: t("quiz.assessment.Homework") },
+    { value: "Exercises", label: t("quiz.assessment.Exercises") },
+    { value: "Activity", label: t("quiz.assessment.Activity") },
   ]);
 
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -125,7 +128,7 @@ function QuizManual() {
   // --- ADD QUESTION ---
   const handleAddQuestion = () => {
     if (!newQuestion.question_text.trim()) {
-      alert("Please enter a question.");
+      alert(t("quiz.enter_question"));
       return;
     }
 
@@ -157,7 +160,7 @@ function QuizManual() {
   // --- SAVE QUIZ ---
   const handleSaveQuiz = async () => {
     if (!selectedLecture || !quiz.title.trim() || quiz.questions.length === 0) {
-      alert("Please fill Quiz Title, Lecture, and add at least one question.");
+      alert(t("quiz.fill_title_lecture_question"));
       return;
     }
 
@@ -196,7 +199,7 @@ function QuizManual() {
       resetForm();
     } catch (err) {
       console.error("Error saving manual quiz:", err);
-      alert("Failed to save quiz. Check console.");
+      alert(t("quiz.failed_save"));
     } finally {
       setSaving(false);
     }
@@ -204,7 +207,7 @@ function QuizManual() {
 
   // --- DISCARD QUIZ ---
   const handleDiscardQuiz = () => {
-    if (window.confirm("Are you sure you want to discard this quiz?")) {
+    if (window.confirm(t("quiz.confirm_discard"))) {
       resetForm();
     }
   };
@@ -231,8 +234,7 @@ function QuizManual() {
 
     return (
       <div className="mb-4" key={section}>
-        <h4 className="text-primary">{section}</h4>
-        {sectionQuestions.map((q, i) => (
+        <h4 className="text-primary">{t(`quiz.section.${section}`)}</h4>         {sectionQuestions.map((q, i) => (
           <div className="card shadow-sm mb-3" key={q.question_id}>
             <div className="card-body">
               <h5 className="card-title fw-bold">Q{i + 1}: {q.question_text}</h5>
@@ -243,9 +245,9 @@ function QuizManual() {
                   ))}
                 </ul>
               )}
-              <p className="text-success mb-1"><strong>Answer:</strong> {q.correct_answer.toUpperCase()}</p>
+              <p className="text-success mb-1"><strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}</p> {/* TRANSLATED */}
               {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
-                <small className="text-muted d-block fw-bold">Explanation:</small>
+                <small className="text-muted d-block fw-bold">{t("quiz.explanation")}</small>
                 <small className="text-dark">{q.explanation}</small>
               </div>}
             </div>
@@ -262,11 +264,11 @@ function QuizManual() {
           {/* LEFT PANEL */}
           <div className="col-12 col-lg-6" style={{ maxHeight: "100vh", overflowY: "auto" }}>
             <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
-              <h3 className="section-title">📘 Manual Quiz Input</h3>
+              <h3 className="section-title">{t("quiz.manual_input")}</h3>
 
               {/* Quiz Title */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Quiz Title</label>
+                <label className="form-label fw-bold">{t("quiz.quiz_title")}</label>
                 <input
                   type="text"
                   className="form-control"
@@ -277,7 +279,7 @@ function QuizManual() {
 
               {/* Quiz Type */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Quiz Type</label>
+                <label className="form-label fw-bold">{t("quiz.quiz_type")}</label>
                 {["Multiple Choice", "Identification"].map(type => (
                   <div className="form-check" key={type}>
                     <input
@@ -294,16 +296,16 @@ function QuizManual() {
 
               {/* Assessment Type */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Assessment Type</label>
+                <label className="form-label fw-bold">{t("quiz.assessment_type")}</label>
                 <select
                   className="form-select"
                   value={assessmentType}
                   onChange={e => setAssessmentType(e.target.value)}
                 >
-                  <option value="">-- Select Assessment Type --</option>
+                  <option value="">{t("quiz.select_assessment_type")}</option>
                   {assessmentTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type}
+                    <option key={type.value} value={type.value}>
+                      {type.label}
                     </option>
                   ))}
                 </select>
@@ -311,24 +313,24 @@ function QuizManual() {
 
               {/* Course / Module / Lecture */}
               <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
-                <label className="form-label fw-bold">Target Placement</label>
+                <label className="form-label fw-bold">{t("quiz.target_placement")}</label>
                 <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
-                  <option value="">-- Select Course --</option>
+                  <option value="">{t("quiz.select_course")}</option>
                   {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
                 </select>
                 <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse}>
-                  <option value="">-- Select Module --</option>
+                  <option value="">{t("quiz.select_module")}</option>
                   {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
                 </select>
                 <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule}>
-                  <option value="">-- Select Lecture --</option>
+                  <option value="">{t("quiz.select_lecture")}</option>
                   {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
                 </select>
               </div>
 
               {/* Question Input */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Question</label>
+                <label className="form-label fw-bold">{t("quiz.question")}</label>
                 <textarea
                   className="form-control mb-2"
                   rows={4}
@@ -355,7 +357,7 @@ function QuizManual() {
 
               {/* Correct Answer */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Correct Answer</label>
+                <label className="form-label fw-bold">{t("quiz.correct_answer")}</label>
                 <input
                   type="text"
                   className="form-control"
@@ -366,7 +368,7 @@ function QuizManual() {
 
               {/* Explanation */}
               <div className="mb-3">
-                <label className="form-label fw-bold">Explanation (Optional)</label>
+                <label className="form-label fw-bold">{t("quiz.explanation_optional")}</label>
                 <textarea
                   className="form-control"
                   rows={3}
@@ -376,7 +378,7 @@ function QuizManual() {
               </div>
 
               <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
-                + Add Question
+                + {t("quiz.add_question")}
               </button>
             </div>
           </div>
@@ -384,7 +386,7 @@ function QuizManual() {
           {/* RIGHT PANEL */}
           <div className="col-12 col-lg-6 d-flex">
             <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}>
-              <h3 className="section-title">Generated Quiz</h3>
+              <h3 className="section-title">{t("quiz.generated_quiz")}</h3>
               {(!quiz || quiz?.questions?.length === 0) && (
                 <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
                   <img
@@ -393,7 +395,7 @@ function QuizManual() {
                     style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
                   />
                   <p className="text-muted text-center mb-0">
-                    No quiz generated yet.
+                    {t("quiz.no_quiz_yet")}
                   </p>
                 </div>
               )}
@@ -402,9 +404,9 @@ function QuizManual() {
               {quiz.questions.length > 0 && (
                 <div className="d-flex justify-content-center gap-3">
                   <button className="btn btn-success" style={{ width: "220px" }} onClick={handleSaveQuiz} disabled={saving}>
-                    {saving ? "Saving..." : "Save & Review"}
+                    {saving ? t("quiz.saving") : t("quiz.save_review")}
                   </button>
-                  <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>Discard Quiz</button>
+                  <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>{t("quiz.discard_quiz")}</button>
                 </div>
               )}
             </div>

@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true, // This maps to created_at and updated_at
         underscored: true,
 
+
         indexes: [
             {
                 unique: true,
@@ -25,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
             },
         ],
     });
+
 
     Batch.associate = function (models) {
         Batch.belongsToMany(models.User, {
@@ -34,12 +36,24 @@ module.exports = (sequelize, DataTypes) => {
             as: 'users'
         });
 
+
         // Inside Batch.associate
         Batch.hasOne(models.Curriculum, {
             foreignKey: 'batch_id',
             as: 'curriculum'
         });
+
+
+        Batch.associate = function (models) {
+        Batch.belongsToMany(models.User, {
+        through: models.UserBatch,
+        foreignKey: "batch_id",
+        otherKey: "user_id",
+        as: "users"
+        });
     };
+    };
+
 
     return Batch;
 };
