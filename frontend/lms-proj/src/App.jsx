@@ -1,57 +1,35 @@
-// All imports of packages that are needed 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import "./App.css";
-
-function UserProfileRoute() {
-  const token = localStorage.getItem("authToken");
-
-  if (!token) return <Navigate to="/" />;
-
-  try {
-    const decoded = jwtDecode(token);
-    const role = decoded.roles[0].toLowerCase(); // e.g., "Admin" → "admin"
-
-    // Redirect to /userlevel/profile
-    return <Navigate to={`/${role}/profile`} />;
-  } catch (err) {
-    console.error(err);
-    return <Navigate to="/" />;
-  }
-}
 
 // Context & Security
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoutes";
 
-// Navbar & Shared
+// Navbar & Pages
 import Navbar from "./all/Navbar";
 import LoginPage from "./all/LoginPage";
-
-// Notification
 import NotificationView from "./all/NotificationView.jsx";
-
-//Checkpoint View
-import CheckpointView from "./admin/CheckpointView.jsx";
 
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
 
-// Admin Imports
+// Admin Pages
 import AdminDashboard from './admin/AdminDashboard';
-// import AdminCreateCourse from './admin/AdminCoursePage';
 import AdminCourseManagement from './admin/CourseManagementPage';
-// import AdminCourseEditPage from './admin/AdminCourseEditPage';
 import AddUser from "./admin/AddUser.jsx";
 import UserRoleTable from "./admin/UserRoleTable";
 import AdminProfileManagement from "./admin/AdminProfileManagement.jsx";
 import BatchesTable from "./admin/BatchesTable.jsx";
 import ModuleTable from "./admin/ModuleTable.jsx";
 import SetPeriodModule from "./admin/SetPeriodModule.jsx";
-import CalendarView from "./admin/CalendarView.jsx";
-import NewSchedule from "./admin/NewSchedule.jsx";
+import AddBatch from "./admin/AddBatch.jsx";
+import AdminCoursePage from "./admin/AdminCoursePage";
+import AdminNewSchedule from "./admin/AdminNewSchedule.jsx";
+import CheckpointView from "./admin/CheckpointView.jsx";
 
-// Trainer Imports
+// Trainer Pages
 import TrainerDashboard from './trainer/Dashboard.jsx'
 import QuizGenerator from './trainer/QuizGenerator';
 import QuizManual from "./trainer/QuizManual.jsx";
@@ -60,29 +38,40 @@ import TrainerModuleScreen from "./trainer/TrainerModuleScreen";
 import AddLecture from "./trainer/AddLecture";
 import ModuleManagement from "./trainer/ModuleManagement.jsx";
 import AddModule from "./trainer/AddModule.jsx";
+import ReviewPublish from "./trainer/ReviewPublish.jsx";
+import ProctorReview from "./trainer/ProctorReview.jsx";
+import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
 
-//Trainer Imports
+// Trainee Pages
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
 import TraineeAssessment from "./trainee/TraineeAssessment.jsx";
 import ReviewPage from "./trainee/ReviewPage.jsx";
-import ReviewPublish from "./trainer/ReviewPublish.jsx";
-import TrainerCalendarView from "./trainer/TrainerCalendarView.jsx";
-import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
-
-// Trainee imports
 import TraineeCourseManagement from "./trainee/CourseManagement.jsx";
 import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
-import ProctorReview from "./trainer/ProctorReview.jsx";
-import AddBatch from "./admin/AddBatch.jsx";
-import AdminCoursePage from "./admin/AdminCoursePage";
-import ViewGrades from "./trainee/ViewGrades.jsx";
 import ProfileInfo from "./trainee/ProfileInfo.jsx";
 
+// Unified Calendar Component
+import CalendarView from "./admin/CalendarView.jsx";
+
+// App Content
 function AppContent() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/"; // hide navbar only on login page
+  const hideNavbar = location.pathname === "/";
+
+  const token = localStorage.getItem("authToken");
+  let decoded = null;
+  let userRole = null;
+
+  if (token) {
+    try {
+      decoded = jwtDecode(token);
+      userRole = decoded.role?.toLowerCase();
+    } catch (err) {
+      console.error("Invalid token", err);
+    }
+  }
 
   return (
     <>
@@ -90,34 +79,9 @@ function AppContent() {
 
       <div className="container-fluid w-100 h-100">
         <div className="row h-100">
-          {/* 
-          How to use ProtectedRoutes:
-
-          <Route 
-            path="path-of-the-web-page"
-            element={
-              <ProtectedRoute roles={["Admin", "Trainer", "Trainee"]}>
-                <ObjectOfWebPage ex.ModuleScreen/>
-              </ProtectedRoute>c
-            }
-          />
-
-          Goodluck mga frontend!!!
-          
-          Wag lagyan ng protected ang login page sapagkat ito ay kaylangan ma access
-          kahit walang naka login. Salamat nawa.
-
-          Ang roles={[]} ay palitan nang na aayon sa mga makaka access ng page na yon.
-
-          Pagkatapos maglagay ng mga routes, I check ang file na navConfig upang
-          tuluyang maayos na talaga ang navbar natin.
-
-        */}
           <Routes>
-            {/* Public / Login */}
+            {/* Public */}
             <Route path="/" element={<LoginPage />} />
-
-            {/* Notification */}
             <Route path="/all/notificationview" element={<NotificationView />} />
 
             {/* Checkpoint View */}
@@ -126,34 +90,38 @@ function AppContent() {
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
 
-            {/* Trainer Side Routes */}
-            <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+            {/* Calendar - Unified */}
+            <Route path="/admin/calendar" element={<CalendarView />} />
+            <Route path="/trainer/calendar" element={<CalendarView />} />
+            <Route path="/trainee/calendar" element={<CalendarView />} />
 
+            {/* Admin Schedules */}
+            <Route path="/admin/add-new-schedule" element={<AdminNewSchedule />} />
+            <Route path="/admin/edit-schedule/:event_id" element={<AdminNewSchedule />} />
+
+            {/* Trainer Schedules */}
+            <Route path="/trainer/:course_id/add-new-schedule" element={<TrainerNewSchedule />} />
+            <Route path="/trainer/:course_id/edit-schedule/:event_id" element={<TrainerNewSchedule />} />
+
+            {/* Trainer Routes */}
+            <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/quiz-generator" element={<QuizGenerator />} />
             <Route path="/trainer/quizmanual" element={<QuizManual />} />
             <Route path="/trainer/quiz/:assessment_id/sessions" element={<ProctorReview />} />
-
             <Route path="/trainer/course-management" element={<CoursePage />} />
             <Route path="/:course_id/modules" element={<ModuleManagement />} />
             <Route path="/trainer/:course_id/modules/:module_id/quizzes/:assessment_id" element={<ReviewPublish />} />
-
             <Route path="/trainer/:course_id/modules/create" element={<AddModule />} />
             <Route path="/trainer/:course_id/modules/:module_id/edit" element={<AddModule />} />
-
             <Route path="/trainer/:course_id/modules/:module_id/lectures/create" element={<AddLecture />} />
             <Route path="/trainer/:course_id/modules/:module_id/lectures/:lecture_id/edit" element={<AddLecture />} />
-
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
-
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
-            <Route path="/trainer/calendar" element={<TrainerCalendarView />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
             
 
-
-            {/* Admin Side Routes */}
+            {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
             <Route path="/admin/course-management" element={<AdminCourseManagement />} />
             <Route path="/admin/course-management/create" element={<AdminCoursePage />} />
             <Route path="/admin/course-management/edit/:course_id" element={<AdminCoursePage />} />
@@ -167,26 +135,23 @@ function AppContent() {
             <Route path="/admin/module-management" element={<ModuleTable />} />
             <Route path="/admin/set-module-date" element={<SetPeriodModule />} />
             <Route path="/admin/set-module-date/:id" element={<SetPeriodModule />} />
-            <Route path="/admin/calendar" element={<CalendarView />} />
-            <Route path="/admin/add-new-schedule" element={<NewSchedule />} />
+            <Route path="/admin/checkpointview" element={<CheckpointView />} />
 
-            {/* Trainee Side Routes */}
+            {/* Trainee Routes */}
             <Route path="/trainee/profile" element={<AdminProfileManagement />} />
             <Route path="/trainee/dashboard" element={<TraineeDashboard />} />
             <Route path="/trainee/assessment" element={<TraineeAssessment />} />
             <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage />} />
             <Route path="/trainee/ProfileInfo" element={<ProfileInfo />} />
-
             <Route path="/trainee/courses" element={<TraineeCourseManagement />} />
             <Route path="/:course_id/modules/:module_id/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
-            <Route path="/trainee/assessment/:assessment_id/review" element={<ReviewPage/>} />
-            <Route path="/trainee/viewgrades" element={<ViewGrades />} />
 
+            {/* Fallback */}
+            <Route path="*" element={<h2>Page Not Found</h2>} />
           </Routes>
         </div>
-
       </div>
     </>
   );

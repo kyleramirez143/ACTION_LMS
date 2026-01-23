@@ -3,12 +3,14 @@ module.exports = (sequelize, DataTypes) => {
         lecture_id: {
             type: DataTypes.UUID,
             primaryKey: true,
-            allowNull: false
+            allowNull: false,
+            references: { model: 'lectures', key: 'lecture_id' }
         },
         resource_id: {
             type: DataTypes.UUID,
             primaryKey: true,
-            allowNull: false
+            allowNull: false,
+            references: { model: 'resources', key: 'resource_id' }
         },
         created_at: {
             type: DataTypes.DATE,

@@ -2,84 +2,173 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 function TrainerNewSchedule() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { id: userId } = useParams();
-    const isEditMode = !!userId;
+    const { event_id } = useParams();
+    const isEditMode = !!event_id;
+
     const token = localStorage.getItem("authToken");
+    const decoded = token ? jwtDecode(token) : {};
+    const headers = { Authorization: `Bearer ${token}` };
 
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         batch_id: "",
-        event_type: "", // 'module_session' or 'lecture'
+        event_type: "",
         module_id: "",
         lecture_id: "",
         date: "",
         start_time: "",
         end_time: "",
+        module_start_date: "",
+        module_end_date: "",
+        is_all_day: false,
         is_recurring: false,
-        repetition: "", // 'Daily', 'Weekly', 'Monthly'
-        weekly_days: [], // Store Mon-Fri
-        monthly_date: ""  // Store day of month
+        repetition: "",
+        weekly_days: [],
+        monthly_date: ""
     });
 
     const [batches, setBatches] = useState([]);
     const [modules, setModules] = useState([]); // Fetch based on batch
+    const [selectedBatch, setSelectedBatch] = useState(null);
     const [lectures, setLectures] = useState([]); // Fetch based on module
-    const [isLoadingModules, setIsLoadingModules] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    //Logic to fetch modules when batch_id changes
-    useEffect(() => {
-        const fetchModulesForBatch = async () => {
-            if (!formData.batch_id) {
-                setModules([]);
-                return;
-            }
-
-            setIsLoadingModules(true);
-            try {
-                // Adjust this URL to your actual API endpoint for modules by batch
-                const res = await fetch(`http://localhost:5000/api/modules/batch/${formData.batch_id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error("No modules found");
-                const data = await res.json();
-                setModules(data);
-            } catch (err) {
-                console.error("Module fetch error:", err);
-                setModules([]); // Reset if error or none found
-            } finally {
-                setIsLoadingModules(false);
-            }
-        };
-
-        fetchModulesForBatch();
-    }, [formData.batch_id, token]);
-
-    // --- FETCH BATCHES ---
+    /* -----------------------------
+       Fetch Batches
+    ----------------------------- */
     useEffect(() => {
         const fetchBatches = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/batches/dropdown", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                setBatches(data);
-            } catch (err) { console.error(err); }
+                const res = await axios.get("/api/batches/dropdown", { headers });
+                setBatches(res.data || []);
+            } catch (err) {
+                console.error("Failed to fetch batches:", err);
+                setBatches([]);
+            }
         };
         fetchBatches();
-    }, [token]);
+    }, []);
 
-    // --- HANDLERS ---
+    /* -----------------------------
+   Fetch Modules & Lectures for Batch
+----------------------------- */
+    const fetchModulesAndLectures = async (batchId) => {
+        if (!batchId) {
+            setModules([]);
+            setLectures([]);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Use the backend endpoint we just created
+            const res = await axios.get(`${API_BASE}/api/lectures/batch/${batchId}`, { headers });
+
+            // Set independent arrays
+            setModules(res.data.modules || []);
+            setLectures(res.data.lectures || []);
+
+        } catch (err) {
+            console.error("Failed to fetch modules or lectures for batch", err);
+            setModules([]);
+            setLectures([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    /* -----------------------------
+       Fetch event data if editing
+    ----------------------------- */
+    useEffect(() => {
+        if (!event_id) return;
+
+        const fetchEvent = async () => {
+            try {
+                const res = await axios.get(`/api/calendar/${event_id}`, { headers });
+                const data = res.data;
+
+                setFormData(prev => ({
+                    ...prev,
+                    ...data,
+                    batch_id: data.batch_id || "",
+                    module_id: data.module_id || "",
+                    lecture_id: data.lecture_id || "",
+                    date: data.date?.split("T")[0] || "",
+                    start_time: data.start_time?.split("T")[1]?.slice(0, 5) || "",
+                    end_time: data.end_time?.split("T")[1]?.slice(0, 5) || "",
+                }));
+
+                if (data.batch_id) await fetchModulesAndLectures(data.batch_id);
+            } catch (err) {
+                console.error("Failed to fetch event", err);
+            }
+        };
+
+        fetchEvent();
+    }, [event_id]);
+
+    /* -----------------------------
+       Handlers
+    ----------------------------- */
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value
         }));
+    };
+
+    const handleBatchChange = async (e) => {
+        const batchId = e.target.value;
+        setFormData(prev => ({ ...prev, batch_id: batchId, module_id: "", lecture_id: "" }));
+        await fetchModulesAndLectures(batchId);
+    };
+
+    const handleModuleChange = (e) => {
+        const moduleId = e.target.value;
+        setFormData(prev => ({ ...prev, module_id: moduleId, lecture_id: "" }));
+
+        // Filter lectures to show only those under selected module
+        const filteredLectures = lectures.filter(l => l.module?.module_id === moduleId);
+        setLectures(filteredLectures);
+    };
+
+    const handleLectureChange = (e) => {
+        const lectureId = e.target.value;
+        const selectedLecture = lectures.find(l => l.lecture_id === lectureId);
+
+        let lectureDate = "";
+
+        if (selectedLecture) {
+            // Use lecture start_date if available
+            if (selectedLecture.start_date) {
+                lectureDate = selectedLecture.start_date.split("T")[0];
+            }
+            // Otherwise, fallback to module start_date
+            else if (selectedLecture.module?.start_date) {
+                lectureDate = selectedLecture.module.start_date.split("T")[0];
+            }
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            lecture_id: lectureId,
+            module_id: selectedLecture?.module_id || "",
+            date: lectureDate,
+        }));
+    };
+
+
+    const handleTimeChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleDayChange = (day) => {
@@ -91,11 +180,91 @@ function TrainerNewSchedule() {
         }));
     };
 
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting Payload:", formData);
-        // Logic to combine date + time and send to backend
+
+        try {
+            // 1️⃣ Determine event_date from lecture → module fallback
+            let eventDate = formData.date; // default from date picker
+
+            if (formData.lecture_id) {
+                const lecture = lectures.find(l => l.lecture_id === formData.lecture_id);
+                eventDate = lecture?.start_date || lecture?.module?.start_date || "";
+            } else if (formData.module_id) {
+                const module = modules.find(m => m.module_id === formData.module_id);
+                eventDate = module?.start_date || "";
+            }
+
+            if (!eventDate) {
+                return alert("No start date found for selected lecture/module.");
+            }
+
+            // 2️⃣ Convert start_time and end_time to valid ISO strings
+            let startTimeISO = null;
+            let endTimeISO = null;
+
+            if (formData.is_all_day) {
+                startTimeISO = new Date(`${eventDate}T00:00:00`).toISOString();
+                endTimeISO = new Date(`${eventDate}T23:59:59`).toISOString();
+            } else {
+                if (formData.start_time && formData.end_time) {
+                    startTimeISO = new Date(`${eventDate}T${formData.start_time}`).toISOString();
+                    endTimeISO = new Date(`${eventDate}T${formData.end_time}`).toISOString();
+                } else {
+                    return alert("Start and end time are required for non-all-day events.");
+                }
+            }
+
+            // 3️⃣ Build payload
+            const payload = {
+                title: formData.title,
+                description: formData.description || null,
+                batch_id: formData.batch_id,
+                event_type: formData.event_type,
+                event_date: eventDate,
+                start_time: startTimeISO,
+                end_time: endTimeISO,
+                is_all_day: formData.is_all_day || false,
+                is_recurring: formData.is_recurring || false,
+                recurrence_rule: null,
+                module_id: ["module_session", "lecture", "assessments"].includes(formData.event_type) ? formData.module_id : null,
+                lecture_id: formData.event_type === "lecture" ? formData.lecture_id : null,
+                created_by: decoded?.user_id || null,
+            };
+
+            // 4️⃣ Build recurrence_rule if recurring
+            if (formData.is_recurring) {
+                if (formData.repetition === "Daily") payload.recurrence_rule = "FREQ=DAILY";
+                else if (formData.repetition === "Weekly") {
+                    const days = formData.weekly_days.map(d => d.slice(0, 2).toUpperCase());
+                    payload.recurrence_rule = `FREQ=WEEKLY;BYDAY=${days.join(",")}`;
+                } else if (formData.repetition === "Monthly") {
+                    payload.recurrence_rule = `FREQ=MONTHLY;BYMONTHDAY=${formData.monthly_date}`;
+                }
+            }
+
+            // 5️⃣ Determine API method and URL
+            const method = isEditMode ? "put" : "post";
+            console.log(method);
+            const url = isEditMode ? `${API_BASE}/api/schedules/${event_id}` : `${API_BASE}/api/schedules`;
+
+            // 6️⃣ Send request
+            const res = await axios({ method, url, data: payload, headers });
+            alert(res.data.message || "Schedule saved successfully!");
+            navigate("/trainer/calendar");
+
+        } catch (err) {
+            console.error("Submit Error:", err);
+            console.log(err);
+            alert(err.response?.data?.error || "Failed to save schedule");
+        }
     };
+
+    const showTimeFields =
+        ["module_session", "lecture", "assessments", "events"].includes(formData.event_type) &&
+        !(formData.event_type === "events" && formData.is_all_day);
 
     // --- RENDER ---
     return (
@@ -113,7 +282,7 @@ function TrainerNewSchedule() {
                         <label className="col-sm-3 col-form-label">{t("schedule.title")}
                         </label>
                         <div className="col-sm-9">
-                            <input name="title" type="text" className="form-control" onChange={handleChange} required placeholder={t("schedule.title_placeholder")} />
+                            <input name="title" type="text" className="form-control" value={formData.title} onChange={handleChange} required placeholder={t("schedule.title_placeholder")} />
                         </div>
                     </div>
 
@@ -121,8 +290,13 @@ function TrainerNewSchedule() {
                     <div className="row mb-3">
                         <label className="col-sm-3 col-form-label">{t("schedule.title_placeholder")} </label>
                         <div className="col-sm-9">
-                            <textarea type="text" class="form-control" placeholder={t("schedule.description")} aria-label="Description">
-                            </textarea>
+                            <textarea
+                                name="description"
+                                className="form-control"
+                                placeholder={t("schedule.description")}
+                                value={formData.description}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
 
@@ -130,34 +304,19 @@ function TrainerNewSchedule() {
                     <div className="row mb-3">
                         <label className="col-sm-3 col-form-label">{t("schedule.batch")} </label>
                         <div className="col-sm-9">
-                            <select name="batch_id"
+                            <select
+                                name="batch_id"
                                 className="form-select"
-                                onChange={handleChange}
                                 value={formData.batch_id}
-                                required>
-
+                                onChange={handleBatchChange}
+                                required
+                            >
                                 <option value="">{t("schedule.select_batch")}</option>
-
-                                {batches.map((b) => {
-                                    // LOGIC: Disable if there are no quarters assigned
-                                    // Based on your controller, we check if qCount is 0 or isDisabled is true
-                                    const hasNoQuarters = b.qCount === 0 || !b.curriculum_id;
-                                    const isCurrentlySelected = formData.batch_id === b.batch_id;
-
-                                    // Only disable if it's not the one already saved (for Edit Mode)
-                                    const isDisabled = hasNoQuarters && !isCurrentlySelected;
-
-                                    return (
-                                        <option
-                                            key={b.batch_id}
-                                            value={b.batch_id}
-                                            disabled={isDisabled}
-                                            style={isDisabled ? { color: '#a0a0a0', backgroundColor: '#f8f9fa' } : {}}
-                                        >
-                                            {b.name} {b.location} {isDisabled ? ` — ${t("schedule.no_quarters")}` : ""}
-                                        </option>
-                                    );
-                                })}
+                                {batches.map(batch => (
+                                    <option key={batch.batch_id} value={batch.batch_id}>
+                                        {batch.name} ({batch.location})
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -183,116 +342,143 @@ function TrainerNewSchedule() {
                         </div>
                     </div>
 
-                    {/* Conditional Dropdown: Module */}
+                    {/* Module Dropdown */}
                     {formData.event_type === "module_session" && (
-                        <div className="row mb-3 animate-fade">
+                        <div className="row mb-3">
                             <label className="col-sm-3 col-form-label">{t("schedule.select_module")}</label>
                             <div className="col-sm-9">
-                                <select name="module_id" className="form-select" onChange={handleChange} required>
+                                <select
+                                    name="module_id"
+                                    className="form-select"
+                                    value={formData.module_id}
+                                    onChange={handleModuleChange}
+                                    required
+                                >
                                     <option value="">{t("schedule.choose_module")}</option>
-                                    {/* Map modules here */}
+                                    {modules.map(m => (
+                                        <option key={m.module_id} value={m.module_id}>
+                                            {m.title}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
                     )}
 
-                    {/* Conditional Dropdown: Lecture */}
+                    {/* Lecture Dropdown */}
                     {formData.event_type === "lecture" && (
-                        <div className="row mb-3 animate-fade">
+                        <div className="row mb-3">
                             <label className="col-sm-3 col-form-label">{t("schedule.select_lecture")}</label>
                             <div className="col-sm-9">
-                                <select name="lecture_id" className="form-select" onChange={handleChange} required>
+                                <select
+                                    name="lecture_id"
+                                    className="form-select"
+                                    value={formData.lecture_id}
+                                    onChange={handleLectureChange}
+                                    required
+                                >
                                     <option value="">{t("schedule.choose_lecture")}</option>
-                                    {/* Map lectures here */}
+                                    {lectures.map(l => (
+                                        <option key={l.lecture_id} value={l.lecture_id}>
+                                            {l.title} ({l.module?.title || "No Module"})
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
-                            x</div>
+                        </div>
                     )}
-
                     <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 
-                    {/* Start Date & End Date */}
-                    <div className="row mb-3 mt-3">
-                        <label htmlFor="date" className="col-sm-3 col-form-label" style={styles.label}>
-                            {t("schedule.date")}
-                        </label>
-                        <div className="col-sm-9">
-                            <input
-                                id="date"
-                                type="date"
-                                className="form-control date-input"
-                                name="date"
-                                value={formData.date}
-                                onChange={handleChange}
-                                onClick={(e) => e.target.showPicker()}
-                                required
-                            />
+                    {/* All Day Radio */}
+                    {formData.event_type === "holiday" || formData.event_type === "events" ? (
+                        <div className="mb-3 d-flex">
+                            <div className="form-check">
+                                <input
+                                    type="radio"
+                                    className="form-check-input"
+                                    id="allDayRadio"
+                                    name="is_all_day"
+                                    checked={formData.is_all_day}
+                                    onClick={() => setFormData(prev => ({ ...prev, is_all_day: !prev.is_all_day }))}
+                                    onChange={() => { }}
+                                />
+                                <label className="form-check-label" htmlFor="allDayRadio">
+                                    All Day
+                                </label>
+                            </div>
                         </div>
-                    </div>
+                    ) : null}
 
-                    <div className="row mb-3">
-                        <label htmlFor="start_time" className="col-sm-3 col-form-label" style={styles.label}>
-                            {t("schedule.start_time")}
-                        </label>
-                        <div className="col-sm-9 position-relative">
-                            <input
-                                id="start_time"
-                                type="time"
-                                className="form-control pe-5" // padding-right for icon
-                                name="start_time"
-                                value={formData.start_time}
-                                onChange={handleChange}
-                                onClick={(e) => e.target.showPicker()}
-                                required
-                            />
-                            {/* Clock icon on the right */}
-                            <span
-                                className="position-absolute"
-                                style={{
-                                    right: "25px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    pointerEvents: "none",
-                                    color: "#6c757d",
-                                    fontSize: "1rem",
-                                }}
-                            >
-                                <i className="bi bi-clock"></i>
-                            </span>
-                        </div>
-                    </div>
+                    {/* Start / End Time */}
+                    {showTimeFields && (
+                        <>
+                            <div className="row mb-3">
+                                <label htmlFor="start_time" className="col-sm-3 col-form-label" style={styles.label}>
+                                    {t("schedule.start_time")}
+                                </label>
+                                <div className="col-sm-9 position-relative">
+                                    <input
+                                        id="start_time"
+                                        type="time"
+                                        className="form-control pe-5" // padding-right for icon
+                                        name="start_time"
+                                        value={formData.start_time}
+                                        onChange={e => handleTimeChange("start_time", e.target.value)}
+                                        disabled={formData.is_all_day} // disable if all-day selected
+                                        onClick={(e) => e.target.showPicker()}
+                                        required
+                                    />
+                                    {/* Clock icon on the right */}
+                                    <span
+                                        className="position-absolute"
+                                        style={{
+                                            right: "25px",
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            pointerEvents: "none",
+                                            color: "#6c757d",
+                                            fontSize: "1rem",
+                                        }}
+                                    >
+                                        <i className="bi bi-clock"></i>
+                                    </span>
+                                </div>
+                            </div>
 
-                    <div className="row mb-3">
-                        <label htmlFor="end_time" className="col-sm-3 col-form-label" style={styles.label}>
-                            {t("schedule.end_time")}
-                        </label>
-                        <div className="col-sm-9 position-relative">
-                            <input
-                                id="end_time"
-                                type="time"
-                                className="form-control pe-5" // padding-right for icon
-                                name="end_time"
-                                value={formData.end_time}
-                                onChange={handleChange}
-                                onClick={(e) => e.target.showPicker()}
-                                required
-                            />
-                            {/* Clock icon on the right */}
-                            <span
-                                className="position-absolute"
-                                style={{
-                                    right: "25px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    pointerEvents: "none",
-                                    color: "#6c757d",
-                                    fontSize: "1rem",
-                                }}
-                            >
-                                <i className="bi bi-clock"></i>
-                            </span>
-                        </div>
-                    </div>
+                            <div className="row mb-3">
+                                <label htmlFor="end_time" className="col-sm-3 col-form-label" style={styles.label}>
+                                    {t("schedule.end_time")}
+                                </label>
+                                <div className="col-sm-9 position-relative">
+                                    <input
+                                        id="end_time"
+                                        type="time"
+                                        className="form-control pe-5" // padding-right for icon
+                                        name="end_time"
+                                        value={formData.end_time}
+                                        onChange={e => handleTimeChange("end_time", e.target.value)}
+                                        disabled={formData.is_all_day} // disable if all-day selected
+                                        onClick={(e) => e.target.showPicker()}
+                                        required
+                                    />
+                                    {/* Clock icon on the right */}
+                                    <span
+                                        className="position-absolute"
+                                        style={{
+                                            right: "25px",
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            pointerEvents: "none",
+                                            color: "#6c757d",
+                                            fontSize: "1rem",
+                                        }}
+                                    >
+                                        <i className="bi bi-clock"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <div style={{ borderBottom: "2px solid #ccc", margin: "8px 0" }}></div>
 

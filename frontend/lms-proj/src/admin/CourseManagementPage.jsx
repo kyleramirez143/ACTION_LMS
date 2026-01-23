@@ -230,8 +230,8 @@ export default function CourseManagementPage() {
                     ) : (
                         <p className="text-muted mb-3">{t("course_management.no_courses_desc")}</p>
                     )}
-                    
-                    {userRole === "Admin" && !selectedBatch &&  (
+
+                    {userRole === "Admin" && !selectedBatch && (
                         <button
                             className="btn btn-primary"
                             onClick={() => navigate("/admin/course-management/create")}
@@ -360,9 +360,12 @@ export default function CourseManagementPage() {
                                                         .join(", ")
                                                     : t("course_management.no_trainers")}
                                             </p>
+                                            <p className="card-text mb-0">
+                                                <strong>Location:</strong>{" "}
+                                                {batches.find(b => String(b.batch_id) === String(course.batch_id))?.location || "No location"}
+                                            </p>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         ))}

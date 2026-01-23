@@ -176,9 +176,7 @@
         "cancel": "Cancel",
         "no_data": "No data available for the selected batch.",
         "delete_confirmation": "Delete {{count}} modules?",
-        "generic_error": "Something went wrong. Please try again.",
-        "title_default": "Module Management",
-        "module_period": "Module Period"
+        "generic_error": "Something went wrong. Please try again."
     },
     "module": {
         "loading": "Loading module data...",
@@ -210,6 +208,8 @@
         "upcoming": "Upcoming"
     },
     "lecture": {
+        "courses": "Courses",
+        "modules": "Modules",
         "add": "Add Lecture",
         "loading": "Loading lectures...",
         "empty_trainer": "No lectures yet. Click \"Add Lecture\" to create one.",
@@ -273,7 +273,7 @@
         "save_failed": "Failed to save quiz.",
         "review_publish_failed": "Failed to go to Review & Publish page.",
         "discard_failed": "Discard failed.",
-        "generator_title": "ACTION LMS AI Quiz Generator",
+        "generator_title": "📘 AI Quiz Generator",
         "upload_pdf": "Upload PDF",
         "title_label": "Quiz Title",
         "title_placeholder": "Enter quiz title",
@@ -312,7 +312,7 @@
         "review_publish": "Review & Publish",
         "enter_question": "Please enter a question.",
         "discard": "Discard",
-        "manual_input": "Manual Quiz Input",
+        "manual_input": "📘 Manual Quiz Input",
         "quiz_title": "Quiz Title",
         "quiz_type": "Quiz Type",
         "assessment_type": "Assessment Type",
@@ -382,7 +382,8 @@
         "take_quiz": "Take Quiz",
         "expired": "Quiz Expired",
         "limit_reached": "Limit Reached",
-        "add_choice": "Add Choice"
+        "add_choice": "Add Choice",
+        "passing_score": "Passing Score"
     },
     "proctor": {
         "quiz_result": "Quiz Result",
@@ -500,7 +501,9 @@
         "business_courses": "Business/Softskill Courses",
         "philnits_exam": "PhilNITS FE Official Exam",
         "jplt_exam": "JPLT N4 Official Exam",
-        "closing_batch": "Closing - {{batch}}"
+        "closing_batch": "Closing - {{batch}}",
+        "all_courses": "All Courses",
+        "all_modules": "All Modules"
     },
     "subjects": {
         "Nihongo": "Nihongo",
@@ -938,5 +941,14 @@
         "homework": "Homework",
         "work_etiquette": "Work Etiquette",
         "oral_1": "Oral 1"
+    },
+    "quarters": {
+        "title_default": "Quarter Management",
+        "quarter": "Quarter",
+        "no_batches_yet": "No batches or periods yet",
+        "start_create": "Start creating batches and assigning periods.",
+        "set_quarter": "Set Quarter",
+        "no_periods": "No periods yet.",
+        "no_assigned": "This batch does not have any assigned period yet."
     }
 }

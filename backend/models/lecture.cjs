@@ -1,3 +1,5 @@
+const { DATEONLY } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
     const Lecture = sequelize.define("Lecture", {
         lecture_id: {
@@ -31,7 +33,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         description: {
             type: DataTypes.STRING(255),
-            allowNull: true
+            allowNull: true,
+        },
+        start_date: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+        end_date: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
 
     }, {
@@ -53,8 +63,8 @@ module.exports = (sequelize, DataTypes) => {
 
         Lecture.belongsToMany(models.Resource, {
             through: models.LectureResource,
-            foreignKey: 'lecture_id',
-            otherKey: 'resource_id',
+            foreignKey: 'lecture_id',      // column in LectureResource pointing to Lecture
+            otherKey: 'resource_id',      // column in LectureResource pointing to Resource
             as: 'resources'
         });
 

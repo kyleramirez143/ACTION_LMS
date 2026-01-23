@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@schedule-x/calendar": "^3.5.1",
-    "@schedule-x/events-service": "^3.5.1",
-    "@schedule-x/react": "^3.5.0",
-    "@schedule-x/theme-default": "^3.5.1",
+    "@schedule-x/calendar": "^3.7.2",
+    "@schedule-x/events-service": "^3.7.2",
+    "@schedule-x/react": "^3.7.0",
+    "@schedule-x/theme-default": "^3.7.2",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "bootstrap-datepicker": "^1.10.1",

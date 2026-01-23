@@ -98,11 +98,11 @@ export default function TraineeAssessment() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredResults = normalizedSearch
     ? assessmentData.filter(
-        (r) =>
-          r.title.toLowerCase().includes(normalizedSearch) ||
-          r.status.toLowerCase().includes(normalizedSearch) ||
-          r.feedback.toLowerCase().includes(normalizedSearch)
-      )
+      (r) =>
+        r.title.toLowerCase().includes(normalizedSearch) ||
+        r.status.toLowerCase().includes(normalizedSearch) ||
+        r.feedback.toLowerCase().includes(normalizedSearch)
+    )
     : assessmentData;
 
   const totalPages = Math.max(1, Math.ceil(filteredResults.length / itemsPerPage));
@@ -136,133 +136,136 @@ export default function TraineeAssessment() {
   // RENDER
   // ----------------------
   return (
-    <div className="assessment-wrapper">
-      <div className="assessment-content">
+    <div className="user-role-card">
+      <div className="d-flex justify-content-between align-items-center mb-4">
         {/* HEADER */}
-        <div className="title-back-row">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => navigate(-1)}
-            aria-label={t("assessment.back")}
-          >
-            <ArrowLeft size={20} strokeWidth={2.2} />
-          </button>
-          <h2 className="page-title">{t("assessment.title")}</h2>
+        {/* LEFT SIDE: BACK + TITLE */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <h3 className="section-title">{t("assessment.title")}</h3>
         </div>
 
-        {/* ===== Dashboard Table ===== */}
-        <div className="white-card">
-          {/* SEARCH */}
-          <div className="filter-controls">
-            <div className="search-box">
-              <Search size={20} className="search-icon" />
-              <input
-                type="text"
-                placeholder={t("assessment.search_placeholder")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
+        {/* RIGHT SIDE: SEARCH */}
+        <div
+          className="filter-controls"
+          style={{
+            display: "flex",
+            alignItems: "center", // 🔑 center search vertically
+          }}
+        >
+          <input
+            type="text"
+            className="form-control"
+            style={{ minWidth: "300px" }}
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
-          <div className="results-table-scroll">
-            <table className="results-table">
-              <thead>
-                <tr>
-                  <th>{t("assessment.course")}</th>
-                  <th>{t("assessment.module")}</th>
-                  <th>{t("assessment.quiz_title")}</th>
-                  <th>{t("assessment.score")}</th>
-                  <th>{t("assessment.status")}</th>
-                  <th>{t("assessment.feedback")}</th>
-                  <th>{t("assessment.date")}</th>
-                </tr>
-              </thead>
+      <div className="results-table-scroll">
+        <table className="results-table">
+          <thead>
+            <tr>
+              <th>{t("assessment.course")}</th>
+              <th>{t("assessment.module")}</th>
+              <th>{t("assessment.quiz_title")}</th>
+              <th>{t("assessment.score")}</th>
+              <th>{t("assessment.status")}</th>
+              <th>{t("assessment.feedback")}</th>
+              <th>{t("assessment.date")}</th>
+            </tr>
+          </thead>
 
-              <tbody>
-                {loadingDashboard ? (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>
-                      {t("assessment.loading_results")}
-                    </td>
-                  </tr>
-                ) : displayedResults.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>
-                      {t("assessment.no_records")}
-                    </td>
-                  </tr>
-                ) : (
-                  displayedResults.map((r) => (
-                    <tr key={r.attempt_id}>
-                      <td>{r.course}</td>
-                      <td>{r.module}</td>
-                      <td>
-                        <button
-                          className="title-link text-primary text-decoration-underline"
-                          type="button"
-                          onClick={() =>
-                            openAssessment(r.assessment_id, r.attempt_id)
-                          }
-                        >
-                          {r.title}
-                        </button>
-                      </td>
-                      <td>{r.score}</td>
-                      <td>
-                        <span className={`status-pill ${statusClass[r.status] || ""}`}>
-                          {t(`assessment.statuses.${r.status.toLowerCase()}`)}
-                        </span>
-                      </td>
-                      <td>{r.feedback}</td>
-                      <td>{new Date(r.date).toLocaleDateString()}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* PAGINATION */}
-          <div className="pagination-wrapper">
-            <nav>
-              <ul className="pagination custom-pagination">
-                {/* PREV */}
-                <li className="page-item">
-                  <button className="page-link" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-                    ‹
-                  </button>
-                </li>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li
-                    key={i}
-                    className={`page-item ${
-                      currentPage === i + 1 ? "active" : ""
-                    }`}
-                  >
+          <tbody>
+            {loadingDashboard ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  {t("assessment.loading_results")}
+                </td>
+              </tr>
+            ) : displayedResults.length === 0 ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  {t("assessment.no_records")}
+                </td>
+              </tr>
+            ) : (
+              displayedResults.map((r) => (
+                <tr key={r.attempt_id}>
+                  <td>{r.course}</td>
+                  <td>{r.module}</td>
+                  <td>
                     <button
-                      className="page-link"
-                      onClick={() => goToPage(i + 1)}
+                      className="title-link text-primary text-decoration-underline"
+                      type="button"
+                      onClick={() =>
+                        openAssessment(r.assessment_id, r.attempt_id)
+                      }
                     >
-                      {i + 1}
+                      {r.title}
                     </button>
-                  </li>
-                ))}
+                  </td>
+                  <td>{r.score}</td>
+                  <td>
+                    <span className={`status-pill ${statusClass[r.status] || ""}`}>
+                      {t(`assessment.statuses.${r.status.toLowerCase()}`)}
+                    </span>
+                  </td>
+                  <td>{r.feedback}</td>
+                  <td>{new Date(r.date).toLocaleDateString()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-                <li className="page-item">
-                  <button className="page-link" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                    ›
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
+      {/* PAGINATION */}
+      <div className="pagination-wrapper">
+        <nav>
+          <ul className="pagination custom-pagination">
+            {/* PREV */}
+            <li className="page-item">
+              <button className="page-link" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+                ‹
+              </button>
+            </li>
 
-        {/* ===== Review Page Questions ===== */}
-        {loadingReview ? (
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li
+                key={i}
+                className={`page-item ${currentPage === i + 1 ? "active" : ""
+                  }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => goToPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+
+            <li className="page-item">
+              <button className="page-link" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                ›
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+
+      {/* ===== Review Page Questions ===== */}
+      {
+        loadingReview ? (
           <div className="p-4">{t("review.loading")}</div>
         ) : quizData.length > 0 && currentQ ? (
           <div className="review-section mt-4">
@@ -347,9 +350,9 @@ export default function TraineeAssessment() {
 
             </div>
           </div>
-        ) : null}
+        ) : null
+      }
 
-      </div>
-    </div>
+    </div >
   );
 }
