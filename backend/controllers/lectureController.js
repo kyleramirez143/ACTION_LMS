@@ -81,6 +81,7 @@ export const uploadLectureFile = async (req, res) => {
                     file_url: file.filename,
                     display_name: file.originalname,
                     content_type: file.mimetype,
+                    is_visible: true,
                 });
 
                 await LectureResource.create({

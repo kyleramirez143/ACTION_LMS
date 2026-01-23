@@ -292,7 +292,7 @@ export default function LectureForm() {
 
   // --- Delete Lecture ---
   const handleDelete = async () => {
-    if (window.confirm(t("lecture.confirm_delete", { title }))) return;
+    if (!window.confirm(t("lecture.confirm_delete", { title }))) return;
 
     setIsSubmitting(true);
     try {
