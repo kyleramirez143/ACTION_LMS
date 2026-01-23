@@ -8,7 +8,7 @@ import defaultImage from "../image/logo.png";
 import moduleImage from "../image/module.svg"; // <-- added
 
 const getInitialModules = (modulesFromApi) => {
-    return modulesFromApi.map(module => ({
+    return modulesFromApi.map((module) => ({
         ...module,
         is_visible: module.is_visible !== undefined ? module.is_visible : true,
     }));
@@ -38,7 +38,7 @@ export default function ModuleManagement() {
             const decoded = jwtDecode(token);
             const roles = decoded.roles || [];
             const allowedRoles = ["Trainer", "Trainee"];
-            const role = roles.find(r => allowedRoles.includes(r));
+            const role = roles.find((r) => allowedRoles.includes(r));
             if (!role) return navigate("/access-denied");
             setUserRole(role);
         } catch (err) {
@@ -139,17 +139,17 @@ export default function ModuleManagement() {
 
     const handleDropdownToggle = (e, moduleId) => {
         e.stopPropagation();
-        setOpenDropdownId(prev => prev === moduleId ? null : moduleId);
+        setOpenDropdownId((prev) => (prev === moduleId ? null : moduleId));
     };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (openDropdownId !== null && !event.target.closest('.dropdown')) {
+            if (openDropdownId !== null && !event.target.closest(".dropdown")) {
                 setOpenDropdownId(null);
             }
         };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
     }, [openDropdownId]);
 
     // -------------------------------
@@ -158,38 +158,64 @@ export default function ModuleManagement() {
     if (loading) return <p className="text-center py-5">Loading modules...</p>;
 
     return (
-        <div className="container px-4 py-0">
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <div className="title-back-row p-0 m-0">
-                    <button
-                        type="button"
-                        className="back-btn"
-                        onClick={() => {
-                            if (userRole === "Trainee") {
-                                navigate(`/trainee/courses`);
-                            } else {
-                                navigate(`/trainer/course-management`);
-                            }
-                        }}
-                        aria-label="Go back"
-                    >
-                        <ArrowLeft size={20} strokeWidth={2.2} />
-                    </button>
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+            {/* ---------------- Header: Breadcrumb + Title + Trainer Buttons ---------------- */}
+            {/* Breadcrumb */}
+            <nav
+                style={{ "--bs-breadcrumb-divider": "'>'" }}
+                aria-label="breadcrumb"
+            >
+                <ol className="breadcrumb mb-1" style={{ backgroundColor: "transparent" }}>
+                    <li className="breadcrumb-item">
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (userRole === "Trainee") navigate(`/trainee/courses`);
+                                else navigate(`/trainer/course-management`);
+                            }}
+                            style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
+                        >
+                            Assigned Course
+                        </a>
+                    </li>
+                    <li className="breadcrumb-item active" aria-current="page">
+                        <span style={{ fontWeight: 500, color: "#1E1E1E" }}>
+                            {courseTitle || "Course"}
+                        </span>
+                    </li>
+                </ol>
+            </nav>
 
-                    <h3 className="mb-0">{courseTitle}</h3>
-                </div>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                {/* Course Title */}
+                <h3 className="mb-0">{courseTitle}</h3>
+
+                {/* Trainer Buttons */}
                 {userRole === "Trainer" && (
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
-                    >
-                        Add New Module
-                    </button>
+                    <div className="d-flex gap-2 mt-2">
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={() =>
+                                navigate(`/trainer/${course_id}/add-new-schedule`)
+                            }
+                        >
+                            Add Schedule
+                        </button>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() =>
+                                navigate(`/trainer/${course_id}/modules/create`)
+                            }
+                        >
+                            Add New Module
+                        </button>
+                    </div>
                 )}
             </div>
 
-            {/* Empty */}
+            {/* ---------------- Modules Grid ---------------- */}
             {modulesData.length === 0 ? (
                 <div className="d-flex flex-column align-items-center justify-content-center py-5">
                     <img
@@ -212,12 +238,10 @@ export default function ModuleManagement() {
                 </div>
             ) : (
                 <>
-                    {/* Grid */}
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-                        {pagedModules.map(module => (
+                        {pagedModules.map((module) => (
                             <div className="col" key={module.module_id}>
                                 <div className="card h-100 shadow-sm d-flex flex-column position-relative">
-
                                     {/* STATUS BADGE */}
                                     {userRole === "Trainer" && (
                                         <span
@@ -225,39 +249,73 @@ export default function ModuleManagement() {
                                             style={{ fontSize: '0.75rem', zIndex: 10 }}
                                             onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >
-                                            {module.is_visible ? 'Visible' : 'Hidden'}
+                                            {module.is_visible ? "Visible" : "Hidden"}
                                         </span>
                                     )}
 
-                                    {/* Dropdown (Trainer only) */}
+                                    {/* Dropdown */}
                                     {userRole === "Trainer" && (
-                                        <div className="dropdown position-absolute" style={{ zIndex: 10, top: '0.25rem', right: '0.25rem' }}>
+                                        <div
+                                            className="dropdown position-absolute"
+                                            style={{ zIndex: 10, top: "0.25rem", right: "0.25rem" }}
+                                        >
                                             <div
                                                 className="text-dark p-2"
                                                 role="button"
-                                                onClick={(e) => handleDropdownToggle(e, module.module_id)}
-                                                style={{ cursor: 'pointer', backgroundColor: openDropdownId === module.module_id ? 'rgba(0,0,0,0.05)' : 'transparent', borderRadius: '50%' }}
+                                                onClick={(e) =>
+                                                    handleDropdownToggle(e, module.module_id)
+                                                }
+                                                style={{
+                                                    cursor: "pointer",
+                                                    backgroundColor:
+                                                        openDropdownId === module.module_id
+                                                            ? "rgba(0,0,0,0.05)"
+                                                            : "transparent",
+                                                    borderRadius: "50%",
+                                                }}
                                             >
                                                 <i className="bi bi-three-dots-vertical fs-5"></i>
                                             </div>
                                             <ul
-                                                className={`dropdown-menu dropdown-menu-end ${openDropdownId === module.module_id ? 'show' : ''}`}
-                                                style={{ position: 'absolute', inset: '0px 0px auto auto', transform: 'translate(0px, 40px)' }}
+                                                className={`dropdown-menu dropdown-menu-end ${openDropdownId === module.module_id ? "show" : ""
+                                                    }`}
+                                                style={{
+                                                    position: "absolute",
+                                                    inset: "0px 0px auto auto",
+                                                    transform: "translate(0px, 40px)",
+                                                }}
                                             >
                                                 <li>
-                                                    <button className="dropdown-item" onClick={(e) => handleEditClick(e, module.module_id)}>
+                                                    <button
+                                                        className="dropdown-item"
+                                                        onClick={(e) => handleEditClick(e, module.module_id)}
+                                                    >
                                                         <i className="bi bi-pencil me-2"></i> Edit Module
                                                     </button>
                                                 </li>
                                                 {module.is_visible ? (
                                                     <li>
-                                                        <button className="dropdown-item text-danger" onClick={(e) => handleToggleVisibility(e, module.module_id, false)}>
+                                                        <button
+                                                            className="dropdown-item text-danger"
+                                                            onClick={(e) =>
+                                                                handleToggleVisibility(
+                                                                    e,
+                                                                    module.module_id,
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
                                                             <i className="bi bi-eye-slash me-2"></i> Make Hidden
                                                         </button>
                                                     </li>
                                                 ) : (
                                                     <li>
-                                                        <button className="dropdown-item text-success" onClick={(e) => handleToggleVisibility(e, module.module_id, true)}>
+                                                        <button
+                                                            className="dropdown-item text-success"
+                                                            onClick={(e) =>
+                                                                handleToggleVisibility(e, module.module_id, true)
+                                                            }
+                                                        >
                                                             <i className="bi bi-eye me-2"></i> Make Visible
                                                         </button>
                                                     </li>
@@ -266,23 +324,49 @@ export default function ModuleManagement() {
                                         </div>
                                     )}
 
-                                    {/* Card content (clickable) */}
-                                    <div onClick={() => navigate(`/${course_id}/modules/${module.module_id}/lectures`)} style={{ cursor: "pointer", flexGrow: 1 }}>
+                                    {/* Card content */}
+                                    <div
+                                        onClick={() =>
+                                            navigate(`/${course_id}/modules/${module.module_id}/lectures`)
+                                        }
+                                        style={{ cursor: "pointer", flexGrow: 1 }}
+                                    >
                                         <div className="p-3">
-                                            <div className="bg-light rounded overflow-hidden" style={{ aspectRatio: "16/9", border: "1px solid #dee2e6", padding: "0.5rem" }}>
-                                                <img src={module.image ? `/uploads/images/${module.image}` : defaultImage} alt={`${module.title} cover`} className="w-100 h-100 rounded" style={{ objectFit: "cover" }} />
+                                            <div
+                                                className="bg-light rounded overflow-hidden"
+                                                style={{
+                                                    aspectRatio: "16/9",
+                                                    border: "1px solid #dee2e6",
+                                                    padding: "0.5rem",
+                                                }}
+                                            >
+                                                <img
+                                                    src={
+                                                        module.image
+                                                            ? `/uploads/images/${module.image}`
+                                                            : defaultImage
+                                                    }
+                                                    alt={`${module.title} cover`}
+                                                    className="w-100 h-100 rounded"
+                                                    style={{ objectFit: "cover" }}
+                                                />
                                             </div>
                                         </div>
                                         <div className="card-body pt-2 d-flex flex-column justify-content-between">
                                             <div>
                                                 <h6 className="card-title mb-2">{module.title}</h6>
-                                                <p className="card-text text-muted mb-0" style={{ fontSize: "0.9rem" }}>
-                                                    {module.description ? module.description.substring(0, 100) + (module.description.length > 100 ? "..." : "") : "No description available."}
+                                                <p
+                                                    className="card-text text-muted mb-0"
+                                                    style={{ fontSize: "0.9rem" }}
+                                                >
+                                                    {module.description
+                                                        ? module.description.substring(0, 100) +
+                                                        (module.description.length > 100 ? "..." : "")
+                                                        : "No description available."}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         ))}
@@ -293,15 +377,32 @@ export default function ModuleManagement() {
                         <nav>
                             <ul className="pagination custom-pagination">
                                 <li className="page-item">
-                                    <button className="page-link" disabled={page === 1} onClick={() => goToPage(page - 1)}>‹</button>
+                                    <button
+                                        className="page-link"
+                                        disabled={page === 1}
+                                        onClick={() => goToPage(page - 1)}
+                                    >
+                                        ‹
+                                    </button>
                                 </li>
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                                    <li key={p} className={`page-item ${p === page ? "active" : ""}`}>
-                                        <button className="page-link" onClick={() => goToPage(p)}>{p}</button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                    <li
+                                        key={p}
+                                        className={`page-item ${p === page ? "active" : ""}`}
+                                    >
+                                        <button className="page-link" onClick={() => goToPage(p)}>
+                                            {p}
+                                        </button>
                                     </li>
                                 ))}
                                 <li className="page-item">
-                                    <button className="page-link" disabled={page === totalPages} onClick={() => goToPage(page + 1)}>›</button>
+                                    <button
+                                        className="page-link"
+                                        disabled={page === totalPages}
+                                        onClick={() => goToPage(page + 1)}
+                                    >
+                                        ›
+                                    </button>
                                 </li>
                             </ul>
                         </nav>

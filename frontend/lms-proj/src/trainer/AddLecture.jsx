@@ -37,6 +37,12 @@ export default function LectureForm() {
     }
   }, [token, navigate]);
 
+  const [formData, setFormData] = useState({
+    start_date: "",
+    end_date: ""
+  });
+
+
   // --- Fetch Lecture Data for Edit ---
   useEffect(() => {
     if (!isEditMode) return setLoading(false);
@@ -53,6 +59,12 @@ export default function LectureForm() {
           setTitle(result.lecture.title || "");
           setDescription(result.lecture.description || "");
           setExistingResources(result.lecture.resources || []);
+
+          // --- Pre-fill start & end dates ---
+          setFormData({
+            start_date: result.lecture.start_date ? result.lecture.start_date.split("T")[0] : "",
+            end_date: result.lecture.end_date ? result.lecture.end_date.split("T")[0] : ""
+          });
         } else {
           alert(t("lecture.not_found"));
           navigate(`/${course_id}/modules/${module_id}/lectures`);
@@ -67,7 +79,6 @@ export default function LectureForm() {
 
     fetchLectureData();
   }, [isEditMode, lecture_id, course_id, module_id, navigate, token]);
-
   // --- Resource Handlers ---
   const handleAddNewResourceField = () => {
     if (existingResources.length + newResources.length >= 5) {
@@ -76,6 +87,30 @@ export default function LectureForm() {
     }
     setNewResources([...newResources, { type: "PDF", value: null }]);
   };
+
+  const handleDeleteLecture = async (lectureId, lectureTitle) => {
+    if (!window.confirm(`Are you sure you want to permanently delete the lecture: ${lectureTitle}?`)) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(`/api/lectures/${lectureId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        alert("Lecture deleted successfully!");
+        setLectures(prev => prev.filter(lec => lec.lecture_id !== lectureId));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete lecture.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong during deletion.");
+    }
+  };
+
 
   const handleResourceTypeChange = (index, type) => {
     const updated = [...newResources];
@@ -97,11 +132,17 @@ export default function LectureForm() {
   };
 
   const handleDeleteExistingResource = (resourceId) => {
-    if (window.confirm(t("resource.confirm_delete"))) {
-      setResourcesToDelete(prev => [...prev, resourceId]);
-      setExistingResources(prev => prev.filter(res => res.resource_id !== resourceId));
-    }
-  };
+    const confirmed = window.confirm(
+     t("resource.confirm_delete")
+    );
+
+    if (!confirmed) return;
+
+    setResourcesToDelete(prev => [...prev, resourceId]);
+    setExistingResources(prev =>
+      prev.filter(res => res.resource_id !== resourceId)
+    );
+  }
 
   // --- Submission Handlers ---
   const handleLectureMetadata = async (dataToSubmit) => {
@@ -145,49 +186,48 @@ export default function LectureForm() {
   };
 
   const uploadNewResources = async (targetLectureId) => {
+    // Separate files and links
     const filesToUpload = newResources.filter(r => r.value instanceof File);
-    const linksToSubmit = newResources.filter(r => r.type === "Link" && r.value).map(r => r.value);
+    const linksToSubmit = newResources
+      .filter(r => r.type === "Link" && r.value)
+      .map(r => r.value);
 
-    if (filesToUpload.length > 0) {
-      const formData = new FormData();
-      filesToUpload.forEach(file => formData.append("files", file.value));
-      formData.append("lecture_id", targetLectureId);
+    // Only proceed if there are files or links to upload
+    if (filesToUpload.length === 0 && linksToSubmit.length === 0) return;
 
-      try {
-        const res = await fetch("/api/lectures/resource", {
-          method: "POST",
-          body: formData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to upload new resources");
-        }
-      } catch (err) {
-        console.error(err);
-        alert(err.message);
-        throw err;
-      }
+    const formData = new FormData();
+    formData.append("lecture_id", targetLectureId);
+
+    // Append files
+    filesToUpload.forEach(file => formData.append("files", file.value));
+
+    // Append links (stringify array)
+    if (linksToSubmit.length > 0) {
+      formData.append("links", JSON.stringify(linksToSubmit));
     }
 
-    if (linksToSubmit.length > 0) {
-      try {
-        const res = await fetch("/api/lectures/resource", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ lecture_id: targetLectureId, links: linksToSubmit }),
-        });
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "Failed to submit links");
-        }
-      } catch (err) {
-        console.error(err);
-        alert(err.message);
-        throw err;
+    try {
+      const res = await fetch("/api/lectures/resource", {
+        method: "POST",
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` }, // Let fetch set Content-Type
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to upload lecture resources");
       }
+
+      // Optionally, you can return the uploaded resources if backend responds with them
+      const result = await res.json();
+      return result;
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+      throw err;
     }
   };
+
 
   const handleSubmitAll = async (e) => {
     e.preventDefault();
@@ -197,13 +237,39 @@ export default function LectureForm() {
     let targetLectureId = lecture_id;
 
     try {
-      const metadataPayload = { title: title.trim(), description, module_id };
-      const metadataResult = await handleLectureMetadata(metadataPayload);
+      // 1️⃣ Prepare lecture metadata
+      const metadataPayload = {
+        title: title.trim(),
+        description,
+        module_id,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null
+      };
 
+      // 2️⃣ Save lecture metadata (create or update)
+      const metadataResult = await handleLectureMetadata(metadataPayload);
       if (!isEditMode) targetLectureId = metadataResult.lecture.lecture_id;
 
-      if (isEditMode) await deleteResources();
-      await uploadNewResources(targetLectureId);
+      // 3️⃣ Delete selected existing resources (only in edit mode)
+      if (isEditMode && resourcesToDelete.length > 0) {
+        await deleteResources();
+        // Update frontend state
+        setExistingResources(prev =>
+          prev.filter(res => !resourcesToDelete.includes(res.resource_id))
+        );
+        setResourcesToDelete([]); // clear deleted IDs
+      }
+
+      // 4️⃣ Upload new resources
+      const uploaded = await uploadNewResources(targetLectureId);
+
+      // 5️⃣ Update frontend state with newly uploaded resources
+      if (uploaded?.resources && uploaded.resources.length > 0) {
+        setExistingResources(prev => [...prev, ...uploaded.resources]);
+      }
+
+      // 6️⃣ Reset new resources form fields
+      setNewResources([{ type: "PDF", value: null }]);
 
       const action = isEditMode ? t("lecture.update_btn") : t("lecture.create_btn");
       alert(t("lecture.success_message", { action }));
@@ -211,10 +277,18 @@ export default function LectureForm() {
       navigate(`/${course_id}/modules/${module_id}/lectures`);
     } catch (err) {
       console.error(err);
+      alert(err.message || "Failed to submit lecture.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
 
   // --- Delete Lecture ---
   const handleDelete = async () => {
@@ -278,6 +352,32 @@ export default function LectureForm() {
             ></textarea>
           </div>
 
+          <div className="row mb-3">
+            <div className="col">
+              <label className="col-sm-3 col-form-label">Start Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="start_date"
+                value={formData.start_date}
+                onChange={handleChange}
+                onClick={(e) => e.target.showPicker()}
+              />
+            </div>
+
+            <div className="col">
+              <label className="col-sm-3 col-form-label">End Date</label>
+              <input
+                type="date"
+                className="form-control"
+                name="end_date"
+                value={formData.end_date}
+                onChange={handleChange}
+                onClick={(e) => e.target.showPicker()}
+              />
+            </div>
+          </div>
+
           {/* --- RESOURCES SECTION --- */}
           <div className="mb-4 pt-3 border-top">
             <label className="form-label d-block fw-bold">{t("lecture.resources_title")}</label>
@@ -286,13 +386,27 @@ export default function LectureForm() {
               <div className="card p-3 mb-3 bg-light">
                 <h6 className="card-title text-muted small">{t("resource.existing")}</h6>
                 {existingResources.map(res => (
-                  <div key={res.resource_id} className="d-flex justify-content-between align-items-center mb-1 py-1 border-bottom">
-                    <a href={`${window.location.origin}/uploads/lectures/${res.file_url}`} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center text-truncate me-2">
+                  <div
+                    key={res.resource_id}
+                    className="d-flex justify-content-between align-items-center mb-1 py-1 border-bottom"
+                  >
+                    <a
+                      href={`${window.location.origin}/uploads/lectures/${res.file_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="d-flex align-items-center text-truncate me-2"
+                    >
                       <FileText size={16} className="me-2 text-primary" />
-                      {res.file_url}
+                      {res.display_name || res.file_url}
                     </a>
-                    <button type="button" className="btn btn-sm text-danger p-0" onClick={() => handleDeleteExistingResource(res.resource_id)} disabled={isSubmitting}>
-                      <X size={18} />
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDeleteExistingResource(res.resource_id)}
+                      disabled={isSubmitting}
+                    >
+                      <X size={14} />
                     </button>
                   </div>
                 ))}
@@ -337,9 +451,9 @@ export default function LectureForm() {
               {isSubmitting ? t("lecture.processing") : isEditMode ? t("lecture.update_btn") : t("lecture.create_btn")}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+        </form >
+      </div >
+    </div >
   );
 }
 

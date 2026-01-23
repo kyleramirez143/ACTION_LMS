@@ -75,6 +75,7 @@ export async function getQuiz(req, res) {
                 passing_score: assessment.passing_score,
                 attempts: assessment.attempts,
                 time_limit: assessment.time_limit,
+                passing_score: assessment.passing_score,
                 due_date: assessment.due_date,
                 screen_monitoring: assessment.screen_monitoring,
                 randomize_questions: assessment.randomize_questions,
