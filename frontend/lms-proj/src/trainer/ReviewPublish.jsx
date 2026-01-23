@@ -385,7 +385,7 @@ const ReviewPublish = () => {
                         <i className="bi bi-x-square-fill" style={{ color: "gray", fontSize: "1.1rem" }}></i>
                       </button>
                       <button className="icon-btn" onClick={() => handleDeleteQuestion(index)}>
-                        <i className="bi bi-trash3-fill" style={{ color: "red" }}></i>
+                        <i className="bi bi-trash3-fill" style={{ color: "red" ,  fontSize: "1.1rem" }}></i>
                       </button>
                     </div>
                   </div>

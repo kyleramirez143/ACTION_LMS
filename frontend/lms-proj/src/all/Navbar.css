@@ -66,7 +66,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
 }
 
 .navbar-wrapper + * {
-  padding-top: calc(var(--navbar-height) + var(--search-height));
+  padding-top: 100px;
 }
 
 /* ================= LOGO ================= */
@@ -154,7 +154,7 @@ a:hover, .nav-link:hover, .curriculum-link:hover {
   background-color: var(--light-gray);
 }
 
-.search-bar-section>div {
+.search-bar-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
