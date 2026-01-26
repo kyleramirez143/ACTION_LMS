@@ -176,7 +176,11 @@ export default function ModuleManagement() {
                             }}
                             style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
                         >
-                            Assigned Course
+                            {userRole === "Trainer" ? (
+                                <span>Assigned Course</span>
+                            ) : (
+                                <span>Courses</span>
+                            )}
                         </a>
                     </li>
                     <li className="breadcrumb-item active" aria-current="page">
