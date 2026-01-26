@@ -57,16 +57,6 @@ export default function ReviewPage() {
   };
 
   return (
-<<<<<<< HEAD
-    <div className="container-fluid py-3">
-      {/* Header */}
-      <div className="d-flex align-items-center mb-3">
-        <button className="btn btn-light border me-2" onClick={() => navigate(`/trainee/assessment`)}>
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="m-0 h4">{quizTitle || readableTitle} {t("review.title")}</h2>
-      </div>
-=======
     <div className="module-container w-100 px-0 py-4">
       <div className="container" style={{ maxWidth: "1400px" }}>
         {/* Header */}
@@ -86,7 +76,6 @@ export default function ReviewPage() {
                 Assessments
               </span>
             </li>
->>>>>>> f977be05afd6d587f64acb7c39ded87ec4e9eaca
 
             <li className="breadcrumb-item active" aria-current="page">
               {readableTitle} {t("review.title")}

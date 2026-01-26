@@ -136,37 +136,6 @@ export default function TraineeAssessment() {
   // RENDER
   // ----------------------
   return (
-<<<<<<< HEAD
-    <div className="assessment-wrapper">
-      <div className="assessment-content">
-        {/* ===== Dashboard Table ===== */}
-        <div className="white-card">
-          {/* HEADER */}
-          <div className="title-back-row">
-            <button
-              type="button"
-              className="back-btn"
-              onClick={() => navigate(-1)}
-              aria-label={t("assessment.back")}
-            >
-              <ArrowLeft size={20} strokeWidth={2.2} />
-            </button>
-            <h2 className="page-title">{t("assessment.title")}</h2>
-          </div>
-
-          {/* SEARCH */}
-          {/* <div className="filter-controls">
-            <div className="search-box">
-              <Search size={20} className="search-icon" />
-              <input
-                type="text"
-                placeholder={t("assessment.search_placeholder")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div> */}
-=======
     <div className="user-role-card">
       <div className="d-flex justify-content-between align-items-center mb-4">
         {/* HEADER */}
@@ -199,7 +168,6 @@ export default function TraineeAssessment() {
           />
         </div>
       </div>
->>>>>>> f977be05afd6d587f64acb7c39ded87ec4e9eaca
 
       <div className="results-table-scroll">
         <table className="results-table">
@@ -215,70 +183,6 @@ export default function TraineeAssessment() {
             </tr>
           </thead>
 
-<<<<<<< HEAD
-              <tbody>
-                {loadingDashboard ? (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>
-                      {t("assessment.loading_results")}
-                    </td>
-                  </tr>
-                ) : displayedResults.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>
-                      {t("assessment.no_records")}
-                    </td>
-                  </tr>
-                ) : (
-                  displayedResults.map((r) => (
-                    <tr key={r.attempt_id}>
-                      <td>{r.course}</td>
-                      <td>{r.module}</td>
-                      <td>
-                        <button
-                          className={`title-link ${r.show_score ? "text-primary text-decoration-underline" : ""} `}
-                          type="button"
-                          disabled={!r.show_score}
-                          onClick={() =>
-                            openAssessment(r.assessment_id, r.attempt_id)
-                          }
-                        >
-                          {r.title}
-                        </button>
-                      </td>
-                      <td>{r.score}</td>
-                      <td>
-                        <span className={`status-pill ${statusClass[r.status] || ""}`}>
-                          {t(`assessment.statuses.${r.status.toLowerCase()}`)}
-                        </span>
-                      </td>
-                      <td>{r.feedback}</td>
-                      <td>{new Date(r.date).toLocaleDateString()}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* PAGINATION */}
-          <div className="pagination-wrapper">
-            <nav>
-              <ul className="pagination custom-pagination">
-                {/* PREV */}
-                <li className="page-item">
-                  <button className="page-link" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-                    ‹
-                  </button>
-                </li>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li
-                    key={i}
-                    className={`page-item ${currentPage === i + 1 ? "active" : ""
-                      }`}
-                  >
-=======
           <tbody>
             {loadingDashboard ? (
               <tr>
@@ -298,22 +202,37 @@ export default function TraineeAssessment() {
                   <td>{r.course}</td>
                   <td>{r.module}</td>
                   <td>
->>>>>>> f977be05afd6d587f64acb7c39ded87ec4e9eaca
-                    <button
-                      className="title-link text-primary text-decoration-underline"
-                      type="button"
-                      onClick={() =>
-                        openAssessment(r.assessment_id, r.attempt_id)
-                      }
-                    >
-                      {r.title}
-                    </button>
+                    {r.show_score ? (
+                      <button
+                        className="title-link text-primary text-decoration-underline"
+                        type="button"
+                        onClick={() =>
+                          openAssessment(r.assessment_id, r.attempt_id)
+                        }
+                      >
+                        {r.title}
+                      </button>
+                    ) : (
+                      <span>{r.title}</span>
+                    )}
                   </td>
-                  <td>{r.score}</td>
                   <td>
-                    <span className={`status-pill ${statusClass[r.status] || ""}`}>
-                      {t(`assessment.statuses.${r.status.toLowerCase()}`)}
-                    </span>
+                    {r.show_score ? (
+                      <span>
+                        {r.score}
+                      </span>
+                    ) : (
+                      <span>N/A</span>
+                    )}
+                  </td>
+                  <td>
+                    {r.show_score ? (
+                      <span className={`status-pill ${statusClass[r.status] || ""}`}>
+                        {t(`assessment.statuses.${r.status.toLowerCase()}`)}
+                      </span>
+                    ) : (
+                      <span >N/A</span>
+                    )}
                   </td>
                   <td>{r.feedback}</td>
                   <td>{new Date(r.date).toLocaleDateString()}</td>
