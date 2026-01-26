@@ -859,6 +859,7 @@
         "waiting_permission": "許可待ち",
         "entire_screen_check": "画面全体の共有チェックが有効です。",
         "enable_entire_screen": "画面全体を有効にする",
+        "go_back": "キャンセル",
         "start_quiz_now": "クイズを開始",
         "error_entire_screen": "画面全体を共有する必要があります。",
         "error_permission_denied": "許可が拒否されました。画面アクセスが必要です。",

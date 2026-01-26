@@ -868,6 +868,7 @@
         "validated": "Validated",
         "waiting_permission": "Waiting for permission",
         "entire_screen_check": "Entire screen sharing check enabled.",
+        "go_back": "Cancel",
         "enable_entire_screen": "Enable Entire Screen",
         "start_quiz_now": "Start Quiz Now",
         "error_entire_screen": "You must share your ENTIRE SCREEN.",
