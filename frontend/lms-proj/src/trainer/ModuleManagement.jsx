@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next"; //
 
 import defaultImage from "../image/logo.png";
 import moduleImage from "../image/module.svg"; // <-- added
@@ -23,6 +24,7 @@ export default function ModuleManagement() {
     const [courseTitle, setCourseTitle] = useState("");
     const [loading, setLoading] = useState(true);
     const [openDropdownId, setOpenDropdownId] = useState(null);
+    const { t } = useTranslation();
 
     const ITEMS_PER_PAGE = 8;
     const [page, setPage] = useState(1);

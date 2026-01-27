@@ -206,14 +206,14 @@ function ModuleTable() {
                         ))}
                     </select>
                 </div>
-                <input
+                {/* <input
                     type="text"
                     className="form-control"
                     style={{ maxWidth: "300px" }}
                     placeholder="Search Module"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                /> */}
             </div>
 
             {/* Table */}
