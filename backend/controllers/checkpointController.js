@@ -31,15 +31,26 @@ export const getCheckpoint = async (req, res) => {
 export const updateCheckpoint = async (req, res) => {
     try {
         const { userId } = req.params;
-        const [updatedRows] = await Onboarding.update(req.body, {
-            where: { user_id: userId }
-        });
+        const updateData = req.body;
 
-        if (updatedRows === 0) return res.status(404).json({ message: "No record" });
-        
-        const updated = await Onboarding.findOne({ where: { user_id: userId } });
-        res.status(200).json(updated);
+        // 1. Try to find the record first
+        let onboarding = await Onboarding.findOne({ where: { user_id: userId } });
+
+        if (onboarding) {
+            // 2. If it exists, update it
+            await onboarding.update(updateData);
+        } else {
+            // 3. If it doesn't exist, create it (Admin is the first to add info)
+            // Ensure the user_id is included in the creation
+            onboarding = await Onboarding.create({
+                ...updateData,
+                user_id: userId
+            });
+        }
+
+        res.status(200).json(onboarding);
     } catch (error) {
+        console.error("Update/Create Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
