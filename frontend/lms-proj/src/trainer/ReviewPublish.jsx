@@ -554,24 +554,25 @@ const ReviewPublish = () => {
                 <label className="form-label">{t("quiz.passing_score")}</label>
                 <input 
                   type="number" 
-                  className={`form-control ${(settings.passingScore === "" || settings.passingScore < 1) ? 'is-invalid' : ''}`} 
+                  min="0" // Added native browser constraint
+                  className={`form-control ${(settings.passingScore === "" || settings.passingScore < 0) ? 'is-invalid' : ''}`} 
                   value={settings.passingScore} 
                   onChange={(e) => {
                     const val = e.target.value;
-                    // Allows user to erase or type 0 temporarily
+                    // Allows user to erase or type numbers
                     handleChange("passingScore", val === "" ? "" : Number(val));
                   }}
                   onBlur={(e) => {
-                    // THE AUTO-FIX: Snaps to 1 if empty or less than 1 when user leaves the field
-                    if (e.target.value === "" || Number(e.target.value) < 1) {
-                      handleChange("passingScore", 1);
+                    // THE AUTO-FIX: Snaps to 0 if empty or less than 0 when user leaves the field
+                    if (e.target.value === "" || Number(e.target.value) < 0) {
+                      handleChange("passingScore", 0);
                     }
                   }}
                 />
                 
-                {(settings.passingScore === "" || settings.passingScore < 1) && (
+                {(settings.passingScore === "" || settings.passingScore < 0) && (
                   <div className="text-danger small mt-1">
-                    {t("Passing score must be at least 1")}
+                    {t("Passing score must be at least 0")}
                   </div>
                 )}
               </div>
