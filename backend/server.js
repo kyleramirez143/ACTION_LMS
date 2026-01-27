@@ -35,6 +35,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get("/", (req, res) => res.send("LMS Backend ✅"));
 
+app.use("/uploads", express.static("uploads"));
+
 app.use("/api/upload", uploadRoute);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/results", resultRoutes);
@@ -49,7 +51,7 @@ app.use("/api/quarters", quarterRoute);
 app.use("/api/schedules", scheduleRoute);
 app.use("/api/checkpoints", checkpointRoutes);
 
-app.use("/uploads", express.static("uploads"));
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Backend running on http://localhost:${PORT}`));

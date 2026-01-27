@@ -48,14 +48,34 @@ function AdminProfileManagement() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
-                setUserProfile(data);
-                if (data.profile_picture) setPreview(`${backendURL}/${data.profile_picture}`);
+                
+                // Just update the profile data. 
+                // The Sync Logic below will handle the image URL automatically.
+                setUserProfile(data); 
+
             } catch (err) {
-                console.error(err);
+                console.error("Fetch Profile Error:", err);
             }
         };
         if (!userProfile && token) fetchProfile();
     }, [token, userProfile, setUserProfile]);
+
+// PREVIEW SYNC LOGIC (The Fix)
+// ----------------------------
+useEffect(() => {
+    if (userProfile?.profile_picture && !selectedFile) {
+        let path = userProfile.profile_picture.replace(/\\/g, "/");
+
+        // Since your DB has "uploads/profile/image.jpg", 
+        // we check if it already starts with "uploads/"
+        const finalUrl = path.startsWith("uploads/") 
+            ? `${backendURL}/${path}` 
+            : `${backendURL}/uploads/${path}`;
+        
+        console.log("STATE UPDATE: Setting preview to", finalUrl);
+        setPreview(finalUrl);
+    }
+}, [userProfile, selectedFile]);
 
     // ----------------------------
     // IMAGE HANDLERS
@@ -73,35 +93,41 @@ function AdminProfileManagement() {
     };
 
     const handleSaveImage = async (e) => {
-        e.preventDefault();
-        if (!selectedFile) return;
+    e.preventDefault();
+    if (!selectedFile) return;
 
-        const formData = new FormData();
-        formData.append("profileImage", selectedFile);
+    const formData = new FormData();
+    formData.append("profileImage", selectedFile);
 
-        try {
-            const res = await fetch(`${backendURL}/api/users/upload-profile`, {
-                method: "PUT",
-                body: formData,
-                headers: { Authorization: `Bearer ${token}` },
-            });
+    try {
+        const res = await fetch(`${backendURL}/api/users/upload-profile`, {
+            method: "PUT",
+            body: formData,
+            headers: { Authorization: `Bearer ${token}` },
+        });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || t("admin-profile.upload_failed"));
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || t("admin-profile.upload_failed"));
 
-            setPreview(`${backendURL}/${data.profileImageUrl}`);
-            setUserProfile((prev) => ({
-                ...prev,
-                profile_picture: data.profileImageUrl,
-            }));
+        // Format the URL based on your DB string: "uploads/profile/..."
+        const path = data.profileImageUrl.replace(/\\/g, "/");
+        const finalUrl = path.startsWith("uploads/") 
+            ? `${backendURL}/${path}` 
+            : `${backendURL}/uploads/${path}`;
 
-            alert(t("admin-profile.image_updated"));
-            setSelectedFile(null);
-        } catch (err) {
-            console.error(err);
-            alert(t("admin-profile.image_upload_error") + ": " + err.message);
-        }
-    };
+        setPreview(finalUrl);
+        setUserProfile((prev) => ({
+            ...prev,
+            profile_picture: data.profileImageUrl,
+        }));
+
+        alert(t("admin-profile.image_updated"));
+        setSelectedFile(null);
+    } catch (err) {
+        console.error(err);
+        alert(t("admin-profile.image_upload_error") + ": " + err.message);
+    }
+};
 
     // ----------------------------
     // PASSWORD HANDLERS
@@ -159,7 +185,13 @@ function AdminProfileManagement() {
                     <div className="profile-image-card">
                         <div className="image-square">
                             {preview ? (
-                                <img src={preview} alt={t("admin-profile.profile")} className="image-square-img" />
+                                <img 
+                                    key={preview} // <--- Forces React to refresh the image element
+                                    src={preview} 
+                                    alt="Profile" 
+                                    className="image-square-img"
+                                    style={{ objectFit: "cover" }}
+                                />
                             ) : (
                                 <div className="image-placeholder">👤</div>
                             )}
