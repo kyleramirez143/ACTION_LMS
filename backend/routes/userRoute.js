@@ -16,6 +16,7 @@ import {
     bulkDeleteUsers,
     uploadProfilePicture,
     downloadTemplate,
+    getUserById,
 } from "../controllers/userController.js";
 import { protect, checkRole } from "../middleware/authMiddleware.js";
 import uploadCSVMiddleware from "../middleware/uploadCSVMiddleware.js";
@@ -47,6 +48,8 @@ router.get("/download-template", protect, checkRole(['Admin']), downloadTemplate
 
 router.get('/:id', protect, getSingleUser);
 router.put('/update/:id', protect, updateUser);
+
+router.get("/:id", getUserById);
 
 // Admin-only CSV import
 router.post("/import", protect, checkRole(['Admin']), uploadCSVMiddleware.single("file"), importUsers);

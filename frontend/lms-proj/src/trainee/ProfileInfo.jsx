@@ -20,6 +20,7 @@ export default function ProfileInfo() {
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasData, setHasData] = useState(false);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     if (!token) return navigate("/login");
@@ -39,9 +40,9 @@ export default function ProfileInfo() {
         const decoded = jwtDecode(token);
         const userId = decoded.id;
 
-        const resUser = await fetch(`${backendURL}/api/users/${userId}`, {
+        const resUser = await fetch(`${backendURL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
-        });
+      });
         const userData = await resUser.json();
         setUserProfile(userData);
 
@@ -69,6 +70,23 @@ export default function ProfileInfo() {
     };
     fetchProfileData();
   }, [token]);
+
+  // ----------------------------
+  // PREVIEW SYNC LOGIC
+  // ----------------------------
+  useEffect(() => {
+    if (userProfile?.profile_picture) {
+        // 1. Fix backslashes
+        let path = userProfile.profile_picture.replace(/\\/g, "/");
+
+        // 2. Build the full URL
+        const finalUrl = path.startsWith("uploads/") 
+            ? `${backendURL}/${path}` 
+            : `${backendURL}/uploads/${path}`;
+
+        setPreview(finalUrl);
+    }
+}, [userProfile]);
 
   const handleChange = (field, value) => {
     const val = value === "true" ? true : value === "false" ? false : value;
@@ -130,11 +148,13 @@ export default function ProfileInfo() {
       <div className="checkpoint-card user-info-card">
         <div className="user-info-header">
           <div className="profile-picture">
-            {userProfile.profile_picture ? (
+            {preview ? (
               <img
-                src={`${backendURL}/${userProfile.profile_picture}`}
+                key={preview} // 🔹 Forces refresh on update
+                src={preview} // 🔹 Uses our synced preview state
                 alt={t("profile_info.profile_picture")}
                 className="profile-img"
+                style={{ objectFit: "cover" }}
               />
             ) : (
               <div className="profile-placeholder">👤</div>
