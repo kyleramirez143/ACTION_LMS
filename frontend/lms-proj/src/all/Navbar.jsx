@@ -93,7 +93,13 @@ const Navbar = () => {
   }, []);
 
   const renderNotificationPopout = () => (
-    <div className="notification-popout shadow">
+    <div
+      className="notification-popout shadow-lg rounded"
+      style={{
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+        background: "#fff",
+      }}
+    >
       <ul className="list-unstyled m-0 p-2">
         {notifications.map((notif) => (
           <li key={notif.id} className="px-3 py-2 border-bottom d-flex align-items-start gap-2">
@@ -105,8 +111,12 @@ const Navbar = () => {
           </li>
         ))}
       </ul>
-      <div className="text-center mt-2">
-        <Link to="all/NotificationView" className="text-primary fw-semibold" onClick={() => setNotifOpen(false)}>
+      <div className="text-center mb-2">
+        <Link
+          to="all/NotificationView"
+          className="text-primary fw-semibold"
+          onClick={() => setNotifOpen(false)}
+        >
           {t("navbar.view_all_notifications")}
         </Link>
       </div>

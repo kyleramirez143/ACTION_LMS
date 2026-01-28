@@ -386,7 +386,7 @@ const ReviewPublish = () => {
                         <i className="bi bi-x-square-fill" style={{ color: "gray", fontSize: "1.1rem" }}></i>
                       </button>
                       <button className="icon-btn" onClick={() => handleDeleteQuestion(index)}>
-                        <i className="bi bi-trash3-fill" style={{ color: "red" }}></i>
+                        <i className="bi bi-trash3-fill" style={{ color: "red" ,  fontSize: "1.1rem" }}></i>
                       </button>
                     </div>
                   </div>
@@ -551,30 +551,8 @@ const ReviewPublish = () => {
               </div>
 
               <div className="mb-3">
-                <label className="form-label">{t("quiz.passing_score")}</label>
-                <input 
-                  type="number" 
-                  min="0" // Added native browser constraint
-                  className={`form-control ${(settings.passingScore === "" || settings.passingScore < 0) ? 'is-invalid' : ''}`} 
-                  value={settings.passingScore} 
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    // Allows user to erase or type numbers
-                    handleChange("passingScore", val === "" ? "" : Number(val));
-                  }}
-                  onBlur={(e) => {
-                    // THE AUTO-FIX: Snaps to 0 if empty or less than 0 when user leaves the field
-                    if (e.target.value === "" || Number(e.target.value) < 0) {
-                      handleChange("passingScore", 0);
-                    }
-                  }}
-                />
-                
-                {(settings.passingScore === "" || settings.passingScore < 0) && (
-                  <div className="text-danger small mt-1">
-                    {t("Passing score must be at least 0")}
-                  </div>
-                )}
+                <label className="form-label">Passing Score</label>
+                <input type="number" className="form-control" value={settings.passingScore} min={1} onChange={(e) => handleChange("passingScore", Number(e.target.value))} />
               </div>
 
               <div className="mb-3">

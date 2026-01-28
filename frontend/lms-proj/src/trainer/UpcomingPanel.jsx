@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import logo from "../image/upcoming.svg"; // <-- added
 
 export default function UpcomingPanel({ moduleId }) {
     const { t } = useTranslation();
@@ -52,7 +53,16 @@ export default function UpcomingPanel({ moduleId }) {
             {loading ? (
                 <p>{t("upcoming.loading")}</p>
             ) : events.length === 0 ? (
-                <p className="text-secondary">{t("upcoming.no_upcoming")}</p>
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                    <img
+                        src={logo}
+                        alt="No modules"
+                        style={{ maxWidth: "200px" }}
+                        className="mb-3"
+                    />
+
+                    <p className="text-secondary">{t("upcoming.no_upcoming")}</p>
+                </div>
             ) : (
                 events.map((e, i) => (
                     <div key={i} className="upcoming-card green">

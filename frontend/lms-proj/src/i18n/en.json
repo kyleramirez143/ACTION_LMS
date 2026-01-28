@@ -42,7 +42,8 @@
         "ai_generated": "AI Generated",
         "manual_quiz": "Manual Quiz",
         "my_courses": "My Courses",
-        "assessment": "Assessment"
+        "assessment": "Assessment",
+        "view_grades": "View Grades"
     },
     "dashboard": {
         "admin_lms_dashboard": "Admin LMS Dashboard",
@@ -153,7 +154,9 @@
         "network_error": "Network error. Visibility change failed.",
         "server_error": "Server error",
         "add_new_module": "Add New Module",
-        "no_modules_found": "No modules found.",
+        "no_modules_found": "Add your first module in this Course.",
+        "no_courses_added": "No courses added by your Trainer.",
+        "no_modules_yet": "No Modules yet!",
         "no_description": "No description available.",
         "visible": "Visible",
         "hidden": "Hidden",
@@ -214,6 +217,7 @@
         "loading": "Loading lectures...",
         "empty_trainer": "No lectures yet. Click \"Add Lecture\" to create one.",
         "empty_trainee": "No lectures available yet.",
+        "no_lectures_title": "No lectures Yet!",
         "none": "No lectures available.",
         "edit": "Edit Lecture",
         "make_visible": "Make Visible",
@@ -868,6 +872,7 @@
         "validated": "Validated",
         "waiting_permission": "Waiting for permission",
         "entire_screen_check": "Entire screen sharing check enabled.",
+        "go_back": "Cancel",
         "enable_entire_screen": "Enable Entire Screen",
         "start_quiz_now": "Start Quiz Now",
         "error_entire_screen": "You must share your ENTIRE SCREEN.",

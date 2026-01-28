@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next"; //
 
@@ -15,6 +16,7 @@ const getInitialModules = (modulesFromApi) => {
 };
 
 export default function ModuleManagement() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { course_id } = useParams();
     const token = localStorage.getItem("authToken");
@@ -192,7 +194,7 @@ export default function ModuleManagement() {
                 <h3 className="mb-0">{courseTitle}</h3>
 
                 {/* Trainer Buttons */}
-                {userRole === "Trainer" && (
+                {userRole === "Trainer" && modulesData.length > 0 && (
                     <div className="d-flex gap-2 mt-2">
                         <button
                             className="btn btn-outline-primary"
@@ -221,22 +223,35 @@ export default function ModuleManagement() {
                     <img
                         src={moduleImage}
                         alt="No modules"
-                        style={{ maxWidth: "220px", opacity: 0.9 }}
+                        style={{ maxWidth: "220px" }}
                         className="mb-3"
                     />
+
+                    {/* Keep heading the same for all roles */}
+                    <h3 className="section-title">
+                        {t("module_management.no_modules_yet")}
+                    </h3>
+
+                    {/* Paragraph changes based on role */}
                     <p className="text-center text-muted mb-0">
-                        {t("module_management.no_modules_found")}
+                        {userRole === "Trainee"
+                            ? t("module_management.no_courses_added")
+                            : t("module_management.no_modules_found")}
                     </p>
-                    {/* {userRole === "Trainer" && (
+
+                    {/* Button only for Trainers */}
+                    {userRole === "Trainer" && (
                         <button
-                            className="btn btn-outline-primary mt-3"
+                            className="btn btn-primary mt-3"
                             onClick={() => navigate(`/trainer/${course_id}/modules/create`)}
                         >
-                            Add your first module
+                            Add New Module
                         </button>
-                    )} */}
+                    )}
                 </div>
             ) : (
+
+
                 <>
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
                         {pagedModules.map((module) => (

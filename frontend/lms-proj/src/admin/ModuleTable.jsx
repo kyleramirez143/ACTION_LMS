@@ -148,7 +148,7 @@ function ModuleTable() {
 
     const dynamicTitle = currentBatch
         ? `${currentBatch.name} ${currentBatch.location} - ${t("quarters.quarter")}`
-    : t("quarters.title_default");
+        : t("quarters.title_default");
 
     // --- Render ---
     if (noBatchesExist) {
@@ -166,160 +166,162 @@ function ModuleTable() {
     }
 
     return (
-        <div className="user-role-card">
-            {/* Header and Top-right buttons */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">{dynamicTitle}</h3>
-                <div className="d-flex gap-2">
-                    <Link to="/admin/set-module-date">
-                        <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
-                        </button>
-                    </Link>
-                    {hasPeriods && (
-                        <button
-                            className="btn btn-danger rounded-pill"
-                            onClick={handleBulkDelete}
-                            disabled={selectedModules.length === 0}
-                        >
-                            <i className="bi bi-trash3-fill"></i> {t("module_management.delete_modules", { count: selectedModules.length })}
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="d-flex gap-3 mb-3 flex-wrap">
-                <div>
-                    <label className="me-2">{t("module_management.filter_by_batch")}</label>
-                    <select className="form-select w-auto d-inline-block"
-                        value={selectedCurriculumId}
-                        onChange={(e) => setSelectedCurriculumId(e.target.value)}>
-                        {batches.map(b => (
-                            <option
-                                key={b.batch_id}
-                                value={b.curriculum_id || "null"}
-                                disabled={!b.curriculum_id}
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+            <div className="user-role-card" style={{ margin: 0, minHeight: "550px"}}>
+                {/* Header and Top-right buttons */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h3 className="section-title">{dynamicTitle}</h3>
+                    <div className="d-flex gap-2">
+                        <Link to="/admin/set-module-date">
+                            <button className="btn btn-primary rounded-pill">
+                                <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
+                            </button>
+                        </Link>
+                        {hasPeriods && (
+                            <button
+                                className="btn btn-danger rounded-pill"
+                                onClick={handleBulkDelete}
+                                disabled={selectedModules.length === 0}
                             >
-                                {b.name} {b.location} {!b.curriculum_id ? t("module_management.no_curriculum") : ""}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* <input
-                    type="text"
-                    className="form-control"
-                    style={{ maxWidth: "300px" }}
-                    placeholder="Search Module"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                /> */}
-            </div>
-
-            {/* Table */}
-            <div className="table-responsive">
-                <table className="table align-middle">
-                    <thead className="table-light">
-                        <tr>
-                            <th className="text-center">{t("module_management.table_module")}</th>
-                            <th className="text-center">{t("module_management.table_start_date")}</th>
-                            <th className="text-center">{t("module_management.table_end_date")}</th>
-                            <th className="text-center">{t("module_management.table_action")}</th>
-                            <th className="text-center">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    onChange={handleSelectAll}
-                                    checked={filteredPeriods.length > 0 && selectedModules.length === filteredPeriods.length}
-                                />
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {hasPeriods ? (
-                            filteredPeriods.map((period) => {
-                                const isEditing = editingId === period.quarter_id;
-                                return (
-                                    <tr key={period.quarter_id} className={isEditing ? "table-primary-light" : ""}>
-                                        <td className="text-center">
-                                            {isEditing ? (
-                                                <input
-                                                    type="text"
-                                                    className="form-control w-75 mx-auto"
-                                                    value={editData.name}
-                                                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                                />
-                                            ) : (
-                                                period.name
-                                            )}
-                                        </td>
-                                        <td className="text-center">
-                                            {isEditing ? (
-                                                <input
-                                                    type="date"
-                                                    className="form-control"
-                                                    value={editData.start_date}
-                                                    onChange={(e) => setEditData({ ...editData, start_date: e.target.value })}
-                                                />
-                                            ) : (
-                                                period.start_date
-                                            )}
-                                        </td>
-                                        <td className="text-center">
-                                            {isEditing ? (
-                                                <input
-                                                    type="date"
-                                                    className="form-control"
-                                                    value={editData.end_date}
-                                                    onChange={(e) => setEditData({ ...editData, end_date: e.target.value })}
-                                                />
-                                            ) : (
-                                                period.end_date
-                                            )}
-                                        </td>
-                                        <td className="text-center">
-                                            <div className="d-flex justify-content-center gap-2">
-                                                {isEditing ? (
-                                                    <>
-                                                        <button className="icon-btn" onClick={() => handleSave(period.quarter_id)} title={t("module_management.save")}>
-                                                            <i className="bi bi-check-square-fill"></i>
-                                                        </button>
-                                                        <button className="icon-btn" onClick={handleCancel} title={t("module_management.cancel")}>
-                                                            <i className="bi bi-x-square-fill"></i>
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <button className="icon-btn" onClick={() => handleEditClick(period)} title={t("module_management.edit")}>
-                                                        <i className="bi bi-pencil-fill"></i>
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="text-center">
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                checked={selectedModules.includes(period.quarter_id)}
-                                                onChange={() => handleCheckboxChange(period.quarter_id)}
-                                            />
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                        ) : (
-                            <tr>
-                                <td colSpan="5" className="text-center text-muted py-5">
-                                    <>
-                                        <img src={logo} alt="Logo" className="img-fluid mb-3"
-                                            style={{ maxWidth: "200px" }} />
-                                        <h3 className="mb-2">{t("quarters.no_periods")}</h3>
-                                        <p className="mb-0">{t("quarters.no_assigned")}</p>
-                                    </>
-                                </td>
-                            </tr>
+                                <i className="bi bi-trash3-fill"></i> {t("module_management.delete_modules", { count: selectedModules.length })}
+                            </button>
                         )}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
+
+                {/* Filters */}
+                <div className="d-flex gap-3 mb-3 flex-wrap">
+                    <div>
+                        <label className="me-2">{t("module_management.filter_by_batch")}</label>
+                        <select className="form-select w-auto d-inline-block"
+                            value={selectedCurriculumId}
+                            onChange={(e) => setSelectedCurriculumId(e.target.value)}>
+                            {batches.map(b => (
+                                <option
+                                    key={b.batch_id}
+                                    value={b.curriculum_id || "null"}
+                                    disabled={!b.curriculum_id}
+                                >
+                                    {b.name} {b.location} {!b.curriculum_id ? t("module_management.no_curriculum") : ""}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <input
+                        type="text"
+                        className="form-control"
+                        style={{ maxWidth: "300px" }}
+                        placeholder="Search Module"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                {/* Table */}
+                <div className="table-responsive">
+                    <table className="table align-middle">
+                        <thead className="table-light">
+                            <tr>
+                                <th className="text-center">{t("module_management.table_module")}</th>
+                                <th className="text-center">{t("module_management.table_start_date")}</th>
+                                <th className="text-center">{t("module_management.table_end_date")}</th>
+                                <th className="text-center">{t("module_management.table_action")}</th>
+                                <th className="text-center">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        onChange={handleSelectAll}
+                                        checked={filteredPeriods.length > 0 && selectedModules.length === filteredPeriods.length}
+                                    />
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {hasPeriods ? (
+                                filteredPeriods.map((period) => {
+                                    const isEditing = editingId === period.quarter_id;
+                                    return (
+                                        <tr key={period.quarter_id} className={isEditing ? "table-primary-light" : ""}>
+                                            <td className="text-center">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        className="form-control w-75 mx-auto"
+                                                        value={editData.name}
+                                                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    period.name
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        value={editData.start_date}
+                                                        onChange={(e) => setEditData({ ...editData, start_date: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    period.start_date
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        value={editData.end_date}
+                                                        onChange={(e) => setEditData({ ...editData, end_date: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    period.end_date
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="d-flex justify-content-center gap-2">
+                                                    {isEditing ? (
+                                                        <>
+                                                            <button className="icon-btn" onClick={() => handleSave(period.quarter_id)} title={t("module_management.save")}>
+                                                                <i className="bi bi-check-square-fill"></i>
+                                                            </button>
+                                                            <button className="icon-btn" onClick={handleCancel} title={t("module_management.cancel")}>
+                                                                <i className="bi bi-x-square-fill"></i>
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button className="icon-btn" onClick={() => handleEditClick(period)} title={t("module_management.edit")}>
+                                                            <i className="bi bi-pencil-fill"></i>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input"
+                                                    checked={selectedModules.includes(period.quarter_id)}
+                                                    onChange={() => handleCheckboxChange(period.quarter_id)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center text-muted py-5">
+                                        <>
+                                            <img src={logo} alt="Logo" className="img-fluid mb-3"
+                                                style={{ maxWidth: "200px" }} />
+                                            <h3 className="mb-2">{t("quarters.no_periods")}</h3>
+                                            <p className="mb-0">{t("quarters.no_assigned")}</p>
+                                        </>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

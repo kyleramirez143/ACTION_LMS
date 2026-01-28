@@ -69,31 +69,41 @@ function AdminDashboard() {
   // ============================
   // HEADER COMPONENT
   // ============================
-const DashboardHeader = () => {
-  // Get current date & time in GMT+8
-  const now = new Date();
-  const timezoneOptions = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: 'numeric', 
-    minute: 'numeric', 
-    second: 'numeric', 
-    hour12: true, 
-    timeZone: 'Asia/Singapore' // GMT+8
-  };
-  const formattedTime = now.toLocaleString('en-US', timezoneOptions);
+  const DashboardHeader = () => {
+    // Get current date & time in GMT+8
+    const [now, setNow] = useState(new Date());
 
-  return (
-    <div className="row mb-4">
-      <h2 className="fw-bold">{t("dashboard.admin_lms_dashboard")}</h2>
-      <div className="text-muted" style={{ fontSize: '14px' }}>
-        {formattedTime} (GMT+8)
+    // Update time every second
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setNow(new Date());
+      }, 1000);
+
+      return () => clearInterval(interval); // cleanup
+    }, []);
+
+    const timezoneOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true,
+      timeZone: 'Asia/Singapore' // GMT+8
+    };
+    const formattedTime = now.toLocaleString('en-US', timezoneOptions);
+
+    return (
+      <div className="row">
+        <h2 className="fw-bold">{t("dashboard.admin_lms_dashboard")}</h2>
+        <p className="text-muted">
+          {formattedTime} (GMT+8)
+        </p>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 
   // ============================
@@ -107,11 +117,11 @@ const DashboardHeader = () => {
     ];
 
     return (
-      <div className="card border-0 shadow-sm bg-white rounded p-4 mb-4">
+      <div className="user-role-card mb-3" style={{ margin: 0 }}>
         <h4 className="fw-semibold">{t("dashboard.users")}</h4>
         <h6 className="text-muted">{t("dashboard.batch_action_40")}</h6>
 
-        <div className="row mb-4 mt-3">
+        <div className="row mt-3">
           {items.map((item, index) => (
             <div key={index} className="col-md-4">
               <div
@@ -208,20 +218,23 @@ const DashboardHeader = () => {
 
 
     return (
-      <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h4 className="fw-semibold">{t("dashboard.active_users_over_time")}</h4>
-          <select
-            className="form-select"
-            style={{ maxWidth: "150px" }}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="Daily">{t("dashboard.daily")}</option>
-            <option value="Weekly">{t("dashboard.weekly")}</option>
-            <option value="Per Module">{t("dashboard.per_module")}</option>
-          </select>
+      <div className="user-role-card" style={{ margin: 0 }}>
+        <div className="col-12 col-lg-12">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h3 className="section-title">{t("dashboard.active_users_over_time")}</h3>
+            <select
+              className="form-select"
+              style={{ maxWidth: "150px" }}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="Daily">{t("dashboard.daily")}</option>
+              <option value="Weekly">{t("dashboard.weekly")}</option>
+              <option value="Per Module">{t("dashboard.per_module")}</option>
+            </select>
+          </div>
         </div>
+
 
         <div className="row">
           <div className="col-12 col-md-10">
@@ -275,7 +288,7 @@ const DashboardHeader = () => {
   // RETURN UI
   // ============================
   return (
-    <div className="container mt-4 pb-5">
+    <div className="container py-4" style={{ maxWidth: "1400px" }}>
       <DashboardHeader />
       <AttendanceCard />
       <TraineeChartCard />

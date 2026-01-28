@@ -7,6 +7,7 @@ import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
 import { ArrowLeft } from "lucide-react";
+import logo from "../image/add.svg";
 
 export default function TrainerModuleScreen() {
   const { t } = useTranslation();
@@ -131,49 +132,78 @@ export default function TrainerModuleScreen() {
           </ol>
         </nav>
 
-        <div className="row">
-          {/* Left column: Module & Lectures (8) */}
-          <div className="col-12 col-lg-8 ">
-            <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0}}>
-              {/* Header */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">{moduleTitle}</h3>
-                {userRole === "Trainer" && (
-                  <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
-                    {t("lecture.add")}
-                  </button>
-                )}
+        <div className="row g-3">
+          {lectures.length === 0 ? (
+            // Empty state: left full width, no right panel
+            <div className="col-12 col-lg-12">
+              <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "50vh", margin: 0 }}>
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h3 className="mb-0">{moduleTitle}</h3>
+                </div>
+
+                <p className="text-muted">{moduleDescription}</p>
+
+                {/* Empty state */}
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                  <img
+                    src={logo}
+                    alt="No modules"
+                    style={{ maxWidth: "220px" }}
+                    className="mb-3"
+                  />
+                  <h3 className="section-title">{t("lecture.no_lectures_title")}</h3>
+                  <p className="text-muted mb-3">
+                    {userRole === "Trainer"
+                      ? t("lecture.empty_trainer")
+                      : t("lecture.empty_trainee")}
+                  </p>
+                  {userRole === "Trainer" && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleAddLectureClick}
+                    >
+                      {t("lecture.add")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Lectures exist: normal left + right layout
+            <>
+              {/* Left column */}
+              <div className="col-12 col-lg-8">
+                <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0 }}>
+                  {/* Header */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h3 className="mb-0">{moduleTitle}</h3>
+                    {userRole === "Trainer" && (
+                      <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
+                        {t("lecture.add")}
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-muted">{moduleDescription}</p>
+
+                  <ModuleAccordion
+                    isTrainerView={userRole === "Trainer"}
+                    userRole={userRole}
+                    lectures={lectures}
+                  />
+                </div>
               </div>
 
-              <p className="text-muted">{moduleDescription}</p>
-
-              {loading ? (
-                <p>{t("lecture.loading")}</p>
-              ) : error ? (
-                <p className="text-danger">{error}</p>
-              ) : lectures.length === 0 ? (
-                <p>
-                  {userRole === "Trainer"
-                    ? t("lecture.empty_trainer")
-                    : t("lecture.empty_trainee")}
-                </p>
-              ) : (
-                <ModuleAccordion
-                  isTrainerView={userRole === "Trainer"}
-                  userRole={userRole}
-                  lectures={lectures}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Right column: Upcoming Panel (4) */}
-          <div className="col-12 col-lg-4 d-flex">
-            <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0}}>
-              <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
-              <UpcomingPanel moduleId={module_id} />
-            </div>
-          </div>
+              {/* Right column */}
+              <div className="col-12 col-lg-4 d-flex">
+                <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "50vh", margin: 0 }}>
+                  <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
+                  <UpcomingPanel moduleId={module_id} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

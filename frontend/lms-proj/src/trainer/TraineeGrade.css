@@ -251,3 +251,60 @@
 .print-button:hover {
   background-color: #003b94;
 }
+
+.trainee-grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.trainee-grade-table th,
+.trainee-grade-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.trainee-grade-table thead th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Section Header Colors */
+.section-header.module3 {
+  background-color: #cfe2ff; /* light blue */
+}
+
+.section-header.daily-performance {
+  background-color: #d1e7dd; /* light green */
+}
+
+.section-header.exams {
+  background-color: #fff3cd; /* light yellow */
+}
+
+/* Sub-columns slightly bolder */
+.trainee-grade-table thead tr:nth-child(2) th {
+  font-weight: 500;
+}
+
+/* Alternate row colors for better readability */
+.trainee-grade-table tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/* Hover effect */
+.trainee-grade-table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+/* Edit icon column width */
+.edit-col {
+  width: 40px;
+}
+
+/* Responsive scroll for smaller screens */
+.table-wrapper {
+  overflow-x: auto;
+}
+

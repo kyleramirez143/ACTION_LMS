@@ -75,6 +75,12 @@ export const navLinks = [
       },]
   },
   {
+    name: 'View Grades',
+    path: '/trainer/view-grades',
+    requiredRoles: ['Trainer'],
+    translationKey: "nav.view_grades",
+  },
+  {
     name: 'Action Calendar', // unified calendar link
     path: '/trainer/calendar',
     requiredRoles: ['Trainer'],
@@ -100,6 +106,12 @@ export const navLinks = [
     path: '/trainee/assessment',
     requiredRoles: ['Trainee'],
     translationKey: "nav.assessment",
+  },
+  {
+    name: 'View Grades', // unified calendar link
+    path: '/trainee/view-grades',
+    requiredRoles: ['Trainee'],
+    translationKey: "nav.view_grades",
   },
   {
     name: 'Action Calendar', // unified calendar link

@@ -37,6 +37,8 @@ export default function ModuleAccordion({
     const quizMenuRefs = useRef({});
     const resourceMenuRefs = useRef({});
     const navigate = useNavigate();
+    const contentRefs = useRef({});
+    const [heights, setHeights] = useState({});
 
     // Filter lectures based on role
     useEffect(() => {
@@ -51,6 +53,15 @@ export default function ModuleAccordion({
                 }));
         setLectures(filteredLectures);
     }, [lectures, isTrainerView]);
+
+    useEffect(() => {
+        const newHeights = {};
+        Object.keys(contentRefs.current).forEach((key) => {
+            const el = contentRefs.current[key];
+            if (el) newHeights[key] = el.scrollHeight;
+        });
+        setHeights(newHeights);
+    }, [localLectures, openIndex]);
 
     // Close menus on outside click
     useEffect(() => {
@@ -300,20 +311,28 @@ export default function ModuleAccordion({
                                     </div>
                                 )}
 
-                                <span onClick={() => toggleAccordion(i)} className="cursor-pointer">
+                                <span onClick={() => toggleAccordion(i)} className="cursor-pointer mt-1 mt-sm-0">
                                     {openIndex === i ? <ChevronUp /> : <ChevronDown />}
                                 </span>
                             </div>
                         </div>
 
                         {/* --- ACCORDION CONTENT --- */}
-                        {openIndex === i && (
+                        <div
+                            ref={(el) => (contentRefs.current[i] = el)}
+                            className="accordion-content-wrapper"
+                            style={{
+                                maxHeight: openIndex === i ? `${heights[i] || 0}px` : "0px",
+                                overflow: "hidden",
+                                transition: "max-height 0.35s ease",
+                            }}
+                        >
                             <div className="accordion-content p-3">
                                 {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
                                 {/* Resources Section */}
                                 <h6 className="fw-bold mb-2">{t("resource.title")}</h6>
 
-                                <div className="resources-container">
+                                <div className="resources-container d-flex flex-wrap gap-2">
                                     {lec.resources?.length > 0 ? (
                                         lec.resources.map((res) => {
                                             const isLink = res.file_url.startsWith("http://") || res.file_url.startsWith("https://");
@@ -322,7 +341,7 @@ export default function ModuleAccordion({
                                             return (
                                                 <div
                                                     key={res.resource_id}
-                                                    className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border"
+                                                    className="d-flex flex-column flex-sm-row align-items-center flex-grow-1 mb-2 position-relative bg-light rounded p-2 border"
                                                 >
                                                     {/* Resource clickable area */}
                                                     {editingResourceId === res.resource_id ? (
@@ -451,7 +470,7 @@ export default function ModuleAccordion({
 
                                 {/* Quizzes Section */}
                                 <h6 className="fw-bold mb-2">{t("quiz.title")}</h6>
-                                <div className="quizzes-container">
+                                <div className="quizzes-container d-flex flex-wrap gap-2">
                                     {lec.assessments?.length > 0 ? (
                                         lec.assessments.map((quiz) => (
                                             <div key={quiz.assessment_id} className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border">
@@ -506,7 +525,7 @@ export default function ModuleAccordion({
                                     ) : <p className="small text-muted">{t("quiz.none")}</p>}
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 ))
             )

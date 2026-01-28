@@ -385,7 +385,13 @@ function QuizManual() {
 
           {/* RIGHT PANEL */}
           <div className="col-12 col-lg-6 d-flex">
-            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}>
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{
+              minHeight: "550px",      // or 100vh if you prefer
+              margin: 0,
+              width: "100%",
+              maxHeight: "100vh",      // <-- constrain height
+              overflowY: "auto",       // <-- enable vertical scroll
+            }}>
               <h3 className="section-title">{t("quiz.generated_quiz")}</h3>
               {(!quiz || quiz?.questions?.length === 0) && (
                 <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
@@ -413,7 +419,7 @@ function QuizManual() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

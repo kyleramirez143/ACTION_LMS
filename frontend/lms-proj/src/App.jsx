@@ -41,6 +41,7 @@ import AddModule from "./trainer/AddModule.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
+import TraineeGrade from "./trainer/TraineeGrade.jsx";
 
 // Trainee Pages
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
@@ -51,6 +52,7 @@ import QuizPage from "./trainee/QuizPage.jsx";
 import QuizPreview from "./trainee/QuizPreview.jsx";
 import QuizScreenRecord from "./trainee/QuizScreenRecord.jsx";
 import ProfileInfo from "./trainee/ProfileInfo.jsx";
+import ViewGrades from "./trainee/ViewGrades.jsx";
 
 // Unified Calendar Component
 import CalendarView from "./admin/CalendarView.jsx";
@@ -118,6 +120,7 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+            <Route path="/trainer/view-grades" element={<TraineeGrade />} />
             
 
             {/* Admin Routes */}
@@ -147,6 +150,7 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/quiz/:assessment_id" element={<QuizPreview />} />
             <Route path="/quiz/:assessment_id/permission" element={<QuizScreenRecord />} />
             <Route path="/quiz/:assessment_id/start" element={<QuizPage />} />
+            <Route path="/trainee/view-grades" element={<ViewGrades />} />
 
             {/* Fallback */}
             <Route path="*" element={<h2>Page Not Found</h2>} />
