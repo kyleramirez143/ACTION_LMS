@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,7 @@ const ReviewPublish = () => {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
+  const dateInputRef = useRef(null);
 
   // AUTH CHECK
   useEffect(() => {
@@ -88,7 +89,7 @@ const ReviewPublish = () => {
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
-          timeLimit: data.quiz.time_limit ?? 30,
+          timeLimit: (data.quiz.time_limit && data.quiz.time_limit > 0) ? data.quiz.time_limit : 1,
           dueDate: data.quiz.due_date ? formatForDatetimeLocal(data.quiz.due_date) : "",
           noDueDate: !data.quiz.due_date,
           description: data.quiz.description || "",
@@ -523,7 +524,30 @@ const ReviewPublish = () => {
 
               <div className="mb-3">
                 <label className="form-label">{t("quiz.num_attempts")}</label>
-                <input type="number" className="form-control" value={settings.attempts} min={1} onChange={(e) => handleChange("attempts", Number(e.target.value))} />
+                <input 
+                  type="number" 
+                  className={`form-control ${(settings.attempts === "" || settings.attempts < 1) ? 'is-invalid' : ''}`} 
+                  // This allows 0 to be visible and "" to be empty
+                  value={settings.attempts} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Allow the user to type 0 or erase (empty string)
+                    handleChange("attempts", val === "" ? "" : Number(val));
+                  }}
+                  onBlur={(e) => {
+                    // THE AUTO-SNAP: If user leaves the field and it's 0, empty, or negative
+                    if (e.target.value === "" || Number(e.target.value) < 1) {
+                      handleChange("attempts", 1);
+                    }
+                  }}
+                />
+                
+                {/* Show error if value is 0 or empty while the user is still focused on the input */}
+                {(settings.attempts === "" || settings.attempts < 1) && (
+                  <div className="text-danger small mt-1">
+                    {t("Number of attempts must be at least 1")}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">
@@ -533,20 +557,52 @@ const ReviewPublish = () => {
 
               <div className="mb-3">
                 <label className="form-label">{t("quiz.time_limit")}</label>
-                <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={(e) => handleChange("timeLimit", Number(e.target.value))} />
+                <input 
+                  type="number" 
+                  // Show red border ONLY if user explicitly types 0
+                  className={`form-control ${settings.timeLimit !== "" && settings.timeLimit < 1 ? 'is-invalid' : ''}`} 
+                  value={settings.timeLimit} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // FIX: Allow empty string so the field is erasable
+                    handleChange("timeLimit", val === "" ? "" : Number(val));
+                  }}
+                  onBlur={(e) => {
+                    // AUTO-SNAP: If user leaves it as 0 or empty, put 1 automatically
+                    if (e.target.value === "" || Number(e.target.value) < 1) {
+                      handleChange("timeLimit", 1);
+                    }
+                  }}
+                />
+                
+                {/* Validation Message */}
+                {settings.timeLimit !== "" && settings.timeLimit < 1 && (
+                  <div className="text-danger small mt-1">
+                    {t("Time limit must be at least 1 minute")}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">
                 <label className="form-label fw-semibold">{t("quiz.due_date")}</label>
-                <div className="input-group">
+                <div className="position-relative">
                   <input
+                    ref={dateInputRef}
                     type="datetime-local"
-                    className="form-control"
+                    className="form-control pe-5" // 'pe-5' adds padding to the right so text doesn't overlap icon
                     value={settings.noDueDate ? "" : settings.dueDate || ""}
                     disabled={settings.noDueDate}
                     onChange={(e) => handleChange("dueDate", e.target.value || null)}
+                    onClick={(e) => !settings.noDueDate && e.target.showPicker()}
                   />
-                  <span className="input-group-text">
+                  <span 
+                    className="position-absolute top-50 end-0 translate-middle-y me-3" 
+                    style={{ 
+                      cursor: settings.noDueDate ? "default" : "pointer",
+                      zIndex: 5 // Ensures it stays above the input
+                    }}
+                    onClick={() => !settings.noDueDate && dateInputRef.current?.showPicker()}
+                  >
                     <i className="bi bi-calendar-event"></i>
                   </span>
                 </div>
