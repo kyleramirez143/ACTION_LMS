@@ -644,6 +644,7 @@
         "status": "Status",
         "action": "Action",
         "no_match": "No batches match your criteria.",
+        "no_batch_yet": "No Batch Yet!",
         "active": "Active",
         "inactive": "Inactive",
         "confirm_delete_single": "Are you sure you want to delete this batch?",
@@ -652,7 +653,8 @@
         "bulk_deleted": "Batches deleted successfully",
         "bulk_delete_failed": "Error deleting batches",
         "manila": "Manila",
-        "cebu": "Cebu"
+        "cebu": "Cebu",
+        "start": "Start creating batch by clicking the button."
     },
     "checkpoint": {
         "trainee_list": "Trainee List",
@@ -954,6 +956,6 @@
         "start_create": "Start creating batches and assigning periods.",
         "set_quarter": "Set Quarter",
         "no_periods": "No periods yet.",
-        "no_assigned": "This batch does not have any assigned period yet."
+        "no_assigned": "ボタンをクリックしてバッチの作成を開始します。"
     }
 }

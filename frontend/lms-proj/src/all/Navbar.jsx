@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import logo from "../image/logo.png";
+import defaultAvatar from "../image/profile.svg";
 import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -48,6 +49,11 @@ const Navbar = () => {
     navigate("/");
     setMenuOpen(false);
   };
+
+  // ================= PROFILE IMAGE =================
+  // Later replace null with API image
+  const profileImageUrl = null;
+  const avatarSrc = profileImageUrl || defaultAvatar;
 
   // JWT decode for profile path
   const token = localStorage.getItem("authToken");
@@ -118,8 +124,6 @@ const Navbar = () => {
   );
 
   if (loading) return null;
-
-  const profileImageUrl = null;
 
   return (
     <nav className="navbar-wrapper">
@@ -208,21 +212,18 @@ const Navbar = () => {
 
           {/* PROFILE DROPDOWN */}
           <div className="d-flex align-items-center gap-2">
-            {profileImageUrl && (
-              <img
-                src={profileImageUrl}
-                alt="Profile"
-                className="trainee-image"
-              />
-            )}
-
-
             <Dropdown align="end">
               <Dropdown.Toggle
                 as="div"
-                className="rounded-circle border d-flex align-items-center justify-content-center bg-light"
-                style={{ width: "40px", height: "40px", cursor: "pointer" }}
-              />
+                className="rounded-circle border overflow-hidden"
+                style={{ width: 40, height: 40, cursor: "pointer" }}
+              >
+                <img
+                  src={avatarSrc}
+                  alt="profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </Dropdown.Toggle>
               <Dropdown.Menu className="mt-2 shadow">
                 <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   {t("navbar.profile")}

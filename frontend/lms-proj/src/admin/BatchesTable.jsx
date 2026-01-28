@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./UserRoleTable.css";
+import logo from "../image/batches.svg";
 
 function BatchesTable() {
     const navigate = useNavigate();
@@ -139,9 +140,50 @@ function BatchesTable() {
         }
     };
 
+    // --- Derived State ---
+    const noBatchesExist = batches.length === 0 && searchTerm === "" && filter === "All";
+    const isFilteredEmpty = batches.length === 0 && (searchTerm !== "" || filter !== "All");
+
+    // Clear selection if data changes
+    useEffect(() => {
+        if (isFilteredEmpty) setSelectedBatches([]);
+    }, [isFilteredEmpty]);
+
+    // Clear selection if nothing is visible
+    useEffect(() => {
+        if (isFilteredEmpty) setSelectedBatches([]);
+    }, [isFilteredEmpty]);
+
+    // --- Render ---
+    if (noBatchesExist && !loading) {
+        // State 1: No batches in the system
+        return (
+            <div className="container py-4" style={{ maxWidth: "1400px" }}>
+                <div className="user-role-card text-center py-5 text-muted" style={{ margin: 0, minHeight: "550px" }}>
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            textAlign: "center",
+                        }}
+                    >
+                        <img src={logo} className="mb-2"alt="No data" style={{ maxWidth: "220px" }} />
+                        <h3 className="section-title">{t("batches.no_batch_yet")}</h3>
+                        <p className="text-muted">{t("batches.start")}</p>
+                        <Link to="/admin/add-batch" className="btn btn-primary">
+                            <i className="bi bi-plus-circle-fill"></i> {t("batches.add_new_batch")}
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
-            <div className="user-role-card mb-3" style={{ margin: 0, minHeight: "550px"  }}>
+            <div className="user-role-card mb-3" style={{ margin: 0, minHeight: "550px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="section-title">{t("batches.all_batches")}</h3>
                     <div className="d-flex gap-2">
@@ -151,13 +193,16 @@ function BatchesTable() {
                             </button>
                         </Link>
 
-                        <button
-                            className="btn btn-danger rounded-pill"
-                            onClick={handleBulkDelete}
-                            disabled={selectedBatches.length === 0}
-                        >
-                            <i className="bi bi-trash3-fill"></i> {t("batches.delete")} ({selectedBatches.length})
-                        </button>
+                        {!isFilteredEmpty && batches.length > 0 && (
+                            <button
+                                className="btn btn-danger rounded-pill"
+                                onClick={handleBulkDelete}
+                                disabled={selectedBatches.length === 0}
+                            >
+                                <i className="bi bi-trash3-fill me-2"></i>
+                                {t("batches.delete")} ({selectedBatches.length})
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -192,126 +237,142 @@ function BatchesTable() {
                     </div>
                 </div>
 
-                {
-                    loading ? (
-                        <div className="text-center p-5">
-                            <div className="spinner-border text-primary" role="status"></div>
-                            <p className="mt-2">{t("batches.loading")}</p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="table-responsive">
-                                <table className="table align-middle">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th className="text-center">{t("batches.batch_name")}</th>
-                                            <th className="text-center">{t("batches.location")}</th>
-                                            <th className="text-center">{t("batches.start_date")}</th>
-                                            <th className="text-center">{t("batches.end_date")}</th>
-                                            <th className="text-center">{t("batches.curriculum")}</th>
-                                            <th className="text-center">{t("batches.status")}</th>
-                                            <th className="text-center">{t("batches.action")}</th>
-                                            <th className="text-center">
+                {noBatchesExist && (
+                    <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                        <img src={logo} alt="No data" style={{ maxWidth: "220px" }} />
+                        <h3 className="section-title">{t("batches.no_batch_yet")}</h3>
+                        <p className="text-muted">{t("batches.no_batch")}</p>
+                        <Link to="/admin/add-batch" className="btn btn-primary">
+                            <i className="bi bi-plus-circle-fill"></i> {t("batches.add_new_batch")}
+                        </Link>
+                    </div>
+                )
+                }
+
+                <div className="table-responsive">
+                    <table className="table align-middle">
+                        <thead className="table-light">
+                            <tr>
+                                <th className="text-center">{t("batches.batch_name")}</th>
+                                <th className="text-center">{t("batches.location")}</th>
+                                <th className="text-center">{t("batches.start_date")}</th>
+                                <th className="text-center">{t("batches.end_date")}</th>
+                                <th className="text-center">{t("batches.curriculum")}</th>
+                                <th className="text-center">{t("batches.status")}</th>
+                                <th className="text-center">{t("batches.action")}</th>
+                                <th className="text-center">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        // Update this line
+                                        checked={batches.length > 0 && selectedBatches.length === batches.length}
+                                        onChange={() => {
+                                            if (selectedBatches.length === batches.length) {
+                                                setSelectedBatches([]);
+                                            } else {
+                                                setSelectedBatches(batches.map(b => b.batch_id));
+                                            }
+                                        }}
+                                    />
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isFilteredEmpty ? (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-5">
+                                        <div className="d-flex flex-column align-items-center justify-content-center gap-2">
+                                            <img src={logo} alt="No data" style={{ maxWidth: "220px" }} />
+                                            <h3 className="section-title">{t("batches.no_batch_yet")}</h3>
+                                            <p className="text-muted">{t("batches.no_match")}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                batches.map((batch) => {
+                                    const status = getBatchStatus(batch.end_date);
+                                    const curriculum = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
+
+                                    return (
+                                        <tr key={batch.batch_id}>
+                                            <td className="text-center">
+                                                <Link
+                                                    to="/admin/checkpointview"
+                                                    state={{ batchId: batch.batch_id, batchName: batch.name }}
+                                                    className="batch-link"
+                                                    title="View checkpoint for this batch"
+                                                >
+                                                    {batch.name}
+                                                </Link>
+                                            </td>
+                                            <td className="text-center">
+                                                {batch.location}
+                                            </td>
+                                            <td className="text-center">
+                                                {batch.start_date}
+                                            </td>
+                                            <td className="text-center">
+                                                {batch.end_date}
+                                            </td>
+                                            <td className="text-center small fw-bold">{curriculum}</td>
+                                            <td className="text-center">
+                                                <span
+                                                    className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
+                                                        }`}
+                                                >
+                                                    {status}
+                                                </span>
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="d-flex justify-content-center gap-2">
+                                                    <button className="icon-btn" onClick={() =>
+                                                        navigate(`/admin/edit-batch/${batch.batch_id}`)
+                                                    } title="Edit">
+                                                        <i className="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
+                                                        <i className="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className="text-center">
                                                 <input
                                                     type="checkbox"
                                                     className="form-check-input"
-                                                    onChange={handleSelectAll}
-                                                    checked={selectedBatches.length === batches.length && batches.length > 0}
+                                                    checked={selectedBatches.includes(batch.batch_id)}
+                                                    onChange={() => handleCheckboxChange(batch.batch_id)}
                                                 />
-                                            </th>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {batches.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="6" className="text-center py-5 text-muted">
-                                                    {t("batches.no_match")}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            batches.map((batch) => {
-                                                const status = getBatchStatus(batch.end_date);
-                                                const curriculum = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                                                return (
-                                                    <tr key={batch.batch_id}>
-                                                        <td className="text-center">
-                                                            <Link
-                                                                to="/admin/checkpointview"
-                                                                state={{ batchId: batch.batch_id, batchName: batch.name }}
-                                                                className="batch-link"
-                                                                title="View checkpoint for this batch"
-                                                            >
-                                                                {batch.name}
-                                                            </Link>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            {batch.location}
-                                                        </td>
-                                                        <td className="text-center">
-                                                            {batch.start_date}
-                                                        </td>
-                                                        <td className="text-center">
-                                                            {batch.end_date}
-                                                        </td>
-                                                        <td className="text-center small fw-bold">{curriculum}</td>
-                                                        <td className="text-center">
-                                                            <span
-                                                                className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
-                                                                    }`}
-                                                            >
-                                                                {status}
-                                                            </span>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <div className="d-flex justify-content-center gap-2">
-                                                                <button className="icon-btn" onClick={() =>
-                                                                    navigate(`/admin/edit-batch/${batch.batch_id}`)
-                                                                } title="Edit">
-                                                                    <i className="bi bi-pencil-fill"></i>
-                                                                </button>
-                                                                <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
-                                                                    <i className="bi bi-trash3-fill"></i>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="form-check-input"
-                                                                checked={selectedBatches.includes(batch.batch_id)}
-                                                                onChange={() => handleCheckboxChange(batch.batch_id)}
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Pagination */}
-                            <div className="pagination-wrapper">
-                                <ul className="pagination custom-pagination">
-                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                        <button className="page-link" onClick={handlePrev}>‹</button>
+                {/* Pagination */}
+                {
+                    !isFilteredEmpty && (
+                        <div className="pagination-wrapper">
+                            <ul className="pagination custom-pagination">
+                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={handlePrev}>‹</button>
+                                </li>
+                                {Array.from({ length: totalPages }, (_, i) => (
+                                    <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                                        <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
                                     </li>
-                                    {Array.from({ length: totalPages }, (_, i) => (
-                                        <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                                            <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
-                                        </li>
-                                    ))}
-                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                        <button className="page-link" onClick={handleNext}>›</button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={handleNext}>›</button>
+                                </li>
+                            </ul>
+                        </div>
                     )
                 }
             </div >
-        </div>
+        </div >
     );
 }
 
