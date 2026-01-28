@@ -42,7 +42,8 @@
         "ai_generated": "AI生成",
         "manual_quiz": "手動クイズ",
         "my_courses": "マイコース",
-        "assessment": "アセスメント"
+        "assessment": "アセスメント",
+        "view_grades": "成績を見る"
     },
     "dashboard": {
         "admin_lms_dashboard": "管理者LMSダッシュボード",
@@ -148,7 +149,9 @@
         "network_error": "ネットワークエラー。表示変更に失敗しました。",
         "server_error": "サーバーエラー",
         "add_new_module": "新しいモジュールを追加",
-        "no_modules_found": "モジュールが見つかりません。",
+        "no_modules_found": "このコースに最初のモジュールを追加します。",
+        "no_courses_added": "トレーナーによって追加されたコースはありません。",
+        "no_modules_yet": "まだモジュールはありません!",
         "no_description": "説明はありません。",
         "visible": "表示中",
         "hidden": "非表示",
@@ -200,6 +203,7 @@
         "loading": "講義を読み込み中...",
         "empty_trainer": "まだ講義がありません。「講義を追加」をクリックしてください。",
         "empty_trainee": "現在、講義はありません。",
+        "no_lectures_title": "まだ講義はありません!",
         "none": "講義はありません。",
         "edit": "講義を編集",
         "make_visible": "表示する",

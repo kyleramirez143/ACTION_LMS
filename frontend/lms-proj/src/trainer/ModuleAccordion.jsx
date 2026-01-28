@@ -311,7 +311,7 @@ export default function ModuleAccordion({
                                     </div>
                                 )}
 
-                                <span onClick={() => toggleAccordion(i)} className="cursor-pointer">
+                                <span onClick={() => toggleAccordion(i)} className="cursor-pointer mt-1 mt-sm-0">
                                     {openIndex === i ? <ChevronUp /> : <ChevronDown />}
                                 </span>
                             </div>
@@ -332,7 +332,7 @@ export default function ModuleAccordion({
                                 {/* Resources Section */}
                                 <h6 className="fw-bold mb-2">{t("resource.title")}</h6>
 
-                                <div className="resources-container">
+                                <div className="resources-container d-flex flex-wrap gap-2">
                                     {lec.resources?.length > 0 ? (
                                         lec.resources.map((res) => {
                                             const isLink = res.file_url.startsWith("http://") || res.file_url.startsWith("https://");
@@ -341,7 +341,7 @@ export default function ModuleAccordion({
                                             return (
                                                 <div
                                                     key={res.resource_id}
-                                                    className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border"
+                                                    className="d-flex flex-column flex-sm-row align-items-center flex-grow-1 mb-2 position-relative bg-light rounded p-2 border"
                                                 >
                                                     {/* Resource clickable area */}
                                                     {editingResourceId === res.resource_id ? (
@@ -470,7 +470,7 @@ export default function ModuleAccordion({
 
                                 {/* Quizzes Section */}
                                 <h6 className="fw-bold mb-2">{t("quiz.title")}</h6>
-                                <div className="quizzes-container">
+                                <div className="quizzes-container d-flex flex-wrap gap-2">
                                     {lec.assessments?.length > 0 ? (
                                         lec.assessments.map((quiz) => (
                                             <div key={quiz.assessment_id} className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border">

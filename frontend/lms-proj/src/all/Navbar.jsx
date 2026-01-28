@@ -82,7 +82,13 @@ const Navbar = () => {
 
   // Render notifications popout
   const renderNotificationPopout = () => (
-    <div className="notification-popout shadow">
+    <div
+      className="notification-popout shadow-lg rounded"
+      style={{
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+        background: "#fff",
+      }}
+    >
       <ul className="list-unstyled m-0 p-2">
         {notifications.map((notif) => (
           <li
@@ -99,7 +105,7 @@ const Navbar = () => {
           </li>
         ))}
       </ul>
-      <div className="text-center mt-2">
+      <div className="text-center mb-2">
         <Link
           to="all/NotificationView"
           className="text-primary fw-semibold"

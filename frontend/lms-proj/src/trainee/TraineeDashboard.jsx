@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Label
@@ -40,7 +40,7 @@ const StatGroupCard = () => {
     const [activeTab, setActiveTab] = useState('Philnits');
 
     return (
-        <div className="card border-0 shadow-sm bg-white rounded p-4 mb-4 w-100 h-100">
+        <div className="user-role-card" style={{ margin: 0 }}>
             <h4 className="fw-semibold">{t('dashboard.learning_overview')}</h4>
             <ul className="nav nav-underline mb-4">
                 <li className="nav-item">
@@ -122,7 +122,7 @@ const AttendanceCard = () => {
 
 
     return (
-        <div className="card border-0 shadow-sm bg-white rounded p-4 mb-4">
+        <div className="user-role-card mb-3" style={{ margin: 0 }}>
             <h4 className="fw-semibold">{t('dashboard.attendance')}</h4>
             <h6 className="text-muted">{t('dashboard.batch_action', { batch: 40 })}</h6>
             <div className="row mb-4">
@@ -161,50 +161,52 @@ const TraineeChartCard = () => {
     ];
 
     return (
-        <div className="card border-0 shadow-sm bg-white rounded p-3 mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="fw-semibold">{t('dashboard.trainee_performance_chart')}</h4>
-                <select
-                    className="form-select"
-                    style={{ maxWidth: '150px' }}
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                >
-                    <option value="Daily">{t('dashboard.daily')}</option>
-                    <option value="Weekly">{t('dashboard.weekly')}</option>
-                    <option value="Per Module">{t('dashboard.per_module')}</option>
-                </select>
-            </div>
-
-            <div className="row">
-                <div className="col-12 col-md-10">
-                    <ResponsiveContainer width="100%" height={320}>
-                        <LineChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis domain={[0, 100]} tickFormatter={(tick) => `${tick}%`} />
-                            <Tooltip formatter={(value) => `${value}%`} />
-                            <Line type="monotone" dataKey="philnits" name={t('dashboard.philnits')} stroke="#007bff" strokeWidth={2} dot={({ cx, cy, index }) => (
-                                <circle cx={cx} cy={cy} r={data[index].date === '07 Aug' ? 6 : 4} fill="#007bff" />
-                            )} />
-                            <Line type="monotone" dataKey="nihongo" name={t('dashboard.nihongo')} stroke="#21B148" strokeWidth={2} dot={({ cx, cy, index }) => (
-                                <circle cx={cx} cy={cy} r={data[index].date === '07 Aug' ? 6 : 4} fill="#21B148" />
-                            )} />
-                            <ReferenceLine x="07 Aug" stroke="#007bff" strokeDasharray="3 3">
-                                <Label value="Peak: 91%" position="top" fill="#007bff" />
-                            </ReferenceLine>
-                        </LineChart>
-                    </ResponsiveContainer>
+        <div className="user-role-card" style={{ margin: 0 }}>
+            <div className="col-12 col-lg-12">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="fw-semibold">{t('dashboard.trainee_performance_chart')}</h4>
+                    <select
+                        className="form-select"
+                        style={{ maxWidth: '150px' }}
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                    >
+                        <option value="Daily">{t('dashboard.daily')}</option>
+                        <option value="Weekly">{t('dashboard.weekly')}</option>
+                        <option value="Per Module">{t('dashboard.per_module')}</option>
+                    </select>
                 </div>
 
-                <div className="col-12 col-md-2 d-flex flex-column justify-content-center gap-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <div className="rounded-circle" style={{ width: '16px', height: '16px', backgroundColor: '#007bff' }}></div>
-                        <span className="fw-semibold">{t('dashboard.philnits')}</span>
+                <div className="row">
+                    <div className="col-12 col-md-10">
+                        <ResponsiveContainer width="100%" height={320}>
+                            <LineChart data={data}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis domain={[0, 100]} tickFormatter={(tick) => `${tick}%`} />
+                                <Tooltip formatter={(value) => `${value}%`} />
+                                <Line type="monotone" dataKey="philnits" name={t('dashboard.philnits')} stroke="#007bff" strokeWidth={2} dot={({ cx, cy, index }) => (
+                                    <circle cx={cx} cy={cy} r={data[index].date === '07 Aug' ? 6 : 4} fill="#007bff" />
+                                )} />
+                                <Line type="monotone" dataKey="nihongo" name={t('dashboard.nihongo')} stroke="#21B148" strokeWidth={2} dot={({ cx, cy, index }) => (
+                                    <circle cx={cx} cy={cy} r={data[index].date === '07 Aug' ? 6 : 4} fill="#21B148" />
+                                )} />
+                                <ReferenceLine x="07 Aug" stroke="#007bff" strokeDasharray="3 3">
+                                    <Label value="Peak: 91%" position="top" fill="#007bff" />
+                                </ReferenceLine>
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
-                    <div className="d-flex align-items-center gap-2">
-                        <div className="rounded-circle" style={{ width: '16px', height: '16px', backgroundColor: '#21B148' }}></div>
-                        <span className="fw-semibold">{t('dashboard.nihongo')}</span>
+
+                    <div className="col-12 col-md-2 d-flex flex-column justify-content-center gap-3">
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="rounded-circle" style={{ width: '16px', height: '16px', backgroundColor: '#007bff' }}></div>
+                            <span className="fw-semibold">{t('dashboard.philnits')}</span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="rounded-circle" style={{ width: '16px', height: '16px', backgroundColor: '#21B148' }}></div>
+                            <span className="fw-semibold">{t('dashboard.nihongo')}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -215,7 +217,7 @@ const TraineeChartCard = () => {
 const AICoachCard = () => {
     const { t } = useTranslation();
     return (
-        <div className="card border-0 shadow-sm bg-white rounded p-3 w-100 h-100">
+        <div className="user-role-card" style={{ margin: 0 }}>
             <div className="card-body">
                 <h4 className="fw-semibold">{t('dashboard.ai_coach')}</h4>
                 <h6 className="text-muted">{t('dashboard.hello_trainee')}</h6>
@@ -256,7 +258,19 @@ const AICoachCard = () => {
 
 const DashboardHeader = () => {
     const { t } = useTranslation();
-    const now = new Date();
+
+    // Get current date & time in GMT+8
+    const [now, setNow] = useState(new Date());
+
+    // Update time every second
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(new Date());
+        }, 1000);
+
+        return () => clearInterval(interval); // cleanup
+    }, []);
+
     const timezoneOptions = {
         weekday: 'long',
         year: 'numeric',
@@ -282,13 +296,13 @@ const DashboardHeader = () => {
 
 const Dashboard = () => {
     return (
-        <div className="container mt-4">
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
             <DashboardHeader />
             <div className="col-md-12">
                 <AttendanceCard />
             </div>
             <div className="row">
-                <div className="col-md-7 mb-4 d-flex">
+                <div className="col-md-7 mb-4">
                     <StatGroupCard />
                 </div>
                 <div className="col-md-5 mb-4 d-flex">
