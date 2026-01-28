@@ -155,6 +155,7 @@ export async function saveQuizToLecture(req, res) {
             title,
             pdf_source_url: pdfFilename,
             assessment_type_id: assessmentType.assessment_type_id,
+            passing_score: assessmentType.passing_criteria,
             is_published: false,
             created_by: userId
         });

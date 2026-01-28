@@ -7,6 +7,7 @@ import "../trainer/Module.css";
 import ModuleAccordion from "../trainer/ModuleAccordion";
 import UpcomingPanel from "../trainer/UpcomingPanel";
 import { ArrowLeft } from "lucide-react";
+import logo from "../image/add.svg";
 
 export default function TrainerModuleScreen() {
   const { t } = useTranslation();
@@ -96,55 +97,116 @@ export default function TrainerModuleScreen() {
   };
 
   return (
-    <div className="module-container px-4 py-0">
-      <div className="module-left">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="title-back-row p-0 m-0">
-            <button
-              type="button"
-              className="back-btn"
-              onClick={() => navigate(`/${course_id}/modules`)}
-              aria-label="Go back"
-            >
-              <ArrowLeft size={20} strokeWidth={2.2} />
-            </button>
+    <div className="module-container w-100 px-0 py-4">
+      <div className="container" style={{ maxWidth: "1400px" }}>
+        {/* ================= BREADCRUMBS ================= */}
+        <nav
+          style={{
+            "--bs-breadcrumb-divider": "'>'",
+            paddingLeft: 0,
+          }}
+          aria-label="breadcrumb"
+        >
+          <ol className="breadcrumb mb-2" style={{ backgroundColor: "transparent" }}>
+            <li className="breadcrumb-item">
+              <span
+                onClick={() => navigate("/courses")}
+                style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
+              >
+                {t("lecture.courses")}
+              </span>
+            </li>
+            <li className="breadcrumb-item">
+              <span
+                onClick={() => navigate(`/${course_id}/modules`)}
+                style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
+              >
+                {t("lecture.modules")}
+              </span>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              <span style={{ fontWeight: 500, color: "#1E1E1E" }}>
+                {moduleTitle || "Loading..."}
+              </span>
+            </li>
+          </ol>
+        </nav>
 
-            <h3 className="mb-0">{moduleTitle}</h3>
-          </div>
-          {userRole === "Trainer" && (
-            <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
-              {t("lecture.add")}
-            </button>
+        <div className="row g-3">
+          {lectures.length === 0 ? (
+            // Empty state: left full width, no right panel
+            <div className="col-12 col-lg-12">
+              <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "50vh", margin: 0 }}>
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h3 className="mb-0">{moduleTitle}</h3>
+                </div>
+
+                <p className="text-muted">{moduleDescription}</p>
+
+                {/* Empty state */}
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                  <img
+                    src={logo}
+                    alt="No modules"
+                    style={{ maxWidth: "220px" }}
+                    className="mb-3"
+                  />
+                  <h3 className="section-title">{t("lecture.no_lectures_title")}</h3>
+                  <p className="text-muted mb-3">
+                    {userRole === "Trainer"
+                      ? t("lecture.empty_trainer")
+                      : t("lecture.empty_trainee")}
+                  </p>
+                  {userRole === "Trainer" && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleAddLectureClick}
+                    >
+                      {t("lecture.add")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Lectures exist: normal left + right layout
+            <>
+              {/* Left column */}
+              <div className="col-12 col-lg-8">
+                <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0 }}>
+                  {/* Header */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h3 className="mb-0">{moduleTitle}</h3>
+                    {userRole === "Trainer" && (
+                      <button className="btn btn-primary btn-sm" onClick={handleAddLectureClick}>
+                        {t("lecture.add")}
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-muted">{moduleDescription}</p>
+
+                  <ModuleAccordion
+                    isTrainerView={userRole === "Trainer"}
+                    userRole={userRole}
+                    lectures={lectures}
+                  />
+                </div>
+              </div>
+
+              {/* Right column */}
+              <div className="col-12 col-lg-4 d-flex">
+                <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "50vh", margin: 0 }}>
+                  <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
+                  <UpcomingPanel moduleId={module_id} />
+                </div>
+              </div>
+            </>
           )}
         </div>
-
-        <p className="text-secondary">{moduleDescription}</p>
-
-        {loading ? (
-          <p>{t("lecture.loading")}</p>
-        ) : error ? (
-          <p className="text-danger">{error}</p>
-        ) : lectures.length === 0 ? (
-          <p>
-            {userRole === "Trainer"
-              ? t("lecture.empty_trainer")
-              : t("lecture.empty_trainee")}
-          </p>
-        ) : (
-          <ModuleAccordion
-            isTrainerView={userRole === "Trainer"}
-            userRole={userRole}
-            lectures={lectures}
-            courseId={course_id}
-            moduleId={module_id}
-          />
-        )}
-      </div>
-
-      <div className="module-right">
-        <div className="upcoming-title">{t("upcoming.upcoming")}</div>
-        <UpcomingPanel moduleId={module_id}/>
       </div>
     </div>
+
   );
 }

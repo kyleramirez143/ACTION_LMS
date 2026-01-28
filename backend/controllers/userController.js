@@ -396,16 +396,34 @@ export const getProfile = async (req, res) => {
         const userId = req.user.id;
 
         const user = await db.User.findByPk(userId, {
-            attributes: ["id", "first_name", "last_name", "email", "is_active"],
-            include: [
-                {
-                    model: db.Role,
-                    as: "roles",
-                    attributes: ["name"], // Example: Admin, Trainer, etc.
-                    through: { attributes: [] } // Hide pivot table
-                }
-            ]
-        });
+    // Force these specific columns to be returned
+    attributes: [
+        'id', 
+        'first_name', 
+        'last_name', 
+        'email', 
+        'is_active', 
+        'profile_picture' // <--- Ensure this is exactly like your DB column
+    ],
+    include: [
+        {
+            model: db.Role,
+            as: "roles",
+            attributes: ["name"],
+            through: { attributes: [] }
+        }
+    ]
+});
+
+    // --- DEBUGGING LOGS (Check your terminal, not Postman) ---
+    if (user) {
+        console.log("Found User in DB:", user.id);
+        console.log("Raw profile_picture value:", user.profile_picture);
+        console.log("All available keys in user object:", Object.keys(user.dataValues));
+    } else {
+        console.log("User not found for ID:", userId);
+    }
+    // ---------------------------------------------------------
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -688,6 +706,35 @@ export const getUserGrowth = async (req, res) => {
     }
 };
 
+// Example: userController.js
+export const getUserById = async (req, res) => { // or whatever your function name is
+    try {
+        const { id } = req.params;
+        const user = await db.User.findByPk(id, {
+            // 🔹 CRITICAL: Add 'profile_picture' here
+            attributes: ["id", "first_name", "last_name", "email", "is_active", "profile_picture"],
+            include: [
+                {
+                    model: db.Role,
+                    as: "roles",
+                    attributes: ["name"],
+                    through: { attributes: [] }
+                }
+            ]
+        });
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const formattedUser = {
+            ...user.toJSON(),
+            role: user.roles.length > 0 ? user.roles[0].name : "No Role"
+        };
+        res.json(formattedUser);
+    } catch (err) {
+        res.status(500).json({ message: "Error" });
+    }
+};
+
 // ===== BULK IMPORT (FIXED ASYNC & PATHING) =====
 export const importUsers = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "CSV file is required." });
@@ -788,7 +835,7 @@ export const uploadProfilePicture = async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
 
         // ✅ Use the correct DB column
-        user.profile_picture = req.file.path.replace(/\\/g, "/");
+        user.profile_picture = `profile/${req.file.filename}`;
         await user.save();
 
         res.json({

@@ -69,12 +69,12 @@ function Course() {
                     // =========================
                     // EMPTY STATE
                     // =========================
-                    <div className="text-center text-muted py-5">
+                    <div className="d-flex flex-column align-items-center justify-content-center py-5">
                         <img
                             src={logo} // <-- use imported SVG variable
                             alt="No courses"
-                            className="img-fluid mb-3"
-                            style={{ maxWidth: "200px" }}
+                            className="mb-3"
+                            style={{ maxWidth: "220px" }}
                         />
                         <h3 className="mb-0">No courses yet</h3>
                         <p className="text-muted mb-0">

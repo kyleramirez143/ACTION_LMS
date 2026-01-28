@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,7 @@ const ReviewPublish = () => {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
+  const dateInputRef = useRef(null);
 
   // AUTH CHECK
   useEffect(() => {
@@ -88,7 +89,7 @@ const ReviewPublish = () => {
         setSettings({
           title: data.quiz.title || "",
           attempts: data.quiz.attempts ?? 1,
-          timeLimit: data.quiz.time_limit ?? 30,
+          timeLimit: (data.quiz.time_limit && data.quiz.time_limit > 0) ? data.quiz.time_limit : 1,
           dueDate: data.quiz.due_date ? formatForDatetimeLocal(data.quiz.due_date) : "",
           noDueDate: !data.quiz.due_date,
           description: data.quiz.description || "",
@@ -97,6 +98,7 @@ const ReviewPublish = () => {
           scoreVisibility: data.quiz.show_score ?? false,
           includeExplanationIfWrong: data.quiz.show_explanations ?? true,
           isPublished: data.quiz.is_published ?? false,
+          passingScore: data.quiz.passing_score,
         });
 
         setLoading(false);
@@ -364,203 +366,309 @@ const ReviewPublish = () => {
     return (
       <div className="card mb-3 shadow-sm" key={q.question_id || index}>
         <div className="card-body">
-          <div className="d-flex justify-content-between align-items-start">
-            <h5 className="card-title">
-              {q.section && isNihongo && <span className="badge bg-secondary me-2">{q.section}</span>}
-              {t("quiz.q_prefix")}{index + 1}:
-              {isEditing ? (
-                <textarea
-                  className="form-control mt-2"
-                  rows={4}
-                  value={q.question_text}
-                  onChange={(e) => handleQuestionChange(index, "question_text", e.target.value)}
-                />
-              ) : (
-                <span className="ms-2">{q.question_text}</span>
-              )}
-            </h5>
+          {/* Question Row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
 
-            <div>
+            {/* Left side: Question number and text / textarea */}
+            <div style={{ flexGrow: 1 }}>
               {isEditing ? (
                 <>
-                  <button className="btn btn-success btn-sm me-1" onClick={() => handleSaveQuestion(index)}>{t("quiz.save")}</button>
-                  <button className="btn btn-secondary btn-sm me-1" onClick={() => handleCancelEdit(index)}> {t("quiz.cancel")} </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuestion(index)}> {t("quiz.delete")} </button>
+                  {/* Row with Q number and buttons */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {q.section && isNihongo && <span className="badge bg-secondary me-2">{q.section}</span>}
+                    <h5 className="fw-bold mb-0">Q{index + 1}:</h5>
+
+                    <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
+                      <button className="icon-btn" onClick={() => handleSaveQuestion(index)}>
+                        <i className="bi bi-check-square-fill" style={{ color: "green", fontSize: "1.1rem" }}></i>
+                      </button>
+                      <button className="icon-btn" onClick={() => handleCancelEdit(index)}>
+                        <i className="bi bi-x-square-fill" style={{ color: "gray", fontSize: "1.1rem" }}></i>
+                      </button>
+                      <button className="icon-btn" onClick={() => handleDeleteQuestion(index)}>
+                        <i className="bi bi-trash3-fill" style={{ color: "red" ,  fontSize: "1.1rem" }}></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Textarea below */}
+                  <textarea
+                    className="form-control mt-2"
+                    rows={4}
+                    value={q.question_text}
+                    onChange={(e) => handleQuestionChange(index, "question_text", e.target.value)}
+                  />
                 </>
               ) : (
-                <button className="btn btn-outline-primary btn-sm" onClick={() => setEditingQuestionIndex(index)}> {t("quiz.edit")}</button>
+                // Normal mode: question text with edit icon
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <h5 className="fw-bold mb-0">
+                    {q.section && isNihongo && <span className="badge bg-secondary me-2">{q.section}</span>}
+                    {t("quiz.q_prefix")}{index + 1}: <span className="ms-2">{q.question_text}</span>
+                  </h5>
+                  <button className="icon-btn" onClick={() => setEditingQuestionIndex(index)}>
+                    <i className="bi bi-pencil-fill" style={{ color: "#0047AB", fontSize: "1.1rem" }}></i>
+                  </button>
+                </div>
               )}
             </div>
           </div>
+        </div>
 
-          {/* --- MULTIPLE CHOICE --- */}
-          {isMultipleChoice && (
-            <>
-              <ul className="list-group list-group-flush mb-2 mt-2">
-                {Object.entries(q.options).map(([k, v]) => (
-                  <li key={k} className="list-group-item d-flex align-items-center">
-                    <strong>{k.toUpperCase()}.</strong>
-                    {isEditing ? (
-                      <>
-                        <input
-                          type="text"
-                          className="form-control ms-2"
-                          value={v}
-                          onChange={(e) => handleOptionChange(index, k, e.target.value)}
-                        />
-                        <button className="btn btn-danger btn-sm ms-2" onClick={() => handleRemoveChoice(index, k)}>{t("common.remove")}</button>
-                      </>
-                    ) : (
-                      <span className="ms-2">{v}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              {isEditing && (
-                <button className="btn btn-outline-success btn-sm mb-2" onClick={() => handleAddChoice(index)}>
+        {/* --- MULTIPLE CHOICE --- */}
+        {isMultipleChoice && (
+          <>
+            <ul className="list-group list-group-flush mb-2 mt-2" style={{ paddingLeft: "1rem", paddingRight: "1rem" }}>
+              {Object.entries(q.options).map(([k, v]) => (
+                <li key={k} className="list-group-item d-flex align-items-center">
+                  <strong>{k.toUpperCase()}.</strong>
+                  {isEditing ? (
+                    <>
+                      <input
+                        type="text"
+                        className="form-control ms-2"
+                        value={v}
+                        onChange={(e) => handleOptionChange(index, k, e.target.value)}
+                      />
+                      <button className="icon-btn ms-2" onClick={() => handleRemoveChoice(index, k)}><i class="bi bi-x-square-fill" style={{ color: "red", fontSize: "1.1rem" }}></i></button>
+                    </>
+                  ) : (
+                    <span className="ms-2">{v}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {isEditing && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
+                <button
+                  className="btn btn-outline-success p-1"
+                  onClick={() => handleAddChoice(index)}
+                >
                   + {t("quiz.add_choice")}
                 </button>
-              )}
-            </>
-          )}
+              </div>
+            )}
+          </>
+        )}
 
-          {/* --- EXPLANATION --- */}
-          {q.correct_answer && !isEditing && <p className="text-success mb-1 mt-2"><strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}</p>}
+        {/* --- ANSWER --- */}
+        {q.correct_answer && !isEditing && (
+          <p className="text-success mb-1 mt-2" style={{ marginLeft: "1rem" }}>
+            <strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}
+          </p>
+        )}
 
-          {q.explanation && !isEditing && (
-            <div className="p-2 mt-2 bg-light border rounded">
-              <small className="text-muted d-block fw-bold">{t("quiz.explanation")}</small>
-              <small className="text-dark">{q.explanation}</small>
-            </div>
-          )}
-          {isEditing && (
-            <div className="mb-2 mt-2">
-              <label>{t("quiz.explanation")}</label>
-              <textarea
-                className="form-control"
-                rows={2}
-                value={q.explanation || ""}
-                onChange={(e) => handleQuestionChange(index, "explanation", e.target.value)}
-              />
-            </div>
-          )}
-        </div>
+        {/* --- EXPLANATION --- */}
+        {q.explanation && !isEditing && (
+          <div className="p-2 mt-2 bg-light border rounded" style={{
+            padding: "0.75rem 1rem",  // top/bottom 0.75rem, left/right 1rem
+            margin: "0.5rem 0.5rem",  // top/bottom 0.5rem, left/right 0.5rem
+          }}>
+            <p className="fw-bold">{t("quiz.explanation")}</p>
+            <p className="text-muted">{q.explanation}</p>
+          </div>
+        )}
+        {isEditing && (
+          <div className="mb-2 mt-2" style={{ marginLeft: "1rem", marginRight: "1rem" }}>
+            <label>{t("quiz.explanation")}:</label>
+            <textarea
+              className="form-control"
+              rows={2}
+              value={q.explanation || ""}
+              onChange={(e) => handleQuestionChange(index, "explanation", e.target.value)}
+            />
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="container-fluid bg-light" style={{ minHeight: "100vh" }}>
-      <div className="row">
-        {/* LEFT PANEL */}
-        <div className="col-lg-9 p-4" style={{ height: "100vh", overflowY: "auto" }}>
-          <h2 className="mb-4 fw-bold">{t("quiz.review_publish")}</h2>
-          <button className="btn btn-outline-success mb-3" onClick={handleAddQuestion}>+ {t("quiz.add_question")}
-          </button>
-
-          {quiz.questions.length === 0 ? (
-            <div className="alert alert-info">{t("quiz.no_questions_yet1")}</div>
-          ) : (
-            quiz.questions.map((q, i) => renderQuestion(q, i))
-          )}
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="col-lg-3 p-4" style={{ height: "100vh", overflowY: "auto" }}>
-          <div className="card shadow-sm p-3">
-            <h5 className="fw-semibold mb-3">{t("quiz.settings_options")}</h5>
-
-            <div className="mb-3">
-              <label className="form-label">{t("quiz.title_label")}</label>
-              <input type="text" className="form-control" value={settings.title} onChange={(e) => handleChange("title", e.target.value)} />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">{t("quiz.num_attempts")}</label>
-              <input type="number" className="form-control" value={settings.attempts} min={1} onChange={(e) => handleChange("attempts", Number(e.target.value))} />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">{t("quiz.time_limit")}</label>
-              <input type="number" className="form-control" value={settings.timeLimit} min={1} onChange={(e) => handleChange("timeLimit", Number(e.target.value))} />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label fw-semibold">{t("quiz.due_date")}</label>
-              <div className="input-group">
-                <input
-                  type="datetime-local"
-                  className="form-control"
-                  value={settings.noDueDate ? "" : settings.dueDate || ""}
-                  disabled={settings.noDueDate}
-                  onChange={(e) => handleChange("dueDate", e.target.value || null)}
-                />
-                <span className="input-group-text">
-                  <i className="bi bi-calendar-event"></i>
-                </span>
+    <div className="module-container w-100 px-0 py-4">
+      <div className="container" style={{ maxWidth: "1400px" }}>
+        <div className="row">
+          {/* LEFT PANEL */}
+          <div className="col-12 col-lg-8" style={{ height: "100vh", overflowY: "auto" }}>
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "100%", margin: 0, width: "100%" }}>
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h3 className="section-title mb-0">{t("quiz.review_publish")}</h3>
+                <button className="btn btn-primary" onClick={handleAddQuestion}>
+                  + {t("quiz.add_question")}
+                </button>
               </div>
 
-              <div className="form-check mt-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="noDueDateCheck"
-                  checked={settings.noDueDate}
+              {quiz.questions.length === 0 ? (
+                <div className="alert alert-info">{t("quiz.no_questions_yet1")}</div>
+              ) : (
+                quiz.questions.map((q, i) => renderQuestion(q, i))
+              )}
+            </div>
+          </div>
+
+
+          {/* RIGHT PANEL */}
+          <div className="col-12 col-lg-4 d-flex">
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{
+              minHeight: "550px",
+              overflowY: "auto",
+              margin: 0,
+              maxHeight: "100vh",
+            }}
+            >
+              <h5 className="fw-semibold mb-3">{t("quiz.settings_options")}</h5>
+
+              <div className="mb-3">
+                <label className="form-label">{t("quiz.title_label")}</label>
+                <input type="text" className="form-control" value={settings.title} onChange={(e) => handleChange("title", e.target.value)} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">{t("quiz.num_attempts")}</label>
+                <input 
+                  type="number" 
+                  className={`form-control ${(settings.attempts === "" || settings.attempts < 1) ? 'is-invalid' : ''}`} 
+                  // This allows 0 to be visible and "" to be empty
+                  value={settings.attempts} 
                   onChange={(e) => {
-                    const checked = e.target.checked;
-                    handleChange("noDueDate", checked);
-                    handleChange("dueDate", checked ? null : settings.dueDate);
+                    const val = e.target.value;
+                    // Allow the user to type 0 or erase (empty string)
+                    handleChange("attempts", val === "" ? "" : Number(val));
+                  }}
+                  onBlur={(e) => {
+                    // THE AUTO-SNAP: If user leaves the field and it's 0, empty, or negative
+                    if (e.target.value === "" || Number(e.target.value) < 1) {
+                      handleChange("attempts", 1);
+                    }
                   }}
                 />
-                <label className="form-check-label" htmlFor="noDueDateCheck">
-                  {t("quiz.no_due_date")}
-                </label>
+                
+                {/* Show error if value is 0 or empty while the user is still focused on the input */}
+                {(settings.attempts === "" || settings.attempts < 1) && (
+                  <div className="text-danger small mt-1">
+                    {t("Number of attempts must be at least 1")}
+                  </div>
+                )}
               </div>
 
-              <div className="form-text">
-                {t("quiz.due_date_description")}
+              <div className="mb-3">
+                <label className="form-label">Passing Score</label>
+                <input type="number" className="form-control" value={settings.passingScore} min={1} onChange={(e) => handleChange("passingScore", Number(e.target.value))} />
               </div>
-            </div>
 
-            <div className="mb-3">
-              <label className="form-label">{t("quiz.instructions")}</label>
-              <textarea className="form-control" placeholder={t("quiz.instructions_placeholder")} rows={5} value={settings.description} onChange={(e) => handleChange("description", e.target.value)} />
-            </div>
+              <div className="mb-3">
+                <label className="form-label">{t("quiz.time_limit")}</label>
+                <input 
+                  type="number" 
+                  // Show red border ONLY if user explicitly types 0
+                  className={`form-control ${settings.timeLimit !== "" && settings.timeLimit < 1 ? 'is-invalid' : ''}`} 
+                  value={settings.timeLimit} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // FIX: Allow empty string so the field is erasable
+                    handleChange("timeLimit", val === "" ? "" : Number(val));
+                  }}
+                  onBlur={(e) => {
+                    // AUTO-SNAP: If user leaves it as 0 or empty, put 1 automatically
+                    if (e.target.value === "" || Number(e.target.value) < 1) {
+                      handleChange("timeLimit", 1);
+                    }
+                  }}
+                />
+                
+                {/* Validation Message */}
+                {settings.timeLimit !== "" && settings.timeLimit < 1 && (
+                  <div className="text-danger small mt-1">
+                    {t("Time limit must be at least 1 minute")}
+                  </div>
+                )}
+              </div>
 
-            {/* Checkboxes */}
-            <div className="form-check mb-2">
-              <input className="form-check-input" type="checkbox" checked={settings.screenMonitoring} onChange={() => handleChange("screenMonitoring", !settings.screenMonitoring)} />
-              <label className="form-check-label">{t("quiz.screen_monitoring")}</label>
-            </div>
+              <div className="mb-3">
+                <label className="form-label fw-semibold">{t("quiz.due_date")}</label>
+                <div className="position-relative">
+                  <input
+                    ref={dateInputRef}
+                    type="datetime-local"
+                    className="form-control pe-5" // 'pe-5' adds padding to the right so text doesn't overlap icon
+                    value={settings.noDueDate ? "" : settings.dueDate || ""}
+                    disabled={settings.noDueDate}
+                    onChange={(e) => handleChange("dueDate", e.target.value || null)}
+                    onClick={(e) => !settings.noDueDate && e.target.showPicker()}
+                  />
+                  <span 
+                    className="position-absolute top-50 end-0 translate-middle-y me-3" 
+                    style={{ 
+                      cursor: settings.noDueDate ? "default" : "pointer",
+                      zIndex: 5 // Ensures it stays above the input
+                    }}
+                    onClick={() => !settings.noDueDate && dateInputRef.current?.showPicker()}
+                  >
+                    <i className="bi bi-calendar-event"></i>
+                  </span>
+                </div>
 
-            <div className="form-check mb-2">
-              <input className="form-check-input" type="checkbox" checked={settings.randomization} onChange={() => handleChange("randomization", !settings.randomization)} />
-              <label className="form-check-label">{t("quiz.shuffle_questions")}</label>
-            </div>
+                <div className="form-check mt-2">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="noDueDateCheck"
+                    checked={settings.noDueDate}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      handleChange("noDueDate", checked);
+                      handleChange("dueDate", checked ? null : settings.dueDate);
+                    }}
+                  />
+                  <label className="form-check-label" htmlFor="noDueDateCheck">
+                    {t("quiz.no_due_date")}
+                  </label>
+                </div>
 
-            <div className="form-check mb-2">
-              <input className="form-check-input" type="checkbox" checked={settings.scoreVisibility} onChange={() => handleChange("scoreVisibility", !settings.scoreVisibility)} />
-              <label className="form-check-label">{t("quiz.score_visibility")}</label>
-            </div>
+                <div className="form-text">
+                  {t("quiz.due_date_description")}
+                </div>
+              </div>
 
-            <div className="form-check mb-2">
-              <input className="form-check-input" type="checkbox" checked={settings.includeExplanationIfWrong} onChange={() => handleChange("includeExplanationIfWrong", !settings.includeExplanationIfWrong)} />
-              <label className="form-check-label">{t("quiz.include_explanation_if_wrong")}</label>
-            </div>
+              <div className="mb-3">
+                <label className="form-label">{t("quiz.instructions")}</label>
+                <textarea className="form-control" placeholder="No need to include numbering. Just press enter per instruction." rows={5} value={settings.description} onChange={(e) => handleChange("description", e.target.value)} />
+              </div>
 
-            <div className="form-check form-switch mb-2">
-              <input className="form-check-input" type="checkbox" checked={settings.isPublished} onChange={() => handleChange("isPublished", !settings.isPublished)} />
-              <label className="form-check-label">{settings.isPublished ? t("quiz.quiz_visible") : t("quiz.quiz_hidden")}</label>
-            </div>
+              {/* Checkboxes */}
+              <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" checked={settings.screenMonitoring} onChange={() => handleChange("screenMonitoring", !settings.screenMonitoring)} />
+                <label className="form-check-label">{t("quiz.screen_monitoring")}</label>
+              </div>
 
-            <div className="d-flex justify-content-center gap-2 mt-4">
-              <button className="btn btn-primary w-50" onClick={handlePublish}>{t("quiz.save")} </button>
-              <button className="btn btn-outline-secondary w-50" onClick={handleCancel}>{t("quiz.cancel")}</button>
+              <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" checked={settings.randomization} onChange={() => handleChange("randomization", !settings.randomization)} />
+                <label className="form-check-label">{t("quiz.shuffle_questions")}</label>
+              </div>
+
+              <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" checked={settings.scoreVisibility} onChange={() => handleChange("scoreVisibility", !settings.scoreVisibility)} />
+                <label className="form-check-label">{t("quiz.score_visibility")}</label>
+              </div>
+
+              <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" checked={settings.includeExplanationIfWrong} onChange={() => handleChange("includeExplanationIfWrong", !settings.includeExplanationIfWrong)} />
+                <label className="form-check-label">{t("quiz.include_explanation_if_wrong")}</label>
+              </div>
+
+              <div className="form-check form-switch mb-2">
+                <input className="form-check-input" type="checkbox" checked={settings.isPublished} onChange={() => handleChange("isPublished", !settings.isPublished)} />
+                <label className="form-check-label">{settings.isPublished ? t("quiz.quiz_visible") : t("quiz.quiz_hidden")}</label>
+              </div>
+
+              <div className="d-flex justify-content-center gap-2 mt-4">
+                <button className="btn btn-primary w-50" onClick={handlePublish}>{t("quiz.save")} </button>
+                <button className="btn btn-outline-secondary w-50" onClick={handleCancel}>{t("quiz.cancel")}</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

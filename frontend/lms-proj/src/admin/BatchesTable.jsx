@@ -80,14 +80,16 @@ function BatchesTable() {
         if (!window.confirm(t("batches.confirm_delete_single"))) return;
 
         const token = localStorage.getItem("authToken");
+
         try {
             const res = await fetch(`http://localhost:5000/api/batches/delete/${batchId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!res.ok) throw new Errort("batches.delete_failed")
 
-            alertt("batches.deleted_success")
+            if (!res.ok) throw new Error(t("batches.delete_failed"));
+
+            alert(t("batches.deleted_success"));
             fetchBatches();
         } catch (err) {
             alert("Error: " + err.message);
@@ -138,176 +140,178 @@ function BatchesTable() {
     };
 
     return (
-        <div className="user-role-card">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="section-title">{t("batches.all_batches")}</h3>
-                <div className="d-flex gap-2">
-                    <Link to="/admin/add-batch">
-                        <button className="btn btn-primary rounded-pill">
-                            <i className="bi bi-plus-circle-fill me-2"></i>{t("batches.add_new_batch")}
+        <div className="container py-4" style={{ maxWidth: "1400px" }}>
+            <div className="user-role-card mb-3" style={{ margin: 0, minHeight: "550px"  }}>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h3 className="section-title">{t("batches.all_batches")}</h3>
+                    <div className="d-flex gap-2">
+                        <Link to="/admin/add-batch">
+                            <button className="btn btn-primary rounded-pill">
+                                <i className="bi bi-plus-circle-fill me-2"></i>{t("batches.add_new_batch")}
+                            </button>
+                        </Link>
+
+                        <button
+                            className="btn btn-danger rounded-pill"
+                            onClick={handleBulkDelete}
+                            disabled={selectedBatches.length === 0}
+                        >
+                            <i className="bi bi-trash3-fill"></i> {t("batches.delete")} ({selectedBatches.length})
                         </button>
-                    </Link>
-
-                    <button
-                        className="btn btn-danger rounded-pill"
-                        onClick={handleBulkDelete}
-                        disabled={selectedBatches.length === 0}
-                    >
-                        <i className="bi bi-trash3-fill"></i> {t("batches.delete")} ({selectedBatches.length})
-                    </button>
-                </div>
-            </div>
-
-            <div className="d-flex gap-3 mb-4 flex-wrap">
-                <div className="d-flex align-items-center">
-                    <label className="me-2 fw-bold">{t("batches.filter_by_location")}</label>
-                    <select
-                        value={filter}
-                        onChange={(e) => {
-                            setFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="form-select w-auto"
-                    >
-                        <option value="All">{t("batches.all_locations")}</option>
-                        <option value="Manila">{t("batches.manila")}</option>
-                        <option value="Cebu">{t("batches.cebu")}</option>
-                    </select>
-                </div>
-
-                <div className="flex-grow-1" style={{ maxWidth: "400px" }}>
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder={t("batches.search")}
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                    />
-                </div>
-            </div>
-
-            {
-                loading ? (
-                    <div className="text-center p-5">
-                        <div className="spinner-border text-primary" role="status"></div>
-                        <p className="mt-2">{t("batches.loading")}</p>
                     </div>
-                ) : (
-                    <>
-                        <div className="table-responsive">
-                            <table className="table align-middle">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th className="text-center">{t("batches.batch_name")}</th>
-                                        <th className="text-center">{t("batches.location")}</th>
-                                        <th className="text-center">{t("batches.start_date")}</th>
-                                        <th className="text-center">{t("batches.end_date")}</th>
-                                        <th className="text-center">{t("batches.curriculum")}</th>
-                                        <th className="text-center">{t("batches.status")}</th>
-                                        <th className="text-center">{t("batches.action")}</th>
-                                        <th className="text-center">
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                onChange={handleSelectAll}
-                                                checked={selectedBatches.length === batches.length && batches.length > 0}
-                                            />
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {batches.length === 0 ? (
+                </div>
+
+                <div className="d-flex gap-3 mb-4 flex-wrap">
+                    <div className="d-flex align-items-center">
+                        <label className="me-2 fw-bold">{t("batches.filter_by_location")}</label>
+                        <select
+                            value={filter}
+                            onChange={(e) => {
+                                setFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="form-select w-auto"
+                        >
+                            <option value="All">{t("batches.all_locations")}</option>
+                            <option value="Manila">{t("batches.manila")}</option>
+                            <option value="Cebu">{t("batches.cebu")}</option>
+                        </select>
+                    </div>
+
+                    <div className="flex-grow-1" style={{ maxWidth: "400px" }}>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder={t("batches.search")}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {
+                    loading ? (
+                        <div className="text-center p-5">
+                            <div className="spinner-border text-primary" role="status"></div>
+                            <p className="mt-2">{t("batches.loading")}</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="table-responsive">
+                                <table className="table align-middle">
+                                    <thead className="table-light">
                                         <tr>
-                                            <td colSpan="6" className="text-center py-5 text-muted">
-                                                {t("batches.no_match")}
-                                            </td>
+                                            <th className="text-center">{t("batches.batch_name")}</th>
+                                            <th className="text-center">{t("batches.location")}</th>
+                                            <th className="text-center">{t("batches.start_date")}</th>
+                                            <th className="text-center">{t("batches.end_date")}</th>
+                                            <th className="text-center">{t("batches.curriculum")}</th>
+                                            <th className="text-center">{t("batches.status")}</th>
+                                            <th className="text-center">{t("batches.action")}</th>
+                                            <th className="text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input"
+                                                    onChange={handleSelectAll}
+                                                    checked={selectedBatches.length === batches.length && batches.length > 0}
+                                                />
+                                            </th>
                                         </tr>
-                                    ) : (
-                                        batches.map((batch) => {
-                                            const status = getBatchStatus(batch.end_date);
-                                            const curriculum = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
+                                    </thead>
+                                    <tbody>
+                                        {batches.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="text-center py-5 text-muted">
+                                                    {t("batches.no_match")}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            batches.map((batch) => {
+                                                const status = getBatchStatus(batch.end_date);
+                                                const curriculum = `${getBatchCode(batch.name)}${batch.location}${formatDate(batch.start_date)}–${formatDate(batch.end_date)}`;
 
-                                            return (
-                                                <tr key={batch.batch_id}>
-                                                    <td className="text-center">
-                                                        <Link
-                                                            to="/admin/checkpointview"
-                                                            state={{ batchId: batch.batch_id, batchName: batch.name }}
-                                                            className="batch-link"
-                                                            title="View checkpoint for this batch"
-                                                        >
-                                                            {batch.name}
-                                                        </Link>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        {batch.location}
-                                                    </td>
-                                                    <td className="text-center">
-                                                        {batch.start_date}
-                                                    </td>
-                                                    <td className="text-center">
-                                                        {batch.end_date}
-                                                    </td>
-                                                    <td className="text-center small fw-bold">{curriculum}</td>
-                                                    <td className="text-center">
-                                                        <span
-                                                            className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
-                                                                }`}
-                                                        >
-                                                            {status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <div className="d-flex justify-content-center gap-2">
-                                                            <button className="icon-btn" onClick={() =>
-                                                                navigate(`/admin/edit-batch/${batch.batch_id}`)
-                                                            } title="Edit">
-                                                                <i className="bi bi-pencil-fill"></i>
-                                                            </button>
-                                                            <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
-                                                                <i className="bi bi-trash3-fill"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="form-check-input"
-                                                            checked={selectedBatches.includes(batch.batch_id)}
-                                                            onChange={() => handleCheckboxChange(batch.batch_id)}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                                return (
+                                                    <tr key={batch.batch_id}>
+                                                        <td className="text-center">
+                                                            <Link
+                                                                to="/admin/checkpointview"
+                                                                state={{ batchId: batch.batch_id, batchName: batch.name }}
+                                                                className="batch-link"
+                                                                title="View checkpoint for this batch"
+                                                            >
+                                                                {batch.name}
+                                                            </Link>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            {batch.location}
+                                                        </td>
+                                                        <td className="text-center">
+                                                            {batch.start_date}
+                                                        </td>
+                                                        <td className="text-center">
+                                                            {batch.end_date}
+                                                        </td>
+                                                        <td className="text-center small fw-bold">{curriculum}</td>
+                                                        <td className="text-center">
+                                                            <span
+                                                                className={`badge ${status === "Active" ? "bg-success-subtle text-success" : "bg-success-subtle text-danger"
+                                                                    }`}
+                                                            >
+                                                                {status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <div className="d-flex justify-content-center gap-2">
+                                                                <button className="icon-btn" onClick={() =>
+                                                                    navigate(`/admin/edit-batch/${batch.batch_id}`)
+                                                                } title="Edit">
+                                                                    <i className="bi bi-pencil-fill"></i>
+                                                                </button>
+                                                                <button className="icon-btn" onClick={() => handleDelete(batch.batch_id)} title="Delete">
+                                                                    <i className="bi bi-trash3-fill"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="form-check-input"
+                                                                checked={selectedBatches.includes(batch.batch_id)}
+                                                                onChange={() => handleCheckboxChange(batch.batch_id)}
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {/* Pagination */}
-                        <div className="pagination-wrapper">
-                            <ul className="pagination custom-pagination">
-                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                    <button className="page-link" onClick={handlePrev}>‹</button>
-                                </li>
-                                {Array.from({ length: totalPages }, (_, i) => (
-                                    <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                                        <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
+                            {/* Pagination */}
+                            <div className="pagination-wrapper">
+                                <ul className="pagination custom-pagination">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <button className="page-link" onClick={handlePrev}>‹</button>
                                     </li>
-                                ))}
-                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                    <button className="page-link" onClick={handleNext}>›</button>
-                                </li>
-                            </ul>
-                        </div>
-                    </>
-                )
-            }
-        </div >
+                                    {Array.from({ length: totalPages }, (_, i) => (
+                                        <li key={i + 1} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
+                                            <button className="page-link" onClick={() => handlePageClick(i + 1)}>{i + 1}</button>
+                                        </li>
+                                    ))}
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <button className="page-link" onClick={handleNext}>›</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </>
+                    )
+                }
+            </div >
+        </div>
     );
 }
 

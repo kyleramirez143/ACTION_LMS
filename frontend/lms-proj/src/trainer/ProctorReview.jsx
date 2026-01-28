@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import API from '../api/axios'; // Your Axios instance
 import { FaPlay, FaUser, FaClock } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import "./ProctorReview.css";
 
 const ProctorReview = () => {
     const { t } = useTranslation();
@@ -61,218 +62,292 @@ const ProctorReview = () => {
         setHistoryUser(name);
     };
 
+    // --- Prevent background scroll when modal is open ---
+    useEffect(() => {
+        if (selectedVideo || attemptHistory.length > 0) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+    }, [selectedVideo, attemptHistory]);
+
     return (
-        <div className="container mt-1">
-            <h2 className="mb-4">{t("proctor.quiz_result")}</h2>
-            {/* Details part */}
-            <div className="mt-3">
-                <div className="row g-4">
-                    {/* Trainee Details */}
-                    <div className="col-6">
-                        <div className="card shadow-sm border-0 p-4 h-100">
-                            <h6 className="fw-semibold mb-4">{t("proctor.trainee_overview")}</h6>
+        <>
+            {/* --- Attempt History Modal --- */}
+            {
+                attemptHistory.length > 0 && (
+                    <div
+                        className="modal-backdrop-custom"
+                        onClick={() => setAttemptHistory([])}
+                    >
+                        <div
+                            className="modal-dialog modal-lg modal-dialog-centered"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-content" style={{ maxWidth: "95vw" }}>
+                                <div className="modal-header d-flex align-items-center justify-content-between mb-3">
+                                    <h3 className="section-title mb-0">
+                                        {historyUser} {t("proctor.attempt_history")}
+                                    </h3>
 
-                            <div className="row text-center">
-                                <div className="col-4">
-                                    <i className="bi bi-people-fill fs-2 text-primary"></i>
-                                    <div className="mt-2 fw-semibold">{t("proctor.total_trainees")}</div>
-                                    <div className="fs-4 fw-bold">{totalTrainees}</div>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        onClick={() => setAttemptHistory([])}
+                                    />
                                 </div>
 
-                                <div className="col-4">
-                                    <i className="bi bi-check-circle-fill fs-2 text-success"></i>
-                                    <div className="mt-2 fw-semibold">{t("proctor.took_quiz")}</div>
-                                    <div className="fs-4 fw-bold">{tookQuiz}</div>
+                                <div className="modal-body mb-3" style={{ padding: "0" }}>
+                                    <div>
+                                        <table className="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>{t("proctor.attempt")}</th>
+                                                    <th>{t("proctor.score")}</th>
+                                                    <th>{t("proctor.percentage")}</th>
+                                                    <th>{t("proctor.status")}</th>
+                                                    <th>{t("proctor.date")}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {attemptHistory.map((a) => (
+                                                    <tr key={a.attempt_id}>
+                                                        <td>#{a.attempt_number}</td>
+                                                        <td>
+                                                            {a.total_score}/{a.max_score}
+                                                        </td>
+                                                        <td>{a.final_score}%</td>
+                                                        <td>
+                                                            <span
+                                                                className={`badge ${a.status === "Pass" ? "bg-success" : "bg-danger"
+                                                                    }`}
+                                                            >
+                                                                {t(`proctor.status.${a.status.toLowerCase()}`)}
+                                                            </span>
+                                                        </td>
+                                                        <td>{new Date(a.created_at).toLocaleString()}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div >
+                )
+            }
 
-                                <div className="col-4">
-                                    <i className="bi bi-x-circle-fill fs-2 text-danger"></i>
-                                    <div className="mt-2 fw-semibold">{t("proctor.did_not_take")}</div>
-                                    <div className="fs-4 fw-bold">{didNotTake}</div>
+            {/* --- Video Player Modal --- */}
+            {
+                selectedVideo && (
+                    <div
+                        className="modal-backdrop-custom"
+                        onClick={() => setSelectedVideo(null)}
+                    >
+                        <div className="modal-dialog modal-xl modal-dialog-centered"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-content bg-dark border-0" style={{ minWidth: "45vw" }}>
+                                <div className="modal-header border-0">
+                                    <h5 className="modal-title text-white">
+                                        {t("proctor.screen_recording_playback")}
+                                    </h5>
+                                    <button
+                                        className="btn-close btn-close-white"
+                                        onClick={() => setSelectedVideo(null)}
+                                    ></button>
+                                </div>
+                                <div className="modal-body text-center">
+                                    <video
+                                        src={selectedVideo}
+                                        controls
+                                        autoPlay
+                                        style={{ minWidth: "80vh", minHeight: "50vh" }}
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
+                )
+            }
 
-                    {/* Passing Rate */}
-                    <div className="col-6">
-                        <div className="card shadow-sm border-0 p-4 d-flex align-items-center justify-content-center">
-                            <h6 className="fw-semibold mb-4">{t("proctor.passing_rate")}</h6>
+            <div className="module-container w-100 px-0 py-4">
+                <div className="container" style={{ maxWidth: "1400px" }}>
+                    <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ margin: 0, minHeight: "570px" }}>
+                        <h3 className="section-title">QUIZ TITLE : {t("proctor.quiz_result")}</h3>
+                        <div className="row">
+                            {/* Trainee Details */}
+                            <div className="col-12 col-lg-8">
+                                <div className="user-role-card flex-grow-1 d-flex flex-column w-100 border rounded p-3" style={{ margin: 0, height: "200px" }}>
+                                    <h5 className="fw-bold">{t("proctor.trainee_overview")}</h5>
 
-                            <div
-                                className="position-relative d-flex align-items-center justify-content-center"
-                                style={{
-                                    width: "160px",
-                                    height: "160px",
-                                    borderRadius: "50%",
-                                    background: `conic-gradient(#198754 ${passingRate}%, #e9ecef 0)`
-                                }}
-                            >
-                                <div
-                                    className="bg-white rounded-circle d-flex align-items-center justify-content-center"
-                                    style={{
-                                        width: "120px",
-                                        height: "120px"
-                                    }}
-                                >
-                                    <div className="text-center">
-                                        <div className="fs-3 fw-bold text-success">{passingRate}%</div>
-                                        <div className="small text-muted">{t("proctor.passed")}</div>
+                                    <div className="row text-center">
+                                        <div className="col-4 border-end">
+                                            <i className="bi bi-people-fill fs-2 text-primary"></i>
+                                            <p className="text-muted">{t("proctor.total_trainees")}</p>
+                                            <div className="fs-4 fw-bold">{totalTrainees}</div>
+                                        </div>
+
+                                        <div className="col-4 border-end">
+                                            <i className="bi bi-person-fill-check fs-2 text-success"></i>
+                                            <p className="text-muted">{t("proctor.took_quiz")}</p>
+                                            <div className="fs-4 fw-bold">{tookQuiz}</div>
+                                        </div>
+
+                                        <div className="col-4">
+                                            <i className="bi bi-person-fill-slash fs-2 text-danger"></i>
+                                            <p className="text-muted">{t("proctor.did_not_take")}</p>
+                                            <div className="fs-4 fw-bold">{didNotTake}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-4 text-center small text-muted">
-                                {passedCount} {t("proctor.out_of")} {tookQuiz} {t("proctor.trainees")}
+                            {/* Passing Rate */}
+                            <div className="col-12 col-lg-4">
+                                <div className="user-role-card border rounded p-3 d-flex flex-column" style={{ margin: 0, height: "200px" }}>
+
+                                    {/* Title top-left */}
+                                    <h5 className="fw-bold">{t("proctor.passing_rate")}</h5>
+
+                                    {/* Chart centered */}
+                                    <div className="d-flex justify-content-center">
+                                        <div
+                                            className="position-relative d-flex align-items-center justify-content-center"
+                                            style={{
+                                                width: "110px",
+                                                height: "110px",
+                                                borderRadius: "50%",
+                                                background: `conic-gradient(#198754 ${passingRate}%, #e9ecef 0)`,
+                                            }}
+                                        >
+                                            <div
+                                                className="bg-white rounded-circle d-flex align-items-center justify-content-center"
+                                                style={{ width: "80px", height: "80px" }}
+                                            >
+                                                <div className="text-center">
+                                                    <h6 className="fw-bold text-success mb-0">{passingRate}%</h6>
+                                                    <p className="text-muted mb-0" style={{ fontSize: "11px" }}>
+                                                        {t("proctor.passed")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Text info below chart */}
+                                    <div className="text-center small text-muted">
+                                        {passedCount} {t("proctor.out_of")} {tookQuiz} {t("proctor.trainees")}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Table and Summary part */}
-            <div className="my-5">
-                <div className="row">
-                    {/* Table part */}
-                    <div className="col-8">
-                        <div className="card shadow-sm border-0">
-                            <table className="table table-hover align-middle mb-0">
-                                <thead className="bg-light">
-                                    <tr>
-                                        <th>{t("proctor.student")}</th>
-                                        <th>{t("proctor.date_started")}</th>
-                                        <th>{t("proctor.time_finished")}</th>
-                                        <th>{t("proctor.score")}</th>
-                                        <th>{t("proctor.status")}</th>
-                                        <th>{t("proctor.action")}</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {sessions.map((item) => (
-                                        <tr key={item.attempt_id}>
-                                            {/* Student Info */}
-                                            <td>
-                                                <div className="d-flex align-items-center">
-                                                    <div className="bg-secondary rounded-circle p-2 text-white me-3">
-                                                        <FaUser />
-                                                    </div>
-                                                    <div>
-                                                        <div className="fw-bold">{item.user.first_name} {item.user.last_name}</div>
-                                                        <div className="small text-muted">{t("proctor.attempt")} #{item.attempt_number} </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            {/* Date Started */}
-                                            <td>
-                                                {new Date(item.created_at).toLocaleDateString()}
-                                                <div className="small text-muted">
-                                                    {new Date(item.created_at).toLocaleTimeString()}
-                                                </div>
-                                            </td>
-
-                                            {/* Date Finished */}
-                                            <td>
-                                                {item.completed_at ? (
-                                                    <>
-                                                        {new Date(item.completed_at).toLocaleDateString()}
-                                                        <div className="small text-muted">
-                                                            {new Date(item.completed_at).toLocaleTimeString()}
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <span className="text-muted small">{t("proctor.incomplete")}</span>
-                                                )}
-                                            </td>
-
-                                            {/* Score Column: Displays 5 / 10 */}
-                                            <td>
-                                                <span className="fw-bold">{Math.floor(item.total_score)}</span>
-                                                <span className="text-muted"> / {Math.floor(item.max_score)}</span>
-                                                <div className="small text-muted">{item.final_score}%</div>
-                                            </td>
-
-                                            {/* Status */}
-                                            <td>
-                                                <span className={`badge ${item.status === 'Pass' ? "bg-success" : "bg-danger"}`}>
-                                                    {t(`proctor.status.${item.status.toLowerCase()}`)}
-                                                </span>
-                                            </td>
-
-                                            {/* Action (Video) */}
-                                            <td className="text-end">
-                                                {item.recording_url ? (
-                                                    <button
-                                                        className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => setSelectedVideo(`http://localhost:5000/uploads/recordings/${item.recording_url}`)}
-                                                    >
-                                                        <FaPlay className="me-1" /> {t("proctor.view")}
-                                                    </button>
-
-                                                ) : (
-                                                    <span className="text-muted small">{t("proctor.no_recording")}</span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                {/* {item.user?.id && ( */}
-                                                <button
-                                                    className="btn btn-sm btn-outline-secondary me-2"
-                                                    onClick={() => openHistory(item.user.id, item.user.first_name)}
-                                                >
-                                                    {t("proctor.attempts")}
-                                                </button>
-                                                {/* )}  */}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
 
-                    {/* Summary part */}
-                    <div className="col-4">
-                        <div className="card shadow-sm border-0">
-                            {t("proctor.test_summary")}
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {attemptHistory.length > 0 && (
-                <div className="modal d-block" style={{ background: "rgba(0,0,0,.6)" }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5>{historyUser}{t("proctor.attempt_history")}</h5>
-                                <button className="btn-close" onClick={() => setAttemptHistory([])} />
-                            </div>
-                            <div className="modal-body">
-                                <table className="table">
-                                    <thead>
+                        {/* Table part */}
+                        <div className="col-12 col-lg-12 my-4">
+                            <div className="user-role-card flex-grow-1 d-flex flex-column w-100 border rounded" style={{ margin: 0 }}>
+                                <table className="table table-hover align-middle mb-0">
+                                    <thead className="bg-light">
                                         <tr>
-                                            <th>{t("proctor.attempt")}</th> 
-                                            <th>{t("proctor.score")}</th> 
-                                            <th>{t("proctor.percentage")}</th> 
-                                            <th>{t("proctor.status")}</th> 
-                                            <th>{t("proctor.date")}</th>
+                                            <th>{t("proctor.student")}</th>
+                                            <th className='text-center'>{t("proctor.date_started")}</th>
+                                            <th className='text-center'>{t("proctor.time_finished")}</th>
+                                            <th className='text-center'>{t("proctor.score")}</th>
+                                            <th className='text-center'>{t("proctor.status")}</th>
+                                            <th className='text-center'>{t("proctor.action")}</th>
                                         </tr>
                                     </thead>
+
                                     <tbody>
-                                        {attemptHistory.map(a => (
-                                            <tr key={a.attempt_id}>
-                                                <td>#{a.attempt_number}</td>
-                                                <td>{a.total_score}/{a.max_score}</td>
-                                                <td>{a.final_score}%</td>
+                                        {sessions.map((item) => (
+                                            <tr key={item.attempt_id}>
+                                                {/* Student Info */}
                                                 <td>
-                                                    <span className={`badge ${a.status === 'Pass' ? 'bg-success' : 'bg-danger'}`}>
-                                                        {t(`proctor.status.${a.status.toLowerCase()}`)}
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="bg-secondary rounded-circle text-white me-3 d-flex align-items-center justify-content-center"
+                                                            style={{ width: "40px", height: "40px" }}>
+                                                            <FaUser />
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="fw-bold">{item.user.first_name} {item.user.last_name}</div>
+                                                            <div className="small text-muted">{t("proctor.attempt")} #{item.attempt_number} </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                {/* Date Started */}
+                                                <td className='text-center'>
+                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                    <div className="small text-muted">
+                                                        {new Date(item.created_at).toLocaleTimeString()}
+                                                    </div>
+                                                </td>
+
+                                                {/* Date Finished */}
+                                                <td className='text-center'>
+                                                    {item.completed_at ? (
+                                                        <>
+                                                            {new Date(item.completed_at).toLocaleDateString()}
+                                                            <div className="small text-muted">
+                                                                {new Date(item.completed_at).toLocaleTimeString()}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-muted small">{t("proctor.incomplete")}</span>
+                                                    )}
+                                                </td>
+
+                                                {/* Score Column: Displays 5 / 10 */}
+                                                <td className='text-center'>
+                                                    <span className="fw-bold">{Math.floor(item.total_score)}</span>
+                                                    <span className="text-muted"> / {Math.floor(item.max_score)}</span>
+                                                    <div className="small text-muted">{item.final_score}%</div>
+                                                </td>
+
+                                                {/* Status */}
+                                                <td className="text-center">
+                                                    <span
+                                                        className={`badge ${item.status === 'Pass' ? "bg-success" : "bg-danger"} px-3 py-2`}
+                                                    >
+                                                        {t(`proctor.status.${item.status.toLowerCase()}`)}
                                                     </span>
                                                 </td>
-                                                <td>{new Date(a.created_at).toLocaleString()}</td>
+
+                                                {/* Action */}
+                                                <td className="text-center">
+                                                    <div className="d-flex justify-content-center gap-2" style={{ minHeight: "40px", alignItems: "center" }}>
+                                                        {item.recording_url ? (
+                                                            <button
+                                                                className="btn btn-sm btn-primary"
+                                                                style={{ minHeight: "35px" }}
+                                                                onClick={() =>
+                                                                    setSelectedVideo(
+                                                                        `http://localhost:5000/uploads/recordings/${item.recording_url}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                <FaPlay className="me-1" /> {t("proctor.view")}
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-muted small" style={{ lineHeight: "35px" }}>
+                                                                {t("proctor.no_recording")}
+                                                            </span>
+                                                        )}
+
+                                                        <button
+                                                            className="btn btn-sm btn-secondary"
+                                                            style={{ minHeight: "35px" }}
+                                                            onClick={() =>
+                                                                openHistory(item.user.id, item.user.first_name)
+                                                            }
+                                                        >
+                                                            {t("proctor.attempts")}
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -280,32 +355,9 @@ const ProctorReview = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Video Player Modal */}
-            {selectedVideo && (
-                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content border-0">
-                            <div className="modal-header">
-                                <h5 className="modal-title">{t("proctor.screen_recording_playback")}</h5>
-                                <button className="btn-close" onClick={() => setSelectedVideo(null)}></button>
-                            </div>
-                            <div className="modal-body p-0 bg-dark text-center">
-                                <video
-                                    src={selectedVideo}
-                                    controls
-                                    className="w-100"
-                                    autoPlay
-                                    style={{ maxHeight: '70vh' }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                </div >
+            </div>
+        </>
     );
 };
 

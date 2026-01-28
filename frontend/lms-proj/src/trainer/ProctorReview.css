@@ -1,0 +1,10 @@
+.modal-backdrop-custom {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .65);
+    z-index: 9999;
+    /* force above navbar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

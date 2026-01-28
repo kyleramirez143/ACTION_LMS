@@ -13,9 +13,9 @@
 
 /* ================= MAIN LAYOUT ================= */
 .module-container {
-    flex: 1;
+    /* flex: 1;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; */
     gap: 2.3rem;
     padding: 2.4rem 3rem;
     box-sizing: border-box;
@@ -48,8 +48,8 @@
 }
 
 .accordion-card {
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
     background-color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -89,7 +89,9 @@
 }
 
 .accordion-title {
-    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .accordion-description {
@@ -111,6 +113,9 @@
 
 .resources-container {
     margin-bottom: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .resource-item {
@@ -206,6 +211,12 @@
     cursor: pointer;
     padding: 4px;
     color: #1E1E1E;
+}
+
+.quizzes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .quiz-menu {

@@ -1,8 +1,7 @@
 // ./src/config/navConfig.js
 
-// Change what is needed for each role.
-// Check what each role can access. Add something if it's not yet included.
 export const navLinks = [
+  // ------------------ Admin ------------------
   {
     name: 'Dashboard',
     path: '/admin/dashboard',
@@ -38,12 +37,14 @@ export const navLinks = [
         translationKey: "nav.view_module_table",
       },
       {
-        name: 'Action Calendar',
+        name: 'Action Calendar',  // unified calendar link
         path: '/admin/calendar',
         translationKey: "nav.action_calendar",
       },
     ],
   },
+
+  // ------------------ Trainer ------------------
   {
     name: 'Dashboard',
     path: '/trainer/dashboard',
@@ -74,11 +75,19 @@ export const navLinks = [
       },]
   },
   {
-    name: 'Action Calendar',
+    name: 'View Grades',
+    path: '/trainer/view-grades',
+    requiredRoles: ['Trainer'],
+    translationKey: "nav.view_grades",
+  },
+  {
+    name: 'Action Calendar', // unified calendar link
     path: '/trainer/calendar',
     requiredRoles: ['Trainer'],
     translationKey: "nav.action_calendar",
   },
+
+  // ------------------ Trainee ------------------
   {
     name: 'Dashboard',
     path: '/trainee/dashboard',
@@ -98,10 +107,15 @@ export const navLinks = [
     requiredRoles: ['Trainee'],
     translationKey: "nav.assessment",
   },
-  // {
-  //   name: 'Profile',
-  //   path: '/profile',
-  //   // icon: 'UserIcon',
-  //   requiredRoles: ['Admin', 'Trainer', 'Trainee'],
-  // },
+  {
+    name: 'View Grades', // unified calendar link
+    path: '/trainee/view-grades',
+    requiredRoles: ['Trainee'],
+    translationKey: "nav.view_grades",
+  },
+  {
+    name: 'Action Calendar', // unified calendar link
+    path: '/trainee/calendar',
+    requiredRoles: ['Trainee'],
+  },
 ];

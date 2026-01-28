@@ -78,8 +78,3 @@
     border: 1px solid #5B5B5B !important;
     box-shadow: none !important;
 }
-
-.bi-x-square-fill::before {
-    content: "\f628";
-    color: #dc3545; 
-}
