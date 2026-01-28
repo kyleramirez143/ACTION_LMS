@@ -634,6 +634,7 @@
         "status": "ステータス",
         "action": "操作",
         "no_match": "該当するバッチが見つかりません。",
+        "no_batch_yet": "まだバッチはありません!",
         "active": "有効",
         "inactive": "無効",
         "confirm_delete_single": "このバッチを削除してもよろしいですか？",
@@ -642,7 +643,8 @@
         "bulk_deleted": "バッチを一括削除しました。",
         "bulk_delete_failed": "バッチの削除中にエラーが発生しました。",
         "manila": "マニラ",
-        "cebu": "セブ"
+        "cebu": "セブ",
+        "start": "ボタンをクリックしてバッチの作成を開始します。"
     },
     "checkpoint": {
         "trainee_list": "研修生リスト",

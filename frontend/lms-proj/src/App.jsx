@@ -79,8 +79,8 @@ function AppContent() {
     <>
       {!hideNavbar && <Navbar />}
 
-      <div className="container-fluid w-100 h-100">
-        <div className="row h-100">
+      {/* <div className="container-fluid"> */}
+        <div className="row">
           <Routes>
             {/* Public */}
             <Route path="/" element={<LoginPage />} />
@@ -156,7 +156,7 @@ function AppContent() {
             <Route path="*" element={<h2>Page Not Found</h2>} />
           </Routes>
         </div>
-      </div>
+      {/* </div> */}
     </>
   );
 }

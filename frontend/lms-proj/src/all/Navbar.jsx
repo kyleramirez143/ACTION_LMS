@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Dropdown } from "react-bootstrap";
 import logo from "../image/logo.png";
+import defaultAvatar from "../image/profile.svg";
 import "./Navbar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -63,7 +64,12 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
-  // JWT decode for dynamic profile pathing
+  // ================= PROFILE IMAGE =================
+  // Later replace null with API image
+  const profileImageUrl = null;
+  const avatarSrc = profileImageUrl || defaultAvatar;
+
+  // JWT decode for profile path
   const token = localStorage.getItem("authToken");
   let profilePath = "/profile";
 
@@ -181,20 +187,15 @@ const Navbar = () => {
             <Dropdown align="end">
               <Dropdown.Toggle
                 as="div"
-                className="rounded-circle border d-flex align-items-center justify-content-center bg-light overflow-hidden"
-                style={{ width: "40px", height: "40px", cursor: "pointer" }}
+                className="rounded-circle border overflow-hidden"
+                style={{ width: 40, height: 40, cursor: "pointer" }}
               >
-                {profileImageUrl ? (
-                  <img
-                    src={profileImageUrl}
-                    alt="Profile"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                ) : (
-                  <span style={{ fontSize: "20px" }}>👤</span>
-                )}
+                <img
+                  src={avatarSrc}
+                  alt="profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
               </Dropdown.Toggle>
-
               <Dropdown.Menu className="mt-2 shadow">
                 <Dropdown.Item as={Link} to="/trainee/ProfileInfo">
                   {t("navbar.profile")}

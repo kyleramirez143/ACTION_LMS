@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import logo from "../image/login.svg"; // or your actual path
 
 function LoginPage() {
   const { t, i18n } = useTranslation(); // i18n hook
@@ -104,73 +105,80 @@ function LoginPage() {
   }; // End of handleSubmit
 
   return (
-    <div className="login-wrapper">
-      {/* Left side: Blue panel */}
-      <div className="login-left">
-        {/* Optional logo, image, or tagline */}
-      </div>
+    <div className="login-container" style={{ color: "#0047AB"}}>
+      <div className="login-wrapper">
+        {/* Left side: Blue panel */}
+        <div className="login-left">
+          <img
+            src={logo}        // replace with your image import or URL
+            alt="Logo"
+            className="img-fluid"  // makes it responsive
+            style={{ maxWidth: "400px" }} // optional size
+          />
+        </div>
 
-      {/* Right side: Login form */}
-      <div className="login-right">
-        <div className="login-content">
-          {/* Language dropdown */}
-          <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-            <select
-              value={i18n.language}
-              onChange={(e) => {
-                const lng = e.target.value;
-                i18n.changeLanguage(lng);
-                localStorage.setItem("lang", lng);
-              }}
-              style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Right side: Login form */}
+        <div className="login-right">
+          <div className="login-content">
+            {/* Language dropdown */}
+            <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+              <select
+                value={i18n.language}
+                onChange={(e) => {
+                  const lng = e.target.value;
+                  i18n.changeLanguage(lng);
+                  localStorage.setItem("lang", lng);
+                }}
+                style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+              >
+                {languages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />
-          <h2 className="welcome-title">{t('login.welcome')}</h2>
-          <p className="welcome-subtext">{t('login.subtext')}</p>
+            <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />
+            <h2 className="welcome-title">{t('login.welcome')}</h2>
+            <p className="welcome-subtext">{t('login.subtext')}</p>
 
-          <form className="login-form" onSubmit={handleSubmit}>
-            {error && <p className="error-message" style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
+            <form className="login-form" onSubmit={handleSubmit}>
+              {error && <p className="error-message" style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
 
-            <input
-              type="text"
-              placeholder={t('login.username')}
-              className="form-input"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-
-            <div className="password-wrapper">
               <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t('login.password')}
+                type="text"
+                placeholder={t('login.username')}
                 className="form-input"
-                name="password"
-                value={formData.password}
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
               />
-              <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </span>
-            </div>
 
-            <div className="form-options">
-              <label>
-                <input type="checkbox" /> {t('login.remember_me')}
-              </label>
-              <a href="#" className="forgot-link">{t('login.forgot_password')}</a>
-            </div>
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={t('login.password')}
+                  className="form-input"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </span>
+              </div>
 
-            <button type="submit" className="login-button">{t('login.button')}</button>
-          </form>
+              <div className="form-options">
+                <label>
+                  <input type="checkbox" /> {t('login.remember_me')}
+                </label>
+                <a href="#" className="forgot-link">{t('login.forgot_password')}</a>
+              </div>
+
+              <button type="submit" className="login-button">{t('login.button')}</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
