@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,9 @@ function ModuleTable() {
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({ name: "", start_date: "", end_date: "" });
     const [selectedModules, setSelectedModules] = useState([]);
+
+    const startDateRef = useRef(null);
+    const endDateRef = useRef(null);
 
     // --- Fetch periods ---
     const fetchPeriods = useCallback(async () => {
@@ -142,6 +145,17 @@ function ModuleTable() {
         }
     };
 
+    const mapModuleToQuarter = (name) => {
+        switch (name.toLowerCase()) {
+            case "module 1": return "Quarter 1";
+            case "module 2": return "Quarter 2";
+            case "module 3": return "Quarter 3";
+            case "module 4": return "Quarter 4";
+            default: return name; // already correct
+        }
+    };
+
+
     const currentBatch = batches.find((b) => String(b.curriculum_id) === String(selectedCurriculumId));
     const hasPeriods = periods.length > 0;
     const noBatchesExist = batches.length === 0;
@@ -184,18 +198,24 @@ function ModuleTable() {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="section-title">{dynamicTitle}</h3>
                     <div className="d-flex gap-2">
-                        <Link to="/admin/set-module-date">
-                            <button className="btn btn-primary rounded-pill">
-                                <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
-                            </button>
-                        </Link>
-                        {hasPeriods && (
+                        {!hasPeriods ? (
+                            <Link to="/admin/set-module-date"
+                                state={{ selectedCurriculumId }} >
+                                <button
+                                    className="btn btn-primary rounded-pill"
+                                    style={{ width: "170px" }}
+                                >
+                                    <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
+                                </button>
+                            </Link>
+                        ) : (
                             <button
-                                className="btn btn-danger rounded-pill"
-                                onClick={handleBulkDelete}
-                                disabled={selectedModules.length === 0}
+                                className="btn btn-primary rounded-pill"
+                                style={{ width: "170px" }}
+                                disabled
+                                title={t("quarters.already_set")}
                             >
-                                <i className="bi bi-trash3-fill"></i> {t("module_management.delete_modules", { count: selectedModules.length })}
+                                <i className="bi bi-calendar2-plus-fill"></i> {t("quarters.set_quarter")}
                             </button>
                         )}
                     </div>
@@ -230,14 +250,6 @@ function ModuleTable() {
                                 <th className="text-center">{t("module_management.table_start_date")}</th>
                                 <th className="text-center">{t("module_management.table_end_date")}</th>
                                 <th className="text-center">{t("module_management.table_action")}</th>
-                                <th className="text-center">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        onChange={handleSelectAll}
-                                        checked={filteredPeriods.length > 0 && selectedModules.length === filteredPeriods.length}
-                                    />
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -247,24 +259,19 @@ function ModuleTable() {
                                     return (
                                         <tr key={period.quarter_id} className={isEditing ? "table-primary-light" : ""}>
                                             <td className="text-center">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="text"
-                                                        className="form-control w-75 mx-auto"
-                                                        value={editData.name}
-                                                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                                    />
-                                                ) : (
-                                                    period.name
-                                                )}
+                                                {mapModuleToQuarter(period.name)}
                                             </td>
+
                                             <td className="text-center">
                                                 {isEditing ? (
                                                     <input
+                                                        ref={startDateRef}
                                                         type="date"
                                                         className="form-control"
                                                         value={editData.start_date}
                                                         onChange={(e) => setEditData({ ...editData, start_date: e.target.value })}
+                                                        onFocus={() => startDateRef.current?.showPicker()}
+                                                        onClick={() => startDateRef.current?.showPicker()}
                                                     />
                                                 ) : (
                                                     period.start_date
@@ -273,10 +280,13 @@ function ModuleTable() {
                                             <td className="text-center">
                                                 {isEditing ? (
                                                     <input
+                                                        ref={endDateRef}
                                                         type="date"
                                                         className="form-control"
                                                         value={editData.end_date}
                                                         onChange={(e) => setEditData({ ...editData, end_date: e.target.value })}
+                                                        onFocus={() => endDateRef.current?.showPicker()}
+                                                        onClick={() => endDateRef.current?.showPicker()}
                                                     />
                                                 ) : (
                                                     period.end_date
@@ -300,14 +310,6 @@ function ModuleTable() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="text-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-check-input"
-                                                    checked={selectedModules.includes(period.quarter_id)}
-                                                    onChange={() => handleCheckboxChange(period.quarter_id)}
-                                                />
-                                            </td>
                                         </tr>
                                     );
                                 })
@@ -327,7 +329,7 @@ function ModuleTable() {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

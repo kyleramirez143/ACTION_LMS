@@ -18,11 +18,17 @@ function BatchesTable() {
     const [selectedBatches, setSelectedBatches] = useState([]);
     const ITEMS_PER_PAGE = 7;
 
-    // ✅ ADD IT HERE (helper functions section)
     const getBatchCode = (name) => {
         if (!name) return "";
+
+        // grab first number from any string
         const match = name.match(/\d+/);
-        return match ? `B${match[0]}` : name;
+
+        // if number exists → B + number
+        if (match) return `B${match[0]}`;
+
+        // fallback: if no number, just return original
+        return name;
     };
 
     // Helper to determine status on the fly
@@ -169,7 +175,7 @@ function BatchesTable() {
                             textAlign: "center",
                         }}
                     >
-                        <img src={logo} className="mb-2"alt="No data" style={{ maxWidth: "220px" }} />
+                        <img src={logo} className="mb-2" alt="No data" style={{ maxWidth: "220px" }} />
                         <h3 className="section-title">{t("batches.no_batch_yet")}</h3>
                         <p className="text-muted">{t("batches.start")}</p>
                         <Link to="/admin/add-batch" className="btn btn-primary">
@@ -298,11 +304,11 @@ function BatchesTable() {
                                             <td className="text-center">
                                                 <Link
                                                     to="/admin/checkpointview"
-                                                    state={{ batchId: batch.batch_id, batchName: batch.name }}
+                                                    state={{ batchId: batch.batch_id, batchName: getBatchCode(batch.name) }}
                                                     className="batch-link"
                                                     title="View checkpoint for this batch"
                                                 >
-                                                    {batch.name}
+                                                    {getBatchCode(batch.name)}
                                                 </Link>
                                             </td>
                                             <td className="text-center">

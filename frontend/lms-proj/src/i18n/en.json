@@ -208,7 +208,9 @@
         "save": "Save",
         "update": "Update",
         "processing": "Processing...",
-        "upcoming": "Upcoming"
+        "upcoming": "Tasks",
+        "view_less_tasks": "View Less",
+        "view_all_tasks": "View More"
     },
     "lecture": {
         "courses": "Courses",
@@ -698,7 +700,7 @@
         "batch": "Batch",
         "select_batch": "Select Batch",
         "modules_already_set": "— Modules already set",
-        "module": "Module",
+        "module": "Quarter",
         "start_date": "Start Date",
         "end_date": "End Date",
         "submit": "Submit",
@@ -956,6 +958,6 @@
         "start_create": "Start creating batches and assigning periods.",
         "set_quarter": "Set Quarter",
         "no_periods": "No periods yet.",
-        "no_assigned": "ボタンをクリックしてバッチの作成を開始します。"
+        "no_assigned": "Click the button to start setting quarter."
     }
 }

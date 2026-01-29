@@ -197,7 +197,16 @@ export default function TrainerModuleScreen() {
 
               {/* Right column */}
               <div className="col-12 col-lg-4 d-flex">
-                <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "50vh", margin: 0 }}>
+                <div
+                  className="user-role-card flex-grow-1 d-flex flex-column"
+                  style={{
+                    minHeight: "50vh",
+                    margin: 0,
+                    maxHeight: "550px",       // ✅ keeps panel same height as left column
+                    overflowY: "auto",        // ✅ scrollable
+                    scrollbarWidth: "thin",   // ✅ Firefox scrollbar
+                  }}
+                >
                   <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
                   <UpcomingPanel moduleId={module_id} />
                 </div>
