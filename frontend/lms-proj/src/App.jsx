@@ -41,6 +41,7 @@ import AddModule from "./trainer/AddModule.jsx";
 import ReviewPublish from "./trainer/ReviewPublish.jsx";
 import ProctorReview from "./trainer/ProctorReview.jsx";
 import TrainerNewSchedule from "./trainer/TrainerNewSchedule.jsx";
+import TraineeGrade from "./trainer/TraineeGrade.jsx";
 
 // Trainee Pages
 import TraineeDashboard from "./trainee/TraineeDashboard.jsx";
@@ -118,6 +119,7 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
+            <Route path="/trainer/traineegrade" element={<TraineeGrade/>}/>
             
 
             {/* Admin Routes */}

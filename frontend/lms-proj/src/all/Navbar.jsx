@@ -23,6 +23,7 @@ const Navbar = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const navigate = useNavigate();
 
+
   const [notifications] = useState([
     { id: 1, titleKey: "notif.1_title", typeKey: "notif.1_type", date: "Dec 19, 2025 · 3:00 PM", icon: "bi-exclamation-circle-fill text-warning" },
     { id: 2, titleKey: "notif.2_title", typeKey: "notif.2_type", date: "Dec 19, 2025 · 2:45 PM", icon: "bi-check-circle-fill text-success" },
@@ -33,9 +34,9 @@ const Navbar = () => {
   useEffect(() => {
     if (userProfile?.profile_picture) {
       const path = userProfile.profile_picture.replace(/\\/g, "/");
-      const finalUrl = path.startsWith("uploads/") 
-          ? `${backendURL}/${path}` 
-          : `${backendURL}/uploads/${path}`;
+      const finalUrl = path.startsWith("uploads/")
+        ? `${backendURL}/${path}`
+        : `${backendURL}/uploads/${path}`;
       setProfileImageUrl(finalUrl);
     } else {
       setProfileImageUrl(null);
@@ -200,7 +201,11 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   {t("navbar.help_support")}
                 </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/" className="text-danger" onClick={logoutUser}>
+                <Dropdown.Item
+                  as="button"
+                  className="dropdown-item text-danger"
+                  onClick={logoutUser}
+                >
                   {t("navbar.sign_out")}
                 </Dropdown.Item>
               </Dropdown.Menu>

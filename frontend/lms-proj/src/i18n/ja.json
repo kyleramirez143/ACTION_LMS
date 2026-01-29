@@ -940,5 +940,25 @@
         "set_quarter": "クォーターを設定",
         "no_periods": "まだ期間がありません。",
         "no_assigned": "このバッチには、まだ期間が設定されていません。"
+    },
+    "notifications": {
+        "title": "通知",
+        "mark_all_read": "すべて既読にする",
+        "table": {
+            "title": "タイトル",
+            "type": "種類",
+            "related_to": "関連",
+            "date_time": "日時",
+            "status": "状態"
+        },
+        "types": {
+            "reminder": "リマインダー",
+            "update": "更新",
+            "action_required": "対応必要"
+        },
+        "status": {
+            "read": "既読",
+            "unread": "未読"
+        }
     }
 }
