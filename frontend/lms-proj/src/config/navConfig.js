@@ -76,7 +76,7 @@ export const navLinks = [
   },
   {
     name: 'View Grades',
-    path: '/trainer/view-grades',
+    path: '/trainer/traineegrade',
     requiredRoles: ['Trainer'],
     translationKey: "nav.view_grades",
   },

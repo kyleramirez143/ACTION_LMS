@@ -15,6 +15,9 @@ import NotificationView from "./all/NotificationView.jsx";
 //Help & Support
 import HelpAndSupport from "./all/HelpSupport.jsx";
 
+//Home
+import Home from "./all/Home.jsx";
+
 // Admin Pages
 import AdminDashboard from './admin/AdminDashboard';
 import AdminCourseManagement from './admin/CourseManagementPage';
@@ -91,6 +94,9 @@ function AppContent() {
 
             {/* Help & Support */}
             <Route path="/all/helpandsupport" element={<HelpAndSupport />} />
+
+            {/* Home */}
+            <Route path="/all/home" element={<Home />} />
 
             {/* Calendar - Unified */}
             <Route path="/admin/calendar" element={<CalendarView />} />
