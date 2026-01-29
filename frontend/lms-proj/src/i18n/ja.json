@@ -947,5 +947,53 @@
         "set_quarter": "クォーターを設定",
         "no_periods": "まだ期間がありません。",
         "no_assigned": "このバッチには、まだ期間が設定されていません。"
+    },
+    "home": {
+        "hero_title": "才能をグローバルスタンダードへ",
+        "hero_subtitle": "業界に関連した技術スキルと日本語能力を兼ね備えた、次世代のエンジニアを育成します。",
+        "goals": {
+        "standards": "国際標準",
+        "standards_sub": "国際的なIT要件にスキルを適応させます。",
+        "bridge": "キャリアの架け橋",
+        "bridge_sub": "地元の才能をグローバルな機会に繋げます。",
+        "nihongo": "日本語習得",
+        "nihongo_sub": "プロフェッショナルなビジネス日本語コミュニケーション。"
+        },
+    "program_overview_title": "プログラム・ロードマップ",
+        "roadmap": {
+        "step1_title": "基礎構築",
+        "step1_exam": "適性検査",
+        "step1_desc": "論理、数学、および基礎プログラミングの評価。",
+        "step2_title": "コアIT",
+        "step2_req": "技術トレーニング",
+        "step2_desc": "Java、RDBMS、およびソフトウェア工学の集中講義。",
+        "step3_title": "日本語",
+        "step3_req": "言語準備",
+        "step3_desc": "JLPT対策トレーニングと文化への没入。",
+        "step4_title": "プレイスメント",
+        "step4_exam": "最終面接",
+        "step4_desc": "提携グローバル企業とのダイレクトマッチング。"
+        },
+    "awards": {
+        "year": "2025年",
+        "title": "優秀賞受賞",
+        "subtitle": "国際的な認知",
+        "company_program": "Action LMS: グローバル・ブリッジ・プログラム",
+        "project1": "トップ・テクニカル・トレーニング・プロバイダー",
+        "project2": "卓越した卒業生就職実績"
+        },
+    "curriculum": {
+      "title": "カリキュラム詳細",
+      "tech": {
+        "title": "テクノロジー",
+        "common_title": "共通技術",
+        "special1_title": "専門技術 1",
+        "special2_title": "専門技術 2",
+        "practicum_title": "実習"
+      },
+      "it_concepts": { "title": "IT全般の概念" },
+      "business": { "title": "ビジネスの基礎" },
+      "japanese": { "title": "日本語教育" }
     }
+}
 }

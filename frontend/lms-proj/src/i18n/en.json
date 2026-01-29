@@ -957,5 +957,50 @@
         "set_quarter": "Set Quarter",
         "no_periods": "No periods yet.",
         "no_assigned": "ボタンをクリックしてバッチの作成を開始します。"
+    },
+    "home": {
+        "hero_title": "Bridging Talent to Global Standards",
+        "hero_subtitle": "Empowering the next generation of engineers with industry-relevant technical skills and Japanese language proficiency.",
+        "goals": {
+        "standards": "Global IT Standards",
+        "standards_sub": "Aligning skills with international IT requirements.",
+        "bridge": "Technical to Business",
+        "bridge_sub": "Connecting local talent with global opportunities.",
+        "nihongo": "Nihongo Proficiency",
+        "nihongo_sub": "Professional business Japanese communication."
+        },
+    "program_overview_title": "Overview of the 4-Month Intensive Program",
+        "roadmap": {
+        "step1_title": "General IT Concepts",
+        "step1_desc": "Brush up on the general knowledge that all IT Engineers should master",
+        "step2_title": "Business Basics",
+        "step2_req": "Technical Training",
+        "step2_desc": "Aside from technical skills. get to learn the basic business skills on how to deal with clients and co-employees",
+        "step3_title": "Technical",
+        "step3_desc": "Learn and apply latest technologies, software engineering and project management principles.",
+        "step4_title": "Japanese Language",
+        "step4_desc": "Learn the Japanese language white getting familiar with Japanese culture 2 hours daily"
+        },
+    "awards": {
+        "year": "2007",
+        "title": "E-Services Award",
+        "subtitle": "International Recognition",
+        "company_program": "ACTION - Outstanding Company Program",
+        "project1": "SCM-Offshore Project of the Year",
+        "project2": "High Definition Clipstation Project - Most Creative Application of the Year"
+        },
+    "curriculum": {
+      "title": "Curriculum Breakdown",
+      "tech": {
+        "title": "Technology",
+        "common_title": "Common Technologies",
+        "special1_title": "Specialized Technologies 1",
+        "special2_title": "Specialized Technologies 2",
+        "practicum_title": "Practicum"
+      },
+      "it_concepts": { "title": "General I.T. Concepts" },
+      "business": { "title": "Business Basics" },
+      "japanese": { "title": "Japanese Language" }
+    }
     }
 }
