@@ -344,7 +344,7 @@
         "num_attempts": "Number of Attempts",
         "time_limit": "Time Limit (minutes)",
         "due_date": "Due Date",
-        "no_due_date": "This quiz has no due date",
+        "no_due_date": "No due date set",
         "due_date_description": "Leave unchecked to set a deadline. Check to allow unlimited time.",
         "instructions": "Instructions",
         "screen_monitoring": "Screen Monitoring",

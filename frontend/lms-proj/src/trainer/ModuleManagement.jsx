@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
+
 import defaultImage from "../image/logo.png";
 import moduleImage from "../image/module.svg"; // <-- added
 
@@ -175,7 +176,11 @@ export default function ModuleManagement() {
                             }}
                             style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
                         >
-                            Assigned Course
+                            {userRole === "Trainer" ? (
+                                <span>Assigned Course</span>
+                            ) : (
+                                <span>Courses</span>
+                            )}
                         </a>
                     </li>
                     <li className="breadcrumb-item active" aria-current="page">

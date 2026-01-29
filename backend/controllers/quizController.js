@@ -72,6 +72,7 @@ export async function getQuiz(req, res) {
                 description: assessment.description,
                 attempts_allowed: assessment.attempts,
                 attempts_taken: currentAttemptCount,
+                passing_score: assessment.passing_score,
                 attempts: assessment.attempts,
                 time_limit: assessment.time_limit,
                 passing_score: assessment.passing_score,
@@ -325,7 +326,7 @@ export async function getTraineeResults(req, res) {
                 {
                     model: Assessment,
                     as: 'assessment',
-                    attributes: ['title', 'passing_score'],
+                    attributes: ['title', 'passing_score', 'show_score'],
                     include: [
                         {
                             model: Lecture,
@@ -373,9 +374,12 @@ export async function getTraineeResults(req, res) {
                 score: `${att.total_score} / ${totalPoints || 0}`,
                 status: passed ? 'Passed' : 'Failed',
                 feedback: passed ? 'Great job!' : 'Needs improvement.',
-                date: att.created_at
+                date: att.created_at,
+                show_score: att.assessment.show_score
             };
         }));
+
+        console.log(results);
 
         res.json(results);
     } catch (err) {
@@ -390,6 +394,14 @@ export async function getQuizReview(req, res) {
     const user_id = req.user.id;
 
     try {
+        const assessment = await Assessment.findByPk(assessment_id, {
+            attributes: ["assessment_id", "title"]
+        });
+
+        if (!assessment) {
+            return res.status(404).json({ error: "Assessment not found" });
+        }
+
         const responses = await AssessmentResponse.findAll({
             where: { assessment_id, user_id, attempt_id },
             include: [
@@ -404,7 +416,7 @@ export async function getQuizReview(req, res) {
                         'explanations',
                         'points'
                     ],
-                    order: [['question_id', 'ASC']]
+                    order: [['question_id', 'ASC']],
                 }
             ],
         });
@@ -416,10 +428,13 @@ export async function getQuizReview(req, res) {
             explanation: r.question.explanations,
             userAnswer: r.answer,
             isCorrect: r.score > 0,
-            points: r.question.points
+            points: r.question.points,
         }));
 
-        res.json(formatted);
+        res.json({
+            assessment: assessment,
+            questions: formatted
+        });
 
     } catch (err) {
         console.error("getQuizReview error:", err);
