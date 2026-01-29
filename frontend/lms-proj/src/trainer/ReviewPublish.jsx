@@ -236,6 +236,18 @@ const ReviewPublish = () => {
     }
   };
 
+  const handleCorrectAnswerChange = (qIndex, key) => {
+    setQuiz((prev) => {
+      const updated = { ...prev };
+      updated.questions = [...updated.questions];
+      updated.questions[qIndex] = {
+        ...updated.questions[qIndex],
+        correct_answer: key,
+      };
+      return updated;
+    });
+  };
+
   const handleCancelEdit = (index) => {
     const updated = [...quiz.questions];
     updated[index] = JSON.parse(JSON.stringify(originalQuestions[index]));
@@ -386,7 +398,7 @@ const ReviewPublish = () => {
                         <i className="bi bi-x-square-fill" style={{ color: "gray", fontSize: "1.1rem" }}></i>
                       </button>
                       <button className="icon-btn" onClick={() => handleDeleteQuestion(index)}>
-                        <i className="bi bi-trash3-fill" style={{ color: "red" ,  fontSize: "1.1rem" }}></i>
+                        <i className="bi bi-trash3-fill" style={{ color: "red", fontSize: "1.1rem" }}></i>
                       </button>
                     </div>
                   </div>
@@ -415,22 +427,48 @@ const ReviewPublish = () => {
           </div>
         </div>
 
-        {/* --- MULTIPLE CHOICE --- */}
         {isMultipleChoice && (
           <>
-            <ul className="list-group list-group-flush mb-2 mt-2" style={{ paddingLeft: "1rem", paddingRight: "1rem" }}>
+            <ul
+              className="list-group list-group-flush mb-2 mt-2"
+              style={{ paddingLeft: "1rem", paddingRight: "1rem" }}
+            >
               {Object.entries(q.options).map(([k, v]) => (
-                <li key={k} className="list-group-item d-flex align-items-center">
+                <li
+                  key={k}
+                  className="list-group-item d-flex align-items-center gap-2"
+                >
+                  {/* Correct answer selector */}
+                  {isEditing && (
+                    <input
+                      type="radio"
+                      name={`correct-answer-${index}`}
+                      checked={q.correct_answer === k}
+                      onChange={() => handleCorrectAnswerChange(index, k)}
+                    />
+                  )}
+
                   <strong>{k.toUpperCase()}.</strong>
+
                   {isEditing ? (
                     <>
                       <input
                         type="text"
-                        className="form-control ms-2"
+                        className="form-control"
                         value={v}
-                        onChange={(e) => handleOptionChange(index, k, e.target.value)}
+                        onChange={(e) =>
+                          handleOptionChange(index, k, e.target.value)
+                        }
                       />
-                      <button className="icon-btn ms-2" onClick={() => handleRemoveChoice(index, k)}><i class="bi bi-x-square-fill" style={{ color: "red", fontSize: "1.1rem" }}></i></button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => handleRemoveChoice(index, k)}
+                      >
+                        <i
+                          className="bi bi-x-square-fill"
+                          style={{ color: "red", fontSize: "1.1rem" }}
+                        />
+                      </button>
                     </>
                   ) : (
                     <span className="ms-2">{v}</span>
@@ -438,8 +476,15 @@ const ReviewPublish = () => {
                 </li>
               ))}
             </ul>
+
             {isEditing && (
-              <div style={{ display: "flex", justifyContent: "flex-end", marginRight: "1rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginRight: "1rem",
+                }}
+              >
                 <button
                   className="btn btn-outline-success p-1"
                   onClick={() => handleAddChoice(index)}
@@ -450,6 +495,7 @@ const ReviewPublish = () => {
             )}
           </>
         )}
+
 
         {/* --- ANSWER --- */}
         {q.correct_answer && !isEditing && (

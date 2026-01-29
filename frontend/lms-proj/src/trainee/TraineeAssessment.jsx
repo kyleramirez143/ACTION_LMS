@@ -192,17 +192,18 @@ export default function TraineeAssessment() {
                   </td>
                 </tr>
               ) : displayedResults.length === 0 ? (
-                <tr>
-                  <td colSpan="7" style={{ textAlign: "center" }}>
-                    {t("assessment.no_records")}
-                  </td>
-                </tr>
-              ) : (
-                displayedResults.map((r) => (
-                  <tr key={r.attempt_id}>
-                    <td>{r.course}</td>
-                    <td>{r.module}</td>
-                    <td>
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  {t("assessment.no_records")}
+                </td>
+              </tr>
+            ) : (
+              displayedResults.map((r) => (
+                <tr key={r.attempt_id}>
+                  <td>{r.course}</td>
+                  <td>{r.module}</td>
+                  <td>
+                    {r.show_score ? (
                       <button
                         className="title-link text-primary text-decoration-underline"
                         type="button"
@@ -212,15 +213,30 @@ export default function TraineeAssessment() {
                       >
                         {r.title}
                       </button>
-                    </td>
-                    <td>{r.score}</td>
-                    <td>
+                    ) : (
+                      <span>{r.title}</span>
+                    )}
+                  </td>
+                  <td>
+                    {r.show_score ? (
+                      <span>
+                        {r.score}
+                      </span>
+                    ) : (
+                      <span>N/A</span>
+                    )}
+                  </td>
+                  <td>
+                    {r.show_score ? (
                       <span className={`status-pill ${statusClass[r.status] || ""}`}>
                         {t(`assessment.statuses.${r.status.toLowerCase()}`)}
                       </span>
-                    </td>
-                    <td>{r.feedback}</td>
-                    <td>{new Date(r.date).toLocaleDateString()}</td>
+                    ) : (
+                      <span >N/A</span>
+                    )}
+                  </td>
+                  <td>{r.feedback}</td>
+                  <td>{new Date(r.date).toLocaleDateString()}</td>
                   </tr>
                 ))
               )}
