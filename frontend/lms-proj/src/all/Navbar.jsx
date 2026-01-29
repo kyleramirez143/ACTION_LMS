@@ -34,9 +34,9 @@ const Navbar = () => {
   useEffect(() => {
     if (userProfile?.profile_picture) {
       const path = userProfile.profile_picture.replace(/\\/g, "/");
-      const finalUrl = path.startsWith("uploads/") 
-          ? `${backendURL}/${path}` 
-          : `${backendURL}/uploads/${path}`;
+      const finalUrl = path.startsWith("uploads/")
+        ? `${backendURL}/${path}`
+        : `${backendURL}/uploads/${path}`;
       setProfileImageUrl(finalUrl);
     } else {
       setProfileImageUrl(null);

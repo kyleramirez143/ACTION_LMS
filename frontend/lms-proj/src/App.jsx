@@ -120,7 +120,7 @@ function AppContent() {
             <Route path="/:course_id/modules/:module_id/lectures" element={<TrainerModuleScreen />} />
             <Route path="/trainer/profile" element={<AdminProfileManagement />} />
             <Route path="/trainer/add-new-schedule" element={<TrainerNewSchedule />} />
-            <Route path="/trainer/view-grades" element={<TraineeGrade />} />
+            <Route path="/trainer/traineegrade" element={<TraineeGrade/>}/>
             
 
             {/* Admin Routes */}

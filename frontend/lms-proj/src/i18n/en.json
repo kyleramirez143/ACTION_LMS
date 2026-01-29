@@ -956,6 +956,26 @@
         "start_create": "Start creating batches and assigning periods.",
         "set_quarter": "Set Quarter",
         "no_periods": "No periods yet.",
-        "no_assigned": "ボタンをクリックしてバッチの作成を開始します。"
+        "no_assigned": "This batch does not have any assigned period yet."
+    },
+    "notifications": {
+        "title": "Notifications",
+        "mark_all_read": "Mark all as read",
+        "table": {
+            "title": "Title",
+            "type": "Type",
+            "related_to": "Related To",
+            "date_time": "Date & Time",
+            "status": "Status"
+        },
+        "types": {
+            "reminder": "Reminder",
+            "update": "Update",
+            "action_required": "Action Required"
+        },
+        "status": {
+            "read": "Read",
+            "unread": "Unread"
+        }
     }
 }
