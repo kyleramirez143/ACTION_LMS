@@ -195,7 +195,9 @@
         "save": "保存",
         "update": "更新",
         "processing": "処理中...",
-        "upcoming": "予定"
+        "upcoming": "予定",
+        "view_less_tasks": "表示を減らす",
+        "view_all_tasks": "もっと見る"
     },
     "lecture": {
         "courses": "コース",
@@ -255,6 +257,9 @@
         "none": "クイズはまだありません。",
         "published": "公開中",
         "edit": "内容を編集",
+        "placeholder_title": "ここにクイズのタイトルを入力してください",
+        "placeholder_choice": "ここに選択肢を入力してください",
+        "options": "選択肢",
         "results": "クイズ結果",
         "unsaved_prompt": "保存されていないクイズがあります。本当にページを離れますか？",
         "complete_all_fields": "すべての項目（PDF、問題数、対象講義）を入力してください！",
@@ -947,7 +952,7 @@
         "start_create": "バッチを作って、期間を設定してください。",
         "set_quarter": "クォーターを設定",
         "no_periods": "まだ期間がありません。",
-        "no_assigned": "このバッチには、まだ期間が設定されていません。"
+        "no_assigned": "ボタンをクリックして四半期の設定を開始します"
     },
     "notifications": {
         "title": "通知",

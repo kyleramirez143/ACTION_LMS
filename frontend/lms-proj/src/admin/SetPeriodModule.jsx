@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 
 function SetPeriodModule() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useTranslation();
     const { id } = useParams(); // Note: if this is for a batch period, 'id' might be a batchId
     const isEditMode = !!id;
     const token = localStorage.getItem("authToken");
 
+    // --- Batch Pre-selection from ModuleTable ---
+    const preselectedBatch = location.state?.selectedCurriculumId || "";
+
     // --- Fixed State Management (Matching the form fields) ---
     const [formData, setFormData] = useState({
-        batch: "",
+         batch: preselectedBatch, // <-- default from previous page
         mod1_start: "", mod1_end: "",
         mod2_start: "", mod2_end: "",
         mod3_start: "", mod3_end: "",

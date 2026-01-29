@@ -25,7 +25,7 @@ export default function ModuleManagement() {
     const [courseTitle, setCourseTitle] = useState("");
     const [loading, setLoading] = useState(true);
     const [openDropdownId, setOpenDropdownId] = useState(null);
-
+    
     const ITEMS_PER_PAGE = 8;
     const [page, setPage] = useState(1);
 

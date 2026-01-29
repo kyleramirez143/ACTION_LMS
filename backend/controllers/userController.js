@@ -29,62 +29,56 @@ export const getTrainers = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 8;
+        const limit = parseInt(req.query.limit) || 8;
         const offset = (page - 1) * limit;
 
         const search = req.query.search ? req.query.search.toLowerCase() : "";
         const roleFilter = req.query.role;
 
-        const { Sequelize } = db;
-        const whereUser = {};
-
-        if (search) {
-            whereUser[Sequelize.Op.or] = [
-                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.first_name")), "LIKE", `%${search}%`),
-                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.last_name")), "LIKE", `%${search}%`),
-                Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.email")), "LIKE", `%${search}%`),
-            ];
-        }
-
-        const includeRoles = {
-            model: db.Role,
-            as: "roles",
-            attributes: ["name"],
-            through: { attributes: [] },
-            required: roleFilter && roleFilter !== "All",
-        };
-
-        if (roleFilter && roleFilter !== "All") {
-            includeRoles.where = { name: roleFilter };
-        }
-
-        const includeBatch = {
-            model: db.Batch,
-            as: "batches",
-            attributes: ["batch_id", "name", "location"], // Matches your CREATE TABLE 'name' column
-            through: { attributes: [] },
-        };
-
-        const { count, rows } = await db.User.findAndCountAll({
-            where: whereUser,
-            include: [includeRoles, includeBatch],
-            limit,
+        // Fetch users with roles and batches
+        const users = await db.User.findAndCountAll({
+            include: [
+                { model: db.Role, as: "roles" },
+                { model: db.Batch, as: "batches" }
+            ],
             offset,
-            distinct: true,
-            order: [["created_at", "ASC"]],
+            limit,
+            order: [["id", "ASC"]],
         });
 
-        const totalPages = Math.ceil(count / limit);
+        // Filter & map users
+        let filteredUsers = users.rows;
 
-        const formatted = rows.map(u => {
-            const roleName = u.roles.length ? u.roles[0].name : "No Role";
+        // Filter by role if needed
+        if (roleFilter && roleFilter !== "All") {
+            filteredUsers = filteredUsers.filter(u => u.roles[0]?.name === roleFilter);
+        }
 
-            let displayBatch = "Not Applicable";
-            let batchLocation = null;
+        // Filter by search term if needed
+        if (search) {
+            filteredUsers = filteredUsers.filter(u =>
+                `${u.first_name} ${u.last_name}`.toLowerCase().includes(search) ||
+                u.email.toLowerCase().includes(search)
+            );
+        }
 
-            if (roleName === "Trainee" && u.batches && u.batches.length > 0) {
-                displayBatch = u.batches[0].name;
-                batchLocation = u.batches[0].location; // ✅ Include location
+        // Map users and apply batch-inactive rule
+        const mappedUsers = filteredUsers.map(u => {
+            const roleName = u.roles[0]?.name || "Unknown";
+            let status = u.is_active ? "Active" : "Inactive";
+
+            let batchName = "Not Applicable";
+            let location = "-";
+
+            if (roleName === "Trainee") {
+                const batch = u.batches[0];
+                if (batch) {
+                    batchName = batch.name;
+                    location = batch.location || "-";
+
+                    // ✅ Trainee becomes Inactive if batch is inactive
+                    if (!batch.is_active) status = "Inactive";
+                }
             }
 
             return {
@@ -92,24 +86,26 @@ export const getAllUsers = async (req, res) => {
                 name: `${u.first_name} ${u.last_name}`,
                 email: u.email,
                 level: roleName,
-                batch: displayBatch,
-                location: batchLocation,
-                status: u.is_active ? "Active" : "Inactive",
+                batch: batchName,
+                location,
+                status
             };
         });
 
+        const totalPages = Math.ceil(filteredUsers.length / limit);
+
         res.json({
-            users: formatted,
+            users: mappedUsers,
             currentPage: page,
-            totalPages,
-            totalUsers: count,
+            totalPages: totalPages || 1
         });
 
     } catch (err) {
-        console.error("Database Error:", err);
+        console.error("Fetch users error:", err);
         res.status(500).json({ error: "Failed to fetch users" });
     }
 };
+
 
 // ===== Add User =====
 export const addUser = async (req, res) => {
@@ -396,34 +392,34 @@ export const getProfile = async (req, res) => {
         const userId = req.user.id;
 
         const user = await db.User.findByPk(userId, {
-    // Force these specific columns to be returned
-    attributes: [
-        'id', 
-        'first_name', 
-        'last_name', 
-        'email', 
-        'is_active', 
-        'profile_picture' // <--- Ensure this is exactly like your DB column
-    ],
-    include: [
-        {
-            model: db.Role,
-            as: "roles",
-            attributes: ["name"],
-            through: { attributes: [] }
-        }
-    ]
-});
+            // Force these specific columns to be returned
+            attributes: [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'is_active',
+                'profile_picture' // <--- Ensure this is exactly like your DB column
+            ],
+            include: [
+                {
+                    model: db.Role,
+                    as: "roles",
+                    attributes: ["name"],
+                    through: { attributes: [] }
+                }
+            ]
+        });
 
-    // --- DEBUGGING LOGS (Check your terminal, not Postman) ---
-    if (user) {
-        console.log("Found User in DB:", user.id);
-        console.log("Raw profile_picture value:", user.profile_picture);
-        console.log("All available keys in user object:", Object.keys(user.dataValues));
-    } else {
-        console.log("User not found for ID:", userId);
-    }
-    // ---------------------------------------------------------
+        // --- DEBUGGING LOGS (Check your terminal, not Postman) ---
+        if (user) {
+            console.log("Found User in DB:", user.id);
+            console.log("Raw profile_picture value:", user.profile_picture);
+            console.log("All available keys in user object:", Object.keys(user.dataValues));
+        } else {
+            console.log("User not found for ID:", userId);
+        }
+        // ---------------------------------------------------------
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });

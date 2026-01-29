@@ -27,10 +27,10 @@ export const addPeriod = async (req, res) => {
     try {
         // 2. Map frontend names to Database column names (start_date, end_date)
         const modulesToSave = [
-            { name: "Module 1", start_date: mod1_start, end_date: mod1_end, curriculum_id: batch },
-            { name: "Module 2", start_date: mod2_start, end_date: mod2_end, curriculum_id: batch },
-            { name: "Module 3", start_date: mod3_start, end_date: mod3_end, curriculum_id: batch },
-            { name: "Module 4", start_date: mod4_start, end_date: mod4_end, curriculum_id: batch },
+            { name: "Quarter 1", start_date: mod1_start, end_date: mod1_end, curriculum_id: batch },
+            { name: "Quarter 2", start_date: mod2_start, end_date: mod2_end, curriculum_id: batch },
+            { name: "Quarter 3", start_date: mod3_start, end_date: mod3_end, curriculum_id: batch },
+            { name: "Quarter 4", start_date: mod4_start, end_date: mod4_end, curriculum_id: batch },
         ].filter(m => m.start_date && m.end_date); // Only save if dates are provided
 
         // Delete existing modules for this curriculum to prevent duplicates

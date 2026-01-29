@@ -209,7 +209,9 @@
         "save": "Save",
         "update": "Update",
         "processing": "Processing...",
-        "upcoming": "Upcoming"
+        "upcoming": "Tasks",
+        "view_less_tasks": "View Less",
+        "view_all_tasks": "View More"
     },
     "lecture": {
         "courses": "Courses",
@@ -269,6 +271,9 @@
         "none": "No quizzes available yet.",
         "published": "Published",
         "edit": "Edit Content",
+        "options" : "Options",
+        "placeholder_title": "Input quiz title here",
+        "placeholder_choice": "Input choice here",
         "results": "Quiz Results",
         "unsaved_prompt": "You have an unsaved quiz. Are you sure you want to leave?",
         "complete_all_fields": "Please complete all fields (PDF, Quantity, and Target Lecture)!",
@@ -699,7 +704,7 @@
         "batch": "Batch",
         "select_batch": "Select Batch",
         "modules_already_set": "— Modules already set",
-        "module": "Module",
+        "module": "Quarter",
         "start_date": "Start Date",
         "end_date": "End Date",
         "submit": "Submit",
@@ -957,7 +962,7 @@
         "start_create": "Start creating batches and assigning periods.",
         "set_quarter": "Set Quarter",
         "no_periods": "No periods yet.",
-        "no_assigned": "This batch does not have any assigned period yet."
+        "no_assigned": "Click the button to start setting quarter."
     },
     "notifications": {
         "title": "Notifications",
