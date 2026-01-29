@@ -66,7 +66,6 @@ const Navbar = () => {
 
   // ================= PROFILE IMAGE =================
   // Later replace null with API image
-  const profileImageUrl = null;
   const avatarSrc = profileImageUrl || defaultAvatar;
 
   // JWT decode for profile path

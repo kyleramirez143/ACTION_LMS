@@ -1,43 +1,91 @@
-.home-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
+/* Home.css */
+
+:root {
+  --primary-blue: #0047AB;
+  --transition-smooth: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.hero-section {
-    background: white;
-    border-bottom: 2px solid #e9ecef;
+.text-primary-blue {
+  color: var(--primary-blue) !important;
 }
 
-.hero-logo {
-    max-width: 150px;
+/* 1. Global Animations */
+.fade-in {
+  animation: fadeInEffect 0.8s ease-out forwards;
 }
 
-.home-card {
-    background: white;
-    border-radius: 12px;
-    padding: 30px;
-    transition: transform 0.3s ease;
-    border: 1px solid #eee;
-    text-align: center;
+@keyframes fadeInEffect {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.home-card:hover {
-    transform: translateY(-5px);
+/* 2. Parallax Section Styles */
+.parallax-bg {
+  background-color: var(--primary-blue);
+  background-image: linear-gradient(rgba(0, 71, 171, 0.94), rgba(0, 71, 171, 0.94)), 
+                    url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 10px 30px rgba(0,0,0,0.1), inset 0 -10px 30px rgba(0,0,0,0.1);
 }
 
-.card-icon-wrapper {
-    font-size: 2.5rem;
-    color: #0d6efd; /* Same blue as your primary theme */
-    margin-bottom: 15px;
+/* 3. Hover Lift Effects */
+.hover-lift {
+  transition: var(--transition-smooth);
 }
 
-.home-card h3 {
-    font-weight: 700;
-    margin-bottom: 15px;
-    color: #333;
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
 }
 
-.home-card p {
-    color: #666;
-    line-height: 1.6;
+/* 4. Stats Section (3 Strips) - White BG / Black Border */
+.border-black-thin {
+  border: 1px solid #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* 5. Roadmap Elements */
+.roadmap-dot {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-weight: 800;
+  font-size: 1.1rem;
+  z-index: 2;
+  position: relative;
+  border: 2px solid #fff;
+}
+
+/* 6. Curriculum Card: Hint of Blue */
+.hint-blue-card {
+  border-left: 5px solid var(--primary-blue) !important;
+  border-right: 1px solid rgba(0,0,0,0.05) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  border-top: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+/* 7. Award Section Specifics */
+.award-border {
+  border-left: 5px solid #ffc107 !important;
+}
+
+/* 8. Mobile Responsiveness */
+@media (max-width: 768px) {
+  .parallax-bg {
+    background-attachment: scroll;
+  }
+  
+  .border-end {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
 }
