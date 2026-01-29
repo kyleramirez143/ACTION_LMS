@@ -205,7 +205,7 @@ const CheckpointView = () => {
                 <tr><td colSpan="11" className="text-center py-5">{t("checkpoint.loading")}</td></tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan="11" className="text-center py-5 text-muted">
+                  <td colSpan="12" className="text-center py-5 text-muted">
                     <div className="d-flex flex-column align-items-center">
                       <img
                         src={noDataImg}

@@ -194,7 +194,9 @@
         "save": "保存",
         "update": "更新",
         "processing": "処理中...",
-        "upcoming": "予定"
+        "upcoming": "予定",
+        "view_less_tasks": "表示を減らす",
+        "view_all_tasks": "もっと見る"
     },
     "lecture": {
         "courses": "コース",
@@ -946,6 +948,6 @@
         "start_create": "バッチを作って、期間を設定してください。",
         "set_quarter": "クォーターを設定",
         "no_periods": "まだ期間がありません。",
-        "no_assigned": "このバッチには、まだ期間が設定されていません。"
+        "no_assigned": "ボタンをクリックして四半期の設定を開始します。"
     }
 }
