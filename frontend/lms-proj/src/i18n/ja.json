@@ -376,7 +376,7 @@
         "passing_score": "合格点"
     },
     "proctor": {
-        "quiz_result": "クイズ結果",
+        "quiz_result": "結果",
         "trainee_overview": "受講者概要",
         "total_trainees": "受講者数",
         "took_quiz": "受講した",

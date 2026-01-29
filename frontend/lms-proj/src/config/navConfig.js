@@ -58,7 +58,7 @@ export const navLinks = [
     translationKey: "nav.courses",
   },
   {
-    name: 'Assessment',
+    name: 'Create Assessment',
     path: '/trainer/quiz-generator',
     requiredRoles: ['Trainer'],
     translationKey: "nav.quiz",
@@ -106,12 +106,6 @@ export const navLinks = [
     path: '/trainee/assessment',
     requiredRoles: ['Trainee'],
     translationKey: "nav.assessment",
-  },
-  {
-    name: 'View Grades', // unified calendar link
-    path: '/trainee/view-grades',
-    requiredRoles: ['Trainee'],
-    translationKey: "nav.view_grades",
   },
   {
     name: 'Action Calendar', // unified calendar link

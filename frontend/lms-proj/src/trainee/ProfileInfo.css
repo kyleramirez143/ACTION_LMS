@@ -222,6 +222,11 @@
   box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.15);
 }
 
+.table-input.invalid-input {
+  border: 1px solid red;
+  box-shadow: 0 0 3px red;
+}
+
 /* ============================= */
 /* 5. BUTTONS & ACTIONS          */
 /* ============================= */
