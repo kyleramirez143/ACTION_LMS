@@ -83,12 +83,9 @@ function LoginPage() {
         if (roles.includes('Admin')) {
           // 3. Redirect to the admin dashboard
           navigate('/admin/dashboard');
-        } else if (roles.includes('Trainer')) {
-          // Example for another role
-          navigate('/trainer/dashboard');
         } else {
           // Default redirect for unrecognized roles
-          navigate('/trainee/dashboard');
+          navigate('/all/home');
         }
 
         setFormData({ email: '', password: '' });

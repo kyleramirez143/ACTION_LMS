@@ -43,7 +43,8 @@
         "manual_quiz": "Manual Quiz",
         "my_courses": "My Courses",
         "assessment": "Assessment",
-        "view_grades": "View Grades"
+        "view_grades": "View Grades",
+        "home": "Home"
     },
     "dashboard": {
         "admin_lms_dashboard": "Admin LMS Dashboard",

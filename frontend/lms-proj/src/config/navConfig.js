@@ -1,6 +1,14 @@
 // ./src/config/navConfig.js
 
 export const navLinks = [
+  // ------------------ All ------------------
+  {
+    name: 'Home',
+    path: '/all/home',
+    requiredRoles: ['Admin', 'Trainee', 'Trainer'],
+    translationKey: "nav.home",
+  },
+
   // ------------------ Admin ------------------
   {
     name: 'Dashboard',
@@ -46,12 +54,6 @@ export const navLinks = [
 
   // ------------------ Trainer ------------------
   {
-    name: 'Dashboard',
-    path: '/trainer/dashboard',
-    requiredRoles: ['Trainer'],
-    translationKey: "nav.dashboard",
-  },
-  {
     name: 'Courses',
     path: '/trainer/course-management',
     requiredRoles: ['Trainer'],
@@ -80,20 +82,8 @@ export const navLinks = [
     requiredRoles: ['Trainer'],
     translationKey: "nav.view_grades",
   },
-  {
-    name: 'Action Calendar', // unified calendar link
-    path: '/trainer/calendar',
-    requiredRoles: ['Trainer'],
-    translationKey: "nav.action_calendar",
-  },
 
   // ------------------ Trainee ------------------
-  {
-    name: 'Dashboard',
-    path: '/trainee/dashboard',
-    requiredRoles: ['Trainee'],
-    translationKey: "nav.dashboard",
-  },
   {
     name: 'My Courses',
     path: '/trainee/courses',
@@ -106,10 +96,5 @@ export const navLinks = [
     path: '/trainee/assessment',
     requiredRoles: ['Trainee'],
     translationKey: "nav.assessment",
-  },
-  {
-    name: 'Action Calendar', // unified calendar link
-    path: '/trainee/calendar',
-    requiredRoles: ['Trainee'],
-  },
+  }
 ];

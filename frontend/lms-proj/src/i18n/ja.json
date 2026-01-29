@@ -43,7 +43,8 @@
         "manual_quiz": "手動クイズ",
         "my_courses": "マイコース",
         "assessment": "アセスメント",
-        "view_grades": "成績を見る"
+        "view_grades": "成績を見る",
+        "home": "ホーム"
     },
     "dashboard": {
         "admin_lms_dashboard": "管理者LMSダッシュボード",
