@@ -15,6 +15,7 @@ export default function ReviewPage() {
     : t("review.assessment");
 
   const [quizData, setQuizData] = useState([]);
+  const [quizTitle, setQuizTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [showExplanations, setShowExplanations] = useState({});
@@ -34,7 +35,8 @@ export default function ReviewPage() {
         });
 
         const data = await res.json();
-        setQuizData(data);
+        setQuizTitle(data.assessment.title);
+        setQuizData(data.questions);
       } catch (err) {
         console.error("Review fetch error:", err);
       } finally {
@@ -88,7 +90,7 @@ export default function ReviewPage() {
               <div className="d-flex justify-content-between mb-3 align-items-center">
                 {/* LEFT: Title + Question Count */}
                 <div className="d-flex align-items-center gap-3">
-                  <h3 className="section-title mb-0">Please Palagay here Title</h3>
+                  <h3 className="section-title mb-0">{quizTitle || readableTitle}</h3>
 
                   <span className="badge px-3 py-2" style={{ backgroundColor: "#0047A7" }}>
                     Question {currentQuestion} of {totalQuestions}
