@@ -89,7 +89,7 @@ const QuizPage = () => {
     return () => clearInterval(timer);
   }, [showTimeUpModal, hasSubmitted, timeLeft]);
 
-  // ---------- COUNTDOWN ----------
+  // ---------- COUNTDOWN -------------
   useEffect(() => {
     if (!showTimeUpModal || hasSubmitted) return;
 

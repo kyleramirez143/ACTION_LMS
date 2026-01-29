@@ -236,7 +236,7 @@ function UserRoleTable() {
 
     return (
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
-            <div className="user-role-card" style={{ margin: 0 }}>
+            <div className="user-role-card" style={{ margin: 0, minHeight: "550px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="section-title">{t("user_management.title")}</h3>
                     <div className="d-flex gap-2">

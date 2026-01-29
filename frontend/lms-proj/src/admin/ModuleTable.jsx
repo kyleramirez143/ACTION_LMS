@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import "./UserRoleTable.css";
-import logo from "../image/courses.svg";
+import logo from "../image/modules.svg";
 
 function ModuleTable() {
     const navigate = useNavigate();
@@ -154,20 +154,32 @@ function ModuleTable() {
     if (noBatchesExist) {
         // State 1: No batches at all
         return (
-            <div className="user-role-card text-center py-5 text-muted">
-                <img src={logo} alt="Logo" className="img-fluid mb-3" style={{ maxWidth: "200px" }} />
-                <h3 className="mb-2">{t("quarters.no_batches_yet")}</h3>
-                <p className="mb-3">{t("quarters.start_create")}</p>
-                <button className="btn btn-primary" onClick={() => navigate("/admin/set-module-date")}>
-                    <i className="bi bi-plus-circle-fill"></i> {t("quarters.set_quarter")}
-                </button>
+            <div className="container py-4" style={{ maxWidth: "1400px" }}>
+                <div className="user-role-card text-center py-5 text-muted" style={{ margin: 0, minHeight: "550px" }}>
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            textAlign: "center",
+                        }}
+                    >
+                        <img src={logo} alt="Logo" className="img-fluid mb-3" style={{ maxWidth: "200px" }} />
+                        <h3 className="mb-2">{t("quarters.no_batches_yet")}</h3>
+                        <p className="mb-3">{t("quarters.start_create")}</p>
+                        <button className="btn btn-primary" onClick={() => navigate("/admin/set-module-date")}>
+                            <i className="bi bi-plus-circle-fill"></i> {t("quarters.set_quarter")}
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
-            <div className="user-role-card" style={{ margin: 0, minHeight: "550px"}}>
+            <div className="user-role-card" style={{ margin: 0, minHeight: "550px" }}>
                 {/* Header and Top-right buttons */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="section-title">{dynamicTitle}</h3>
@@ -207,14 +219,6 @@ function ModuleTable() {
                             ))}
                         </select>
                     </div>
-                    <input
-                        type="text"
-                        className="form-control"
-                        style={{ maxWidth: "300px" }}
-                        placeholder="Search Module"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
                 </div>
 
                 {/* Table */}
@@ -312,7 +316,7 @@ function ModuleTable() {
                                     <td colSpan="5" className="text-center text-muted py-5">
                                         <>
                                             <img src={logo} alt="Logo" className="img-fluid mb-3"
-                                                style={{ maxWidth: "200px" }} />
+                                                style={{ maxWidth: "220px" }} />
                                             <h3 className="mb-2">{t("quarters.no_periods")}</h3>
                                             <p className="mb-0">{t("quarters.no_assigned")}</p>
                                         </>
