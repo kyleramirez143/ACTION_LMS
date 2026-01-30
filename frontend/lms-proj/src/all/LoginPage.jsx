@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import logo from "../image/login.svg"; // or your actual path
+import Swal from 'sweetalert2';
 
 function LoginPage() {
   const { t, i18n } = useTranslation(); // i18n hook
@@ -37,72 +38,124 @@ function LoginPage() {
     e.preventDefault();
 
     const { email, password } = formData;
+    const primaryColor = "#0047AB"; // blue color
+
+    // 1. Validate empty fields
     if (!email || !password) {
-      setError(t('login.error_empty_fields'));
+      Swal.fire({
+        icon: 'error',
+        title: t('login.error_empty_fields'),
+        background: '#ffffff',
+        color: primaryColor,
+        iconColor: primaryColor,
+        confirmButtonColor: primaryColor,
+        confirmButtonText: t('login.ok'),
+        customClass: {
+          popup: 'rounded-lg',
+          confirmButton: 'rounded-full' // makes the button fully rounded
+        }
+      });
       return;
     }
 
     try {
-      // 1. Target the correct API endpoint using the environment variable
+      // 2. API endpoint
       const apiEndpoint = `/api/auth/login`;
       console.log('Attempting login with:', formData);
-      console.log('Sending request to:', apiEndpoint); // Debug: Check the URL
+      console.log('Sending request to:', apiEndpoint);
+
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email, // This is correct for the backend
-          password: password
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
-      // 2. Fix: Check response status first before attempting to parse JSON.
-      // This prevents the 'Unexpected end of JSON input' error on 404/500
+      // 3. Parse JSON safely
       let data;
       try {
         data = await response.json();
       } catch (err) {
-        // If response is not JSON (e.g., HTML 404 page), use a generic message
         console.error("Failed to parse API response as JSON:", err);
         data = { message: `${t('login.error_server')} (Status: ${response.status})` };
       }
 
       if (response.ok) {
-        // Successful login (HTTP 200)
-        console.log("Login Successful! Token: ", data.token);
-        // 1. Store the token
+        // ✅ Successful login
+        console.log("Login Successful! Token:", data.token);
         localStorage.setItem('authToken', data.token);
         login(data.token);
 
-        alert(t('login.success')); // <-- show success alert
+        // SweetAlert2 success popup with design
+        Swal.fire({
+          icon: 'success',
+          title: t('login.success'),
+          background: '#ffffff',
+          color: primaryColor,
+          iconColor: primaryColor,
+          confirmButtonColor: primaryColor,
+          confirmButtonText: t('login.ok'),
+          customClass: {
+            popup: 'rounded-lg',
+            confirmButton: 'rounded-full' // makes the button fully rounded
+          }
+        }).then(() => {
+          // Decode JWT and redirect after popup closes
+          const decodedUser = jwtDecode(data.token);
+          const roles = decodedUser?.roles || [];
 
-        // 2. Decode the token to get the user's role for redirection
-        const decodedUser = jwtDecode(data.token);
-        const roles = decodedUser?.roles || []; // Get the roles array
+          if (roles.includes('Admin')) {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/all/home');
+          }
 
-        if (roles.includes('Admin')) {
-          // 3. Redirect to the admin dashboard
-          navigate('/admin/dashboard');
-        } else {
-          // Default redirect for unrecognized roles
-          navigate('/all/home');
-        }
+          // Reset form
+          setFormData({ email: '', password: '' });
+        });
 
-        setFormData({ email: '', password: '' });
       } else {
-        // Failed login (e.g., HTTP 401 Unauthorized, HTTP 400 Bad Request)
-        // The error message comes from the 'data' object (backend response)
+        // ❌ Failed login popup with design
+        Swal.fire({
+          icon: 'error',
+          title: t('login.error_invalid_credentials'),
+          text: data.message || t('login.error_invalid_credentials'),
+          background: '#ffffff',
+          color: primaryColor,
+          iconColor: primaryColor,
+          confirmButtonColor: primaryColor,
+          confirmButtonText: t('login.ok'),
+          customClass: {
+            popup: 'rounded-lg',
+            confirmButton: 'rounded-full' // makes the button fully rounded
+          }
+        });
         setError(data.message || t('login.error_invalid_credentials'));
       }
+
     } catch (err) {
-      // Catch network-level errors (e.g., CORS, no internet, server unreachable)
-      console.error("Login Network Error: ", err);
+      // 🌐 Network error popup with design
+      console.error("Login Network Error:", err);
+      Swal.fire({
+        icon: 'error',
+        title: t('login.error_network'),
+        text: err.message,
+        background: '#ffffff',
+        color: primaryColor,
+        iconColor: primaryColor,
+        confirmButtonColor: primaryColor,
+        confirmButtonText: t('login.ok'),
+        customClass: {
+          popup: 'rounded-lg'
+        }
+      });
       setError(t('login.error_network'));
     }
-  }; // End of handleSubmit
+  };
+
+  // End of handleSubmit
 
   return (
-    <div className="login-container" style={{ color: "#0047AB"}}>
+    <div className="login-container" style={{ color: "#0047AB" }}>
       <div className="login-wrapper">
         {/* Left side: Blue panel */}
         <div className="login-left">

@@ -11,7 +11,9 @@
         "error_empty_fields": "Please enter both email and password.",
         "error_invalid_credentials": "Login failed. Check your credentials.",
         "error_network": "A network error occurred. Please check your connection.",
-        "error_server": "Server error occurred"
+        "ok": "OK",
+        "error_server": "Server error occurred",
+        "success_subtext": "Redirecting..."
     },
     "navbar": {
         "profile": "Profile",
