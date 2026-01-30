@@ -10,7 +10,7 @@ import pkg from '../models/index.cjs';
 const { Assessment, LectureAssessment, AssessmentQuestion, AssessmentType } = pkg;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
+console.log(process.env.OPENAI_API_KEY?.slice(-9), '               ', openai.project);
 export async function generateQuizFromPdf(req, res) {
     const file = req.file;
     const user = req.user;
