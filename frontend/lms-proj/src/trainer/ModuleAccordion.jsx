@@ -649,13 +649,25 @@ export default function ModuleAccordion({
 
                                             <Dropdown.Menu>
                                                 <Dropdown.Item
-                                                    onClick={() => navigate("/trainer/quiz-generator")}
+                                                    onClick={() => navigate("/trainer/quiz-generator", {
+                                                        state: {
+                                                            courseId: courseId,
+                                                            moduleId: moduleId,
+                                                            lectureId: lec.lecture_id,
+                                                        },
+                                                    })}
                                                 >
                                                     <i className="bi bi-robot me-2"></i>
                                                     AI Generated
                                                 </Dropdown.Item>
                                                 <Dropdown.Item
-                                                    onClick={() => navigate("/trainer/quizmanual")}
+                                                    onClick={() => navigate("/trainer/quizmanual", {
+                                                        state: {
+                                                            courseId: courseId,
+                                                            moduleId: moduleId,
+                                                            lectureId: lec.lecture_id,
+                                                        },
+                                                    })}
                                                 >
                                                     <i className="bi bi-pencil-square me-2"></i>
                                                     Manual Quiz
