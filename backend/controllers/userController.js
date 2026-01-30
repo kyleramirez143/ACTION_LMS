@@ -62,10 +62,10 @@ export const getAllUsers = async (req, res) => {
             );
         }
 
-        // Map users and apply batch-inactive rule
         const mappedUsers = filteredUsers.map(u => {
             const roleName = u.roles[0]?.name || "Unknown";
-            let status = u.is_active ? "Active" : "Inactive";
+
+            let status = u.is_active ? "Active" : "Inactive"; // current DB flag
 
             let batchName = "Not Applicable";
             let location = "-";
@@ -76,8 +76,9 @@ export const getAllUsers = async (req, res) => {
                     batchName = batch.name;
                     location = batch.location || "-";
 
-                    // ✅ Trainee becomes Inactive if batch is inactive
-                    if (!batch.is_active) status = "Inactive";
+                    // 🔥 Override status based on batch end_date dynamically
+                    const batchEnded = batch.end_date && new Date(batch.end_date) < new Date();
+                    if (batchEnded) status = "Inactive";
                 }
             }
 
@@ -141,14 +142,28 @@ export const addUser = async (req, res) => {
                 if (!batch) throw new Error("Batch is required for Trainee");
 
                 const batchRecord = await db.Batch.findByPk(batch, { transaction: t });
-                if (!batchRecord) throw new Error("Invalid batch selected");
+                if (!batchRecord) throw new Error("Batch not found");
 
                 await db.UserBatch.create(
-                    { user_id: user.id, batch_id: batchRecord.batch_id },
+                    {
+                        user_id: user.id,
+                        batch_id: batchRecord.batch_id
+                    },
                     { transaction: t }
                 );
 
-                batchName = batchRecord.name; // Update for the response
+                // 🔥 Determine batch active via end_date
+                const isBatchActive =
+                    !batchRecord.end_date || new Date(batchRecord.end_date) >= new Date();
+
+                // 🔥 Sync user status with batch
+                await user.update(
+                    { is_active: isBatchActive },
+                    { transaction: t }
+                );
+
+                batchName = batchRecord.name;
+
             }
 
             // 4️⃣ Default password
