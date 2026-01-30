@@ -1,80 +1,66 @@
-// backend/controllers/resultController.js (FIXED)
-
 import pool from "../db.js";
 
-/**
- * Submits quiz answers, computes score, and saves the result.
- * It uses req.user.id (trainee ID) from the JWT payload for security.
- */
-export async function submitQuiz(req, res) {
-    const quizId = req.params.id;
-    // SECURITY FIX: traineeId is now read from the authenticated user (JWT)
-    const traineeId = req.user.id; 
-    const { answers } = req.body; 
-
-    if (!answers || typeof answers !== "object") {
-        return res.status(400).json({ error: "Answers object is required" });
-    }
-    
-    // Check if the user has already submitted this quiz (optional but recommended)
-    const submittedCheck = await pool.query(
-        "SELECT id FROM results WHERE quiz_id = $1 AND trainee_id = $2",
-        [quizId, traineeId]
+export async function getTraineeGrades(req, res) {
+  try {
+    // Fetches grades from the view
+    const result = await pool.query(
+      `SELECT 
+        trainee_id,
+        trainee_name,
+        batch_name,
+        assessment_title,
+        raw_score
+       FROM trainer_grades_view
+       ORDER BY batch_name, trainee_name`
     );
-    if (submittedCheck.rowCount > 0) {
-        return res.status(409).json({ error: "Quiz already submitted by this user." });
-    }
 
-    const client = await pool.connect();
-    try {
-        // Fetch correct answers for questions in the quiz
-        const qRes = await client.query("SELECT id, correct_answer FROM questions WHERE quiz_id = $1", [quizId]);
-        if (qRes.rowCount === 0) return res.status(404).json({ error: "Quiz not found or has no questions" });
+    const traineesMap = {};
 
-        let score = 0;
-        for (const row of qRes.rows) {
-            const qid = row.id;
-            const correct = row.correct_answer;
-            const given = answers[qid];
-            // Case-insensitive comparison is a good practice
-            if (given && given.toLowerCase() === correct.toLowerCase()) score++;
+    result.rows.forEach(row => {
+      // Unique key combining ID and Batch to handle trainees in multiple batches
+      const key = `${row.trainee_id}_${row.batch_name}`;
+      
+      if (!traineesMap[key]) {
+        traineesMap[key] = {
+          trainee_id: row.trainee_id,
+          name: row.trainee_name,
+          batch: row.batch_name,
+          practiceExam: null,
+          activity: null,
+          courseEndExam: null,
+          oralExam: null,
+          skillCheck: null,
+          dailyQuiz: null,
+          homework: null,
+          exercises: null,
+          mockExam: null
+        };
+      }
+
+      const title = row.assessment_title.toLowerCase().replace(/[^a-z]/g, "");
+      const score = row.raw_score !== null ? Number(row.raw_score) : null;
+
+      // Logic: If multiple attempts exist, we keep the highest score
+      const updateIfHigher = (field) => {
+        if (score !== null && (traineesMap[key][field] === null || score > traineesMap[key][field])) {
+          traineesMap[key][field] = score;
         }
+      };
 
-        // Save result
-        const insertRes = await client.query(
-            "INSERT INTO results (trainee_id, quiz_id, answers, score) VALUES ($1, $2, $3, $4) RETURNING id, created_at",
-            [traineeId, quizId, answers, score]
-        );
+      if (title.includes("practice") && title.includes("exam")) updateIfHigher("practiceExam");
+      else if (title.includes("activity")) updateIfHigher("activity");
+      else if (title.includes("courseend") || (title.includes("course") && title.includes("end"))) updateIfHigher("courseEndExam");
+      else if (title.includes("oral") && title.includes("exam")) updateIfHigher("oralExam");
+      else if (title.includes("skill") && title.includes("check")) updateIfHigher("skillCheck");
+      else if (title.includes("daily") && title.includes("quiz")) updateIfHigher("dailyQuiz");
+      else if (title.includes("homework")) updateIfHigher("homework");
+      else if (title.includes("exercise")) updateIfHigher("exercises");
+      else if (title.includes("mock") && title.includes("exam")) updateIfHigher("mockExam");
+    });
 
-        res.json({ success: true, result: { id: insertRes.rows[0].id, score, created_at: insertRes.rows[0].created_at } });
-    } catch (err) {
-        console.error("submitQuiz error:", err);
-        res.status(500).json({ error: err.message });
-    } finally {
-        client.release();
-    }
-}
-
-/**
- * Fetch all results for a quiz (Requires Admin/Manager role).
- * NOTE: The join to 'trainees' suggests you might have a separate Trainees table. 
- * If your 'trainee_id' is the 'user_id' from the Users table, you need to join to 'users'.
- */
-export async function getQuizResults(req, res) {
-    const quizId = req.params.id;
-    try {
-        const r = await pool.query(
-            // ASSUMING trainee_id is user_id from the Users table
-            `SELECT r.id, r.trainee_id, u.email AS trainee_email, r.score, r.answers, r.created_at
-               FROM results r
-               LEFT JOIN users u ON u.id = r.trainee_id  -- FIXED JOIN: Changed 'trainees' to 'users'
-               WHERE r.quiz_id = $1
-               ORDER BY r.created_at DESC`,
-            [quizId]
-        );
-        res.json({ results: r.rows });
-    } catch (err) {
-        console.error("getQuizResults error:", err);
-        res.status(500).json({ error: err.message });
-    }
+    res.json(Object.values(traineesMap));
+  } catch (err) {
+    console.error("getTraineeGrades error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 }
