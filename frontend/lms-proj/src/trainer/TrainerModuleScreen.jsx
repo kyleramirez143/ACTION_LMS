@@ -206,6 +206,7 @@ export default function TrainerModuleScreen() {
                     overflowY: "auto",        // ✅ scrollable
                     scrollbarWidth: "thin",   // ✅ Firefox scrollbar
                   }}
+
                 >
                   <div className="upcoming-title mb-2">{t("module.upcoming")}</div>
                   <UpcomingPanel moduleId={module_id} />
