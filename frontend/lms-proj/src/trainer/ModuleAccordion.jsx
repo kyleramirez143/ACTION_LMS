@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Dropdown } from "react-bootstrap";
 
 export default function ModuleAccordion({
     isTrainerView,
@@ -30,6 +31,10 @@ export default function ModuleAccordion({
     const [showQuizMenuId, setShowQuizMenuId] = useState(null);
     const [localLectures, setLectures] = useState([]);
     const [showResourceMenuId, setShowResourceMenuId] = useState(null);
+    const [showResourceUpload, setShowResourceUpload] = useState({});
+    const [uploadingResource, setUploadingResource] = useState({});
+    const [newResourceType, setNewResourceType] = useState({});
+    const [newResourceValue, setNewResourceValue] = useState({});
     const [editingResourceId, setEditingResourceId] = useState(null);
     const [tempDisplayName, setTempDisplayName] = useState("");
 
@@ -61,7 +66,7 @@ export default function ModuleAccordion({
             if (el) newHeights[key] = el.scrollHeight;
         });
         setHeights(newHeights);
-    }, [localLectures, openIndex]);
+    }, [localLectures, openIndex, showResourceUpload, uploadingResource]);
 
     // Close menus on outside click
     useEffect(() => {
@@ -252,6 +257,67 @@ export default function ModuleAccordion({
         }
     };
 
+    const handleUploadResource = async (lectureId) => {
+        const resourceType = newResourceType[lectureId] || "PDF";
+        const resourceValue = newResourceValue[lectureId];
+
+        if (!resourceValue) {
+            alert("Please select a file or enter a URL");
+            return;
+        }
+
+        setUploadingResource(prev => ({ ...prev, [lectureId]: true }));
+
+        try {
+            const formData = new FormData();
+            formData.append("lecture_id", lectureId);
+
+            if (resourceType === "Link") {
+                formData.append("links", JSON.stringify([resourceValue]));
+            } else {
+                formData.append("files", resourceValue);
+            }
+
+            const token = localStorage.getItem("authToken");
+            const res = await fetch("/api/lectures/resource", {
+                method: "POST",
+                body: formData,
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || "Failed to upload resource");
+            }
+
+            const result = await res.json();
+
+            // Update local state with new resource
+            const updatedLectures = localLectures.map(lec => {
+                if (lec.lecture_id === lectureId) {
+                    return {
+                        ...lec,
+                        resources: [...(lec.resources || []), ...result.resources]
+                    };
+                }
+                return lec;
+            });
+            setLectures(updatedLectures);
+
+            // Reset upload form
+            setShowResourceUpload(prev => ({ ...prev, [lectureId]: false }));
+            setNewResourceType(prev => ({ ...prev, [lectureId]: "PDF" }));
+            setNewResourceValue(prev => ({ ...prev, [lectureId]: null }));
+
+            alert("Resource uploaded successfully!");
+        } catch (err) {
+            console.error(err);
+            alert(err.message || "Failed to upload resource");
+        } finally {
+            setUploadingResource(prev => ({ ...prev, [lectureId]: false }));
+        }
+    };
+
     return (
         <div className="container py-4" style={{ maxWidth: "1400px" }}>
             {localLectures.length === 0 ? (
@@ -323,7 +389,7 @@ export default function ModuleAccordion({
                             className="accordion-content-wrapper"
                             style={{
                                 maxHeight: openIndex === i ? `${heights[i] || 0}px` : "0px",
-                                overflow: "hidden",
+                                overflow: openIndex === i ? "visible" : "hidden",
                                 transition: "max-height 0.35s ease",
                             }}
                         >
@@ -331,6 +397,53 @@ export default function ModuleAccordion({
                                 {lec.description && <p className="text-muted mb-3">{lec.description}</p>}
                                 {/* Resources Section */}
                                 <h6 className="fw-bold mb-2">{t("resource.title")}</h6>
+
+                                {/* Resource Upload Form (shown when "Add Resource" is clicked) */}
+                                {isTrainerView && showResourceUpload[lec.lecture_id] && (
+                                    <div className="card p-3 mb-3 bg-light">
+                                        <div className="d-flex align-items-center gap-2">
+                                            <select
+                                                className="form-select form-select-sm"
+                                                value={newResourceType[lec.lecture_id] || "PDF"}
+                                                onChange={(e) => setNewResourceType(prev => ({ ...prev, [lec.lecture_id]: e.target.value }))}
+                                                disabled={uploadingResource[lec.lecture_id]}
+                                                style={{ maxWidth: '120px' }}
+                                            >
+                                                <option value="PDF">PDF</option>
+                                                <option value="Video">Video</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Link">Link</option>
+                                            </select>
+
+                                            {newResourceType[lec.lecture_id] === "Link" ? (
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-sm"
+                                                    placeholder="Enter URL"
+                                                    value={newResourceValue[lec.lecture_id] || ""}
+                                                    onChange={(e) => setNewResourceValue(prev => ({ ...prev, [lec.lecture_id]: e.target.value }))}
+                                                    disabled={uploadingResource[lec.lecture_id]}
+                                                />
+                                            ) : (
+                                                <input
+                                                    type="file"
+                                                    className="form-control form-control-sm"
+                                                    onChange={(e) => setNewResourceValue(prev => ({ ...prev, [lec.lecture_id]: e.target.files[0] }))}
+                                                    disabled={uploadingResource[lec.lecture_id]}
+                                                />
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                className="btn btn-success btn-sm"
+                                                onClick={() => handleUploadResource(lec.lecture_id)}
+                                                disabled={uploadingResource[lec.lecture_id]}
+                                            >
+                                                {uploadingResource[lec.lecture_id] ? "Uploading..." : "Upload"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="resources-container d-flex flex-wrap gap-2">
                                     {lec.resources?.length > 0 ? (
@@ -341,7 +454,10 @@ export default function ModuleAccordion({
                                             return (
                                                 <div
                                                     key={res.resource_id}
-                                                    className="d-flex flex-column flex-sm-row align-items-center flex-grow-1 mb-2 position-relative bg-light rounded p-2 border"
+                                                    className="d-flex flex-column flex-sm-row align-items-center mb-2 position-relative bg-light rounded p-2 border"
+                                                    style={{
+                                                        width: '100%',
+                                                    }}
                                                 >
                                                     {/* Resource clickable area */}
                                                     {editingResourceId === res.resource_id ? (
@@ -373,19 +489,33 @@ export default function ModuleAccordion({
                                                             href={resourceUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark overflow-hidden"
+                                                            className="flex-grow-1 d-flex align-items-center text-decoration-none text-dark"
                                                             title={res.display_name || res.file_url}
+                                                            style={{ minWidth: 0 }}
                                                         >
                                                             {userRole === "Trainer" && (
-                                                                <span className={`badge ms-2 me-2 p-1 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
+                                                                <span className={`badge me-2 p-1 flex-shrink-0 ${res.is_visible ? "bg-success" : "bg-danger"}`}>
                                                                     {res.is_visible ? t("common.visible") : t("common.hidden")}
                                                                 </span>
                                                             )}
-                                                            {isLink ? <Link size={25} className="me-2 text-primary flex-shrink-0" /> : <FileText size={25} className="me-2 text-primary flex-shrink-0" />}
-                                                            <span className="text-truncate fw-medium" style={{ maxWidth: "calc(100% - 50px)" }}>
+                                                            {isLink ?
+                                                                <Link size={20} className="me-2 text-primary flex-shrink-0" /> :
+                                                                <FileText size={20} className="me-2 text-primary flex-shrink-0" />
+                                                            }
+                                                            <span
+                                                                className="fw-medium"
+                                                                style={{
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    display: 'block',
+                                                                    maxWidth: '100%'
+                                                                }}
+                                                            >
                                                                 {res.display_name || res.file_url}
                                                             </span>
                                                         </a>
+
                                                     )}
 
                                                     {/* Trainer-only Resource Kebab */}
@@ -463,14 +593,79 @@ export default function ModuleAccordion({
                                             );
                                         })
                                     ) : (
-                                        <p className="small text-muted">{t("resource.none")}</p>
+                                        isTrainerView ? (
+                                            <p
+                                                className="small fw-semibold mb-0"
+                                                style={{
+                                                    color: '#0d6efd',
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    marginLeft: "9px",
+                                                }}
+                                                onClick={() => setShowResourceUpload(prev => ({
+                                                    ...prev,
+                                                    [lec.lecture_id]: !prev[lec.lecture_id]
+                                                }))}
+                                            >
+                                                {showResourceUpload[lec.lecture_id] ? "Cancel" : "Add Resource"}
+                                            </p>
+                                        ) : (
+                                            <p className="small text-muted">{t("resource.none")}</p>
+                                        )
                                     )}
                                 </div>
 
+                                {isTrainerView && lec.resources?.length > 0 && (
+                                    <p
+                                        className="small fw-semibold mt-2 mb-0"
+                                        style={{
+                                            color: '#0d6efd',
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            marginLeft: "9px",
+                                        }}
+                                        onClick={() => setShowResourceUpload(prev => ({
+                                            ...prev,
+                                            [lec.lecture_id]: !prev[lec.lecture_id]
+                                        }))}
+                                    >
+                                        {showResourceUpload[lec.lecture_id] ? "Cancel" : "+ Add More Resources"}
+                                    </p>
+                                )}
+
 
                                 {/* Quizzes Section */}
-                                <h6 className="fw-bold mb-2">{t("quiz.title")}</h6>
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 className="fw-bold mb-0">{t("quiz.title")}</h6>
+                                    {isTrainerView && (
+                                        <Dropdown>
+                                            <Dropdown.Toggle
+                                                variant="primary"
+                                                size="sm"
+                                                id={`dropdown-quiz-${lec.lecture_id}`}
+                                            >
+                                                Add Quiz
+                                            </Dropdown.Toggle>
+
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item
+                                                    onClick={() => navigate("/trainer/quiz-generator")}
+                                                >
+                                                    <i className="bi bi-robot me-2"></i>
+                                                    AI Generated
+                                                </Dropdown.Item>
+                                                <Dropdown.Item
+                                                    onClick={() => navigate("/trainer/quizmanual")}
+                                                >
+                                                    <i className="bi bi-pencil-square me-2"></i>
+                                                    Manual Quiz
+                                                </Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    )}
+                                </div>
                                 <div className="quizzes-container d-flex flex-wrap gap-2">
+
                                     {lec.assessments?.length > 0 ? (
                                         lec.assessments.map((quiz) => (
                                             <div key={quiz.assessment_id} className="d-flex align-items-center mb-2 position-relative bg-light rounded p-2 border">
@@ -508,7 +703,7 @@ export default function ModuleAccordion({
                                                         {showQuizMenuId === quiz.assessment_id && (
                                                             <ul className="dropdown-menu show position-absolute end-0 shadow-sm" style={{ minWidth: '180px', zIndex: 1000 }}>
                                                                 <li className="dropdown-item cursor-pointer" onClick={() => navigate(`/trainer/${lec.module.course_id}/modules/${lec.module_id}/quizzes/${quiz.assessment_id}`)}>
-                                                                    <Edit size={14} className="me-2" /> {t("quiz.edit")} 
+                                                                    <Edit size={14} className="me-2" /> {t("quiz.edit")}
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-primary fw-bold" onClick={() => navigate(`/trainer/quiz/${quiz.assessment_id}/sessions`)}>
                                                                     <ShieldAlert size={14} className="me-2 text-danger" /> {t("quiz.results")}

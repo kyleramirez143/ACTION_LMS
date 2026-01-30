@@ -17,6 +17,8 @@ const ProctorReview = () => {
     const [stats, setStats] = useState(null);
     const [attemptHistory, setAttemptHistory] = useState([]);
     const [historyUser, setHistoryUser] = useState(null);
+    const [quizTitle, setQuizTitle] = useState('');
+
 
     // --- AUTH CHECK ---
     useEffect(() => {
@@ -70,6 +72,22 @@ const ProctorReview = () => {
             document.body.style.overflow = "auto";
         }
     }, [selectedVideo, attemptHistory]);
+
+    useEffect(() => {
+        fetch(`/api/quizzes/${assessment_id}/results`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                setSessions(data.rows);
+                setStats(data.stats);
+                setQuizTitle(data.assessmentTitle || 'Quiz Results'); // ✅ Extract title
+            });
+    }, [assessment_id, token]);
+
+
 
     return (
         <>
@@ -175,7 +193,7 @@ const ProctorReview = () => {
             <div className="module-container w-100 px-0 py-4">
                 <div className="container" style={{ maxWidth: "1400px" }}>
                     <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ margin: 0, minHeight: "570px" }}>
-                        <h3 className="section-title">QUIZ TITLE : {t("proctor.quiz_result")}</h3>
+                        <h3 className="section-title">{quizTitle} : {t("proctor.quiz_result")}</h3>
                         <div className="row">
                             {/* Trainee Details */}
                             <div className="col-12 col-lg-8">
@@ -358,7 +376,7 @@ const ProctorReview = () => {
                 </div >
             </div>
         </>
-    );a
+    ); a
 };
 
 export default ProctorReview;

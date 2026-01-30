@@ -42,7 +42,7 @@ export default function ProfileInfo() {
 
         const resUser = await fetch(`${backendURL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
-      });
+        });
         const userData = await resUser.json();
         setUserProfile(userData);
 
@@ -76,17 +76,17 @@ export default function ProfileInfo() {
   // ----------------------------
   useEffect(() => {
     if (userProfile?.profile_picture) {
-        // 1. Fix backslashes
-        let path = userProfile.profile_picture.replace(/\\/g, "/");
+      // 1. Fix backslashes
+      let path = userProfile.profile_picture.replace(/\\/g, "/");
 
-        // 2. Build the full URL
-        const finalUrl = path.startsWith("uploads/") 
-            ? `${backendURL}/${path}` 
-            : `${backendURL}/uploads/${path}`;
+      // 2. Build the full URL
+      const finalUrl = path.startsWith("uploads/")
+        ? `${backendURL}/${path}`
+        : `${backendURL}/uploads/${path}`;
 
-        setPreview(finalUrl);
+      setPreview(finalUrl);
     }
-}, [userProfile]);
+  }, [userProfile]);
 
   const handleChange = (field, value) => {
     const val = value === "true" ? true : value === "false" ? false : value;
@@ -239,15 +239,32 @@ export default function ProfileInfo() {
                       <td>{item.label}</td>
                       <td>
                         {isEditing ? (
-                          <input
-                            type="text"
-                            className="table-input"
-                            value={onboarding[item.field] || ""}
-                            onChange={(e) => handleChange(item.field, e.target.value)}
-                          />
+                          <div style={{ position: "relative", padding: "10px 0" }}>
+                            <input
+                              type="text"
+                              className={`table-input ${onboarding[`${item.field}_invalid`] ? "invalid-input" : ""}`}
+                              value={onboarding[item.field] || ""}
+                              maxLength={50}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^\d*$/.test(val)) {
+                                  handleChange(item.field, val);
+                                  handleChange(`${item.field}_invalid`, false);
+                                } else {
+                                  handleChange(`${item.field}_invalid`, true);
+                                }
+                              }}
+                            />
+                            {onboarding[`${item.field}_invalid`] && (
+                              <small style={{ color: "red", position: "absolute", bottom: "-8px", left: 0, fontSize: "0.65rem", marginLeft: "30px" }}>
+                                Only numbers are allowed
+                              </small>
+                            )}
+                          </div>
                         ) : (
                           onboarding[item.field] || "---"
                         )}
+
                       </td>
                     </tr>
                   ))}
@@ -261,16 +278,18 @@ export default function ProfileInfo() {
                   ].map((item) => (
                     <tr key={item.field}>
                       <td>{item.label}</td>
-                      <td className="text-left">
+                      <td className="text-left" >
                         {isEditing ? (
-                          <select
-                            className="table-select"
-                            value={String(onboarding[item.field])}
-                            onChange={(e) => handleChange(item.field, e.target.value)}
-                          >
-                            <option value="false">{item.no}</option>
-                            <option value="true">{item.yes}</option>
-                          </select>
+                          <div style={{ position: "relative", padding: "10px 0" }}>
+                            <select
+                              className="table-select"
+                              value={String(onboarding[item.field])}
+                              onChange={(e) => handleChange(item.field, e.target.value)}
+                            >
+                              <option value="false">{item.no}</option>
+                              <option value="true">{item.yes}</option>
+                            </select>
+                          </div>
                         ) : (
                           /* Removed the extra curly braces here */
                           onboarding[item.field] ? (
@@ -301,6 +320,6 @@ export default function ProfileInfo() {
 
       )
       }
-    </div>
+    </div >
   );
 }
