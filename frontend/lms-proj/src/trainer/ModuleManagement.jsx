@@ -198,14 +198,14 @@ export default function ModuleManagement() {
                 {/* Trainer Buttons */}
                 {userRole === "Trainer" && modulesData.length > 0 && (
                     <div className="d-flex gap-2 mt-2">
-                        <button
+                        {/* <button
                             className="btn btn-outline-primary"
                             onClick={() =>
                                 navigate(`/trainer/${course_id}/add-new-schedule`)
                             }
                         >
                             Add Schedule
-                        </button>
+                        </button> */}
 
                         <button
                             className="btn btn-primary"

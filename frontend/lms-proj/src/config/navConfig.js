@@ -1,6 +1,14 @@
 // ./src/config/navConfig.js
 
 export const navLinks = [
+  // ------------------ All ------------------
+  {
+    name: 'Home',
+    path: '/all/home',
+    requiredRoles: ['Admin', 'Trainee', 'Trainer'],
+    translationKey: "nav.home",
+  },
+
   // ------------------ Admin ------------------
   {
     name: 'Dashboard',
@@ -46,19 +54,13 @@ export const navLinks = [
 
   // ------------------ Trainer ------------------
   {
-    name: 'Dashboard',
-    path: '/trainer/dashboard',
-    requiredRoles: ['Trainer'],
-    translationKey: "nav.dashboard",
-  },
-  {
     name: 'Courses',
     path: '/trainer/course-management',
     requiredRoles: ['Trainer'],
     translationKey: "nav.courses",
   },
   {
-    name: 'Assessment',
+    name: 'Create Assessment',
     path: '/trainer/quiz-generator',
     requiredRoles: ['Trainer'],
     translationKey: "nav.quiz",
@@ -76,24 +78,12 @@ export const navLinks = [
   },
   {
     name: 'View Grades',
-    path: '/trainer/view-grades',
+    path: '/trainer/traineegrade',
     requiredRoles: ['Trainer'],
     translationKey: "nav.view_grades",
   },
-  {
-    name: 'Action Calendar', // unified calendar link
-    path: '/trainer/calendar',
-    requiredRoles: ['Trainer'],
-    translationKey: "nav.action_calendar",
-  },
 
   // ------------------ Trainee ------------------
-  {
-    name: 'Dashboard',
-    path: '/trainee/dashboard',
-    requiredRoles: ['Trainee'],
-    translationKey: "nav.dashboard",
-  },
   {
     name: 'My Courses',
     path: '/trainee/courses',
@@ -106,16 +96,5 @@ export const navLinks = [
     path: '/trainee/assessment',
     requiredRoles: ['Trainee'],
     translationKey: "nav.assessment",
-  },
-  {
-    name: 'View Grades', // unified calendar link
-    path: '/trainee/view-grades',
-    requiredRoles: ['Trainee'],
-    translationKey: "nav.view_grades",
-  },
-  {
-    name: 'Action Calendar', // unified calendar link
-    path: '/trainee/calendar',
-    requiredRoles: ['Trainee'],
-  },
+  }
 ];

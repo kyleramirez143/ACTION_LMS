@@ -89,7 +89,7 @@ export async function getAssessmentResults(req, res) {
             where: { assessment_id },
             include: [
                 { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email'] },
-                { model: Assessment, as: 'assessment', attributes: ['passing_score'] }
+                { model: Assessment, as: 'assessment', attributes: ['passing_score', 'title'] }
             ],
             order: [['created_at', 'DESC']]
         });
@@ -151,6 +151,7 @@ export async function getAssessmentResults(req, res) {
         });
 
         res.json({
+            assessmentTitle: latestAttempts.length > 0 ? latestAttempts[0].assessment.title : 'Quiz',
             stats: {
                 totalTrainees,
                 tookQuiz,

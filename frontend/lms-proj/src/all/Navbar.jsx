@@ -14,8 +14,8 @@ const backendURL = "http://localhost:5000";
 const Navbar = () => {
   // ================= HOOKS =================
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const notifRef = useRef(null);
+  // const [notifOpen, setNotifOpen] = useState(false);
+  // const notifRef = useRef(null);
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
 
@@ -24,19 +24,19 @@ const Navbar = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const navigate = useNavigate();
 
-  const [notifications] = useState([
-    { id: 1, titleKey: "notif.1_title", typeKey: "notif.1_type", date: "Dec 19, 2025 · 3:00 PM", icon: "bi-exclamation-circle-fill text-warning" },
-    { id: 2, titleKey: "notif.2_title", typeKey: "notif.2_type", date: "Dec 19, 2025 · 2:45 PM", icon: "bi-check-circle-fill text-success" },
-    { id: 3, titleKey: "notif.3_title", typeKey: "notif.3_type", date: "Dec 19, 2025 · 2:30 PM", icon: "bi-flag-fill text-danger" },
-  ]);
+  // const [notifications] = useState([
+  //   { id: 1, titleKey: "notif.1_title", typeKey: "notif.1_type", date: "Dec 19, 2025 · 3:00 PM", icon: "bi-exclamation-circle-fill text-warning" },
+  //   { id: 2, titleKey: "notif.2_title", typeKey: "notif.2_type", date: "Dec 19, 2025 · 2:45 PM", icon: "bi-check-circle-fill text-success" },
+  //   { id: 3, titleKey: "notif.3_title", typeKey: "notif.3_type", date: "Dec 19, 2025 · 2:30 PM", icon: "bi-flag-fill text-danger" },
+  // ]);
 
   // ================= PROFILE IMAGE SYNC =================
   useEffect(() => {
     if (userProfile?.profile_picture) {
       const path = userProfile.profile_picture.replace(/\\/g, "/");
-      const finalUrl = path.startsWith("uploads/") 
-          ? `${backendURL}/${path}` 
-          : `${backendURL}/uploads/${path}`;
+      const finalUrl = path.startsWith("uploads/")
+        ? `${backendURL}/${path}`
+        : `${backendURL}/uploads/${path}`;
       setProfileImageUrl(finalUrl);
     } else {
       setProfileImageUrl(null);
@@ -87,46 +87,46 @@ const Navbar = () => {
     return hasRole(link.requiredRoles);
   });
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setNotifOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (notifRef.current && !notifRef.current.contains(event.target)) {
+  //       setNotifOpen(false);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
 
-  const renderNotificationPopout = () => (
-    <div
-      className="notification-popout shadow-lg rounded"
-      style={{
-        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-        background: "#fff",
-      }}
-    >
-      <ul className="list-unstyled m-0 p-2">
-        {notifications.map((notif) => (
-          <li key={notif.id} className="px-3 py-2 border-bottom d-flex align-items-start gap-2">
-            <i className={`bi ${notif.icon} fs-4 mt-1`} />
-            <div>
-              <div>{t(notif.titleKey)}</div>
-              <small className="text-muted">{t(notif.typeKey)} · {notif.date}</small>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="text-center mb-2">
-        <Link
-          to="all/NotificationView"
-          className="text-primary fw-semibold"
-          onClick={() => setNotifOpen(false)}
-        >
-          {t("navbar.view_all_notifications")}
-        </Link>
-      </div>
-    </div>
-  );
+  // const renderNotificationPopout = () => (
+  //   <div
+  //     className="notification-popout shadow-lg rounded"
+  //     style={{
+  //       boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+  //       background: "#fff",
+  //     }}
+  //   >
+  //     <ul className="list-unstyled m-0 p-2">
+  //       {notifications.map((notif) => (
+  //         <li key={notif.id} className="px-3 py-2 border-bottom d-flex align-items-start gap-2">
+  //           <i className={`bi ${notif.icon} fs-4 mt-1`} />
+  //           <div>
+  //             <div>{t(notif.titleKey)}</div>
+  //             <small className="text-muted">{t(notif.typeKey)} · {notif.date}</small>
+  //           </div>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //     <div className="text-center mb-2">
+  //       <Link
+  //         to="all/NotificationView"
+  //         className="text-primary fw-semibold"
+  //         onClick={() => setNotifOpen(false)}
+  //       >
+  //         {t("navbar.view_all_notifications")}
+  //       </Link>
+  //     </div>
+  //   </div>
+  // );
 
   if (loading) return null;
 
@@ -141,10 +141,10 @@ const Navbar = () => {
             {isJapanese ? "日本語" : "ENG"}
           </button>
 
-          <div className="position-relative" ref={notifRef}>
+          {/* <div className="position-relative" ref={notifRef}>
             <i className="bi bi-bell bell-icon" onClick={() => setNotifOpen(!notifOpen)} />
             {notifOpen && renderNotificationPopout()}
-          </div>
+          </div> */}
 
           <i className={`bi ${menuOpen ? "bi-x" : "bi-list"} hamburger-icon`} onClick={() => setMenuOpen(!menuOpen)} />
         </div>
@@ -176,10 +176,10 @@ const Navbar = () => {
             {isJapanese ? "日本語" : "ENG"}
           </button>
 
-          <div className="position-relative" ref={notifRef}>
+          {/* <div className="position-relative" ref={notifRef}>
             <i className="bi bi-bell bell-icon" onClick={() => setNotifOpen(!notifOpen)} />
             {notifOpen && renderNotificationPopout()}
-          </div>
+          </div> */}
 
           {/* PROFILE DROPDOWN */}
           <div className="d-flex align-items-center gap-2">
@@ -203,13 +203,13 @@ const Navbar = () => {
                 <Dropdown.Item as={Link} to="/admin/profile">
                   {t("navbar.account_settings")}
                 </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/settings-privacy">
+                {/* <Dropdown.Item as={Link} to="/settings-privacy">
                   {t("navbar.privacy_settings")}
                 </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item as={Link} to="all/helpandsupport">
                   {t("navbar.help_support")}
-                </Dropdown.Item>
+                </Dropdown.Item> */}
                 <Dropdown.Item as={Link} to="/" className="text-danger" onClick={logoutUser}>
                   {t("navbar.sign_out")}
                 </Dropdown.Item>
@@ -235,8 +235,8 @@ const Navbar = () => {
 
         <Link to="/trainee/ProfileInfo" onClick={() => setMenuOpen(false)}>{t("navbar.profile")}</Link>
         <Link to="/admin/profile" onClick={() => setMenuOpen(false)}>{t("navbar.account_settings")}</Link>
-        <Link to="/settings-privacy" onClick={() => setMenuOpen(false)}>{t("navbar.privacy_settings")}</Link>
-        <Link to="all/helpandsupport" onClick={() => setMenuOpen(false)}>{t("navbar.help_support")}</Link>
+        {/* <Link to="/settings-privacy" onClick={() => setMenuOpen(false)}>{t("navbar.privacy_settings")}</Link>
+        <Link to="all/helpandsupport" onClick={() => setMenuOpen(false)}>{t("navbar.help_support")}</Link> */}
 
         <button className="logout-btn" onClick={logoutUser}>{t("navbar.sign_out")}</button>
       </div>

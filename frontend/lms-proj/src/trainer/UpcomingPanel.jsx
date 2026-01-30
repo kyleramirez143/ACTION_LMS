@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import logo from "../image/upcoming.svg";
+import logo from "../image/upcoming.svg"; // <-- added
 import { jwtDecode } from "jwt-decode";
 
 export default function UpcomingPanel({ moduleId }) {
@@ -33,7 +33,9 @@ export default function UpcomingPanel({ moduleId }) {
     const [loading, setLoading] = useState(true);
 
     const [selectedTab, setSelectedTab] = useState("Upcoming");
-    const tabs = ["Upcoming", "Completed", "Late"];
+    const tabs = userRole === "trainer" 
+    ? ["Upcoming", "Completed"]  // Trainer sees only 2 tabs
+    : ["Upcoming", "Completed", "Missed"];  // Trainee sees all 3 tabs
 
     const [showAll, setShowAll] = useState(false);
 
@@ -74,7 +76,7 @@ export default function UpcomingPanel({ moduleId }) {
         const due = event.due_date ? new Date(event.due_date) : null;
 
         if (event.completed) return "Completed";
-        if (due && due < now) return "Late";
+        if (due && due < now) return "Missed";
         return "Upcoming";
     };
 

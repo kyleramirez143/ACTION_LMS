@@ -9,7 +9,6 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // --- Handle browser refresh/close ---
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (quiz && !isSaved) {
@@ -21,7 +20,6 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [quiz, isSaved]);
 
-  // Only trigger prompt for other pages, not review & publish
   const handleNavigation = (e) => {
     if (quiz && !isSaved) {
       const target = e.target?.getAttribute("href") || "";
@@ -34,7 +32,6 @@ function useUnsavedQuizPrompt(quiz, isSaved) {
   };
 
   useEffect(() => {
-    // Attach to all links in page
     document.querySelectorAll("a").forEach(link =>
       link.addEventListener("click", handleNavigation)
     );
@@ -77,20 +74,20 @@ function QuizManual() {
   const [selectedLecture, setSelectedLecture] = useState("");
   const [assessmentType, setAssessmentType] = useState("");
 
-
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
-    options: { a: "", b: "", c: "", d: "" },
+    options: ["", ""], // Initialize with 2 empty options
     correct_answer: "a",
     explanation: "",
     section: "General",
     points: 1,
   });
 
-  // --- UNSAVED QUIZ PROMPT ---
+  const hasQuestions = quiz.questions.length > 0;
+
   useUnsavedQuizPrompt(quiz, isSaved);
 
-  // --- AUTH & FETCH COURSES ---
+  // --- AUTH & FETCH ---
   useEffect(() => {
     if (!token) return navigate("/login");
     try {
@@ -106,18 +103,13 @@ function QuizManual() {
     }
   }, [token, navigate]);
 
-  // --- FETCH MODULES ---
   useEffect(() => {
-    if (!selectedCourse) {
-      setModules([]); setSelectedModule(""); setLectures([]);
-      return;
-    }
+    if (!selectedCourse) { setModules([]); setSelectedModule(""); setLectures([]); return; }
     fetch(`/api/modules/${selectedCourse}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => { setModules(data); setSelectedModule(""); setLectures([]); });
   }, [selectedCourse, token]);
 
-  // --- FETCH LECTURES ---
   useEffect(() => {
     if (!selectedModule) { setLectures([]); setSelectedLecture(""); return; }
     fetch(`/api/lectures/modules/${selectedModule}`, { headers: { Authorization: `Bearer ${token}` } })
@@ -125,36 +117,89 @@ function QuizManual() {
       .then(data => { setLectures(data); setSelectedLecture(""); });
   }, [selectedModule, token]);
 
+
+  // --- HANDLERS FOR OPTIONS ---
+
+  const handleOptionChange = (index, value) => {
+    const updatedOptions = [...newQuestion.options];
+    updatedOptions[index] = value;
+    setNewQuestion(prev => ({ ...prev, options: updatedOptions }));
+  };
+
+  const handleAddOptionField = () => {
+    setNewQuestion(prev => ({
+      ...prev,
+      options: [...prev.options, ""]
+    }));
+  };
+
+  const handleRemoveOption = (indexToRemove) => {
+    if (newQuestion.options.length <= 2) return; 
+
+    const updatedOptions = newQuestion.options.filter((_, index) => index !== indexToRemove);
+    
+    // Logic: If the correct answer was the deleted index or higher, safe reset to 'a'
+    setNewQuestion(prev => ({
+      ...prev,
+      options: updatedOptions,
+      correct_answer: "a" 
+    }));
+  };
+
   // --- ADD QUESTION ---
   const handleAddQuestion = () => {
+    // 1. Check Question Text
     if (!newQuestion.question_text.trim()) {
       alert(t("quiz.enter_question"));
       return;
     }
 
-    const questionWithId = { ...newQuestion, question_id: crypto.randomUUID() };
+    // 2. Check Options (Must have at least 2 filled options)
+    if (quiz.quizType === "Multiple Choice") {
+      const filledOptions = newQuestion.options.filter(opt => opt.trim() !== "");
+      
+      if (filledOptions.length < 2) {
+        alert("Please input at least 2 choices before adding the question.");
+        return;
+      }
+
+      // Check for any blank fields that were left behind
+      const hasBlankField = newQuestion.options.some(opt => opt.trim() === "");
+      if(hasBlankField) {
+         alert("Please fill in or remove empty option fields.");
+         return;
+      }
+    }
+
+    // Convert Array to Object for backend
+    const formattedOptions = {};
+    if (quiz.quizType === "Multiple Choice") {
+      newQuestion.options.forEach((opt, index) => {
+        const key = String.fromCharCode(97 + index); // 0->a, 1->b
+        formattedOptions[key] = opt;
+      });
+    }
+
+    const questionToSave = {
+      ...newQuestion,
+      question_id: crypto.randomUUID(),
+      options: formattedOptions 
+    };
 
     setQuiz(prev => ({
       ...prev,
-      questions: [...prev.questions, questionWithId]
+      questions: [...prev.questions, questionToSave]
     }));
 
-    // Reset new question
+    // Reset Form
     setNewQuestion({
       question_text: "",
-      options: { a: "", b: "", c: "", d: "" },
+      options: ["", ""], 
       correct_answer: "a",
       explanation: "",
       section: "General",
       points: 1,
     });
-  };
-
-  const handleOptionChange = (key, value) => {
-    setNewQuestion(prev => ({
-      ...prev,
-      options: { ...prev.options, [key]: value },
-    }));
   };
 
   // --- SAVE QUIZ ---
@@ -164,17 +209,16 @@ function QuizManual() {
       return;
     }
 
+    const finalTitle = assessmentType ? `${quiz.title} - ${assessmentType}` : quiz.title;
     setSaving(true);
+
     try {
       const res = await fetch("/api/upload/save-to-lecture", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           lectureId: selectedLecture,
-          title: quiz.title,
+          title: finalTitle,
           quizType: quiz.quizType,
           assessmentTypeName: assessmentType,
           pdfFilename: null,
@@ -190,35 +234,29 @@ function QuizManual() {
       });
 
       if (!res.ok) throw new Error(await res.text() || "Failed to save quiz");
-
       const { assessmentId } = await res.json();
       setIsSaved(true);
-
-      // Navigate to Review & Publish
       navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
       resetForm();
     } catch (err) {
-      console.error("Error saving manual quiz:", err);
+      console.error(err);
       alert(t("quiz.failed_save"));
     } finally {
       setSaving(false);
     }
   };
 
-  // --- DISCARD QUIZ ---
   const handleDiscardQuiz = () => {
-    if (window.confirm(t("quiz.confirm_discard"))) {
-      resetForm();
-    }
+    if (window.confirm(t("quiz.confirm_discard"))) resetForm();
   };
 
   const resetForm = () => {
     setQuiz({ title: "", quizType: "Multiple Choice", questions: [] });
     setSelectedCourse(""); setSelectedModule(""); setSelectedLecture("");
-    setModules([]); setLectures([]);
+    setAssessmentType("");
     setNewQuestion({
       question_text: "",
-      options: { a: "", b: "", c: "", d: "" },
+      options: ["", ""], 
       correct_answer: "a",
       explanation: "",
       section: "General",
@@ -227,14 +265,15 @@ function QuizManual() {
     setIsSaved(false);
   };
 
-  // --- RENDER QUIZ SECTION ---
+  // --- RENDER SAVED QUESTIONS (PREVIEW) ---
   const renderQuizSection = (section) => {
     const sectionQuestions = quiz.questions.filter(q => q.section === section);
     if (!sectionQuestions.length) return null;
 
     return (
       <div className="mb-4" key={section}>
-        <h4 className="text-primary">{t(`quiz.section.${section}`)}</h4>         {sectionQuestions.map((q, i) => (
+        <h4 className="text-primary">{t(`quiz.section.${section}`)}</h4>        
+        {sectionQuestions.map((q, i) => (
           <div className="card shadow-sm mb-3" key={q.question_id}>
             <div className="card-body">
               <h5 className="card-title fw-bold">Q{i + 1}: {q.question_text}</h5>
@@ -245,10 +284,10 @@ function QuizManual() {
                   ))}
                 </ul>
               )}
-              <p className="text-success mb-1"><strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}</p> {/* TRANSLATED */}
+              <p className="text-success mb-1"><strong>{t("quiz.answer")}</strong> {q.correct_answer.toUpperCase()}</p>
               {q.explanation && <div className="mt-2 p-2 bg-light rounded border">
                 <small className="text-muted d-block fw-bold">{t("quiz.explanation")}</small>
-                <small className="text-dark">{q.explanation}</small>
+                <small>{q.explanation}</small>
               </div>}
             </div>
           </div>
@@ -266,7 +305,7 @@ function QuizManual() {
             <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%" }}>
               <h3 className="section-title">{t("quiz.manual_input")}</h3>
 
-              {/* Quiz Title */}
+              {/* Title & Type */}
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.quiz_title")}</label>
                 <input
@@ -274,10 +313,11 @@ function QuizManual() {
                   className="form-control"
                   value={quiz.title}
                   onChange={(e) => setQuiz(prev => ({ ...prev, title: e.target.value }))}
+                  disabled={hasQuestions}
+                  placeholder={t("quiz.placeholder_title")} 
                 />
               </div>
 
-              {/* Quiz Type */}
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.quiz_type")}</label>
                 {["Multiple Choice", "Identification"].map(type => (
@@ -288,47 +328,40 @@ function QuizManual() {
                       value={type}
                       checked={quiz.quizType === type}
                       onChange={e => setQuiz(prev => ({ ...prev, quizType: e.target.value }))}
+                      disabled={hasQuestions}
                     />
                     <label className="form-check-label">{type}</label>
                   </div>
                 ))}
               </div>
 
-              {/* Assessment Type */}
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.assessment_type")}</label>
-                <select
-                  className="form-select"
-                  value={assessmentType}
-                  onChange={e => setAssessmentType(e.target.value)}
-                >
+                <select className="form-select" value={assessmentType} onChange={e => setAssessmentType(e.target.value)} disabled={hasQuestions}>
                   <option value="">{t("quiz.select_assessment_type")}</option>
-                  {assessmentTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
+                  {assessmentTypes.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}
                 </select>
               </div>
 
-              {/* Course / Module / Lecture */}
+              {/* Placement */}
               <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
                 <label className="form-label fw-bold">{t("quiz.target_placement")}</label>
-                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}>
+                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={hasQuestions}>
                   <option value="">{t("quiz.select_course")}</option>
                   {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
                 </select>
-                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse}>
+                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || hasQuestions}>
                   <option value="">{t("quiz.select_module")}</option>
                   {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
                 </select>
-                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule}>
+                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || hasQuestions}>
                   <option value="">{t("quiz.select_lecture")}</option>
                   {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
                 </select>
               </div>
 
-              {/* Question Input */}
+              <hr />
+
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.question")}</label>
                 <textarea
@@ -339,23 +372,64 @@ function QuizManual() {
                 />
               </div>
 
-              {/* Options */}
+              {/* DYNAMIC OPTIONS SECTION */}
               {quiz.quizType === "Multiple Choice" && (
                 <div className="mb-3">
-                  {["a", "b", "c", "d"].map(key => (
-                    <input
-                      key={key}
-                      type="text"
-                      className="form-control mb-2"
-                      placeholder={`Option ${key.toUpperCase()}`}
-                      value={newQuestion.options[key]}
-                      onChange={e => handleOptionChange(key, e.target.value)}
-                    />
-                  ))}
+                  
+                  {newQuestion.options.map((optValue, index) => {
+                    const letter = String.fromCharCode(65 + index); // A, B, C (Uppercase to match image)
+                    
+                    return (
+                      <div key={index} className="d-flex align-items-center mb-2">
+                        {/* 1. Label (Dot + A.) */}
+                        <div className="d-flex align-items-center me-2 text-nowrap">
+                          <span style={{fontSize: "1.2rem", marginRight: "5px"}}>●</span>
+                          <span className="fw-bold">{letter}.</span>
+                        </div>
+                        
+                        {/* 2. Input Field */}
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={t("quiz.placeholder_choice")}
+                          value={optValue}
+                          onChange={e => handleOptionChange(index, e.target.value)}
+                        />
+
+                        {/* 3. Red Square Delete Button (SMALLER NOW) */}
+                        {newQuestion.options.length > 2 && (
+                          <button 
+                            className="btn btn-danger ms-2 p-0 d-flex align-items-center justify-content-center" 
+                            type="button"
+                            onClick={() => handleRemoveOption(index)}
+                            title="Remove this choice"
+                            style={{ 
+                                width: "30px",     // Reduced size
+                                height: "30px",    // Reduced size
+                                minWidth: "30px",  // Reduced size
+                                borderRadius: "0.25rem",
+                                fontSize: "0.8rem" // Slightly smaller icon
+                            }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Button - Bottom Right */}
+                  <div className="d-flex justify-content-end mt-2">
+                    <button 
+                      className="btn btn-outline-success rounded-pill fw-bold" 
+                      onClick={handleAddOptionField}
+                    >
+                      + {t("quiz.add_choice") || "Add Choice"}
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {/* Correct Answer */}
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.correct_answer")}</label>
                 <input
@@ -363,10 +437,10 @@ function QuizManual() {
                   className="form-control"
                   value={newQuestion.correct_answer}
                   onChange={e => setNewQuestion(prev => ({ ...prev, correct_answer: e.target.value }))}
+                  placeholder="e.g. a"
                 />
               </div>
 
-              {/* Explanation */}
               <div className="mb-3">
                 <label className="form-label fw-bold">{t("quiz.explanation_optional")}</label>
                 <textarea
@@ -383,29 +457,20 @@ function QuizManual() {
             </div>
           </div>
 
-          {/* RIGHT PANEL */}
+          {/* RIGHT PANEL (PREVIEW) */}
           <div className="col-12 col-lg-6 d-flex">
-            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{
-              minHeight: "550px",      // or 100vh if you prefer
-              margin: 0,
-              width: "100%",
-              maxHeight: "100vh",      // <-- constrain height
-              overflowY: "auto",       // <-- enable vertical scroll
-            }}>
-              <h3 className="section-title">{t("quiz.generated_quiz")}</h3>
+            <div className="user-role-card flex-grow-1 d-flex flex-column w-100" style={{ minHeight: "550px", margin: 0, width: "100%", maxHeight: "100vh", overflowY: "auto" }}>
+              <h3 className="section-title">
+                {quiz.title ? <span>{quiz.title} {assessmentType && `- ${assessmentType}`}</span> : t("quiz.generated_quiz")}
+              </h3>
+
               {(!quiz || quiz?.questions?.length === 0) && (
                 <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
-                  <img
-                    src={logo}
-                    alt="Logo"
-                    style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
-                  />
-                  <p className="text-muted text-center mb-0">
-                    {t("quiz.no_quiz_yet")}
-                  </p>
+                  <img src={logo} alt="Logo" style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }} />
+                  <p className="text-muted text-center mb-0">{t("quiz.no_quiz_yet")}</p>
                 </div>
               )}
-              {["General"].map(section => renderQuizSection(section))}
+              {renderQuizSection("General")}
 
               {quiz.questions.length > 0 && (
                 <div className="d-flex justify-content-center gap-3">

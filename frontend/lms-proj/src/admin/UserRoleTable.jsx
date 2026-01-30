@@ -436,7 +436,7 @@ function UserRoleTable() {
                                     <td colSpan="8" className="text-center py-5">
                                         <div className="d-flex flex-column align-items-center justify-content-center gap-2">
                                             <img src={logo} alt="No users" style={{ maxWidth: "220px" }}></img>
-                                            <h5 className="mt-2">No Users Found</h5>
+                                            <h5 className="section-title mt-2">No Users Found</h5>
                                             <p className="text-muted">No users match this filter/search.</p>
                                         </div>
                                     </td>
