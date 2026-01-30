@@ -35,19 +35,17 @@ export const getAllUsers = async (req, res) => {
         const search = req.query.search ? req.query.search.toLowerCase() : "";
         const roleFilter = req.query.role;
 
-        // Fetch users with roles and batches
-        const users = await db.User.findAndCountAll({
+        // Fetch ALL users with roles and batches (no pagination at DB level)
+        const users = await db.User.findAll({
             include: [
                 { model: db.Role, as: "roles" },
                 { model: db.Batch, as: "batches" }
             ],
-            offset,
-            limit,
             order: [["id", "ASC"]],
         });
 
         // Filter & map users
-        let filteredUsers = users.rows;
+        let filteredUsers = users;
 
         // Filter by role if needed
         if (roleFilter && roleFilter !== "All") {
@@ -62,6 +60,7 @@ export const getAllUsers = async (req, res) => {
             );
         }
 
+        // Map all filtered users
         const mappedUsers = filteredUsers.map(u => {
             const roleName = u.roles[0]?.name || "Unknown";
 
@@ -93,10 +92,15 @@ export const getAllUsers = async (req, res) => {
             };
         });
 
-        const totalPages = Math.ceil(filteredUsers.length / limit);
+        // Calculate pagination AFTER filtering
+        const totalFilteredUsers = mappedUsers.length;
+        const totalPages = Math.ceil(totalFilteredUsers / limit);
+        
+        // Apply pagination slice to get only the users for current page
+        const paginatedUsers = mappedUsers.slice(offset, offset + limit);
 
         res.json({
-            users: mappedUsers,
+            users: paginatedUsers,
             currentPage: page,
             totalPages: totalPages || 1
         });
