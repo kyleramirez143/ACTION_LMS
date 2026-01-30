@@ -13,6 +13,16 @@
   overflow: hidden;
 }
 
+/* Optional: if you want to customize further */
+.swal2-confirm {
+  border-radius: 25px !important;
+  /* pill-shaped button */
+  padding: 10px 25px !important;
+  font-weight: bold;
+  width: 180px; 
+}
+
+
 /* Left side */
 .login-left {
   flex: 1;
