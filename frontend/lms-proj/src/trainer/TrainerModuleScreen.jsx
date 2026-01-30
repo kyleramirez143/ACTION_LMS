@@ -132,7 +132,7 @@ export default function TrainerModuleScreen() {
           </ol>
         </nav>
 
-        <div className="row g-3">
+        <div className="row g-3 align-items-stretch">
           {lectures.length === 0 ? (
             // Empty state: left full width, no right panel
             <div className="col-12 col-lg-12">
@@ -173,7 +173,7 @@ export default function TrainerModuleScreen() {
             // Lectures exist: normal left + right layout
             <>
               {/* Left column */}
-              <div className="col-12 col-lg-8">
+              <div className="col-12 col-lg-8 d-flex">
                 <div className="user-role-card flex-grow-1 d-flex flex-column" style={{ minHeight: "550px", margin: 0 }}>
                   {/* Header */}
                   <div className="d-flex justify-content-between align-items-center mb-3">
@@ -201,8 +201,7 @@ export default function TrainerModuleScreen() {
                   className="user-role-card flex-grow-1 d-flex flex-column"
                   style={{
                     minHeight: "50vh",
-                    margin: 0,
-                    maxHeight: "550px",       // ✅ keeps panel same height as left column
+                    margin: 0,      // ✅ keeps panel same height as left column
                     overflowY: "auto",        // ✅ scrollable
                     scrollbarWidth: "thin",   // ✅ Firefox scrollbar
                   }}
