@@ -32,19 +32,10 @@ export default function UpcomingPanel({ moduleId }) {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const visibleEvents = events.filter((e) => {
-        const isExpired = e.due_date ? new Date(e.due_date) < new Date() : false;
-
-        if (userRole === "Trainer") {
-            return true; // Trainer sees all
-        }
-
-        // Trainee sees only published & visible & not expired quizzes
-        return !isExpired;
-    });
-
     const [selectedTab, setSelectedTab] = useState("Upcoming");
-    const tabs = ["Upcoming", "Completed", "Late"];
+    const tabs = userRole === "trainer" 
+    ? ["Upcoming", "Completed"]  // Trainer sees only 2 tabs
+    : ["Upcoming", "Completed", "Missed"];  // Trainee sees all 3 tabs
 
     const [showAll, setShowAll] = useState(false);
 
@@ -85,7 +76,7 @@ export default function UpcomingPanel({ moduleId }) {
         const due = event.due_date ? new Date(event.due_date) : null;
 
         if (event.completed) return "Completed";
-        if (due && due < now) return "Late";
+        if (due && due < now) return "Missed";
         return "Upcoming";
     };
 
