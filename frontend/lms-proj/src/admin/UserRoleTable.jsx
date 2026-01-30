@@ -51,7 +51,7 @@ function UserRoleTable() {
 
         try {
             const res = await fetch(
-                `http://localhost:5000/api/users/all?page=${currentPage}&limit=${ITEMS_PER_PAGE}${roleParam}${searchParam}`,
+                `/api/users/all?page=${currentPage}&limit=${ITEMS_PER_PAGE}${roleParam}${searchParam}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -88,7 +88,7 @@ function UserRoleTable() {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
         const token = localStorage.getItem("authToken");
         try {
-            const res = await fetch(`http://localhost:5000/api/users/delete/${userId}`, {
+            const res = await fetch(`/api/users/delete/${userId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -103,7 +103,7 @@ function UserRoleTable() {
     const handleToggleStatus = async (userId) => {
         const token = localStorage.getItem("authToken");
         try {
-            const res = await fetch(`http://localhost:5000/api/users/toggle-status/${userId}`, {
+            const res = await fetch(`/api/users/toggle-status/${userId}`, {
                 method: "PUT",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -125,7 +125,7 @@ function UserRoleTable() {
 
         try {
             const token = localStorage.getItem("authToken");
-            const res = await fetch("http://localhost:5000/api/users/import", {
+            const res = await fetch("/api/users/import", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData,
@@ -168,7 +168,7 @@ function UserRoleTable() {
         try {
             const token = localStorage.getItem("authToken");
 
-            const res = await fetch("http://localhost:5000/api/users/download-template", {
+            const res = await fetch("/api/users/download-template", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -226,7 +226,7 @@ function UserRoleTable() {
 
         const token = localStorage.getItem("authToken");
         try {
-            const res = await fetch("http://localhost:5000/api/users/bulk-delete", {
+            const res = await fetch("/api/users/bulk-delete", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
