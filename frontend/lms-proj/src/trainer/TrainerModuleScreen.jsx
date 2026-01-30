@@ -191,6 +191,8 @@ export default function TrainerModuleScreen() {
                     isTrainerView={userRole === "Trainer"}
                     userRole={userRole}
                     lectures={lectures}
+                    courseId={course_id}
+                    moduleId={module_id}
                   />
                 </div>
               </div>

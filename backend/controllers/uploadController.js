@@ -10,7 +10,7 @@ import pkg from '../models/index.cjs';
 const { Assessment, LectureAssessment, AssessmentQuestion, AssessmentType } = pkg;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
+console.log(process.env.OPENAI_API_KEY?.slice(-9), '               ', openai.project);
 export async function generateQuizFromPdf(req, res) {
     const file = req.file;
     const user = req.user;
@@ -72,10 +72,7 @@ Output JSON EXACTLY in this format:
 PDF Content:
 ${text.slice(0, 16000)}
 `;
-        }
-
-
-        else if (quizType === "Nihongo") {
+        } else if (quizType === "Nihongo") {
             // Nihongo quiz with sections
             prompt = `
 You are an AI generating a Nihongo (Japanese) lesson quiz based on the provided PDF content.

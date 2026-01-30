@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { usePrompt } from "../hooks/usePrompt";
 import { useTranslation } from "react-i18next";
@@ -78,6 +78,40 @@ function QuizGenerator() {
     const [selectedLecture, setSelectedLecture] = useState("");
     const [assessmentType, setAssessmentType] = useState("");
 
+    const location = useLocation();
+
+    const [prefill, setPrefill] = useState({
+        courseId: null,
+        moduleId: null,
+        lectureId: null
+    });
+
+    // Step 1: capture the prefill values from location
+    useEffect(() => {
+        if (location.state) {
+            const { courseId, moduleId, lectureId } = location.state;
+            setPrefill({ courseId, moduleId, lectureId });
+            if (courseId) setSelectedCourse(courseId);
+        }
+    }, [location.state]);
+
+    // Step 2: once modules are fetched, set module prefill
+    useEffect(() => {
+        if (modules.length > 0 && prefill.moduleId) {
+            setSelectedModule(prefill.moduleId);
+            setPrefill(prev => ({ ...prev, moduleId: null })); // clear after applying
+        }
+    }, [modules, prefill.moduleId]);
+
+    // Step 3: once lectures are fetched, set lecture prefill
+    useEffect(() => {
+        if (lectures.length > 0 && prefill.lectureId) {
+            setSelectedLecture(prefill.lectureId);
+            setPrefill(prev => ({ ...prev, lectureId: null })); // clear after applying
+        }
+    }, [lectures, prefill.lectureId]);
+
+
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
 
@@ -109,8 +143,12 @@ function QuizGenerator() {
         }
         fetch(`/api/modules/${selectedCourse}`, { headers: { Authorization: `Bearer ${token}` } })
             .then(res => res.json())
-            .then(data => { setModules(data); setSelectedModule(""); setLectures([]); });
-    }, [selectedCourse, token]);
+            .then(data => {
+                setModules(data);
+                if (prefill.moduleId) setSelectedModule(""); 
+                setLectures([]);
+            });
+    }, [selectedCourse, token, prefill.moduleId]);
 
     // --- FETCH LECTURES ---
     useEffect(() => {
@@ -121,8 +159,11 @@ function QuizGenerator() {
         }
         fetch(`/api/lectures/modules/${selectedModule}`, { headers: { Authorization: `Bearer ${token}` } })
             .then(res => res.json())
-            .then(data => { setLectures(data); setSelectedLecture(""); });
-    }, [selectedModule, token]);
+            .then(data => {
+                setLectures(data);
+                if (prefill.lectureId) setSelectedLecture("");
+            });
+    }, [selectedModule, token, prefill.lectureId]);
 
     // --- HANDLE FILE DROP ---
     const handleDrop = (e) => {
@@ -163,6 +204,19 @@ function QuizGenerator() {
         }
     };
 
+    // --- PREFILL TARGET PLACEMENT IF COMING FROM ACCORDION ---
+    useEffect(() => {
+        if (location.state) {
+            const { courseId, moduleId, lectureId } = location.state;
+
+            if (courseId) setSelectedCourse(courseId);
+            if (moduleId) setSelectedModule(moduleId);
+            if (lectureId) setSelectedLecture(lectureId);
+        }
+    }, [location.state]);
+
+    const cameFromAccordion = !!location.state;
+
     // --- SAVE QUIZ TO DB + LINK TO LECTURE ---
     const handleReviewPublish = async () => {
         if (!quiz || !selectedLecture || !quizType) {
@@ -188,8 +242,6 @@ function QuizGenerator() {
             const { assessmentId } = await res.json();
             setIsSaved(true); // mark quiz as saved
 
-            console.log(selectedCourse);
-            console.log(selectedModule);
             // Navigate to Review & Publish page
             navigate(`/trainer/${selectedCourse}/modules/${selectedModule}/quizzes/${assessmentId}`);
 
@@ -198,8 +250,6 @@ function QuizGenerator() {
 
         } catch (err) {
             console.error("Error saving and navigating:", err);
-            console.log(selectedCourse);
-            console.log(selectedModule);
             alert(t("quiz.review_publish_failed"));
         } finally {
             setSaving(false);
@@ -356,15 +406,15 @@ function QuizGenerator() {
                             {/* Target Placement */}
                             <div className="mb-3 p-3 shadow-sm rounded bg-white border-start border-primary border-4">
                                 <label className="form-label fw-bold text-primary">{t("quiz.target_placement")}</label>
-                                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={!!quiz}>
+                                <select className="form-select mb-2" value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} disabled={!!quiz || cameFromAccordion}>
                                     <option value="">{t("quiz.select_course")}</option>
                                     {courses.map(c => <option key={c.course_id} value={c.course_id}>{c.title}</option>)}
                                 </select>
-                                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || !!quiz}>
+                                <select className="form-select mb-2" value={selectedModule} onChange={e => setSelectedModule(e.target.value)} disabled={!selectedCourse || !!quiz || cameFromAccordion}>
                                     <option value="">{t("quiz.select_module")}</option>
                                     {modules.map(m => <option key={m.module_id} value={m.module_id}>{m.title}</option>)}
                                 </select>
-                                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || !!quiz}>
+                                <select className="form-select" value={selectedLecture} onChange={e => setSelectedLecture(e.target.value)} disabled={!selectedModule || !!quiz || cameFromAccordion}>
                                     <option value="">{t("quiz.select_lecture")}</option>
                                     {lectures.map(l => <option key={l.lecture_id} value={l.lecture_id}>{l.title}</option>)}
                                 </select>
@@ -440,7 +490,7 @@ function QuizGenerator() {
                                     )}
                                     <div className="d-flex justify-content-center gap-3">
                                         <button className="btn btn-success" style={{ width: "220px" }} onClick={handleReviewPublish} disabled={!quiz || saving}>
-                                              {saving ? t("quiz.saving") : t("quiz.review_publish")}
+                                            {saving ? t("quiz.saving") : t("quiz.review_publish")}
                                         </button>
                                         <button className="btn btn-danger" style={{ width: "220px" }} onClick={handleDiscardQuiz}>{t("quiz.discard")}</button>
                                     </div>
