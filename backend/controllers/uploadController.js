@@ -72,10 +72,7 @@ Output JSON EXACTLY in this format:
 PDF Content:
 ${text.slice(0, 16000)}
 `;
-        }
-
-
-        else if (quizType === "Nihongo") {
+        } else if (quizType === "Nihongo") {
             // Nihongo quiz with sections
             prompt = `
 You are an AI generating a Nihongo (Japanese) lesson quiz based on the provided PDF content.
