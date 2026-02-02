@@ -445,25 +445,19 @@ export async function getQuizReview(req, res) {
 export async function getUpcoming(req, res) {
     try {
         const { module_id } = req.params;
+        const user_id = req.user.id;
 
         if (!module_id) {
             return res.status(400).json({ error: "module_id is required" });
         }
 
-        const today = new Date();
-
-        const upcomingQuizzes = await Assessment.findAll({
-            where: {
-                [Op.or]: [
-                    { due_date: { [Op.gt]: today } },
-                    { due_date: null }
-                ]
-            },
+        // ✅ Fetch ALL assessments (remove date filtering!)
+        const allQuizzes = await Assessment.findAll({
             attributes: ["assessment_id", "title", "due_date"],
             include: [
                 {
                     model: Lecture,
-                    as: "lectures", // 🔥 belongsToMany alias
+                    as: "lectures",
                     required: true,
                     attributes: ["lecture_id", "title"],
                     through: { attributes: [] },
@@ -472,36 +466,54 @@ export async function getUpcoming(req, res) {
                             model: Module,
                             as: "module",
                             required: true,
-                            attributes: ["module_id", "title"],
+                            attributes: ["module_id", "title", "course_id"],
                             where: { module_id }
                         }
                     ]
                 }
             ],
             order: [
-                // Put NULL dates last (Postgres)
                 [Sequelize.literal('due_date IS NULL'), 'ASC'],
                 ['due_date', 'ASC']
             ],
             distinct: true
         });
 
-        const flattened = upcomingQuizzes.flatMap(q =>
-            q.lectures.map(l => ({
-                assessment_id: q.assessment_id,
-                assessment_title: q.title,
-                lecture_title: l.title,
-                module_title: l.module.title,
-                due_date: q.due_date
-            }))
+        const assessmentIds = allQuizzes.map(q => q.assessment_id);
+
+        // ✅ Check which assessments user completed
+        const completedAttempts = await AssessmentAttempt.findAll({
+            where: {
+                assessment_id: { [Op.in]: assessmentIds },
+                user_id: user_id,
+                status: 'completed'
+            },
+            attributes: ['assessment_id']
+        });
+
+        const completedIds = new Set(
+            completedAttempts.map(a => a.assessment_id)
         );
 
-        console.log(flattened);
+        // ✅ Create one entry per assessment
+        const flattened = allQuizzes.map(q => {
+            const lecture = q.lectures[0];
+            
+            return {
+                assessment_id: q.assessment_id,
+                assessment_title: q.title,
+                lecture_title: lecture.title,
+                module_title: lecture.module.title,
+                module_id: lecture.module.module_id,
+                course_id: lecture.module.course_id,
+                due_date: q.due_date,
+                completed: completedIds.has(q.assessment_id)
+            };
+        });
 
         return res.json(flattened);
 
     } catch (err) {
-        console.log(err);
         console.error("getUpcoming error:", err);
         return res.status(500).json({ error: "Failed to fetch upcoming assessments" });
     }

@@ -5,11 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import defaultImage from "../image/logo.png";
 import logo from "../image/courses.svg"; // <-- imported SVG
+import { useTranslation } from "react-i18next";
 
 function Course() {
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const token = localStorage.getItem("authToken");
+    const { t } = useTranslation();
 
     // =========================
     // AUTH CHECK
@@ -62,7 +64,7 @@ function Course() {
         <>
             <div className="container py-4" style={{ maxWidth: "1400px" }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h3 className="mb-0">Assigned Courses</h3>
+                    <h3 className="mb-0">{t("course_management.assigned_courses")}</h3>
                 </div>
 
                 {courses.length === 0 ? (

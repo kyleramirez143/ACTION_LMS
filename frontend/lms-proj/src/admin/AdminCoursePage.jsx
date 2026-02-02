@@ -224,7 +224,7 @@ function AdminCoursePage() {
                             ) : (
                                 <img
                                     src="/images/default-course.jpg"
-                                    alt="Default Course"
+                                    alt={t("course_management.default_course")}
                                     style={{ width: "100%"}}
                                 />
                             )}
@@ -236,11 +236,11 @@ function AdminCoursePage() {
                             accept="image/*"
                             onChange={handleImageChange}
                         />
-                        <label htmlFor="profileUpload" style={styles.uploadLink}>Upload</label>
+                        <label htmlFor="profileUpload" style={styles.uploadLink}>{t("admin-profile.upload")}</label>
                     </div>
                     <div style={styles.profileText}>
-                        <h4 style={styles.profileName}>Course Cover Photo</h4>
-                        <p style={styles.profileRole}><i className="bi bi-exclamation-circle"> Max 250MB</i></p>
+                        <h4 style={styles.profileName}>{t("course_management.cover_photo")}</h4>
+                        <p style={styles.profileRole}><i className="bi bi-exclamation-circle">  {t("course_management.max")}</i></p>
                     </div>
                 </div>
 
@@ -360,7 +360,7 @@ function AdminCoursePage() {
                                 style={styles.btn}
                                 onClick={() => navigate("/admin/course-management")}
                             >
-                                Cancel
+                                {t("module.cancel")}
                             </button>
                         </div>
                     </div>

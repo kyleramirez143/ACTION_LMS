@@ -37,7 +37,7 @@
         "user_management": "ユーザー管理",
         "curriculum": "カリキュラム",
         "view_batch_table": "バッチ表を表示",
-        "view_module_table": "モジュール表を表示",
+        "view_quarter_table": "四半期テーブルを表示する",
         "action_calendar": "アクションカレンダー",
         "courses": "コース",
         "quiz": "アセスメント",
@@ -143,7 +143,11 @@
         "next": "›",
         "assigned_courses": "割り当てられたコース",
         "no_courses_found": "コースが見つかりません。",
-        "appear": "コースは割り当てられるとここに表示されます。"
+        "appear": "コースは割り当てられるとここに表示されます。",
+        "cover_photo": "コースのカバー写真",
+        "default_course": "デフォルトコース",
+        "max": "最大250MB"
+
     },
     "module_management": {
         "loading_modules": "モジュールを読み込み中…",
@@ -231,7 +235,20 @@
         "update_btn": "講義を更新",
         "create_btn": "講義を作成",
         "max_resources": "講義あたり最大5つの資料を追加できます。",
-        "success_message": "講義を{{action}}しました！"
+        "success_message": "講義を{{action}}しました！",
+        "add_resource": "+ リソースを追加する",
+        "add_more_resources": "+ さらにリソースを追加する",
+        "add_quiz": "クイズを追加",
+        "uploading": "アップロードする",
+        "video": "ビデオ",
+        "image": "画像",
+        "link": "リンク",
+        "resource_type": {
+            "PDF": "PDF",
+            "Video": "ビデオ",
+            "Image": "画像",
+            "Link": "リンク"
+        }
     },
     "common": {
         "visible": "表示",
@@ -469,13 +486,16 @@
     "upcoming": {
         "upcoming": "今後",
         "loading": "次のクイズを読み込み中...",
-        "no_upcoming": "今後の小テストはありません",
+        "no_upcoming": "今後の小テストはありません。",
         "sample_date": "2021年6月29日（火）",
         "events": {
             "vocab_quiz": "L49 単語クイズ",
             "mock_exam": "【Java】模擬試験",
             "basic_quiz": "基礎理論クイズ"
-        }
+        },
+        "missed": "逃した",
+        "no_completed": "完了したタスクはありません",
+        "no_missed": "期限切れのタスクはありません"
     },
     "calendar": {
         "batch_title": "第40期 ACTION 全体スケジュール",
@@ -741,7 +761,10 @@
         "import_warning": "警告付きでインポートが完了しました。\n\nインポート成功: {{imported}}\n失敗:\n{{failedList}}",
         "import_success": "{{count}} 件のユーザーを正常にインポートしました！",
         "error_download_template": "テンプレートのダウンロード中にエラーが発生しました: {{message}}",
-        "error_delete_users": "ユーザー削除中にエラーが発生しました: {{message}}"
+        "error_delete_users": "ユーザー削除中にエラーが発生しました: {{message}}",
+        "no_users_yet": "まだユーザーがいません",
+        "start_adding": "まず、ユーザーを追加またはインポートします。",
+        "no_user_matched": "このフィルター/検索に一致するユーザーはいません。"
     },
     "profile_info": {
         "loading": "プロフィールを読み込み中...",
@@ -849,8 +872,8 @@
         "loading": "レビューを読み込み中…",
         "no_data": "レビューのデータが見つかりません。",
         "question_of": "質問 {{current}} / {{total}}",
-        "correct_answer": "✓ 正解",
-        "incorrect_answer": "✗ 不正解",
+        "correct_answer": "正解",
+        "incorrect_answer": "不正解",
         "no_answer": "⚠️ この質問に回答していません。",
         "correct": "正解",
         "your_choice": "あなたの選択",
