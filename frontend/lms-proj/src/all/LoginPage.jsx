@@ -170,23 +170,74 @@ function LoginPage() {
         {/* Right side: Login form */}
         <div className="login-right">
           <div className="login-content">
-            {/* Language dropdown */}
-            <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-              <select
-                value={i18n.language}
-                onChange={(e) => {
-                  const lng = e.target.value;
-                  i18n.changeLanguage(lng);
-                  localStorage.setItem("lang", lng);
+            {/* Language Toggle Switch */}
+            <div style={{ textAlign: 'right', marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <div
+                onClick={() => {
+                  const newLang = i18n.language === 'en' ? 'ja' : 'en';
+                  i18n.changeLanguage(newLang);
+                  localStorage.setItem("lang", newLang);
                 }}
-                style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+                style={{
+                  display: 'flex',
+                  backgroundColor: '#e8e8e8',
+                  borderRadius: '20px',
+                  padding: '4px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  width: '140px',
+                  height: '36px',
+                }}
               >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
+                {/* Sliding highlight background */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '50%',
+                    height: 'calc(100% - 8px)',
+                    backgroundColor: '#0047AB',
+                    borderRadius: '16px',
+                    top: '4px',
+                    left: i18n.language === 'en' ? '4px' : 'calc(50% + 0px)',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0, 71, 171, 0.3)',
+                  }}
+                />
+                {/* EN Label */}
+                <div
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: i18n.language === 'en' ? '#ffffff' : '#666',
+                    position: 'relative',
+                    zIndex: 1,
+                    transition: 'color 0.3s ease',
+                  }}
+                >
+                  EN
+                </div>
+                {/* JA Label */}
+                <div
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: i18n.language === 'ja' ? '#ffffff' : '#666',
+                    position: 'relative',
+                    zIndex: 1,
+                    transition: 'color 0.3s ease',
+                  }}
+                >
+                  日本語
+                </div>
+              </div>
             </div>
 
             <img src="/action-logo.png" alt="ACTION Logo" className="login-logo" />

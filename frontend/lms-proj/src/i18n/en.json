@@ -273,7 +273,7 @@
         "none": "No quizzes available yet.",
         "published": "Published",
         "edit": "Edit Content",
-        "options" : "Options",
+        "options": "Options",
         "placeholder_title": "Input quiz title here",
         "placeholder_choice": "Input choice here",
         "results": "Quiz Results",
@@ -990,45 +990,78 @@
         "hero_title": "Bridging Talent to Global Standards",
         "hero_subtitle": "Empowering the next generation of engineers with industry-relevant technical skills and Japanese language proficiency.",
         "goals": {
-        "standards": "Global IT Standards",
-        "standards_sub": "Aligning skills with international IT requirements.",
-        "bridge": "Technical to Business",
-        "bridge_sub": "Connecting local talent with global opportunities.",
-        "nihongo": "Nihongo Proficiency",
-        "nihongo_sub": "Professional business Japanese communication."
+            "standards": "Global IT Standards",
+            "standards_sub": "Aligning skills with international IT requirements.",
+            "bridge": "Technical to Business",
+            "bridge_sub": "Connecting local talent with global opportunities.",
+            "nihongo": "Nihongo Proficiency",
+            "nihongo_sub": "Professional business Japanese communication."
         },
-    "program_overview_title": "Overview of the 4-Month Intensive Program",
+        "program_overview_title": "Overview of the 4-Month Intensive Program",
         "roadmap": {
-        "step1_title": "General IT Concepts",
-        "step1_desc": "Brush up on the general knowledge that all IT Engineers should master",
-        "step2_title": "Business Basics",
-        "step2_req": "Technical Training",
-        "step2_desc": "Aside from technical skills. get to learn the basic business skills on how to deal with clients and co-employees",
-        "step3_title": "Technical",
-        "step3_desc": "Learn and apply latest technologies, software engineering and project management principles.",
-        "step4_title": "Japanese Language",
-        "step4_desc": "Learn the Japanese language white getting familiar with Japanese culture 2 hours daily"
+            "step1_title": "General IT Concepts",
+            "step1_desc": "Brush up on the general knowledge that all IT Engineers should master",
+            "step2_title": "Business Basics",
+            "step2_req": "Technical Training",
+            "step2_desc": "Aside from technical skills. get to learn the basic business skills on how to deal with clients and co-employees",
+            "step3_title": "Technical",
+            "step3_desc": "Learn and apply latest technologies, software engineering and project management principles.",
+            "step4_title": "Japanese Language",
+            "step4_desc": "Learn the Japanese language white getting familiar with Japanese culture 2 hours daily"
         },
-    "awards": {
-        "year": "2007",
-        "title": "E-Services Award",
-        "subtitle": "International Recognition",
-        "company_program": "ACTION - Outstanding Company Program",
-        "project1": "SCM-Offshore Project of the Year",
-        "project2": "High Definition Clipstation Project - Most Creative Application of the Year"
+        "awards": {
+            "year": "2007",
+            "title": "E-Services Award",
+            "subtitle": "International Recognition",
+            "company_program": "ACTION - Outstanding Company Program",
+            "project1": "SCM-Offshore Project of the Year",
+            "project2": "High Definition Clipstation Project - Most Creative Application of the Year"
         },
-    "curriculum": {
-      "title": "Curriculum Breakdown",
-      "tech": {
-        "title": "Technology",
-        "common_title": "Common Technologies",
-        "special1_title": "Specialized Technologies 1",
-        "special2_title": "Specialized Technologies 2",
-        "practicum_title": "Practicum"
-      },
-      "it_concepts": { "title": "General I.T. Concepts" },
-      "business": { "title": "Business Basics" },
-      "japanese": { "title": "Japanese Language" }
-    }
+        "curriculum": {
+            "title": "Curriculum Breakdown",
+            "tech": {
+                "title": "Technology",
+                "common_title": "Common Technologies",
+                "special1_title": "Specialized Technologies 1",
+                "special2_title": "Specialized Technologies 2",
+                "practicum_title": "Practicum"
+            },
+            "it_concepts": {
+                "title": "General I.T. Concepts",
+                "computer_systems": "Computer Systems",
+                "info_security": "Info Security",
+                "network_tech": "Network Tech",
+                "database_tech": "Database Tech",
+                "sys_dev_maintenance": "Sys Dev & Maintenance",
+                "philnits_reviews": "PhilNITS Reviews"
+            },
+            "business": {
+                "title": "Business Basics",
+                "basic_accounting": "Basic Accounting",
+                "team_building": "Team Building",
+                "japanese_business": "Japanese Business",
+                "technical_writing": "Technical Writing",
+                "etiquette": "Etiquette",
+                "presentation_skills": "Presentation Skills"
+            },
+            "japanese": {
+                "title": "Japanese Language",
+                "listening_oral": "Listening and Oral Activities",
+                "jlpt_proficiency": "JLPT N5 and N4 Proficiency"
+            }
+        },
+        "confidential": "© 2026 Internal Action LMS | Private & Confidential",
+        "uml": "UML",
+        "c_prog": "C Programming",
+        "java_prog": "Java Basic Programming",
+        "rdbms": "RDBMS Programming",
+        "soft_quality": "Software Quality Engineering",
+        "proj_manage": "Project Management",
+        "project": "Project",
+        "web_programming": "Web Programming",
+        "enterprise_java": "Enterprise Java (Tomcat)",
+        "android": "Android",
+        "cpp_programming": "C++ Programming",
+        "embedded_systems": "Embedded Systems - RTOS"
     }
 }

@@ -1020,14 +1020,42 @@
                 "practicum_title": "実習"
             },
             "it_concepts": {
-                "title": "IT全般の概念"
+                "title": "IT全般の概念",
+                "computer_systems": "コンピュータ構成要素",
+                "info_security": "情報セキュリティ",
+                "network_tech": "ネットワーク技術",
+                "database_tech": "データベース技術",
+                "sys_dev_maintenance": "システム開発・保守",
+                "philnits_reviews": "PhilNITS対策講座"
             },
             "business": {
-                "title": "ビジネスの基礎"
+                "title": "ビジネスの基礎",
+                "basic_accounting": "基礎会計",
+                "team_building": "チームビルディング",
+                "japanese_business": "日本式ビジネス実務",
+                "technical_writing": "テクニカルライティング",
+                "etiquette": "ビジネスマナー",
+                "presentation_skills": "プレゼンスキル"
             },
             "japanese": {
-                "title": "日本語教育"
+                "title": "日本語教育",
+                "listening_oral": "聴解・口頭演習",
+                "jlpt_proficiency": "JLPT N5・N4 レベル"
             }
-        }
+        },
+        "confidential": "© 2026 内部アクションLMS | 非公開・機密",
+        "uml": "UML",
+        "c_prog": "C言語プログラミング",
+        "java_prog": "Javaプログラミング基礎",
+        "rdbms": "RDBMSプログラミング",
+        "soft_quality": "ソフトウェア品質工学",
+        "proj_manage": "プロジェクトマネジメント",
+        "project": "プロジェクト",
+        "web_programming": "Webプログラミング",
+        "enterprise_java": "エンタープライズJava (Tomcat)",
+        "android": "Androidアプリ開発",
+        "special2_title": "高度な技術・組込み",
+        "cpp_programming": "C++プログラミング",
+        "embedded_systems": "組込みシステム - RTOS"
     }
 }

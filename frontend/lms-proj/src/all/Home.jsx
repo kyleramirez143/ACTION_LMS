@@ -114,29 +114,29 @@ const Home = () => {
             <div className="col-md-6 border-end">
               <h6 className="fw-bold small text-uppercase text-muted">{t("home.curriculum.tech.common_title")}</h6>
               <ul className="small text-dark ps-0 list-unstyled mt-2">
-                <li>• UML</li>
-                <li>• C Programming</li>
-                <li>• Java Basic Programming</li>
-                <li>• RDBMS Programming</li>
-                <li>• Software Quality Engineering</li>
-                <li>• Project Management</li>
+                <li>• {t("home.uml")}</li>
+                <li>• {t("home.c_prog")}</li>
+                <li>• {t("home.java_prog")}</li>
+                <li>• {t("home.rdbms")}</li>
+                <li>• {t("home.soft_quality")}</li>
+                <li>• {t("home.proj_manage")}</li>
               </ul>
               <h6 className="fw-bold small text-uppercase text-muted mt-3">{t("home.curriculum.tech.practicum_title")}</h6>
               <ul className="small text-dark ps-0 list-unstyled mt-1">
-                <li className="fw-bold text-primary-blue">• Project</li>
+                <li className="fw-bold text-primary-blue">• {t("home.project")}</li>
               </ul>
             </div>
             <div className="col-md-6 ps-md-4">
               <h6 className="fw-bold small text-uppercase text-muted">{t("home.curriculum.tech.special1_title")}</h6>
               <ul className="small text-dark ps-0 list-unstyled mt-2 mb-3">
-                <li>• Web Programming</li>
-                <li>• Enterprise Java (TomCat)</li>
-                <li>• Android</li>
+                <li>• {t("home.web_programming")}</li>
+                <li>• {t("home.enterprise_java")}</li>
+                <li>• {t("home.android")}</li>
               </ul>
               <h6 className="fw-bold small text-uppercase text-muted">{t("home.curriculum.tech.special2_title")}</h6>
               <ul className="small text-dark ps-0 list-unstyled mt-2">
-                <li>• C++ Programming</li>
-                <li>• Embedded Systems - RTOS</li>
+                <li>• {t("home.cpp_programming")}</li>
+                <li>• {t("home.embedded_systems")}</li>
               </ul>
             </div>
           </div>
@@ -150,12 +150,12 @@ const Home = () => {
           <div className="p-3 rounded bg-white shadow-sm flex-grow-1 hint-blue-card hover-lift">
             <h6 className="fw-bold mb-2 text-primary-blue">2. {t("home.curriculum.it_concepts.title")}</h6>
             <ul className="small text-muted ps-0 list-unstyled mb-0" style={{ columns: 2 }}>
-              <li>• Computer Systems</li>
-              <li>• Info Security</li>
-              <li>• Network Tech</li>
-              <li>• Database Tech</li>
-              <li>• Sys Dev & Maintenance</li>
-              <li>• PhilNITS Reviews</li>
+              <li>• {t("home.curriculum.it_concepts.computer_systems")}</li>
+              <li>• {t("home.curriculum.it_concepts.info_security")}</li>
+              <li>• {t("home.curriculum.it_concepts.network_tech")}</li>
+              <li>• {t("home.curriculum.it_concepts.database_tech")}</li>
+              <li>• {t("home.curriculum.it_concepts.sys_dev_maintenance")}</li>
+              <li>• {t("home.curriculum.it_concepts.philnits_reviews")}</li>
             </ul>
           </div>
 
@@ -163,12 +163,12 @@ const Home = () => {
           <div className="p-3 rounded bg-white shadow-sm flex-grow-1 hint-blue-card hover-lift">
             <h6 className="fw-bold mb-2 text-primary-blue">3. {t("home.curriculum.business.title")}</h6>
             <ul className="small text-muted ps-0 list-unstyled mb-0" style={{ columns: 2 }}>
-              <li>• Basic Accounting</li>
-              <li>• Team Building</li>
-              <li>• Japanese Business</li>
-              <li>• Technical Writing</li>
-              <li>• Etiquette</li>
-              <li>• Presentation Skills</li>
+              <li>• {t("home.curriculum.business.basic_accounting")}</li>
+              <li>• {t("home.curriculum.business.team_building")}</li>
+              <li>• {t("home.curriculum.business.japanese_business")}</li>
+              <li>• {t("home.curriculum.business.technical_writing")}</li>
+              <li>• {t("home.curriculum.business.etiquette")}</li>
+              <li>• {t("home.curriculum.business.presentation_skills")}</li>
             </ul>
           </div>
 
@@ -176,8 +176,8 @@ const Home = () => {
           <div className="p-3 rounded bg-white shadow-sm flex-grow-1 hint-blue-card hover-lift">
             <h6 className="fw-bold mb-2 text-primary-blue">4. {t("home.curriculum.japanese.title")}</h6>
             <ul className="small text-muted ps-0 list-unstyled mb-0">
-              <li>• Listening and Oral Activities</li>
-              <li>• JLPT N5 and N4 Proficiency</li>
+              <li>• {t("home.curriculum.japanese.listening_oral")}</li>
+              <li>• {t("home.curriculum.japanese.jlpt_proficiency")}</li>
             </ul>
           </div>
         </div>
@@ -188,7 +188,7 @@ const Home = () => {
 
       <footer className="py-4 border-top bg-white">
         <div className="container text-center text-muted small">
-          © 2026 Internal Action LMS | Private & Confidential
+          {t("home.confidential")}
         </div>
       </footer>
     </div>
