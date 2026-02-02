@@ -334,6 +334,98 @@ function QuizManual() {
               {/* Question Input Section */}
               {/* ... rest of your question inputs stay unchanged ... */}
 
+              <div className="mb-3">
+                <label className="form-label fw-bold">{t("quiz.question")}</label>
+                <textarea
+                  className="form-control mb-2"
+                  rows={4}
+                  value={newQuestion.question_text}
+                  onChange={(e) => setNewQuestion(prev => ({ ...prev, question_text: e.target.value }))}
+                />
+              </div>
+
+              {/* DYNAMIC OPTIONS SECTION */}
+              {quiz.quizType === "Multiple Choice" && (
+                <div className="mb-3">
+
+                  {newQuestion.options.map((optValue, index) => {
+                    const letter = String.fromCharCode(65 + index); // A, B, C (Uppercase to match image)
+
+                    return (
+                      <div key={index} className="d-flex align-items-center mb-2">
+                        {/* 1. Label (Dot + A.) */}
+                        <div className="d-flex align-items-center me-2 text-nowrap">
+                          <span style={{ fontSize: "1.2rem", marginRight: "5px" }}>●</span>
+                          <span className="fw-bold">{letter}.</span>
+                        </div>
+
+                        {/* 2. Input Field */}
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={t("quiz.placeholder_choice")}
+                          value={optValue}
+                          onChange={e => handleOptionChange(index, e.target.value)}
+                        />
+
+                        {/* 3. Red Square Delete Button (SMALLER NOW) */}
+                        {newQuestion.options.length > 2 && (
+                          <button
+                            className="btn btn-danger ms-2 p-0 d-flex align-items-center justify-content-center"
+                            type="button"
+                            onClick={() => handleRemoveOption(index)}
+                            title="Remove this choice"
+                            style={{
+                              width: "30px",     // Reduced size
+                              height: "30px",    // Reduced size
+                              minWidth: "30px",  // Reduced size
+                              borderRadius: "0.25rem",
+                              fontSize: "0.8rem" // Slightly smaller icon
+                            }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Button - Bottom Right */}
+                  <div className="d-flex justify-content-end mt-2">
+                    <button
+                      className="btn btn-outline-success rounded-pill fw-bold"
+                      onClick={handleAddOptionField}
+                    >
+                      + {t("quiz.add_choice") || "Add Choice"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-3">
+                <label className="form-label fw-bold">{t("quiz.correct_answer")}</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={newQuestion.correct_answer}
+                  onChange={e => setNewQuestion(prev => ({ ...prev, correct_answer: e.target.value }))}
+                  placeholder="e.g. a"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-bold">{t("quiz.explanation_optional")}</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={newQuestion.explanation}
+                  onChange={e => setNewQuestion(prev => ({ ...prev, explanation: e.target.value }))}
+                />
+              </div>
+
+              <button className="btn btn-primary w-100 mb-4" onClick={handleAddQuestion}>
+                + {t("quiz.add_question")}
+              </button>
             </div>
           </div>
 
@@ -364,7 +456,7 @@ function QuizManual() {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
