@@ -419,7 +419,7 @@ export default function ModuleAccordion({
                                                 <input
                                                     type="text"
                                                     className="form-control form-control-sm"
-                                                    placeholder="Enter URL"
+                                                    placeholder={t("resource.enter_url")}
                                                     value={newResourceValue[lec.lecture_id] || ""}
                                                     onChange={(e) => setNewResourceValue(prev => ({ ...prev, [lec.lecture_id]: e.target.value }))}
                                                     disabled={uploadingResource[lec.lecture_id]}

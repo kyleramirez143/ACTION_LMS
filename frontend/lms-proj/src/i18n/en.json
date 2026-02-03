@@ -545,7 +545,7 @@
     "assessment": {
         "title": "Assessment",
         "back": "Go back",
-        "search_placeholder": "Search assessments",
+        "search_placeholder": "Search",
         "course": "Course",
         "module": "Module",
         "quiz_title": "Quiz Title",
@@ -839,7 +839,7 @@
         "time_up_desc": "Your quiz time has expired. Auto-submitting in {{countdown}} seconds..."
     },
     "quiz_page": {
-        "assessment": "Assessment",
+        "assessment": "Assessments",
         "question": "Question",
         "of": "of",
         "previous": "Previous",

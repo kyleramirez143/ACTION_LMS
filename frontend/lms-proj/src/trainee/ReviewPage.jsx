@@ -73,7 +73,7 @@ export default function ReviewPage() {
                 className="text-decoration-none"
                 style={{ cursor: "pointer" }}
               >
-                Assessments
+                {t("quiz_page.assessment")}
               </span>
             </li>
 
@@ -93,7 +93,7 @@ export default function ReviewPage() {
                   <h3 className="section-title mb-0">{quizTitle || readableTitle}</h3>
 
                   <span className="badge px-3 py-2" style={{ backgroundColor: "#0047A7" }}>
-                    Question {currentQuestion} of {totalQuestions}
+                    {t("quiz_page.question")} {currentQuestion} {t("quiz_page.of")} {totalQuestions}
                   </span>
                 </div>
                 {currentQ.isCorrect ?
@@ -140,7 +140,6 @@ export default function ReviewPage() {
                             )}
                             {isUserChoice && (
                               <span className={`badge ${currentQ.isCorrect ? 'bg-success' : 'bg-danger'} border border-white`}>
-                                {/* {currentQ.isCorrect ? "Your Choice" : "Your Answer"} */}
                               </span>
                             )}
                           </div>
