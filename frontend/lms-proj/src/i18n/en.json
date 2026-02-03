@@ -813,7 +813,8 @@
         "none": "None",
         "saving": "Saving...",
         "save_changes": "Save Changes",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "only_numbers": "Only numbers are allowed"
     },
     "quiz_modals": {
         "screen_access_title": "Request for Screen Access",

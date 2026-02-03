@@ -257,7 +257,7 @@ export default function ProfileInfo() {
                             />
                             {onboarding[`${item.field}_invalid`] && (
                               <small style={{ color: "red", position: "absolute", bottom: "-8px", left: 0, fontSize: "0.65rem", marginLeft: "30px" }}>
-                                Only numbers are allowed
+                                {t("profile_info.only_numbers")}
                               </small>
                             )}
                           </div>

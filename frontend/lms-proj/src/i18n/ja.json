@@ -804,7 +804,8 @@
         "none": "なし",
         "saving": "保存中...",
         "save_changes": "変更を保存",
-        "cancel": "キャンセル"
+        "cancel": "キャンセル",
+        "only_numbers": "数字のみが許可されます"
     },
     "quiz_modals": {
         "screen_access_title": "画面アクセスの要求",
