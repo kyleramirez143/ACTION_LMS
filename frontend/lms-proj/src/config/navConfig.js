@@ -40,9 +40,9 @@ export const navLinks = [
         translationKey: "nav.view_batch_table",
       },
       {
-        name: 'View Module Table',
+        name: 'View Quarter Table',
         path: '/admin/module-management',
-        translationKey: "nav.view_module_table",
+        translationKey: "nav.view_quarter_table",
       },
       {
         name: 'Action Calendar',  // unified calendar link

@@ -163,7 +163,7 @@ export default function TraineeAssessment() {
               type="text"
               className="form-control"
               style={{ minWidth: "300px" }}
-              placeholder="Search"
+              placeholder={t("assessment.search_placeholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

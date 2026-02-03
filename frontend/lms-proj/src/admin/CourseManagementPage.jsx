@@ -361,7 +361,7 @@ export default function CourseManagementPage() {
                                                     : t("course_management.no_trainers")}
                                             </p>
                                             <p className="card-text mb-0">
-                                                <strong>Location:</strong>{" "}
+                                                <strong>{t("user_management.location")}:</strong>{" "}
                                                 {batches.find(b => String(b.batch_id) === String(course.batch_id))?.location || "No location"}
                                             </p>
                                         </div>

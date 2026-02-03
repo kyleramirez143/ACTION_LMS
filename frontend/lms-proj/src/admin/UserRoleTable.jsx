@@ -85,7 +85,7 @@ function UserRoleTable() {
     const handleEdit = (userId) => navigate(`/admin/edituser/${userId}`);
 
     const handleDelete = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
+        if (!window.confirm(t("user_management.confirm_delete_user"))) return;
         const token = localStorage.getItem("authToken");
         try {
             const res = await fetch(`/api/users/delete/${userId}`, {
@@ -315,17 +315,17 @@ function UserRoleTable() {
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
-                                <i className="bi bi-person-plus-fill"></i> Import Users
+                                <i className="bi bi-person-plus-fill"></i> {t("user_management.import_users")}
                             </button>
                             <ul className="dropdown-menu">
                                 <li>
                                     <label className="dropdown-item" onClick={downloadTemplate}>
-                                        Click to Download Template
+                                        {t("user_management.download_template")}
                                     </label>
                                 </li>
                                 <li>
                                     <label className="dropdown-item" style={{ cursor: "pointer", marginBottom: 0 }}>
-                                        Import Users
+                                        {t("user_management.import_users")}
                                         <input type="file" accept=".csv" style={{ display: "none" }} onChange={handleCSVUpload} />
                                     </label>
                                 </li>
@@ -334,7 +334,7 @@ function UserRoleTable() {
 
                         {!isFilteredEmpty && users.length > 0 && (
                             <button className="btn btn-danger rounded-pill" onClick={handleBulkDelete}>
-                                <i className="bi bi-trash3-fill"></i> Delete ({selectedUsers.length})
+                                <i className="bi bi-trash3-fill"></i> {t("module.delete")} ({selectedUsers.length})
                             </button>
                         )}
                     </div>
@@ -342,23 +342,23 @@ function UserRoleTable() {
 
                 <div className="d-flex gap-3 mb-3 flex-wrap">
                     <div>
-                        <label className="me-2">Filter by Role:</label>
+                        <label className="me-2">{t("user_management.filter_by_role")}:</label>
                         <select
                             value={filter}
                             onChange={e => setFilter(e.target.value)}
                             className="form-select w-auto d-inline-block"
                         >
-                            <option value="All">All Roles</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Trainer">Trainer</option>
-                            <option value="Trainee">Trainee</option>
+                            <option value="All">{t("user_management.all_roles")}</option>
+                            <option value="Admin">{t("user_management.admin")}</option>
+                            <option value="Trainer">{t("user_management.trainer")}</option>
+                            <option value="Trainee">{t("user_management.trainee")}</option>
                         </select>
                     </div>
                     <input
                         type="text"
                         className="form-control"
                         style={{ maxWidth: "400px" }}
-                        placeholder="Search"
+                        placeholder={t("user_management.search_placeholder")}
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -367,8 +367,8 @@ function UserRoleTable() {
                 {noUsersExist && (
                     <div className="d-flex flex-column align-items-center justify-content-center py-5">
                         <img src={logo} alt="No users" style={{ maxWidth: "220px" }} className="mb-3" />
-                        <h3 className="section-title">No Users Yet</h3>
-                        <p className="text-muted">Start by adding or importing users.</p>
+                        <h3 className="section-title">{t("user_management.no_users_yet")}</h3>
+                        <p className="text-muted">{t("user_management.start_adding")}</p>
                         <div className="d-flex align-items-center gap-2">
                             <Link to="/admin/adduser">
                                 <button className="btn btn-primary rounded-pill">
@@ -383,18 +383,18 @@ function UserRoleTable() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="bi bi-person-plus-fill"></i> Import Users
+                                    <i className="bi bi-person-plus-fill"></i> {t("user_management.import_users")}
                                 </button>
 
                                 <ul className="dropdown-menu">
                                     <li>
                                         <label className="dropdown-item" onClick={downloadTemplate}>
-                                            Click to Download Template
+                                            {t("user_management.download_template")}
                                         </label>
                                     </li>
                                     <li>
                                         <label className="dropdown-item" style={{ cursor: "pointer", marginBottom: 0 }}>
-                                            Import Users
+                                            {t("user_management.import_users")}
                                             <input
                                                 type="file"
                                                 accept=".csv"
@@ -436,8 +436,8 @@ function UserRoleTable() {
                                     <td colSpan="8" className="text-center py-5">
                                         <div className="d-flex flex-column align-items-center justify-content-center gap-2">
                                             <img src={logo} alt="No users" style={{ maxWidth: "220px" }}></img>
-                                            <h5 className="section-title mt-2">No Users Found</h5>
-                                            <p className="text-muted">No users match this filter/search.</p>
+                                            <h5 className="section-title mt-2">{t("user_management.no_users_found")}</h5>
+                                            <p className="text-muted">{t("user_management.no_user_matched")}</p>
                                         </div>
                                     </td>
                                 </tr>

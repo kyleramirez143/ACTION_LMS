@@ -370,7 +370,7 @@ export default function ModuleAccordion({
                                                     className="dropdown-item cursor-pointer text-danger"
                                                     onClick={() => handleDeleteLecture(lec.lecture_id, lec.title)}
                                                 >
-                                                    <Trash2 size={14} className="me-2" /> Delete Lecture
+                                                    <Trash2 size={14} className="me-2" /> {t("lecture.delete")}
                                                 </li>
                                             </ul>
                                         )}
@@ -410,16 +410,16 @@ export default function ModuleAccordion({
                                                 style={{ maxWidth: '120px' }}
                                             >
                                                 <option value="PDF">PDF</option>
-                                                <option value="Video">Video</option>
-                                                <option value="Image">Image</option>
-                                                <option value="Link">Link</option>
+                                                <option value="Video">{t("lecture.video")}</option>
+                                                <option value="Image">{t("lecture.image")}</option>
+                                                <option value="Link">{t("lecture.link")}</option>
                                             </select>
 
                                             {newResourceType[lec.lecture_id] === "Link" ? (
                                                 <input
                                                     type="text"
                                                     className="form-control form-control-sm"
-                                                    placeholder="Enter URL"
+                                                    placeholder={t("resource.enter_url")}
                                                     value={newResourceValue[lec.lecture_id] || ""}
                                                     onChange={(e) => setNewResourceValue(prev => ({ ...prev, [lec.lecture_id]: e.target.value }))}
                                                     disabled={uploadingResource[lec.lecture_id]}
@@ -439,7 +439,7 @@ export default function ModuleAccordion({
                                                 onClick={() => handleUploadResource(lec.lecture_id)}
                                                 disabled={uploadingResource[lec.lecture_id]}
                                             >
-                                                {uploadingResource[lec.lecture_id] ? "Uploading..." : "Upload"}
+                                                {uploadingResource[lec.lecture_id] ? t("lecture.uploading") : t("admin-profile.upload")}
                                             </button>
                                         </div>
                                     </div>
@@ -607,7 +607,7 @@ export default function ModuleAccordion({
                                                     [lec.lecture_id]: !prev[lec.lecture_id]
                                                 }))}
                                             >
-                                                {showResourceUpload[lec.lecture_id] ? "Cancel" : "Add Resource"}
+                                                {showResourceUpload[lec.lecture_id] ? t("lecture.cancel") : t("lecture.add_resource")}
                                             </p>
                                         ) : (
                                             <p className="small text-muted">{t("resource.none")}</p>
@@ -629,7 +629,7 @@ export default function ModuleAccordion({
                                             [lec.lecture_id]: !prev[lec.lecture_id]
                                         }))}
                                     >
-                                        {showResourceUpload[lec.lecture_id] ? "Cancel" : "+ Add More Resources"}
+                                        {showResourceUpload[lec.lecture_id] ? t("lecture.cancel"): t("lecture.add_more_resources")}
                                     </p>
                                 )}
 
@@ -644,7 +644,7 @@ export default function ModuleAccordion({
                                                 size="sm"
                                                 id={`dropdown-quiz-${lec.lecture_id}`}
                                             >
-                                                Add Quiz
+                                                {t("lecture.add_quiz")}
                                             </Dropdown.Toggle>
 
                                             <Dropdown.Menu>
@@ -658,7 +658,7 @@ export default function ModuleAccordion({
                                                     })}
                                                 >
                                                     <i className="bi bi-robot me-2"></i>
-                                                    AI Generated
+                                                    {t("nav.ai_generated")}
                                                 </Dropdown.Item>
                                                 <Dropdown.Item
                                                     onClick={() => navigate("/trainer/quizmanual", {
@@ -670,7 +670,7 @@ export default function ModuleAccordion({
                                                     })}
                                                 >
                                                     <i className="bi bi-pencil-square me-2"></i>
-                                                    Manual Quiz
+                                                    {t("nav.manual_quiz")}
                                                 </Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
@@ -721,7 +721,7 @@ export default function ModuleAccordion({
                                                                     <ShieldAlert size={14} className="me-2 text-danger" /> {t("quiz.results")}
                                                                 </li>
                                                                 <li className="dropdown-item cursor-pointer text-danger" onClick={() => handleDeleteQuiz(quiz.assessment_id)}>
-                                                                    <Trash2 size={14} className="me-2" /> Delete Quiz
+                                                                    <Trash2 size={14} className="me-2" /> {t("lecture.delete")}
                                                                 </li>
                                                             </ul>
                                                         )}

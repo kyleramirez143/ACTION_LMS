@@ -177,9 +177,9 @@ export default function ModuleManagement() {
                             style={{ textDecoration: "none", color: "#6a6a6a", cursor: "pointer" }}
                         >
                             {userRole === "Trainer" ? (
-                                <span>Assigned Course</span>
+                                <span>{t("course_management.assigned_courses")}</span>
                             ) : (
-                                <span>Courses</span>
+                                <span>{t("course_management.courses")}</span>
                             )}
                         </a>
                     </li>
@@ -213,7 +213,7 @@ export default function ModuleManagement() {
                                 navigate(`/trainer/${course_id}/modules/create`)
                             }
                         >
-                            Add New Module
+                            {t("module_management.add_new_module")}
                         </button>
                     </div>
                 )}
@@ -266,7 +266,7 @@ export default function ModuleManagement() {
                                             style={{ fontSize: '0.75rem', zIndex: 10 }}
                                             onClick={(e) => userRole === "Trainer" && handleToggleVisibility(e, module.module_id, !module.is_visible)}
                                         >
-                                            {module.is_visible ? "Visible" : "Hidden"}
+                                            {module.is_visible ? t("module_management.visible") : t("module_management.hidden")}
                                         </span>
                                     )}
 
@@ -307,7 +307,7 @@ export default function ModuleManagement() {
                                                         className="dropdown-item"
                                                         onClick={(e) => handleEditClick(e, module.module_id)}
                                                     >
-                                                        <i className="bi bi-pencil me-2"></i> Edit Module
+                                                        <i className="bi bi-pencil me-2"></i> {t("module_management.edit_module")}
                                                     </button>
                                                 </li>
                                                 {module.is_visible ? (
@@ -322,7 +322,7 @@ export default function ModuleManagement() {
                                                                 )
                                                             }
                                                         >
-                                                            <i className="bi bi-eye-slash me-2"></i> Make Hidden
+                                                            <i className="bi bi-eye-slash me-2"></i> {t("module_management.make_hidden")}
                                                         </button>
                                                     </li>
                                                 ) : (

@@ -37,7 +37,7 @@
         "user_management": "User Management",
         "curriculum": "Curriculum",
         "view_batch_table": "View Batch Table",
-        "view_module_table": "View Module Table",
+        "view_quarter_table": "View Quarter Table",
         "action_calendar": "Action Calendar",
         "courses": "Courses",
         "quiz": "Create Assessment",
@@ -148,7 +148,10 @@
         "delete_success": "Course deleted successfully!",
         "delete_failed": "Failed to delete course",
         "update_visibility_failed": "Failed to update visibility",
-        "something_wrong": "Something went wrong. Please try again."
+        "something_wrong": "Something went wrong. Please try again.",
+        "cover_photo": "Course Cover Photo",
+        "default_course": "Default Course",
+        "max": "Max 250MB"
     },
     "module_management": {
         "loading_modules": "Loading modules...",
@@ -245,7 +248,20 @@
         "update_btn": "Update Lecture",
         "create_btn": "Create Lecture",
         "max_resources": "Maximum of 5 resources allowed per lecture.",
-        "success_message": "Lecture {{action}} successfully!"
+        "success_message": "Lecture {{action}} successfully!",
+        "add_resource": "+ Add Resource",
+        "add_more_resources": "+ Add More Resources",
+        "add_quiz": "Add Quiz",
+        "uploading": "Uploading",
+        "video": "Video",
+        "image": "Image",
+        "link": "Link",
+        "resource_type": {
+            "PDF": "PDF",
+            "Video": "Video",
+            "Image": "Image",
+            "Link": "Link"
+        }
     },
     "common": {
         "visible": "Visible",
@@ -481,13 +497,16 @@
     "upcoming": {
         "upcoming": "Upcoming",
         "loading": "Loading upcoming quizzes...",
-        "no_upcoming": "No upcoming quizzes",
+        "no_upcoming": "No upcoming quizzes.",
         "sample_date": "Tuesday, 29 June 2021",
         "events": {
             "vocab_quiz": "L49 Vocabulary Quiz",
             "mock_exam": "[Java] Mock Exam",
             "basic_quiz": "Quiz on Basic Theory"
-        }
+        },
+        "missed": "Missed",
+        "no_completed": "No completed tasks.",
+        "no_missed": "No overdue tasks to show here."
     },
     "calendar": {
         "batch_title": "Batch 40 - Everything About Action",
@@ -526,7 +545,7 @@
     "assessment": {
         "title": "Assessment",
         "back": "Go back",
-        "search_placeholder": "Search assessments",
+        "search_placeholder": "Search",
         "course": "Course",
         "module": "Module",
         "quiz_title": "Quiz Title",
@@ -751,7 +770,10 @@
         "import_warning": "Import completed with warnings.\n\nImported: {{imported}}\nFailed:\n{{failedList}}",
         "import_success": "Successfully imported {{count}} users!",
         "error_download_template": "Error downloading template: {{message}}",
-        "error_delete_users": "Error deleting users: {{message}}"
+        "error_delete_users": "Error deleting users: {{message}}",
+        "no_users_yet": "No Users Yet",
+        "start_adding": "Start by adding or importing users.",
+        "no_user_matched": "No users match this filter/search."
     },
     "profile_info": {
         "loading": "Loading profile...",
@@ -791,7 +813,8 @@
         "none": "None",
         "saving": "Saving...",
         "save_changes": "Save Changes",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "only_numbers": "Only numbers are allowed"
     },
     "quiz_modals": {
         "screen_access_title": "Request for Screen Access",
@@ -817,7 +840,7 @@
         "time_up_desc": "Your quiz time has expired. Auto-submitting in {{countdown}} seconds..."
     },
     "quiz_page": {
-        "assessment": "Assessment",
+        "assessment": "Assessments",
         "question": "Question",
         "of": "of",
         "previous": "Previous",

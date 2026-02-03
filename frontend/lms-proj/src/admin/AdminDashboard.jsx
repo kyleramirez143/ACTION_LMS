@@ -70,17 +70,18 @@ function AdminDashboard() {
   // HEADER COMPONENT
   // ============================
   const DashboardHeader = () => {
-    // Get current date & time in GMT+8
+    const { i18n } = useTranslation(); // ✅ Get i18n instance
     const [now, setNow] = useState(new Date());
 
-    // Update time every second
     useEffect(() => {
       const interval = setInterval(() => {
         setNow(new Date());
       }, 1000);
-
-      return () => clearInterval(interval); // cleanup
+      return () => clearInterval(interval);
     }, []);
+
+    // ✅ Use i18n.language to determine locale
+    const locale = i18n.language === 'ja' ? 'ja-JP' : 'en-US';
 
     const timezoneOptions = {
       weekday: 'long',
@@ -90,10 +91,11 @@ function AdminDashboard() {
       hour: 'numeric',
       minute: 'numeric',
       second: 'numeric',
-      hour12: true,
+      hour12: i18n.language !== 'ja', // ✅ 24-hour for Japanese, 12-hour for English
       timeZone: 'Asia/Singapore' // GMT+8
     };
-    const formattedTime = now.toLocaleString('en-US', timezoneOptions);
+
+    const formattedTime = now.toLocaleString(locale, timezoneOptions); // ✅ Use dynamic locale
 
     return (
       <div className="row">
@@ -104,6 +106,7 @@ function AdminDashboard() {
       </div>
     );
   };
+
 
 
   // ============================

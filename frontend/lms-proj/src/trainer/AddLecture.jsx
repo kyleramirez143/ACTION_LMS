@@ -133,7 +133,7 @@ export default function LectureForm() {
 
   const handleDeleteExistingResource = (resourceId) => {
     const confirmed = window.confirm(
-     t("resource.confirm_delete")
+      t("resource.confirm_delete")
     );
 
     if (!confirmed) return;
@@ -354,7 +354,7 @@ export default function LectureForm() {
 
           <div className="row mb-3">
             <div className="col">
-              <label className="col-sm-3 col-form-label">Start Date</label>
+              <label className="col-sm-3 col-form-label">{t("module.start_date")}</label>
               <input
                 type="date"
                 className="form-control"
@@ -366,7 +366,7 @@ export default function LectureForm() {
             </div>
 
             <div className="col">
-              <label className="col-sm-3 col-form-label">End Date</label>
+              <label className="col-sm-3 col-form-label">{t("module.end_date")}</label>
               <input
                 type="date"
                 className="form-control"
@@ -419,8 +419,18 @@ export default function LectureForm() {
               return (
                 <div key={index} className="d-flex align-items-center mb-2 gap-2">
                   {/* Resource Type Selector */}
-                  <select className="form-select form-select-sm" value={res.type} onChange={(e) => handleResourceTypeChange(index, e.target.value)} disabled={isSubmitting} style={{ maxWidth: '120px' }}>
-                    {RESOURCE_TYPES.map(type => (<option key={type} value={type}>{type}</option>))}
+                  <select
+                    className="form-select form-select-sm"
+                    value={res.type}
+                    onChange={(e) => handleResourceTypeChange(index, e.target.value)}
+                    disabled={isSubmitting}
+                    style={{ maxWidth: '120px' }}
+                  >
+                    {RESOURCE_TYPES.map(type => (
+                      <option key={type} value={type}>
+                        {t(`lecture.resource_type.${type}`)}
+                      </option>
+                    ))}
                   </select>
 
                   {/* Dynamic Input */}
