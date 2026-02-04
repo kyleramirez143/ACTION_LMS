@@ -149,3 +149,4 @@ const QuizScreenRecord = () => {
 };
 
 export default QuizScreenRecord;
+
