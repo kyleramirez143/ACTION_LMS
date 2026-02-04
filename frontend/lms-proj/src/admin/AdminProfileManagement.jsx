@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from  "jwt-decode"; // ✅ fixed import
 import { useAuth } from "../hooks/useAuth";
-import { useTranslation } from "react-i18next"; // 🔹 add
+import { useTranslation } from "react-i18next";
 import "./AdminProfileManagement.css";
 
 const backendURL = "http://localhost:5000";
@@ -11,7 +11,7 @@ function AdminProfileManagement() {
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
     const { userProfile, setUserProfile } = useAuth();
-    const { t } = useTranslation(); // 🔹 add
+    const { t } = useTranslation();
 
     const [preview, setPreview] = useState(userProfile?.profile_picture || null);
     const [showModal, setShowModal] = useState(false);
@@ -27,13 +27,13 @@ function AdminProfileManagement() {
     // AUTH CHECK
     // ----------------------------
     useEffect(() => {
-        if (!token) return navigate("/login");
+        if (!token) return navigate("/");
         try {
             jwtDecode(token);
         } catch (err) {
             console.error("JWT decode error:", err);
             localStorage.removeItem("authToken");
-            navigate("/login");
+            navigate("/");
         }
     }, [token, navigate]);
 
@@ -48,11 +48,7 @@ function AdminProfileManagement() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
-                
-                // Just update the profile data. 
-                // The Sync Logic below will handle the image URL automatically.
-                setUserProfile(data); 
-
+                setUserProfile(data);
             } catch (err) {
                 console.error("Fetch Profile Error:", err);
             }
@@ -60,22 +56,18 @@ function AdminProfileManagement() {
         if (!userProfile && token) fetchProfile();
     }, [token, userProfile, setUserProfile]);
 
-// PREVIEW SYNC LOGIC (The Fix)
-// ----------------------------
-useEffect(() => {
-    if (userProfile?.profile_picture && !selectedFile) {
-        let path = userProfile.profile_picture.replace(/\\/g, "/");
-
-        // Since your DB has "uploads/profile/image.jpg", 
-        // we check if it already starts with "uploads/"
-        const finalUrl = path.startsWith("uploads/") 
-            ? `${backendURL}/${path}` 
-            : `${backendURL}/uploads/${path}`;
-        
-        console.log("STATE UPDATE: Setting preview to", finalUrl);
-        setPreview(finalUrl);
-    }
-}, [userProfile, selectedFile]);
+    // ----------------------------
+    // PREVIEW SYNC
+    // ----------------------------
+    useEffect(() => {
+        if (userProfile?.profile_picture && !selectedFile) {
+            let path = userProfile.profile_picture.replace(/\\/g, "/");
+            const finalUrl = path.startsWith("uploads/")
+                ? `${backendURL}/${path}`
+                : `${backendURL}/uploads/${path}`;
+            setPreview(finalUrl);
+        }
+    }, [userProfile, selectedFile]);
 
     // ----------------------------
     // IMAGE HANDLERS
@@ -93,41 +85,40 @@ useEffect(() => {
     };
 
     const handleSaveImage = async (e) => {
-    e.preventDefault();
-    if (!selectedFile) return;
+        e.preventDefault();
+        if (!selectedFile) return;
 
-    const formData = new FormData();
-    formData.append("profileImage", selectedFile);
+        const formData = new FormData();
+        formData.append("profileImage", selectedFile);
 
-    try {
-        const res = await fetch(`${backendURL}/api/users/upload-profile`, {
-            method: "PUT",
-            body: formData,
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const res = await fetch(`${backendURL}/api/users/upload-profile`, {
+                method: "PUT",
+                body: formData,
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || t("admin-profile.upload_failed"));
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || t("admin-profile.upload_failed"));
 
-        // Format the URL based on your DB string: "uploads/profile/..."
-        const path = data.profileImageUrl.replace(/\\/g, "/");
-        const finalUrl = path.startsWith("uploads/") 
-            ? `${backendURL}/${path}` 
-            : `${backendURL}/uploads/${path}`;
+            const path = data.profileImageUrl.replace(/\\/g, "/");
+            const finalUrl = path.startsWith("uploads/") 
+                ? `${backendURL}/${path}` 
+                : `${backendURL}/uploads/${path}`;
 
-        setPreview(finalUrl);
-        setUserProfile((prev) => ({
-            ...prev,
-            profile_picture: data.profileImageUrl,
-        }));
+            setPreview(finalUrl);
+            setUserProfile((prev) => ({
+                ...prev,
+                profile_picture: data.profileImageUrl,
+            }));
 
-        alert(t("admin-profile.image_updated"));
-        setSelectedFile(null);
-    } catch (err) {
-        console.error(err);
-        alert(t("admin-profile.image_upload_error") + ": " + err.message);
-    }
-};
+            alert(t("admin-profile.image_updated"));
+            setSelectedFile(null);
+        } catch (err) {
+            console.error(err);
+            alert(t("admin-profile.image_upload_error") + ": " + err.message);
+        }
+    };
 
     // ----------------------------
     // PASSWORD HANDLERS
@@ -137,13 +128,21 @@ useEffect(() => {
     };
 
     const handleChangePassword = async () => {
+        if (!token) {
+            alert("Session expired. Please login again.");
+            navigate("/");
+            return;
+        }
+
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
             alert(t("admin-profile.password_mismatch"));
             return;
         }
+
         try {
             const decoded = jwtDecode(token);
             const userId = decoded.id;
+
             const res = await fetch(
                 `${backendURL}/api/users/change-password/${userId}`,
                 {
@@ -158,10 +157,19 @@ useEffect(() => {
                     }),
                 }
             );
+
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || t("admin-profile.password_change_failed"));
+
             alert(t("admin-profile.password_changed"));
             handleCloseModal();
+
+            // ✅ log out and navigate to login page
+            setTimeout(() => {
+                localStorage.removeItem("authToken");
+                navigate("/");
+            }, 300);
+
         } catch (err) {
             console.error(err);
             alert(t("admin-profile.password_error") + ": " + err.message);
@@ -186,7 +194,7 @@ useEffect(() => {
                         <div className="image-square">
                             {preview ? (
                                 <img 
-                                    key={preview} // <--- Forces React to refresh the image element
+                                    key={preview} 
                                     src={preview} 
                                     alt="Profile" 
                                     className="image-square-img"
@@ -222,66 +230,42 @@ useEffect(() => {
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.first_name")}</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={userProfile.first_name}
-                                readOnly
-                            />
+                            <input type="text" className="form-control" value={userProfile.first_name} readOnly />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.last_name")}</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={userProfile.last_name}
-                                readOnly
-                            />
+                            <input type="text" className="form-control" value={userProfile.last_name} readOnly />
                         </div>
                     </div>
 
                     <div className="mb-3 row">
                         <label className="col-12 col-sm-2 col-form-label">{t("admin-profile.email")}</label>
                         <div className="col-12 col-sm-8">
-                            <input
-                                type="email"
-                                className="form-control"
-                                value={userProfile.email}
-                                readOnly
-                            />
+                            <input type="email" className="form-control" value={userProfile.email} readOnly />
                         </div>
                     </div>
                 </div>
 
-                {/* Buttons side by side */}
+                {/* Buttons */}
                 <div className="d-flex gap-2 mt-3">
-                    <button
-                        type="button"
-                        className="btn btn-primary rounded-pill"
-                        onClick={handleOpenModal}
-                    >
+                    <button className="btn btn-primary rounded-pill" onClick={handleOpenModal}>
                         {t("admin-profile.change_password")}
                     </button>
 
-                    <button
-                        type="button"
-                        className="btn btn-outline-primary rounded-pill"
-                        onClick={handleSaveImage}
-                        disabled={!selectedFile}
-                    >
+                    <button className="btn btn-outline-primary rounded-pill" onClick={handleSaveImage} disabled={!selectedFile}>
                         {t("admin-profile.save_changes")}
                     </button>
                 </div>
 
-                {/* Modal */}
+                {/* Password Modal */}
                 {showModal && (
                     <div className="modal-overlay">
                         <div className="modal-content">
                             <h4 style={{ textAlign: "center", fontWeight: "600" }}>
-                                 {t("admin-profile.change_password")}
+                                {t("admin-profile.change_password")}
                             </h4>
 
                             <div className="mb-3">
@@ -321,16 +305,10 @@ useEffect(() => {
                             </div>
 
                             <div className="d-flex justify-content-center gap-2">
-                                <button
-                                    className="btn btn-primary rounded-pill"
-                                    onClick={handleChangePassword}
-                                >
+                                <button className="btn btn-primary rounded-pill" onClick={handleChangePassword}>
                                     {t("admin-profile.save")}
                                 </button>
-                                <button
-                                    className="btn btn-outline-primary rounded-pill"
-                                    onClick={handleCloseModal}
-                                >
+                                <button className="btn btn-outline-primary rounded-pill" onClick={handleCloseModal}>
                                     {t("admin-profile.cancel")}
                                 </button>
                             </div>

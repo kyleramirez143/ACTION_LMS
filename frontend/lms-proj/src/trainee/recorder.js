@@ -1,4 +1,4 @@
-// singleton to hold recording state across pages
+// recorder.js
 export const RecorderState = {
     mediaRecorder: null,
     chunks: [],
@@ -17,10 +17,18 @@ export const RecorderState = {
 
     stop() {
         if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") this.mediaRecorder.stop();
-        if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+        if (this.stream) {
+            this.stream.getTracks().forEach(t => t.stop());
+            this.stream = null;
+        }
     },
 
     getChunks() {
         return this.chunks;
+    },
+
+    // Added to allow QuizPage to access the track for monitoring
+    getStream() {
+        return this.stream;
     }
 };

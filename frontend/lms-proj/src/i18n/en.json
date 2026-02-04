@@ -273,7 +273,7 @@
         "none": "No quizzes available yet.",
         "published": "Published",
         "edit": "Edit Content",
-        "options" : "Options",
+        "options": "Options",
         "placeholder_title": "Input quiz title here",
         "placeholder_choice": "Input choice here",
         "results": "Quiz Results",
@@ -315,8 +315,8 @@
         "select_lecture": "-- Select Lecture --",
         "generating": "Generating...",
         "generate_quiz": "Generate Quiz",
-        "generated_quiz": "Generated Quiz",
-        "no_quiz_yet": "No quiz generated yet.",
+        "manual_quiz": "Manual Quiz",
+        "no_quiz_yet": "No quiz yet.",
         "q_prefix": "Q",
         "answer": "Answer:",
         "explanation": "Explanation:",
@@ -424,7 +424,8 @@
         "date": "Date",
         "status.pass": "Pass",
         "status.fail": "Fail",
-        "trainees": "trainees"
+        "trainees": "trainees",
+        "proctor_violation_stop": "Screen sharing stopped. Your answers will be automatically saved and submitted now."
     },
     "schedule": {
         "add_title": "Add New Schedule",
@@ -753,6 +754,7 @@
         "error_download_template": "Error downloading template: {{message}}",
         "error_delete_users": "Error deleting users: {{message}}"
     },
+    
     "profile_info": {
         "loading": "Loading profile...",
         "session_expired": "Session expired.",
@@ -830,7 +832,10 @@
         "loading": "Loading quiz...",
         "submitting": "Submitting quiz...",
         "load_failed": "Failed to load quiz.",
-        "submit_failed": "Failed to submit quiz."
+        "submit_failed": "Failed to submit quiz.",
+        "tab_warning": "WARNING: You switched tabs. This is your only warning. Switching again will submit your quiz automatically.",
+        "tab_final_violation": "FINAL VIOLATION: You switched tabs again. Your quiz is being submitted now.",
+        "proctor_violation_stop": "Screen sharing stopped. Your answers will be automatically saved and submitted now."
     },
     "quiz_result": {
         "title": "Quiz Result",
@@ -990,45 +995,51 @@
         "hero_title": "Bridging Talent to Global Standards",
         "hero_subtitle": "Empowering the next generation of engineers with industry-relevant technical skills and Japanese language proficiency.",
         "goals": {
-        "standards": "Global IT Standards",
-        "standards_sub": "Aligning skills with international IT requirements.",
-        "bridge": "Technical to Business",
-        "bridge_sub": "Connecting local talent with global opportunities.",
-        "nihongo": "Nihongo Proficiency",
-        "nihongo_sub": "Professional business Japanese communication."
+            "standards": "Global IT Standards",
+            "standards_sub": "Aligning skills with international IT requirements.",
+            "bridge": "Technical to Business",
+            "bridge_sub": "Connecting local talent with global opportunities.",
+            "nihongo": "Nihongo Proficiency",
+            "nihongo_sub": "Professional business Japanese communication."
         },
-    "program_overview_title": "Overview of the 4-Month Intensive Program",
+        "program_overview_title": "Overview of the 4-Month Intensive Program",
         "roadmap": {
-        "step1_title": "General IT Concepts",
-        "step1_desc": "Brush up on the general knowledge that all IT Engineers should master",
-        "step2_title": "Business Basics",
-        "step2_req": "Technical Training",
-        "step2_desc": "Aside from technical skills. get to learn the basic business skills on how to deal with clients and co-employees",
-        "step3_title": "Technical",
-        "step3_desc": "Learn and apply latest technologies, software engineering and project management principles.",
-        "step4_title": "Japanese Language",
-        "step4_desc": "Learn the Japanese language white getting familiar with Japanese culture 2 hours daily"
+            "step1_title": "General IT Concepts",
+            "step1_desc": "Brush up on the general knowledge that all IT Engineers should master",
+            "step2_title": "Business Basics",
+            "step2_req": "Technical Training",
+            "step2_desc": "Aside from technical skills. get to learn the basic business skills on how to deal with clients and co-employees",
+            "step3_title": "Technical",
+            "step3_desc": "Learn and apply latest technologies, software engineering and project management principles.",
+            "step4_title": "Japanese Language",
+            "step4_desc": "Learn the Japanese language white getting familiar with Japanese culture 2 hours daily"
         },
-    "awards": {
-        "year": "2007",
-        "title": "E-Services Award",
-        "subtitle": "International Recognition",
-        "company_program": "ACTION - Outstanding Company Program",
-        "project1": "SCM-Offshore Project of the Year",
-        "project2": "High Definition Clipstation Project - Most Creative Application of the Year"
+        "awards": {
+            "year": "2007",
+            "title": "E-Services Award",
+            "subtitle": "International Recognition",
+            "company_program": "ACTION - Outstanding Company Program",
+            "project1": "SCM-Offshore Project of the Year",
+            "project2": "High Definition Clipstation Project - Most Creative Application of the Year"
         },
-    "curriculum": {
-      "title": "Curriculum Breakdown",
-      "tech": {
-        "title": "Technology",
-        "common_title": "Common Technologies",
-        "special1_title": "Specialized Technologies 1",
-        "special2_title": "Specialized Technologies 2",
-        "practicum_title": "Practicum"
-      },
-      "it_concepts": { "title": "General I.T. Concepts" },
-      "business": { "title": "Business Basics" },
-      "japanese": { "title": "Japanese Language" }
-    }
+        "curriculum": {
+            "title": "Curriculum Breakdown",
+            "tech": {
+                "title": "Technology",
+                "common_title": "Common Technologies",
+                "special1_title": "Specialized Technologies 1",
+                "special2_title": "Specialized Technologies 2",
+                "practicum_title": "Practicum"
+            },
+            "it_concepts": {
+                "title": "General I.T. Concepts"
+            },
+            "business": {
+                "title": "Business Basics"
+            },
+            "japanese": {
+                "title": "Japanese Language"
+            }
+        }
     }
 }
